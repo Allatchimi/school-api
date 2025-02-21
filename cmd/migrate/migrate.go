@@ -7,6 +7,7 @@ import (
 	contactModel "api/services/contact/model"
 	historyModel "api/services/history/model"
 	directorModel "api/services/school/common/director/model"
+	examModel "api/services/school/common/exam/model"
 	schoolModel "api/services/school/common/school/model"
 	yearModel "api/services/school/common/year/model"
 	classModel "api/services/school/highschool/class/model"
@@ -17,7 +18,6 @@ import (
 	testModel "api/services/school/highschool/test/model"
 	departmentModel "api/services/school/university/department/model"
 	domainModel "api/services/school/university/domain/model"
-	examModel "api/services/school/university/exam/model"
 	facultyModel "api/services/school/university/faculty/model"
 	levelModel "api/services/school/university/level/model"
 	studentModel "api/services/school/university/student/model"
@@ -47,6 +47,7 @@ func Start() error {
 		&schoolModel.School{},
 		&schoolModel.SchoolInfo{},
 		&schoolModel.SchoolConfig{},
+		&examModel.Exam{},
 
 		// Director
 		&directorModel.Director{},
@@ -68,7 +69,6 @@ func Start() error {
 		&tuModel.TeachingUnit{},
 		&tuModel.TeachingUnitProfessor{},
 		&studentModel.Student{},
-		&examModel.Exam{},
 	)
 	helpers.LogMigrations(
 		err,

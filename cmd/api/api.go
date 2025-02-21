@@ -15,6 +15,7 @@ import (
 	"api/services/contact"
 	"api/services/history"
 	"api/services/school/common/director"
+	"api/services/school/common/exam"
 	"api/services/school/common/school"
 	"api/services/school/common/year"
 	"api/services/school/highschool/class"
@@ -25,7 +26,6 @@ import (
 	"api/services/school/highschool/test"
 	"api/services/school/university/department"
 	"api/services/school/university/domain"
-	"api/services/school/university/exam"
 	"api/services/school/university/faculty"
 	"api/services/school/university/level"
 	"api/services/school/university/student"
@@ -54,6 +54,7 @@ type Controllers struct {
 	YearController     *year.Controller
 	SchoolController   *school.Controller
 	DirectorController *director.Controller
+	ExamController     *exam.Controller
 	// Secondary
 	SectionController   *section.Controller
 	SpecialtyController *specialty.Controller
@@ -67,7 +68,6 @@ type Controllers struct {
 	DomainController     *domain.Controller
 	LevelController      *level.Controller
 	TUController         *tu.Controller
-	ExamController       *exam.Controller
 	StudentController    *student.Controller
 }
 
@@ -91,6 +91,7 @@ func registerEndpoints(humaApi *huma.API) {
 	year.RegisterEndpoints(humaApi, AllControllers.YearController)
 	school.RegisterEndpoints(humaApi, AllControllers.SchoolController)
 	director.RegisterEndpoints(humaApi, AllControllers.DirectorController)
+	exam.RegisterEndpoints(humaApi, AllControllers.ExamController)
 	// Highschool
 	section.RegisterEndpoints(humaApi, AllControllers.SectionController)
 	specialty.RegisterEndpoints(humaApi, AllControllers.SpecialtyController)
@@ -105,7 +106,6 @@ func registerEndpoints(humaApi *huma.API) {
 	level.RegisterEndpoints(humaApi, AllControllers.LevelController)
 	student.RegisterEndpoints(humaApi, AllControllers.StudentController)
 	tu.RegisterEndpoints(humaApi, AllControllers.TUController)
-	exam.RegisterEndpoints(humaApi, AllControllers.ExamController)
 }
 
 // Start Set up and start the API: set up API documentation,

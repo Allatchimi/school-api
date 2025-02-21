@@ -7,6 +7,7 @@ import (
 	"api/services/contact"
 	"api/services/history"
 	"api/services/school/common/director"
+	"api/services/school/common/exam"
 	"api/services/school/common/school"
 	"api/services/school/common/year"
 	"api/services/school/highschool/class"
@@ -17,7 +18,6 @@ import (
 	"api/services/school/highschool/test"
 	"api/services/school/university/department"
 	"api/services/school/university/domain"
-	"api/services/school/university/exam"
 	"api/services/school/university/faculty"
 	"api/services/school/university/level"
 	"api/services/school/university/student"
@@ -86,6 +86,7 @@ func InjectDependencies() {
 	var yearRepo = year.NewRepository(config.DB)
 	var schoolRepo = school.NewRepository(config.DB)
 	var directorRepo = director.NewRepository(config.DB)
+	var examRepo = exam.NewRepository(config.DB)
 	api.AllControllers.YearController = year.NewController(
 		year.NewService(
 			yearRepo,
@@ -104,6 +105,11 @@ func InjectDependencies() {
 	api.AllControllers.SchoolController = school.NewController(
 		school.NewService(
 			schoolRepo,
+		),
+	)
+	api.AllControllers.ExamController = exam.NewController(
+		exam.NewService(
+			examRepo,
 		),
 	)
 
@@ -154,7 +160,6 @@ func InjectDependencies() {
 	var domainRepo = domain.NewRepository(config.DB)
 	var levelRepo = level.NewRepository(config.DB)
 	var tuRepo = tu.NewRepository(config.DB)
-	var examRepo = exam.NewRepository(config.DB)
 	var studentRepo = student.NewRepository(config.DB)
 	api.AllControllers.FacultyController = faculty.NewController(
 		faculty.NewService(
@@ -183,11 +188,6 @@ func InjectDependencies() {
 	api.AllControllers.TUController = tu.NewController(
 		tu.NewService(
 			tuRepo,
-		),
-	)
-	api.AllControllers.ExamController = exam.NewController(
-		exam.NewService(
-			examRepo,
 		),
 	)
 	api.AllControllers.StudentController = student.NewController(
