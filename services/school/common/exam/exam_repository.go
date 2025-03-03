@@ -91,6 +91,16 @@ func (repository *Repository) GetById(id int64, schoolID int64) (*model.Exam, er
 	return result, repository.Db.Model(&model.Exam{}).Where("id = ?", id).Where("school_id = ?", schoolID).Limit(1).Find(result).Error
 }
 
+func (repository *Repository) GetByObject(data *model.Exam) (*model.Exam, error) {
+	result := &model.Exam{}
+	return result, repository.Db.Model(&model.Exam{}).Where("id = ?", data.ID).Where("school_id = ?", data.SchoolID).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetTypeByObject(data *model.ExamType) (*model.ExamType, error) {
+	result := &model.ExamType{}
+	return result, repository.Db.Model(&model.ExamType{}).Where("id = ?", data.ID).Where("school_id = ?", data.SchoolID).Limit(1).Find(result).Error
+}
+
 func (repository *Repository) GetAllType(filter *types.Filter, pagination *types.Pagination, schoolID int64) ([]model.ExamType, error) {
 	var result []model.ExamType
 	var where string = ""

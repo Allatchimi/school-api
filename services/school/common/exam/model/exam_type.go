@@ -13,6 +13,9 @@ type ExamType struct {
 }
 
 func (item *ExamType) ToResponse() *data.ExamTypeResponse {
+	if item == nil {
+		return nil
+	}
 	resp := &data.ExamTypeResponse{}
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

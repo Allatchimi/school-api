@@ -27,6 +27,9 @@ type Exam struct {
 }
 
 func (item *Exam) ToResponse() *data.ExamResponse {
+	if item == nil {
+		return nil
+	}
 	resp := &data.ExamResponse{}
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

@@ -320,43 +320,6 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get exam by id
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "get-exam-id",
-			Summary:     "Get exam by id",
-			Description: "Return one exam with matching id",
-			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,   // Feature scope
-						tableName,                // Table name
-						constants.PermissionRead, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				data.ExamID
-			},
-		) (*struct{ Body data.ExamResponse }, error) {
-			result, errCode, err := controller.Get(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct{ Body data.ExamResponse }{Body: *result.ToResponse()}, nil
-		},
-	)
-
 	// Get all exam types
 	huma.Register(
 		*humaApi,
@@ -365,7 +328,7 @@ func RegisterEndpoints(
 			Summary:     "Get all exam types",
 			Description: "Get all exam types with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        endpointConfig.Group,
+			Path:        fmt.Sprintf("%s/type", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{

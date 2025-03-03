@@ -19,7 +19,7 @@ func NewService(repository *Repository) *Service {
 // Create new exam type
 func (service *Service) CreateType(inputJwtToken *types.JwtToken, data *model.ExamType) (result *model.ExamType, errCode int, err error) {
 	// Check if exam type already exists
-	foundExam, err := service.Repository.GetByObject(&model.ExamType{
+	foundExam, err := service.Repository.GetTypeByObject(&model.ExamType{
 		SchoolID: data.SchoolID,
 		Name:     data.Name,
 	})
@@ -88,8 +88,8 @@ func (service *Service) UpdateType(inputJwtToken *types.JwtToken, id int64, data
 		err = constants.Http404ErrorMessage("Exam")
 		return
 	}
-	foundExam, err := service.Repository.GetByObject(&model.ExamType{
-		SubjectID:   data.SubjectID,
+	foundExam, err := service.Repository.GetTypeByObject(&model.ExamType{
+		// SubjectID:   data.SubjectID,
 		SchoolID:    data.SchoolID,
 		Name:        data.Name,
 		Description: data.Description,
@@ -106,7 +106,7 @@ func (service *Service) UpdateType(inputJwtToken *types.JwtToken, id int64, data
 	}
 
 	// Update exam
-	result, err = service.Repository.UpdateType(id, inputJwtToken.UserID, data)
+	result, err = service.Repository.UpdateType(id, data)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("update exam from database")
@@ -147,7 +147,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, data *mo
 	}
 
 	// Update exam
-	result, err = service.Repository.Update(id, inputJwtToken.UserID, data)
+	result, err = service.Repository.Update(id, data)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("update exam from database")
@@ -222,11 +222,11 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, examID int64) (result
 
 // GetAll Returns all exams with support for search, filter and pagination
 func (service *Service) GetAllType(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination) (result []model.ExamType, errCode int, err error) {
-	result, err = service.Repository.GetAllExamType(filter, pagination, inputJwtToken.UserID)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get exams from database")
-	}
+	// result, err = service.Repository.GetAllExamType(filter, pagination, inputJwtToken.UserID)
+	// if err != nil {
+	// 	errCode = http.StatusInternalServerError
+	// 	err = constants.Http500ErrorMessage("get exams from database")
+	// }
 	return
 }
 
