@@ -3,20 +3,26 @@ package model
 import (
 	"api/common/types"
 	"api/services/school/university/tu/data"
+	"time"
 )
 
 type TeachingUnit struct {
 	types.BaseGormModel
-	SchoolID               int64                   `gorm:"not null"`
-	DomainID               int64                   `gorm:"not null"`
-	LevelID                int64                   `gorm:"not null"`
-	Name                   string                  `gorm:"not null"`
-	Description            string                  `gorm:"default:null"`
-	Credit                 int                     `gorm:"default:1"`
-	Semester               int                     `gorm:"default:1"`
-	Program                string                  `gorm:"default null"`
-	Requirements           string                  `gorm:"default null"`
+	SchoolID int64 `gorm:"default:null"`
+	DomainID int64 `gorm:"default:null"`
+	LevelID  int64 `gorm:"default:null"`
+
+	Name         string `gorm:"default:null"`
+	Description  string `gorm:"default:null"`
+	Credit       int    `gorm:"default:1"`
+	Semester     int    `gorm:"default:1"`
+	Program      string `gorm:"default null"`
+	Requirements string `gorm:"default null"`
+
 	TeachingUnitProfessors []TeachingUnitProfessor `gorm:"default:null;foreignKey:TeachingUnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	IsInvalid   bool       `gorm:"default:false"`
+	InvalidDate *time.Time `gorm:"default:null"`
 }
 
 func (item *TeachingUnit) ToResponse() *data.TeachingUnitResponse {

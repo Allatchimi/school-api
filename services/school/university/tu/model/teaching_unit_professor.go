@@ -7,8 +7,8 @@ import (
 
 type TeachingUnitProfessor struct {
 	types.BaseGormModel
-	TeachingUnitID int64 `gorm:"not null"`
-	UserID         int64 `gorm:"not null"`
+	TeachingUnitID int64 `gorm:"default:null"`
+	UserID         int64 `gorm:"default:null"`
 }
 
 func (item *TeachingUnitProfessor) ToResponse() *data.TeachingUnitProfessorResponse {

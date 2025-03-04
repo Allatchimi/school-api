@@ -10,6 +10,9 @@ import (
 type StudentLevel struct {
 	types.BaseGormModel
 
+	StudentID int64    `gorm:"default:null"`
+	Student   *Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
 	YearID int64           `gorm:"default:null"`
 	Year   *modelYear.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
@@ -23,6 +26,7 @@ func (item *StudentLevel) ToStudentLevelResponse() *data.StudentLevelResponse {
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
 
+	resp.Student = item.Student.ToStudentResponse()
 	resp.Year = item.Year.ToResponse()
 	resp.Level = item.Level.ToResponse()
 	return resp

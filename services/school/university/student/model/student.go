@@ -3,7 +3,6 @@ package model
 import (
 	"api/common/types"
 	modelSchool "api/services/school/common/school/model"
-	modelYear "api/services/school/common/year/model"
 	"api/services/school/university/student/data"
 	modelUser "api/services/user/user/model"
 )
@@ -16,8 +15,7 @@ type Student struct {
 	UserID int64           `gorm:"default:null"`
 	User   *modelUser.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	YearID int64           `gorm:"default:null"`
-	Year   *modelYear.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	SerialNumber string `gorm:"default:null"`
 }
 
 func (item *Student) ToStudentResponse() *data.StudentResponse {
@@ -28,7 +26,6 @@ func (item *Student) ToStudentResponse() *data.StudentResponse {
 
 	resp.School = item.School.ToResponse()
 	resp.User = item.User.ToResponse()
-	resp.Year = item.Year.ToResponse()
 	return resp
 }
 
