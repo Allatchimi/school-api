@@ -20,17 +20,17 @@ func NewService(repository *Repository) *Service {
 }
 
 // Create user
-func (service *Service) Create(inputJwtToken *types.JwtToken, user *model.User) (result *model.User, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.User) (result *model.User, errCode int, err error) {
 	// Check if user exists
-	var foundUser *model.User
+	var foundItem *model.User
 	var errMsg string = ""
-	var isEmailValid = utils.IsEmailValid(user.Email)
+	var isEmailValid = utils.IsEmailValid(item.Email)
 	if isEmailValid {
 		errMsg = "email"
-		foundUser, err = service.Repository.GetByEmail(user.Email)
+		foundItem, err = service.Repository.GetByEmail(item.Email)
 	} else {
 		errMsg = "phone number"
-		foundUser, err = service.Repository.GetByPhoneNumber(user.PhoneNumber)
+		foundItem, err = service.Repository.GetByPhoneNumber(item.PhoneNumber)
 	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -39,8 +39,8 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, user *model.User) 
 		)
 		return
 	}
-	if foundUser != nil {
-		if (isEmailValid && foundUser.Email == user.Email) || (!isEmailValid && foundUser.PhoneNumber == user.PhoneNumber) {
+	if foundItem != nil {
+		if (isEmailValid && foundItem.Email == item.Email) || (!isEmailValid && foundItem.PhoneNumber == item.PhoneNumber) {
 			errCode = http.StatusFound
 			err = constants.Http302ErrorMessage(
 				fmt.Sprintf("user %s", errMsg),
@@ -52,15 +52,15 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, user *model.User) 
 	// Create new user
 	randomPassword := utils.GenerateRandomPassword(8)
 	var activatedAt *time.Time = nil
-	if user.IsActivated {
+	if item.IsActivated {
 		tmpTime := time.Now()
 		activatedAt = &tmpTime
 	}
 	newUser := &model.User{
-		Email:       user.Email,
-		PhoneNumber: user.PhoneNumber,
-		RoleID:      user.RoleID,
-		IsActivated: user.IsActivated,
+		Email:       item.Email,
+		PhoneNumber: item.PhoneNumber,
+		RoleID:      item.RoleID,
+		IsActivated: item.IsActivated,
 		ActivatedAt: activatedAt,
 		LoginMethod: constants.AuthLoginMethodDefault,
 		Password:    randomPassword,
@@ -86,11 +86,11 @@ func (service *Service) AssignRole(inputJwtToken *types.JwtToken, userID int64, 
 }
 
 // UpdateUser Update user
-func (service *Service) Update(inputJwtToken *types.JwtToken, userID int64, user *model.User) (result *model.User, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, userID int64, item *model.User) (result *model.User, errCode int, err error) {
 	// Check if user exists
 	var errMsg string = ""
 	errMsg = "email"
-	foundUser, err := service.Repository.GetByEmail(user.Email)
+	foundItem, err := service.Repository.GetByEmail(item.Email)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(
@@ -98,8 +98,8 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, userID int64, user
 		)
 		return
 	}
-	if foundUser != nil {
-		if foundUser.Email != user.Email {
+	if foundItem != nil {
+		if foundItem.Email != item.Email {
 			errCode = http.StatusFound
 			err = constants.Http302ErrorMessage(
 				fmt.Sprintf("user %s", errMsg),
@@ -109,7 +109,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, userID int64, user
 	}
 
 	errMsg = "phone number"
-	foundUser, err = service.Repository.GetByPhoneNumber(user.PhoneNumber)
+	foundItem, err = service.Repository.GetByPhoneNumber(item.PhoneNumber)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(
@@ -117,8 +117,8 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, userID int64, user
 		)
 		return
 	}
-	if foundUser != nil {
-		if foundUser.PhoneNumber != user.PhoneNumber {
+	if foundItem != nil {
+		if foundItem.PhoneNumber != item.PhoneNumber {
 			errCode = http.StatusFound
 			err = constants.Http302ErrorMessage(
 				fmt.Sprintf("user %s", errMsg),
@@ -128,13 +128,13 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, userID int64, user
 	}
 
 	// Update
-	if !user.IsActivated {
-		user.ActivatedAt = nil
-	} else if user.IsActivated && !foundUser.IsActivated {
+	if !item.IsActivated {
+		item.ActivatedAt = nil
+	} else if item.IsActivated && !foundItem.IsActivated {
 		tmpTime := time.Now()
-		user.ActivatedAt = &tmpTime
+		item.ActivatedAt = &tmpTime
 	}
-	result, err = service.Repository.Update(userID, user)
+	result, err = service.Repository.Update(userID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("update user from database")
@@ -191,14 +191,14 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 // Get Returns user with matching id
-func (service *Service) Get(inputJwtToken *types.JwtToken, userID int64) (user *model.User, errCode int, err error) {
-	user, err = service.Repository.GetByID(userID)
+func (service *Service) Get(inputJwtToken *types.JwtToken, userID int64) (result *model.User, errCode int, err error) {
+	result, err = service.Repository.GetByID(userID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get user by id from database")
 		return
 	}
-	if user == nil {
+	if result == nil {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage("User")
 		return
@@ -207,8 +207,8 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, userID int64) (user *
 }
 
 // GetAll Returns all users with support for search, filter and pagination
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, roleName string) (userList []model.User, errCode int, err error) {
-	userList, err = service.Repository.GetAll(filter, pagination, roleName)
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, roleName string) (result []model.User, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination, roleName)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get users from database")

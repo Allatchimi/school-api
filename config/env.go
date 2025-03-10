@@ -50,7 +50,7 @@ type Environment struct {
 	JwtIssuerProfileUpdateEmailPassphrase       string `mapstructure:"JWT_ISSUER_PROFILE_UPDATE_EMAIL_PASSPHRASE"`
 	JwtIssuerProfileUpdatePhoneNumberPassphrase string `mapstructure:"JWT_ISSUER_PROFILE_UPDATE_PHONE_NUMBER_PASSPHRASE"`
 
-	// reCAPTCHA
+	// GOOGLE reCAPTCHA
 	GoogleReCAPTCHASiteKey string  `mapstructure:"GOOGLE_RECAPTCHA_SITE_KEY"`
 	GoogleReCAPTCHAScore   float32 `mapstructure:"GOOGLE_RECAPTCHA_SCORE"`
 
@@ -61,7 +61,7 @@ type Environment struct {
 	SmtpPassword string `mapstructure:"SMTP_PASSWORD"`
 	SmtpSender   string `mapstructure:"SMTP_SENDER"`
 
-	// SMS
+	// Twilio SMS
 	TwilioAccountSid   string `mapstructure:"TWILIO_ACCOUNT_SID"`
 	TwilioApiKey       string `mapstructure:"TWILIO_API_KEY"`
 	TwilioApiSecret    string `mapstructure:"TWILIO_API_SECRET"`
@@ -77,7 +77,7 @@ type Environment struct {
 	FacebookDebugTokenUrl string `mapstructure:"FACEBOOK_DEBUG_TOKEN_URL"`
 	FacebookProfileUrl    string `mapstructure:"FACEBOOK_PROFILE_URL"`
 
-	// Initial database
+	// Database fixtures
 	RoleDefault  string `mapstructure:"ROLE_DEFAULT"`
 	RoleAdmin    string `mapstructure:"ROLE_ADMIN"`
 	RoleDirector string `mapstructure:"ROLE_DIRECTOR"`

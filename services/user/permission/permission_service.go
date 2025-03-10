@@ -21,7 +21,7 @@ func (service *Service) Update(
 	inputJwtToken *types.JwtToken,
 	roleID int64,
 	tableName string,
-	data *model.Permission,
+	item *model.Permission,
 ) (result *model.Permission, errCode int, err error) {
 	// Check if the permission exists
 	foundPermission, err := service.Repository.GetByRoleIDTableName(roleID, tableName)
@@ -32,7 +32,7 @@ func (service *Service) Update(
 	}
 	if foundPermission == nil || foundPermission.RoleID != roleID {
 		// Create new ones
-		result, err = service.Repository.Create(data)
+		result, err = service.Repository.Create(item)
 		if err != nil {
 			errCode = http.StatusInternalServerError
 			err = constants.Http500ErrorMessage("create permission from database")
@@ -42,7 +42,7 @@ func (service *Service) Update(
 
 	// Update now
 	result, err = service.Repository.Update(
-		roleID, tableName, data,
+		roleID, tableName, item,
 	)
 	if err != nil {
 		errCode = http.StatusInternalServerError

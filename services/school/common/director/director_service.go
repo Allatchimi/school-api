@@ -68,13 +68,13 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Direct
 // Update director
 func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.Director) (result *model.Director, errCode int, err error) {
 	// Check if director exists
-	foundDirector, err := service.Repository.GetById(id)
+	foundItem, err := service.Repository.GetById(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get director by name from database")
 		return
 	}
-	if foundDirector == nil || foundDirector.UserID < 1 {
+	if foundItem == nil || foundItem.UserID < 1 {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage("Director")
 		return

@@ -60,7 +60,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Highsc
 }
 
 // Update section
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.HighschoolSection) (result *model.HighschoolSection, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, sectionID int64, item *model.HighschoolSection) (result *model.HighschoolSection, errCode int, err error) {
 	// Check if the school type is highschool
 	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
 	if err != nil {
@@ -75,19 +75,19 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	}
 
 	// Check if section exists
-	foundSection, err := service.Repository.GetById(id)
+	foundItem, err := service.Repository.GetById(sectionID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get section by name from database")
 		return
 	}
-	if foundSection == nil || foundSection.ID != id {
+	if foundItem == nil || foundItem.ID != sectionID {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage("Section")
 		return
 	}
 	// Check if the school type is highschool
-	if foundSection.School.Type != constants.SCHOOL_TYPE_HIGHSCHOOL {
+	if foundItem.School.Type != constants.SCHOOL_TYPE_HIGHSCHOOL {
 		errCode = http.StatusBadRequest
 		err = constants.Http400BadRequestErrorMessage()
 		return
@@ -101,7 +101,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 		return
 	}
 	if foundNewSection != nil && foundNewSection.SchoolID == item.SchoolID && foundNewSection.Name == item.Name {
-		if !(foundSection.SchoolID == foundNewSection.SchoolID && foundSection.Name == foundNewSection.Name) {
+		if !(foundItem.SchoolID == foundNewSection.SchoolID && foundItem.Name == foundNewSection.Name) {
 			errCode = http.StatusFound
 			err = constants.Http302ErrorMessage("Section")
 			return
@@ -109,7 +109,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	}
 
 	// Update section
-	result, err = service.Repository.Update(id, item)
+	result, err = service.Repository.Update(sectionID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("update section from database")
@@ -119,8 +119,8 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 }
 
 // Delete section with matching id and return affected rows
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(id)
+func (service *Service) Delete(inputJwtToken *types.JwtToken, sectionID int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.Delete(sectionID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("delete section from database")
@@ -151,8 +151,8 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 // Get Returns section with matching id
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.HighschoolSection, errCode int, err error) {
-	result, err = service.Repository.GetById(id)
+func (service *Service) Get(inputJwtToken *types.JwtToken, sectionID int64) (result *model.HighschoolSection, errCode int, err error) {
+	result, err = service.Repository.GetById(sectionID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get section by id from database")

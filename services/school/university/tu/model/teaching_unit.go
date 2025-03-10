@@ -2,15 +2,23 @@ package model
 
 import (
 	"api/common/types"
+	modelSchool "api/services/school/common/school/model"
+	modelDomain "api/services/school/university/domain/model"
+	modelLevel "api/services/school/university/level/model"
 	"api/services/school/university/tu/data"
 	"time"
 )
 
 type TeachingUnit struct {
 	types.BaseGormModel
-	SchoolID int64 `gorm:"default:null"`
-	DomainID int64 `gorm:"default:null"`
-	LevelID  int64 `gorm:"default:null"`
+	SchoolID int64               `gorm:"default:null"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	DomainID int64                         `gorm:"default:null"`
+	Domain   *modelDomain.UniversityDomain `gorm:"default:null;foreignKey:DomainID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	LevelID int64                       `gorm:"default:null"`
+	Level   *modelLevel.UniversityLevel `gorm:"default:null;foreignKey:LevelID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Name         string `gorm:"default:null"`
 	Description  string `gorm:"default:null"`
@@ -19,10 +27,10 @@ type TeachingUnit struct {
 	Program      string `gorm:"default null"`
 	Requirements string `gorm:"default null"`
 
-	TeachingUnitProfessors []TeachingUnitProfessor `gorm:"default:null;foreignKey:TeachingUnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-
-	IsInvalid   bool       `gorm:"default:false"`
+	IsValid     bool       `gorm:"default:true"`
 	InvalidDate *time.Time `gorm:"default:null"`
+
+	TeachingUnitProfessors []TeachingUnitProfessor `gorm:"default:null;foreignKey:TeachingUnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *TeachingUnit) ToResponse() *data.TeachingUnitResponse {
@@ -34,12 +42,17 @@ func (item *TeachingUnit) ToResponse() *data.TeachingUnitResponse {
 	resp.SchoolID = item.SchoolID
 	resp.DomainID = item.DomainID
 	resp.LevelID = item.LevelID
+
 	resp.Name = item.Name
 	resp.Description = item.Description
 	resp.Credit = item.Credit
 	resp.Semester = item.Semester
 	resp.Program = item.Program
 	resp.Requirements = item.Requirements
+
+	resp.IsValid = item.IsValid
+	resp.InvalidDate = item.InvalidDate
+
 	resp.TeachingUnitProfessors = ToTeachingUnitProfessorResponseList(item.TeachingUnitProfessors)
 	return resp
 }

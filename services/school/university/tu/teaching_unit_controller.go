@@ -26,14 +26,18 @@ func (controller *Controller) Create(
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
 		&model.TeachingUnit{
-			SchoolID:     input.Body.SchoolID,
-			DomainID:     input.Body.DomainID,
-			LevelID:      input.Body.LevelID,
+			SchoolID: input.Body.SchoolID,
+			DomainID: input.Body.DomainID,
+			LevelID:  input.Body.LevelID,
+
 			Name:         input.Body.Name,
 			Description:  input.Body.Description,
 			Credit:       input.Body.Credit,
 			Program:      input.Body.Program,
 			Requirements: input.Body.Requirements,
+
+			IsValid:     input.Body.IsValid,
+			InvalidDate: input.Body.InvalidDate,
 		},
 	)
 	return
@@ -71,6 +75,9 @@ func (controller *Controller) Update(
 			Credit:       input.Body.Credit,
 			Program:      input.Body.Program,
 			Requirements: input.Body.Requirements,
+
+			IsValid:     input.Body.IsValid,
+			InvalidDate: input.Body.InvalidDate,
 		},
 	)
 	return

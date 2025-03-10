@@ -42,6 +42,9 @@ func (repository *Repository) Update(teachingUnitID int64, userID int64, teachin
 			"credit":       teachingUnit.Credit,
 			"program":      teachingUnit.Program,
 			"requirements": teachingUnit.Requirements,
+
+			"is_valid":     teachingUnit.IsValid,
+			"invalid_date": teachingUnit.InvalidDate,
 		},
 	).Error
 }

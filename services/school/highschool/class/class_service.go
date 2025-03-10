@@ -60,7 +60,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Highsc
 }
 
 // Update class
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.HighschoolClass) (result *model.HighschoolClass, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, classID int64, item *model.HighschoolClass) (result *model.HighschoolClass, errCode int, err error) {
 	// Check if the school type is highschool
 	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
 	if err != nil {
@@ -75,19 +75,19 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	}
 
 	// Check if class exists
-	foundClass, err := service.Repository.GetById(id)
+	foundItem, err := service.Repository.GetById(classID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get class by name from database")
 		return
 	}
-	if foundClass == nil || foundClass.ID != id {
+	if foundItem == nil || foundItem.ID != classID {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage("Class")
 		return
 	}
 	// Check if the school type is highschool
-	if foundClass.School.Type != constants.SCHOOL_TYPE_HIGHSCHOOL {
+	if foundItem.School.Type != constants.SCHOOL_TYPE_HIGHSCHOOL {
 		errCode = http.StatusBadRequest
 		err = constants.Http400BadRequestErrorMessage()
 		return
@@ -101,7 +101,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 		return
 	}
 	if foundNewClass != nil && foundNewClass.SchoolID == item.SchoolID && foundNewClass.SpecialtyID == item.SpecialtyID && foundNewClass.Name == item.Name {
-		if !(foundClass.SchoolID == foundNewClass.SchoolID && foundClass.SpecialtyID == foundNewClass.SpecialtyID && foundClass.Name == foundNewClass.Name) {
+		if !(foundItem.SchoolID == foundNewClass.SchoolID && foundItem.SpecialtyID == foundNewClass.SpecialtyID && foundItem.Name == foundNewClass.Name) {
 			errCode = http.StatusFound
 			err = constants.Http302ErrorMessage("Specialty")
 			return
@@ -109,7 +109,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	}
 
 	// Update class
-	result, err = service.Repository.Update(id, item)
+	result, err = service.Repository.Update(classID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("update class from database")
@@ -119,8 +119,8 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 }
 
 // Delete class with matching id and return affected rows
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(id)
+func (service *Service) Delete(inputJwtToken *types.JwtToken, classID int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.Delete(classID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("delete class from database")
@@ -151,8 +151,8 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 // Get Returns class with matching id
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.HighschoolClass, errCode int, err error) {
-	result, err = service.Repository.GetById(id)
+func (service *Service) Get(inputJwtToken *types.JwtToken, classID int64) (result *model.HighschoolClass, errCode int, err error) {
+	result, err = service.Repository.GetById(classID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get class by id from database")
