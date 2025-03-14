@@ -18,9 +18,9 @@ func NewService(repository *Repository) *Service {
 }
 
 // Create new school
-func (service *Service) Create(inputJwtToken *types.JwtToken, school *model.School) (result *model.School, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.School) (result *model.School, errCode int, err error) {
 	// Create school
-	result, err = service.Repository.Create(school)
+	result, err = service.Repository.Create(item)
 	if err != nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
 		if errPgState == nil {
@@ -36,13 +36,13 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, school *model.Scho
 	}
 
 	// Create config
-	newConfig, _, err := service.UpdateConfig(inputJwtToken, -1, school.Config)
+	newConfig, _, err := service.UpdateConfig(inputJwtToken, -1, item.Config)
 	if err != nil {
 		return
 	}
 
 	// Create info
-	newInfo, errCode, err := service.UpdateInfo(inputJwtToken, -1, school.Info)
+	newInfo, errCode, err := service.UpdateInfo(inputJwtToken, -1, item.Info)
 	if err != nil {
 		return
 	}
@@ -55,22 +55,22 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, school *model.Scho
 }
 
 // Update school
-func (service *Service) Update(inputJwtToken *types.JwtToken, schoolID int64, school *model.School) (result *model.School, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, schoolID int64, item *model.School) (result *model.School, errCode int, err error) {
 	// Check if school exists
-	foundSchool, err := service.Repository.GetByName(school.Name)
+	foundSchool, err := service.Repository.GetByName(item.Name)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get school by name from database")
 		return
 	}
-	if foundSchool != nil && foundSchool.Name == school.Name {
+	if foundSchool != nil && foundSchool.Name == item.Name {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage("school")
 		return
 	}
 
 	// Update school
-	result, err = service.Repository.Update(schoolID, school)
+	result, err = service.Repository.Update(schoolID, item)
 	if err != nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
 		if errPgState == nil {
@@ -86,14 +86,14 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, schoolID int64, sc
 	}
 
 	// Update config
-	newConfig, _, err := service.UpdateConfig(inputJwtToken, result.SchoolInfoID, school.Config)
+	newConfig, _, err := service.UpdateConfig(inputJwtToken, result.SchoolInfoID, item.Config)
 	if err != nil {
 		return
 	}
 	result.Config = newConfig
 
 	// Update info
-	newInfo, errCode, err := service.UpdateInfo(inputJwtToken, result.SchoolConfigID, school.Info)
+	newInfo, errCode, err := service.UpdateInfo(inputJwtToken, result.SchoolConfigID, item.Info)
 	if err != nil {
 		return
 	}
@@ -194,14 +194,14 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 // Get Returns school with matching id
-func (service *Service) Get(inputJwtToken *types.JwtToken, schoolID int64) (school *model.School, errCode int, err error) {
-	school, err = service.Repository.GetByID(schoolID)
+func (service *Service) Get(inputJwtToken *types.JwtToken, schoolID int64) (result *model.School, errCode int, err error) {
+	result, err = service.Repository.GetByID(schoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get school by id from database")
 		return
 	}
-	if school == nil {
+	if result == nil {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage("School")
 		return
@@ -210,8 +210,8 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, schoolID int64) (scho
 }
 
 // GetAll Returns all schools with support for search, filter and pagination
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, typeName string) (schoolList []model.School, errCode int, err error) {
-	schoolList, err = service.Repository.GetAll(filter, pagination, typeName)
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, typeName string) (result []model.School, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination, typeName)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get schools from database")

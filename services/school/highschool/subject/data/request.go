@@ -25,3 +25,7 @@ type UpdateSubjectRequest struct {
 	Program      string `json:"Program" required:"false" doc:"Program" example:""`
 	Requirements string `json:"Requirements" required:"false" doc:"Requirements" example:""`
 }
+
+type GetAllRequest struct {
+	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
+}

@@ -17,30 +17,30 @@ func NewService(repository *Repository) *Service {
 }
 
 // Create new subject
-func (service *Service) Create(inputJwtToken *types.JwtToken, subject *model.Subject) (result *model.Subject, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Subject) (result *model.Subject, errCode int, err error) {
 	// Check if subject already exists
-	foundSubject, err := service.Repository.GetByObject(&model.Subject{
-		SchoolID:     subject.SchoolID,
-		ClassID:      subject.ClassID,
-		Name:         subject.Name,
-		Description:  subject.Description,
-		Coefficient:  subject.Coefficient,
-		Program:      subject.Program,
-		Requirements: subject.Requirements,
+	foundItem, err := service.Repository.GetByObject(&model.Subject{
+		SchoolID:     item.SchoolID,
+		ClassID:      item.ClassID,
+		Name:         item.Name,
+		Description:  item.Description,
+		Coefficient:  item.Coefficient,
+		Program:      item.Program,
+		Requirements: item.Requirements,
 	})
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get subject by name from database")
 		return
 	}
-	if foundSubject != nil {
+	if foundItem != nil {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage("subject")
 		return
 	}
 
 	// Insert subject
-	result, err = service.Repository.Create(subject)
+	result, err = service.Repository.Create(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("create subject from database")
@@ -50,22 +50,22 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, subject *model.Sub
 }
 
 // AddProfessor adds new professor
-func (service *Service) AddProfessor(inputJwtToken *types.JwtToken, professor *model.SubjectProfessor) (result *model.SubjectProfessor, errCode int, err error) {
+func (service *Service) AddProfessor(inputJwtToken *types.JwtToken, item *model.SubjectProfessor) (result *model.SubjectProfessor, errCode int, err error) {
 	// Check if professor already exists
-	foundSubject, err := service.Repository.GetProfessorById(professor.SubjectID, professor.UserID)
+	foundItem, err := service.Repository.GetProfessorById(item.SubjectID, item.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get professor by name from database")
 		return
 	}
-	if foundSubject != nil {
+	if foundItem != nil {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage("professor")
 		return
 	}
 
 	// Insert professor
-	result, err = service.Repository.AddProfessor(professor)
+	result, err = service.Repository.AddProfessor(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("create professor from database")
@@ -75,7 +75,7 @@ func (service *Service) AddProfessor(inputJwtToken *types.JwtToken, professor *m
 }
 
 // Update subject
-func (service *Service) Update(inputJwtToken *types.JwtToken, subjectID int64, subject *model.Subject) (result *model.Subject, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, subjectID int64, item *model.Subject) (result *model.Subject, errCode int, err error) {
 	// Check if subject already exists
 	foundSubjectByID, err := service.Repository.GetById(subjectID, inputJwtToken.UserID)
 	if err != nil {
@@ -88,24 +88,24 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, subjectID int64, s
 		err = constants.Http404ErrorMessage("subject")
 		return
 	}
-	foundSubject, err := service.Repository.GetByObject(&model.Subject{
-		SchoolID: subject.SchoolID,
-		ClassID:  subject.ClassID,
-		Name:     subject.Name,
+	foundItem, err := service.Repository.GetByObject(&model.Subject{
+		SchoolID: item.SchoolID,
+		ClassID:  item.ClassID,
+		Name:     item.Name,
 	})
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get subject by name from database")
 		return
 	}
-	if foundSubject != nil {
+	if foundItem != nil {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage("subject")
 		return
 	}
 
 	// Update subject
-	result, err = service.Repository.Update(subjectID, inputJwtToken.UserID, subject)
+	result, err = service.Repository.Update(subjectID, inputJwtToken.UserID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("update subject from database")
@@ -147,14 +147,14 @@ func (service *Service) DeleteProfessor(inputJwtToken *types.JwtToken, subjectPr
 }
 
 // Get Returns subject with matching id
-func (service *Service) Get(inputJwtToken *types.JwtToken, subjectID int64) (subject *model.Subject, errCode int, err error) {
-	subject, err = service.Repository.GetById(subjectID, inputJwtToken.UserID)
+func (service *Service) Get(inputJwtToken *types.JwtToken, subjectID int64) (result *model.Subject, errCode int, err error) {
+	result, err = service.Repository.GetById(subjectID, inputJwtToken.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get subject by id from database")
 		return
 	}
-	if subject == nil {
+	if result == nil {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage("subject")
 		return
@@ -163,8 +163,8 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, subjectID int64) (sub
 }
 
 // GetAll Returns all subjects with support for search, filter and pagination
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination) (subjectList []model.Subject, errCode int, err error) {
-	subjectList, err = service.Repository.GetAll(filter, pagination, inputJwtToken.UserID)
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.Subject, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination, inputJwtToken.UserID, schoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get faculties from database")

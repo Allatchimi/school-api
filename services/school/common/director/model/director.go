@@ -23,12 +23,16 @@ func (item *Director) ToResponse() *data.DirectorResponse {
 	}
 	resp := &data.DirectorResponse{}
 	resp.User = item.User.ToResponse()
-	resp.User.Role = nil
-	resp.User.Info = nil
-	resp.User.Mfa = nil
+	if resp.User != nil {
+		resp.User.Role = nil
+		resp.User.Info = nil
+		resp.User.Mfa = nil
+	}
 	resp.School = item.School.ToResponse()
-	resp.School.Config = nil
-	resp.School.Info = nil
+	if resp.School != nil {
+		resp.School.Config = nil
+		resp.School.Info = nil
+	}
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

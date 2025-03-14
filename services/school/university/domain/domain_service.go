@@ -60,7 +60,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Univer
 }
 
 // Update domain
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.UniversityDomain) (result *model.UniversityDomain, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, domainID int64, item *model.UniversityDomain) (result *model.UniversityDomain, errCode int, err error) {
 	// Check if the school type is university
 	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
 	if err != nil {
@@ -75,19 +75,19 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	}
 
 	// Check if domain exists
-	foundDomain, err := service.Repository.GetById(id)
+	foundItem, err := service.Repository.GetById(domainID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get domain by name from database")
 		return
 	}
-	if foundDomain == nil || foundDomain.ID != id {
+	if foundItem == nil || foundItem.ID != domainID {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage("Domain")
 		return
 	}
 	// Check if the school type is university
-	if foundDomain.School.Type != constants.SCHOOL_TYPE_UNIVERSITY {
+	if foundItem.School.Type != constants.SCHOOL_TYPE_UNIVERSITY {
 		errCode = http.StatusBadRequest
 		err = constants.Http400BadRequestErrorMessage()
 		return
@@ -101,7 +101,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 		return
 	}
 	if foundNewDomain != nil && foundNewDomain.SchoolID == item.SchoolID && foundNewDomain.DepartmentID == item.DepartmentID && foundNewDomain.Name == item.Name {
-		if !(foundDomain.SchoolID == foundNewDomain.SchoolID && foundDomain.DepartmentID == foundNewDomain.DepartmentID && foundDomain.Name == foundNewDomain.Name) {
+		if !(foundItem.SchoolID == foundNewDomain.SchoolID && foundItem.DepartmentID == foundNewDomain.DepartmentID && foundItem.Name == foundNewDomain.Name) {
 			errCode = http.StatusFound
 			err = constants.Http302ErrorMessage("Department")
 			return
@@ -109,7 +109,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	}
 
 	// Update domain
-	result, err = service.Repository.Update(id, item)
+	result, err = service.Repository.Update(domainID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("update domain from database")
@@ -119,8 +119,8 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 }
 
 // Delete domain with matching id and return affected rows
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(id)
+func (service *Service) Delete(inputJwtToken *types.JwtToken, domainID int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.Delete(domainID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("delete domain from database")
@@ -151,8 +151,8 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 // Get Returns domain with matching id
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.UniversityDomain, errCode int, err error) {
-	result, err = service.Repository.GetById(id)
+func (service *Service) Get(inputJwtToken *types.JwtToken, domainID int64) (result *model.UniversityDomain, errCode int, err error) {
+	result, err = service.Repository.GetById(domainID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get domain by id from database")

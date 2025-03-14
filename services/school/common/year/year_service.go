@@ -23,13 +23,13 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Year) 
 	item.Name = yearName
 
 	// Check if the year exists
-	foundYear, err := service.Repository.GetByNameSchoolID(yearName, item.SchoolID)
+	foundItem, err := service.Repository.GetByNameSchoolID(yearName, item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get year by name from database")
 		return
 	}
-	if foundYear != nil && foundYear.Name == yearName && foundYear.SchoolID == item.SchoolID {
+	if foundItem != nil && foundItem.Name == yearName && foundItem.SchoolID == item.SchoolID {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage("year")
 		return
@@ -48,13 +48,13 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Year) 
 // Update year
 func (service *Service) Update(inputJwtToken *types.JwtToken, yearID int64, item *model.Year) (result *model.Year, errCode int, err error) {
 	// Check if year exists
-	foundYear, err := service.Repository.GetById(yearID)
+	foundItem, err := service.Repository.GetById(yearID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get year by name from database")
 		return
 	}
-	if foundYear == nil || len(foundYear.Name) < 1 {
+	if foundItem == nil || len(foundItem.Name) < 1 {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage("Year")
 		return
@@ -70,7 +70,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, yearID int64, item
 		return
 	}
 	if foundNewYear != nil && foundNewYear.SchoolID == item.SchoolID && foundNewYear.Name == yearName {
-		if !(foundYear.SchoolID == foundNewYear.SchoolID && foundYear.Name == foundNewYear.Name) {
+		if !(foundItem.SchoolID == foundNewYear.SchoolID && foundItem.Name == foundNewYear.Name) {
 			errCode = http.StatusFound
 			err = constants.Http302ErrorMessage("year")
 			return
@@ -136,8 +136,8 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, yearID int64) (result
 }
 
 // GetAll Returns all years with support for search, filter and pagination
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination) (yearList []model.Year, errCode int, err error) {
-	yearList, err = service.Repository.GetAll(filter, pagination)
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination) (result []model.Year, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get years from database")

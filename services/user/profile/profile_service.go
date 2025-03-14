@@ -329,14 +329,14 @@ func (service *Service) DeleteProfile(inputJwtToken *types.JwtToken) (affectedRo
 }
 
 // GetProfile Return profile information
-func (service *Service) GetProfile(inputJwtToken *types.JwtToken) (user *model.User, errCode int, err error) {
-	user, err = service.Repository.GetByID(inputJwtToken.UserID)
+func (service *Service) GetProfile(inputJwtToken *types.JwtToken) (result *model.User, errCode int, err error) {
+	result, err = service.Repository.GetByID(inputJwtToken.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get profile from database")
 		return
 	}
-	if user == nil {
+	if result == nil {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage("User")
 		return

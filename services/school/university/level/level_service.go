@@ -60,7 +60,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Univer
 }
 
 // Update level
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.UniversityLevel) (result *model.UniversityLevel, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, levelID int64, item *model.UniversityLevel) (result *model.UniversityLevel, errCode int, err error) {
 	// Check if the school type is university
 	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
 	if err != nil {
@@ -75,19 +75,19 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	}
 
 	// Check if level exists
-	foundLevel, err := service.Repository.GetById(id)
+	foundItem, err := service.Repository.GetById(levelID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get level by name from database")
 		return
 	}
-	if foundLevel == nil || foundLevel.ID != id {
+	if foundItem == nil || foundItem.ID != levelID {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage("Level")
 		return
 	}
 	// Check if the school type is university
-	if foundLevel.School.Type != constants.SCHOOL_TYPE_UNIVERSITY {
+	if foundItem.School.Type != constants.SCHOOL_TYPE_UNIVERSITY {
 		errCode = http.StatusBadRequest
 		err = constants.Http400BadRequestErrorMessage()
 		return
@@ -101,7 +101,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 		return
 	}
 	if foundNewLevel != nil && foundNewLevel.SchoolID == item.SchoolID && foundNewLevel.Name == item.Name {
-		if !(foundLevel.SchoolID == foundNewLevel.SchoolID && foundLevel.Name == foundNewLevel.Name) {
+		if !(foundItem.SchoolID == foundNewLevel.SchoolID && foundItem.Name == foundNewLevel.Name) {
 			errCode = http.StatusFound
 			err = constants.Http302ErrorMessage("Level")
 			return
@@ -109,7 +109,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	}
 
 	// Update level
-	result, err = service.Repository.Update(id, item)
+	result, err = service.Repository.Update(levelID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("update level from database")
@@ -119,8 +119,8 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 }
 
 // Delete level with matching id and return affected rows
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(id)
+func (service *Service) Delete(inputJwtToken *types.JwtToken, levelID int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.Delete(levelID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("delete level from database")
@@ -151,8 +151,8 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 // Get Returns level with matching id
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.UniversityLevel, errCode int, err error) {
-	result, err = service.Repository.GetById(id)
+func (service *Service) Get(inputJwtToken *types.JwtToken, levelID int64) (result *model.UniversityLevel, errCode int, err error) {
+	result, err = service.Repository.GetById(levelID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get level by id from database")

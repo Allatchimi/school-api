@@ -7,8 +7,9 @@ import (
 
 type Subject struct {
 	types.BaseGormModel
-	SchoolID          int64              `gorm:"not null"`
-	ClassID           int64              `gorm:"not null"`
+	SchoolID int64 `gorm:"not null"`
+	ClassID  int64 `gorm:"not null"`
+
 	Name              string             `gorm:"not null"`
 	Description       string             `gorm:"default:null"`
 	Coefficient       int                `gorm:"default:1"`

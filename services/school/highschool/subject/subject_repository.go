@@ -2,8 +2,10 @@ package subject
 
 import (
 	"fmt"
+	"strings"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"api/common/helpers"
 	"api/common/types"
@@ -84,31 +86,43 @@ func (repository *Repository) GetByObject(subject *model.Subject) (*model.Subjec
 	return result, repository.Db.Where(subject).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, userID int64) ([]model.Subject, error) {
-	var result []model.Subject
-	var condition string = ""
-	if filter != nil && len(filter.Search) >= 1 {
-		condition = fmt.Sprintf(
-			"WHERE name ILIKE %s OR WHERE description ILIKE %s OR WHERE program ILIKE %s OR WHERE requirements ILIKE %s",
-			filter.Search,
-			filter.Search,
-			filter.Search,
-			filter.Search,
-		)
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, userID int64, schoolID int64) (result []model.Subject, err error) {
+	result = make([]model.Subject, 0)
+	var where string = ""
+	if schoolID > 0 {
+		where = fmt.Sprintf("WHERE subjects.school_id = %d", schoolID)
 	}
-	return result, repository.Db.Scopes(
+	if filter != nil && len(filter.Search) >= 1 {
+		tempWhere := fmt.Sprintf(
+			"CAST(subjects.id AS TEXT) = '%s' OR subjects.name ILIKE '%s' OR subjects.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR classes.name ILIKE '%s' OR classes.description ILIKE '%s'",
+			filter.Search,
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+		)
+
+		if strings.HasPrefix(where, "WHERE") {
+			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
+		} else {
+			where = fmt.Sprintf("WHERE %s", tempWhere)
+		}
+	}
+	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"subjects",
-			condition,
+			"SELECT subjects.id, subjects.name, subjects.description, subjects.school_id, subjects.section_id"+
+				", subjects.created_at, subjects.updated_at FROM highschool_specialties subjects "+
+				"LEFT JOIN schools ON subjects.school_id = schools.id "+
+				"LEFT JOIN highschool_sections AS classes ON subjects.section_id = classes.id",
+			where,
 			pagination,
 			filter,
 		),
 	).Find(&result).Error
 
-	// return result, repository.Db.Model(&model.Subject{}).
-	// 	Select("subjects.*").
-	// 	Joins("left join school_directors on subjects.school_id = school_directors.id").
-	// 	Where("school_directors.user_id = ?", userID).
-	// 	Scopes(helpers.PaginationScope(result, pagination, filter, repository.Db)).Find(result).Error
+	err = tmpErr
+	return
 }

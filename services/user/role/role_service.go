@@ -18,8 +18,8 @@ func NewService(repository *Repository) *Service {
 }
 
 // Create Creates role
-func (service *Service) Create(inputJwtToken *types.JwtToken, role *model.Role) (result *model.Role, errCode int, err error) {
-	result, err = service.Repository.Create(role)
+func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Role) (result *model.Role, errCode int, err error) {
+	result, err = service.Repository.Create(item)
 	if err != nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
 		if errPgState == nil {
@@ -38,7 +38,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, role *model.Role) 
 }
 
 // Update Updates role
-func (service *Service) Update(inputJwtToken *types.JwtToken, roleID int64, role *model.Role) (result *model.Role, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, roleID int64, item *model.Role) (result *model.Role, errCode int, err error) {
 	// Check if the role exists
 	foundRole, err := service.Repository.GetByID(roleID)
 	if err != nil {
@@ -53,7 +53,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, roleID int64, role
 	}
 
 	// Check if there is some role with the same name
-	foundRoleToUpdate, err := service.Repository.GetByName(role.Name)
+	foundRoleToUpdate, err := service.Repository.GetByName(item.Name)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("find role from database")
@@ -66,7 +66,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, roleID int64, role
 	}
 
 	// Update now
-	result, err = service.Repository.Update(roleID, role)
+	result, err = service.Repository.Update(roleID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("update role from database")
@@ -108,14 +108,14 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 // Get Returns role
-func (service *Service) GetByID(inputJwtToken *types.JwtToken, roleID int64) (role *model.Role, errCode int, err error) {
-	role, err = service.Repository.GetByID(roleID)
+func (service *Service) GetByID(inputJwtToken *types.JwtToken, roleID int64) (result *model.Role, errCode int, err error) {
+	result, err = service.Repository.GetByID(roleID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get role by id from database")
 		return
 	}
-	if role == nil {
+	if result == nil {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage("Role")
 		return
@@ -124,8 +124,8 @@ func (service *Service) GetByID(inputJwtToken *types.JwtToken, roleID int64) (ro
 }
 
 // GetAll Returns role list
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination) (roleList []model.Role, errCode int, err error) {
-	roleList, err = service.Repository.GetAll(filter, pagination)
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination) (result []model.Role, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get roles from database")
