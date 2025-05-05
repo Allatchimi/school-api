@@ -1,12 +1,12 @@
-package subject
+package quarter
 
 import (
 	"context"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/services/school/highschool/subject/data"
-	"api/services/school/highschool/subject/model"
+	"api/services/school/highschool/quarter/data"
+	"api/services/school/highschool/quarter/model"
 )
 
 type Controller struct {
@@ -20,12 +20,12 @@ func NewController(service *Service) *Controller {
 func (controller *Controller) Create(
 	ctx *context.Context,
 	input *struct {
-		Body data.SubjectRequest
+		Body data.QuarterRequest
 	},
-) (result *model.HighschoolSubject, errCode int, err error) {
+) (result *model.HighschoolQuarter, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.HighschoolSubject{
+		&model.HighschoolQuarter{
 			SchoolID:    input.Body.SchoolID,
 			Name:        input.Body.Name,
 			Description: input.Body.Description,
@@ -37,13 +37,13 @@ func (controller *Controller) Create(
 func (controller *Controller) Update(
 	ctx *context.Context,
 	input *struct {
-		data.SubjectID
-		Body data.SubjectRequest
+		data.QuarterID
+		Body data.QuarterRequest
 	},
-) (result *model.HighschoolSubject, errCode int, err error) {
+) (result *model.HighschoolQuarter, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx), input.ID,
-		&model.HighschoolSubject{
+		&model.HighschoolQuarter{
 			SchoolID:    input.Body.SchoolID,
 			Name:        input.Body.Name,
 			Description: input.Body.Description,
@@ -55,7 +55,7 @@ func (controller *Controller) Update(
 func (controller *Controller) Delete(
 	ctx *context.Context,
 	input *struct {
-		data.SubjectID
+		data.QuarterID
 	},
 ) (result int64, errCode int, err error) {
 	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
@@ -83,14 +83,14 @@ func (controller *Controller) DeleteMultiple(
 func (controller *Controller) Get(
 	ctx *context.Context,
 	input *struct {
-		data.SubjectID
+		data.QuarterID
 	},
-) (result *model.HighschoolSubject, errCode int, err error) {
-	subject, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+) (result *model.HighschoolQuarter, errCode int, err error) {
+	quarter, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
-	result = subject
+	result = quarter
 	return
 }
 
@@ -101,14 +101,14 @@ func (controller *Controller) GetAll(
 		types.PaginationRequest
 		data.GetAllRequest
 	},
-) (result *data.SubjectResponseList, errCode int, err error) {
+) (result *data.QuarterResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	subjectList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllRequest.SchoolID)
+	quarterList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllRequest.SchoolID)
 	if err != nil {
 		return
 	}
-	result = &data.SubjectResponseList{
-		Data: model.ToResponseList(subjectList),
+	result = &data.QuarterResponseList{
+		Data: model.ToResponseList(quarterList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

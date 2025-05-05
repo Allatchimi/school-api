@@ -1,4 +1,4 @@
-package tu
+package semester
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
-	"api/services/school/university/tu/data"
+	"api/services/school/university/semester/data"
 )
 
 func RegisterEndpoints(
@@ -17,18 +17,18 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/schools/university/tu",
-		Tag:   []string{"University - Teaching units"},
+		Group: "/schools/university/semesters",
+		Tag:   []string{"University - Semesters"},
 	}
-	const tableName = "teaching_units"
+	const tableName = "semesters"
 
-	// Create teaching unit
+	// Create semester
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-teaching-unit",
-			Summary:     "Create teaching unit",
-			Description: "Create new teaching unit and return the created object.",
+			OperationID: "post-semester",
+			Summary:     "Create semester",
+			Description: "Create new semester.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -48,24 +48,24 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.TeachingUnitRequest
+				Body data.SemesterRequest
 			},
-		) (*struct{ Body data.TeachingUnitResponse }, error) {
+		) (*struct{ Body data.SemesterResponse }, error) {
 			result, errCode, err := controller.Create(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.TeachingUnitResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.SemesterResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Update teaching unit with id
+	// Update semester with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "update-teaching-unit",
-			Summary:     "Update teaching unit",
-			Description: "Update existing teaching unit with matching id and return the updated object.",
+			OperationID: "update-semester",
+			Summary:     "Update semester",
+			Description: "Update existing semester with matching id and return the new object.",
 			Method:      http.MethodPut,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -85,25 +85,25 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.TeachingUnitID
-				Body data.TeachingUnitRequest
+				data.SemesterID
+				Body data.SemesterRequest
 			},
-		) (*struct{ Body data.TeachingUnitResponse }, error) {
+		) (*struct{ Body data.SemesterResponse }, error) {
 			result, errCode, err := controller.Update(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.TeachingUnitResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.SemesterResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Delete teaching unit with id
+	// Delete semester with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-teaching-unit",
-			Summary:     "Delete teaching unit",
-			Description: "Delete existing teaching unit and return affected rows in database.",
+			OperationID: "delete-semester",
+			Summary:     "Delete semester",
+			Description: "Delete existing semester with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -123,7 +123,7 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.TeachingUnitID
+				data.SemesterID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.Delete(&ctx, input)
@@ -134,13 +134,50 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get teaching unit by id
+	// Delete multiple semester
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-teaching-unit-id",
-			Summary:     "Get teaching unit by id",
-			Description: "Return one teaching unit with matching id",
+			OperationID: "delete-semester-multiple",
+			Summary:     "Delete multiple semester",
+			Description: "Delete multiple semester by providing a lis of IDs and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						constants.FeatureAdmin,     // Feature scope
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body types.DeleteMultipleRequest
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteMultiple(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
+	// Get semester by id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-semester-id",
+			Summary:     "Get semester by id",
+			Description: "Return one semester with matching id",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -160,24 +197,24 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.TeachingUnitID
+				data.SemesterID
 			},
-		) (*struct{ Body data.TeachingUnitResponse }, error) {
+		) (*struct{ Body data.SemesterResponse }, error) {
 			result, errCode, err := controller.Get(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.TeachingUnitResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.SemesterResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Get all teaching units
+	// Get all semesters
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-teaching-unit-list",
-			Summary:     "Get all teaching units",
-			Description: "Get all teaching units with support for search, filter and pagination",
+			OperationID: "get-semester-list",
+			Summary:     "Get all semesters",
+			Description: "Get all semesters with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -199,16 +236,17 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
+				data.GetAllRequest
 			},
 		) (*struct {
-			Body data.TeachingUnitResponseList
+			Body data.SemesterResponseList
 		}, error) {
 			result, errCode, err := controller.GetAll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.TeachingUnitResponseList
+				Body data.SemesterResponseList
 			}{Body: *result}, nil
 		},
 	)

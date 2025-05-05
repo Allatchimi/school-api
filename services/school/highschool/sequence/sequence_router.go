@@ -1,4 +1,4 @@
-package tu
+package sequence
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
-	"api/services/school/university/tu/data"
+	"api/services/school/highschool/sequence/data"
 )
 
 func RegisterEndpoints(
@@ -17,18 +17,18 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/schools/university/tu",
-		Tag:   []string{"University - Teaching units"},
+		Group: "/schools/highschool/sequences",
+		Tag:   []string{"Highschool - Sequences"},
 	}
-	const tableName = "teaching_units"
+	const tableName = "sequences"
 
-	// Create teaching unit
+	// Create sequence
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-teaching-unit",
-			Summary:     "Create teaching unit",
-			Description: "Create new teaching unit and return the created object.",
+			OperationID: "post-sequence",
+			Summary:     "Create sequence",
+			Description: "Create new sequence.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -48,24 +48,24 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.TeachingUnitRequest
+				Body data.SequenceRequest
 			},
-		) (*struct{ Body data.TeachingUnitResponse }, error) {
+		) (*struct{ Body data.SequenceResponse }, error) {
 			result, errCode, err := controller.Create(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.TeachingUnitResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.SequenceResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Update teaching unit with id
+	// Update sequence with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "update-teaching-unit",
-			Summary:     "Update teaching unit",
-			Description: "Update existing teaching unit with matching id and return the updated object.",
+			OperationID: "update-sequence",
+			Summary:     "Update sequence",
+			Description: "Update existing sequence with matching id and return the new object.",
 			Method:      http.MethodPut,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -85,25 +85,25 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.TeachingUnitID
-				Body data.TeachingUnitRequest
+				data.SequenceID
+				Body data.SequenceRequest
 			},
-		) (*struct{ Body data.TeachingUnitResponse }, error) {
+		) (*struct{ Body data.SequenceResponse }, error) {
 			result, errCode, err := controller.Update(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.TeachingUnitResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.SequenceResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Delete teaching unit with id
+	// Delete sequence with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-teaching-unit",
-			Summary:     "Delete teaching unit",
-			Description: "Delete existing teaching unit and return affected rows in database.",
+			OperationID: "delete-sequence",
+			Summary:     "Delete sequence",
+			Description: "Delete existing sequence with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -123,7 +123,7 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.TeachingUnitID
+				data.SequenceID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.Delete(&ctx, input)
@@ -134,13 +134,50 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get teaching unit by id
+	// Delete multiple sequence
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-teaching-unit-id",
-			Summary:     "Get teaching unit by id",
-			Description: "Return one teaching unit with matching id",
+			OperationID: "delete-sequence-multiple",
+			Summary:     "Delete multiple sequence",
+			Description: "Delete multiple sequence by providing a lis of IDs and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						constants.FeatureAdmin,     // Feature scope
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body types.DeleteMultipleRequest
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteMultiple(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
+	// Get sequence by id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-sequence-id",
+			Summary:     "Get sequence by id",
+			Description: "Return one sequence with matching id",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -160,24 +197,24 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.TeachingUnitID
+				data.SequenceID
 			},
-		) (*struct{ Body data.TeachingUnitResponse }, error) {
+		) (*struct{ Body data.SequenceResponse }, error) {
 			result, errCode, err := controller.Get(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.TeachingUnitResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.SequenceResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Get all teaching units
+	// Get all sequences
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-teaching-unit-list",
-			Summary:     "Get all teaching units",
-			Description: "Get all teaching units with support for search, filter and pagination",
+			OperationID: "get-sequence-list",
+			Summary:     "Get all sequences",
+			Description: "Get all sequences with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -199,16 +236,17 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
+				data.GetAllRequest
 			},
 		) (*struct {
-			Body data.TeachingUnitResponseList
+			Body data.SequenceResponseList
 		}, error) {
 			result, errCode, err := controller.GetAll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.TeachingUnitResponseList
+				Body data.SequenceResponseList
 			}{Body: *result}, nil
 		},
 	)

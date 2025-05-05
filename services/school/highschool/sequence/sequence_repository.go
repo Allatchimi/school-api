@@ -1,4 +1,4 @@
-package subject
+package sequence
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
-	"api/services/school/highschool/subject/model"
+	"api/services/school/highschool/sequence/model"
 )
 
 type Repository struct {
@@ -21,13 +21,13 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(item *model.HighschoolSubject) (*model.HighschoolSubject, error) {
+func (repository *Repository) Create(item *model.HighschoolSequence) (*model.HighschoolSequence, error) {
 	result := *item
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, item *model.HighschoolSubject) (*model.HighschoolSubject, error) {
-	result := &model.HighschoolSubject{}
+func (repository *Repository) Update(id int64, item *model.HighschoolSequence) (*model.HighschoolSequence, error) {
+	result := &model.HighschoolSequence{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]interface{}{
 			"school_id":   item.SchoolID,
@@ -38,38 +38,38 @@ func (repository *Repository) Update(id int64, item *model.HighschoolSubject) (*
 }
 
 func (repository *Repository) Delete(id int64) (int64, error) {
-	result := repository.Db.Where("id = ?", id).Delete(&model.HighschoolSubject{})
+	result := repository.Db.Where("id = ?", id).Delete(&model.HighschoolSequence{})
 	return result.RowsAffected, result.Error
 }
 
 func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.HighschoolSubject{})
+	tmpResult := repository.Db.Where(where).Delete(&model.HighschoolSequence{})
 
 	result = tmpResult.RowsAffected
 	err = tmpResult.Error
 	return
 }
 
-func (repository *Repository) GetById(id int64) (*model.HighschoolSubject, error) {
-	result := &model.HighschoolSubject{}
+func (repository *Repository) GetById(id int64) (*model.HighschoolSequence, error) {
+	result := &model.HighschoolSequence{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetBySchoolIDName(schoolID int64, name string) (*model.HighschoolSubject, error) {
-	result := &model.HighschoolSubject{}
+func (repository *Repository) GetBySchoolIDName(schoolID int64, name string) (*model.HighschoolSequence, error) {
+	result := &model.HighschoolSequence{}
 	return result, repository.Db.Preload(clause.Associations).Where("school_id = ?", schoolID).Where("name = ?", name).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.HighschoolSubject, err error) {
-	result = make([]model.HighschoolSubject, 0)
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.HighschoolSequence, err error) {
+	result = make([]model.HighschoolSequence, 0)
 	var where string = ""
 	if schoolID > 0 {
-		where = fmt.Sprintf("WHERE subjects.school_id = %d", schoolID)
+		where = fmt.Sprintf("WHERE sequences.school_id = %d", schoolID)
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(subjects.id AS TEXT) = '%s' OR subjects.name ILIKE '%s' OR subjects.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s'",
+			"CAST(sequences.id AS TEXT) = '%s' OR sequences.name ILIKE '%s' OR sequences.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s'",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -85,9 +85,9 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"SELECT subjects.id, subjects.name, subjects.description, subjects.school_id"+
-				", subjects.created_at, subjects.updated_at FROM highschool_subjects subjects "+
-				"LEFT JOIN schools ON subjects.school_id = schools.id",
+			"SELECT sequences.id, sequences.name, sequences.description, sequences.school_id"+
+				", sequences.created_at, sequences.updated_at FROM highschool_sequences sequences "+
+				"LEFT JOIN schools ON sequences.school_id = schools.id",
 			where,
 			pagination,
 			filter,

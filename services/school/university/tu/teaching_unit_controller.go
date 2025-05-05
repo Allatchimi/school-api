@@ -20,15 +20,16 @@ func NewController(service *Service) *Controller {
 func (controller *Controller) Create(
 	ctx *context.Context,
 	input *struct {
-		Body data.CreateTeachingUnitRequest
+		Body data.TeachingUnitRequest
 	},
 ) (result *model.UniversityTeachingUnit, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
 		&model.UniversityTeachingUnit{
-			SchoolID: input.Body.SchoolID,
-			DomainID: input.Body.DomainID,
-			LevelID:  input.Body.LevelID,
+			SchoolID:   input.Body.SchoolID,
+			DomainID:   input.Body.DomainID,
+			LevelID:    input.Body.LevelID,
+			SemesterID: input.Body.SemesterID,
 
 			Name:         input.Body.Name,
 			Description:  input.Body.Description,
@@ -36,8 +37,7 @@ func (controller *Controller) Create(
 			Program:      input.Body.Program,
 			Requirements: input.Body.Requirements,
 
-			IsValid:     input.Body.IsValid,
-			InvalidDate: input.Body.InvalidDate,
+			IsValid: input.Body.IsValid,
 		},
 	)
 	return
@@ -47,20 +47,24 @@ func (controller *Controller) Update(
 	ctx *context.Context,
 	input *struct {
 		data.TeachingUnitID
-		Body data.UpdateTeachingUnitRequest
+		Body data.TeachingUnitRequest
 	},
 ) (result *model.UniversityTeachingUnit, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx), input.ID,
 		&model.UniversityTeachingUnit{
+			SchoolID:   input.Body.SchoolID,
+			DomainID:   input.Body.DomainID,
+			LevelID:    input.Body.LevelID,
+			SemesterID: input.Body.SemesterID,
+
 			Name:         input.Body.Name,
 			Description:  input.Body.Description,
 			Credit:       input.Body.Credit,
 			Program:      input.Body.Program,
 			Requirements: input.Body.Requirements,
 
-			IsValid:     input.Body.IsValid,
-			InvalidDate: input.Body.InvalidDate,
+			IsValid: input.Body.IsValid,
 		},
 	)
 	return

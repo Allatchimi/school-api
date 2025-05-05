@@ -5,6 +5,7 @@ import (
 	modelSchool "api/services/school/common/school/model"
 	modelDomain "api/services/school/university/domain/model"
 	modelLevel "api/services/school/university/level/model"
+	modelSemester "api/services/school/university/semester/model"
 	"api/services/school/university/tu/data"
 	"time"
 )
@@ -20,10 +21,12 @@ type UniversityTeachingUnit struct {
 	LevelID int64                       `gorm:"default:null"`
 	Level   *modelLevel.UniversityLevel `gorm:"default:null;foreignKey:LevelID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
+	SemesterID int64                             `gorm:"default:null"`
+	Semester   *modelSemester.UniversitySemester `gorm:"default:null;foreignKey:SemesterID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
 	Name         string `gorm:"default:null"`
 	Description  string `gorm:"default:null"`
 	Credit       int    `gorm:"default:1"`
-	Semester     int    `gorm:"default:1"`
 	Program      string `gorm:"default null"`
 	Requirements string `gorm:"default null"`
 
@@ -37,14 +40,14 @@ func (item *UniversityTeachingUnit) ToResponse() *data.TeachingUnitResponse {
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
 
-	resp.SchoolID = item.SchoolID
-	resp.DomainID = item.DomainID
-	resp.LevelID = item.LevelID
+	resp.School = item.School.ToResponse()
+	resp.Domain = item.Domain.ToResponse()
+	resp.Level = item.Level.ToResponse()
+	resp.Semester = item.Semester.ToResponse()
 
 	resp.Name = item.Name
 	resp.Description = item.Description
 	resp.Credit = item.Credit
-	resp.Semester = item.Semester
 	resp.Program = item.Program
 	resp.Requirements = item.Requirements
 

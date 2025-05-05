@@ -20,9 +20,12 @@ func NewService(repository *Repository) *Service {
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.UniversityTeachingUnit) (result *model.UniversityTeachingUnit, errCode int, err error) {
 	// Check if teaching unit already exists
 	foundItem, err := service.Repository.GetByObject(&model.UniversityTeachingUnit{
-		SchoolID: item.SchoolID,
-		DomainID: item.DomainID,
-		Name:     item.Name,
+		SchoolID:   item.SchoolID,
+		DomainID:   item.DomainID,
+		LevelID:    item.LevelID,
+		SemesterID: item.SemesterID,
+
+		Name: item.Name,
 	})
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -60,9 +63,12 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, teachingUnitID int
 		return
 	}
 	foundItem, err := service.Repository.GetByObject(&model.UniversityTeachingUnit{
-		SchoolID: foundTeachingUnitByID.SchoolID,
-		DomainID: foundTeachingUnitByID.DomainID,
-		Name:     item.Name,
+		SchoolID:   item.SchoolID,
+		DomainID:   item.DomainID,
+		LevelID:    item.LevelID,
+		SemesterID: item.SemesterID,
+
+		Name: item.Name,
 	})
 	if err != nil {
 		errCode = http.StatusInternalServerError

@@ -3,10 +3,10 @@ package model
 import (
 	"api/common/types"
 	"api/services/school/common/school/model"
-	"api/services/school/highschool/subject/data"
+	"api/services/school/highschool/quarter/data"
 )
 
-type HighschoolSubject struct {
+type HighschoolQuarter struct {
 	types.BaseGormModel
 	SchoolID int64         `gorm:"default:null"`
 	School   *model.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -15,11 +15,11 @@ type HighschoolSubject struct {
 	Description string `gorm:"default:null"`
 }
 
-func (item *HighschoolSubject) ToResponse() *data.SubjectResponse {
+func (item *HighschoolQuarter) ToResponse() *data.QuarterResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.SubjectResponse{}
+	resp := &data.QuarterResponse{}
 	resp.School = item.School.ToResponse()
 	resp.Name = item.Name
 	resp.Description = item.Description
@@ -30,8 +30,8 @@ func (item *HighschoolSubject) ToResponse() *data.SubjectResponse {
 	return resp
 }
 
-func ToResponseList(itemList []HighschoolSubject) []data.SubjectResponse {
-	resp := make([]data.SubjectResponse, len(itemList))
+func ToResponseList(itemList []HighschoolQuarter) []data.QuarterResponse {
+	resp := make([]data.QuarterResponse, len(itemList))
 	for index, item := range itemList {
 		resp[index] = *item.ToResponse()
 	}
