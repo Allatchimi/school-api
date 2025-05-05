@@ -20,8 +20,6 @@ type TeachingUnitResponse struct {
 
 	IsValid     bool       `json:"isValid" required:"false" doc:"Is valid"`
 	InvalidDate *time.Time `json:"invalidDate" required:"false" doc:"Invalid date"`
-
-	TeachingUnitProfessors []TeachingUnitProfessorResponse `json:"teachingUnitProfessors" required:"false" doc:"Teaching unit list"`
 }
 
 type TeachingUnitProfessorResponse struct {

@@ -25,7 +25,7 @@ func (repository *Repository) Create(item *model.Teacher) (*model.Teacher, error
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) CreateLevelClass(item *model.TeacherLevelClass) (*model.TeacherLevelClass, error) {
+func (repository *Repository) CreateTUSubject(item *model.TUSubject) (*model.TUSubject, error) {
 	result := *item
 	return &result, repository.Db.Create(&result).Error
 }
@@ -46,22 +46,20 @@ func (repository *Repository) Update(id int64, item *model.Teacher) (*model.Teac
 	).Error
 }
 
-func (repository *Repository) UpdateLevelClass(id int64, item *model.TeacherLevelClass) (*model.TeacherLevelClass, error) {
+func (repository *Repository) UpdateTUSubject(id int64, item *model.TUSubject) (*model.TUSubject, error) {
 	tempTeacher, err := repository.GetById(id)
 	if err != nil || tempTeacher == nil || tempTeacher.ID != id {
 		return nil, err
 	}
 
-	result := &model.TeacherLevelClass{}
+	result := &model.TUSubject{}
 	return result, repository.Db.Model(result).Where("id = ?", item.ID).Updates(
 		map[string]interface{}{
 			"teacher_id": item.TeacherID,
 			"year_id":    item.YearID,
 
-			"domain_id": item.DomainID,
-			"level_id":  item.LevelID,
-
-			"class_id": item.ClassID,
+			"teaching_unit_id": item.TeachingUnitID,
+			"subject_id":       item.SubjectID,
 		},
 	).Error
 }
@@ -76,13 +74,13 @@ func (repository *Repository) Delete(id int64) (int64, error) {
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteLevelClass(id int64) (int64, error) {
-	foundItem, err := repository.GetLevelClassById(id)
+func (repository *Repository) DeleteTUSubject(id int64) (int64, error) {
+	foundItem, err := repository.GetTUSubjectById(id)
 	if err != nil || foundItem == nil || foundItem.ID != id {
 		return -1, err
 	}
 
-	result := repository.Db.Where("id = ?", id).Delete(&model.TeacherLevelClass{})
+	result := repository.Db.Where("id = ?", id).Delete(&model.TUSubject{})
 	return result.RowsAffected, result.Error
 }
 
@@ -91,8 +89,8 @@ func (repository *Repository) GetById(id int64) (*model.Teacher, error) {
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetLevelClassById(id int64) (*model.TeacherLevelClass, error) {
-	result := &model.TeacherLevelClass{}
+func (repository *Repository) GetTUSubjectById(id int64) (*model.TUSubject, error) {
+	result := &model.TUSubject{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
@@ -101,8 +99,8 @@ func (repository *Repository) GetByObject(item *model.Teacher) (*model.Teacher, 
 	return result, repository.Db.Where(item).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetLevelClassByObject(item *model.TeacherLevelClass) (*model.TeacherLevelClass, error) {
-	result := &model.TeacherLevelClass{}
+func (repository *Repository) GetTUSubjectByObject(item *model.TUSubject) (*model.TUSubject, error) {
+	result := &model.TUSubject{}
 	return result, repository.Db.Where(item).Limit(1).Find(result).Error
 }
 
@@ -114,9 +112,8 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(teachers.id AS TEXT) = '%s' OR teachers.uid ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR users.email ILIKE '%s' OR users.phone_number ILIKE '%s'",
+			"CAST(teachers.id AS TEXT) = '%s' OR teachers.uid ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR users.email ILIKE '%s'",
 			filter.Search,
-			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -146,8 +143,8 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	return
 }
 
-func (repository *Repository) GetAllLevelClass(filter *types.Filter, pagination *types.Pagination, teacherID int64) (result []model.TeacherLevelClass, err error) {
-	result = make([]model.TeacherLevelClass, 0)
+func (repository *Repository) GetAllTUSubject(filter *types.Filter, pagination *types.Pagination, teacherID int64) (result []model.TUSubject, err error) {
+	result = make([]model.TUSubject, 0)
 	var where string = ""
 	if teacherID > 0 {
 		where = fmt.Sprintf("WHERE teacher_lc.teacher_id = %d", teacherID)
@@ -172,7 +169,7 @@ func (repository *Repository) GetAllLevelClass(filter *types.Filter, pagination 
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"SELECT teacher_lc.id, teacher_lc.teacher_id, teacher_lc.year_id, teacher_lc.level_id"+
+			"SELECT teacher_lc.id, teacher_lc.teacher_id, teacher_lc.year_id, teacher_lc.domain_id, teacher_lc.level_id, teacher_lc.class_id"+
 				", teacher_lc.created_at, teacher_lc.updated_at FROM teacher_level_classes AS teacher_lc "+
 				"LEFT JOIN years ON teacher_lc.year_id = years.id "+
 				"LEFT JOIN university_domains ON teacher_lc.domain_id = university_domains.id "+

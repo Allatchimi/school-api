@@ -20,23 +20,18 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(subject *model.Subject) (*model.Subject, error) {
+func (repository *Repository) Create(subject *model.HighschoolSubject) (*model.HighschoolSubject, error) {
 	result := *subject
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) AddProfessor(professor *model.SubjectProfessor) (*model.SubjectProfessor, error) {
-	result := *professor
-	return &result, repository.Db.Create(&result).Error
-}
-
-func (repository *Repository) Update(subjectID int64, userID int64, subject *model.Subject) (*model.Subject, error) {
+func (repository *Repository) Update(subjectID int64, userID int64, subject *model.HighschoolSubject) (*model.HighschoolSubject, error) {
 	tempSubject, err := repository.GetById(subjectID, userID)
 	if err != nil || tempSubject == nil || tempSubject.ID != subjectID {
 		return nil, err
 	}
 
-	result := &model.Subject{}
+	result := &model.HighschoolSubject{}
 	return result, repository.Db.Model(result).Where("id = ?", subjectID).Updates(
 		map[string]interface{}{
 			"name":         subject.Name,
@@ -54,40 +49,25 @@ func (repository *Repository) Delete(subjectID int64, userID int64) (int64, erro
 		return -1, err
 	}
 
-	result := repository.Db.Where("id = ?", subjectID).Delete(&model.Subject{})
+	result := repository.Db.Where("id = ?", subjectID).Delete(&model.HighschoolSubject{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteProfessor(subjectID int64, userID int64) (int64, error) {
-	professor, err := repository.GetProfessorById(subjectID, userID)
-	if err != nil || professor == nil || professor.ID != subjectID {
-		return -1, err
-	}
-
-	result := repository.Db.Where("id = ?", subjectID).Where("user_id = ?", userID).Delete(&model.SubjectProfessor{})
-	return result.RowsAffected, result.Error
-}
-
-func (repository *Repository) GetById(subjectID int64, userID int64) (*model.Subject, error) {
-	result := &model.Subject{}
-	return result, repository.Db.Model(&model.Subject{}).
+func (repository *Repository) GetById(subjectID int64, userID int64) (*model.HighschoolSubject, error) {
+	result := &model.HighschoolSubject{}
+	return result, repository.Db.Model(&model.HighschoolSubject{}).
 		Select("subjects.*").
-		Joins("left join school_directors on subjects.school_id = school_directors.id").
-		Where("subjects.id = ?", subjectID).Where("school_directors.user_id = ?", userID).Limit(1).Find(result).Error
+		Joins("left join directors on highschool_subjects.school_id = directors.id").
+		Where("highschool_subjects.id = ?", subjectID).Where("directors.user_id = ?", userID).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetProfessorById(subjectProfessorID int64, userID int64) (*model.SubjectProfessor, error) {
-	result := &model.SubjectProfessor{}
-	return result, repository.Db.Where("id = ?", subjectProfessorID).Where("user_id = ?", userID).Limit(1).Find(result).Error
-}
-
-func (repository *Repository) GetByObject(subject *model.Subject) (*model.Subject, error) {
-	result := &model.Subject{}
+func (repository *Repository) GetByObject(subject *model.HighschoolSubject) (*model.HighschoolSubject, error) {
+	result := &model.HighschoolSubject{}
 	return result, repository.Db.Where(subject).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, userID int64, schoolID int64) (result []model.Subject, err error) {
-	result = make([]model.Subject, 0)
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, userID int64, schoolID int64) (result []model.HighschoolSubject, err error) {
+	result = make([]model.HighschoolSubject, 0)
 	var where string = ""
 	if schoolID > 0 {
 		where = fmt.Sprintf("WHERE subjects.school_id = %d", schoolID)
@@ -114,7 +94,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 		helpers.PaginationScope(
 			repository.Db,
 			"SELECT subjects.id, subjects.name, subjects.description, subjects.school_id, subjects.section_id"+
-				", subjects.created_at, subjects.updated_at FROM highschool_specialties subjects "+
+				", subjects.created_at, subjects.updated_at FROM highschool_subjects subjects "+
 				"LEFT JOIN schools ON subjects.school_id = schools.id "+
 				"LEFT JOIN highschool_sections AS classes ON subjects.section_id = classes.id",
 			where,

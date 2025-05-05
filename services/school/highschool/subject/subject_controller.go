@@ -22,10 +22,10 @@ func (controller *Controller) Create(
 	input *struct {
 		Body data.CreateSubjectRequest
 	},
-) (result *model.Subject, errCode int, err error) {
+) (result *model.HighschoolSubject, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.Subject{
+		&model.HighschoolSubject{
 			SchoolID:     input.Body.SchoolID,
 			ClassID:      input.Body.ClassID,
 			Name:         input.Body.Name,
@@ -38,33 +38,16 @@ func (controller *Controller) Create(
 	return
 }
 
-func (controller *Controller) AddProfessor(
-	ctx *context.Context,
-	input *struct {
-		data.SubjectID
-		Body data.SubjectProfessorRequest
-	},
-) (result *model.SubjectProfessor, errCode int, err error) {
-	result, errCode, err = controller.Service.AddProfessor(
-		helpers.GetJwtContext(ctx),
-		&model.SubjectProfessor{
-			SubjectID: input.ID,
-			UserID:    input.Body.UserID,
-		},
-	)
-	return
-}
-
 func (controller *Controller) Update(
 	ctx *context.Context,
 	input *struct {
 		data.SubjectID
 		Body data.UpdateSubjectRequest
 	},
-) (result *model.Subject, errCode int, err error) {
+) (result *model.HighschoolSubject, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx), input.ID,
-		&model.Subject{
+		&model.HighschoolSubject{
 			Name:         input.Body.Name,
 			Description:  input.Body.Description,
 			Coefficient:  input.Body.Coefficient,
@@ -89,27 +72,12 @@ func (controller *Controller) Delete(
 	return
 }
 
-func (controller *Controller) DeleteProfessor(
-	ctx *context.Context,
-	input *struct {
-		data.SubjectID
-		Body data.SubjectProfessorRequest
-	},
-) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteProfessor(helpers.GetJwtContext(ctx), input.ID, input.Body.UserID)
-	if err != nil {
-		return
-	}
-	result = affectedRows
-	return
-}
-
 func (controller *Controller) Get(
 	ctx *context.Context,
 	input *struct {
 		data.SubjectID
 	},
-) (result *model.Subject, errCode int, err error) {
+) (result *model.HighschoolSubject, errCode int, err error) {
 	subject, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return

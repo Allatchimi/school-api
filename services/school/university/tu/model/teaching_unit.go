@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-type TeachingUnit struct {
+type UniversityTeachingUnit struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
 	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -29,11 +29,9 @@ type TeachingUnit struct {
 
 	IsValid     bool       `gorm:"default:true"`
 	InvalidDate *time.Time `gorm:"default:null"`
-
-	TeachingUnitProfessors []TeachingUnitProfessor `gorm:"default:null;foreignKey:TeachingUnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
-func (item *TeachingUnit) ToResponse() *data.TeachingUnitResponse {
+func (item *UniversityTeachingUnit) ToResponse() *data.TeachingUnitResponse {
 	resp := &data.TeachingUnitResponse{}
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -52,12 +50,10 @@ func (item *TeachingUnit) ToResponse() *data.TeachingUnitResponse {
 
 	resp.IsValid = item.IsValid
 	resp.InvalidDate = item.InvalidDate
-
-	resp.TeachingUnitProfessors = ToTeachingUnitProfessorResponseList(item.TeachingUnitProfessors)
 	return resp
 }
 
-func ToTeachingUnitResponseList(itemList []TeachingUnit) []data.TeachingUnitResponse {
+func ToTeachingUnitResponseList(itemList []UniversityTeachingUnit) []data.TeachingUnitResponse {
 	resp := make([]data.TeachingUnitResponse, len(itemList))
 	for index, item := range itemList {
 		resp[index] = *item.ToResponse()

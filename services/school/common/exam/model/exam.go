@@ -19,11 +19,11 @@ type Exam struct {
 	TypeID int64     `gorm:"default:null"`
 	Type   *ExamType `gorm:"default:null;foreignKey:TypeID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	TeachingUnitID int64                 `gorm:"default:null"`
-	TeachingUnit   *TUmodel.TeachingUnit `gorm:"default:null;foreignKey:TeachingUnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	TeachingUnitID int64                           `gorm:"default:null"`
+	TeachingUnit   *TUmodel.UniversityTeachingUnit `gorm:"default:null;foreignKey:TeachingUnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	SubjectID int64                 `gorm:"default:null"`
-	Subject   *subjectModel.Subject `gorm:"default:null;foreignKey:SubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	SubjectID int64                           `gorm:"default:null"`
+	Subject   *subjectModel.HighschoolSubject `gorm:"default:null;foreignKey:SubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *Exam) ToResponse() *data.ExamResponse {

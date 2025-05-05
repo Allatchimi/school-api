@@ -14,7 +14,7 @@ type CreateSubjectRequest struct {
 	Requirements string `json:"Requirements" required:"false" doc:"Requirements" example:""`
 }
 
-type SubjectProfessorRequest struct {
+type SubjectTeacherRequest struct {
 	UserID int64 `json:"userID" required:"true" doc:"User id" example:"1"`
 }
 

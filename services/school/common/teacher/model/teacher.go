@@ -19,6 +19,9 @@ type Teacher struct {
 }
 
 func (item *Teacher) ToTeacherResponse() *data.TeacherResponse {
+	if item == nil {
+		return nil
+	}
 	resp := &data.TeacherResponse{}
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

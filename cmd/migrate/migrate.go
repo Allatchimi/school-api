@@ -52,7 +52,7 @@ func Start() error {
 		&yearModel.Year{},
 		// Teacher
 		&teacherModel.Teacher{},
-		&teacherModel.TeacherLevelClass{},
+		&teacherModel.TUSubject{},
 		// Student
 		&studentModel.Student{},
 		&studentModel.StudentLevelClass{},
@@ -66,16 +66,14 @@ func Start() error {
 		&sectionModel.HighschoolSection{},
 		&specialtyModel.HighschoolSpecialty{},
 		&classModel.HighschoolClass{},
-		&subjectModel.Subject{},
-		&subjectModel.SubjectProfessor{},
+		&subjectModel.HighschoolSubject{},
 
 		// University
 		&facultyModel.UniversityFaculty{},
 		&departmentModel.UniversityDepartment{},
 		&domainModel.UniversityDomain{},
 		&levelModel.UniversityLevel{},
-		&tuModel.TeachingUnit{},
-		&tuModel.TeachingUnitProfessor{},
+		&tuModel.UniversityTeachingUnit{},
 	)
 	helpers.LogMigrations(
 		err,

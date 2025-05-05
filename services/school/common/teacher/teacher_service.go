@@ -29,7 +29,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Teache
 		err = constants.Http500ErrorMessage("get teacher by name from database")
 		return
 	}
-	if foundItem != nil {
+	if foundItem != nil && foundItem.UserID == item.UserID {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage("teacher")
 		return
@@ -46,33 +46,31 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Teache
 }
 
 // Create new teacher
-func (service *Service) CreateLevelClass(inputJwtToken *types.JwtToken, item *model.TeacherLevelClass) (result *model.TeacherLevelClass, errCode int, err error) {
-	// Check if teacher level/class already exists
-	foundItem, err := service.Repository.GetLevelClassByObject(&model.TeacherLevelClass{
+func (service *Service) CreateTUSubject(inputJwtToken *types.JwtToken, item *model.TUSubject) (result *model.TUSubject, errCode int, err error) {
+	// Check if teacher teaching unit/subject already exists
+	foundItem, err := service.Repository.GetTUSubjectByObject(&model.TUSubject{
 		TeacherID: item.TeacherID,
 		YearID:    item.YearID,
 
-		DomainID: item.DomainID,
-		LevelID:  item.LevelID,
-
-		ClassID: item.ClassID,
+		TeachingUnitID: item.TeachingUnitID,
+		SubjectID:      item.SubjectID,
 	})
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get teacher level/class by name from database")
+		err = constants.Http500ErrorMessage("get teacher teaching unit/subject by name from database")
 		return
 	}
-	if foundItem != nil {
+	if foundItem != nil && foundItem.TeacherID == item.TeacherID && foundItem.YearID == item.YearID {
 		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage("teacher level/class")
+		err = constants.Http302ErrorMessage("teacher teaching unit/subject")
 		return
 	}
 
-	// Insert teacher level/class
-	result, err = service.Repository.CreateLevelClass(item)
+	// Insert teacher teaching unit/subject
+	result, err = service.Repository.CreateTUSubject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("create teacher level/class from database")
+		err = constants.Http500ErrorMessage("create teacher teaching unit/subject from database")
 		return
 	}
 	return
@@ -118,45 +116,43 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, teacherID int64, i
 	return
 }
 
-// Update teacher level/class
-func (service *Service) UpdateLevelClass(inputJwtToken *types.JwtToken, teacherLevelClassID int64, item *model.TeacherLevelClass) (result *model.TeacherLevelClass, errCode int, err error) {
+// Update teacher teaching unit/subject
+func (service *Service) UpdateTUSubject(inputJwtToken *types.JwtToken, teacherTUSubjectID int64, item *model.TUSubject) (result *model.TUSubject, errCode int, err error) {
 	// Check if teacher already exists
-	foundTeacherByID, err := service.Repository.GetLevelClassById(teacherLevelClassID)
+	foundTeacherByID, err := service.Repository.GetTUSubjectById(teacherTUSubjectID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get teacher level/class by name from database")
+		err = constants.Http500ErrorMessage("get teacher teaching unit/subject by name from database")
 		return
 	}
 	if foundTeacherByID == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Teacher level/class")
+		err = constants.Http404ErrorMessage("Teacher teaching unit/subject")
 		return
 	}
-	foundItem, err := service.Repository.GetLevelClassByObject(&model.TeacherLevelClass{
+	foundItem, err := service.Repository.GetTUSubjectByObject(&model.TUSubject{
 		TeacherID: item.TeacherID,
 		YearID:    item.YearID,
 
-		DomainID: item.DomainID,
-		LevelID:  item.LevelID,
-
-		ClassID: item.ClassID,
+		TeachingUnitID: item.TeachingUnitID,
+		SubjectID:      item.SubjectID,
 	})
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get teacher level/class by name from database")
+		err = constants.Http500ErrorMessage("get teacher teaching unit/subject by name from database")
 		return
 	}
 	if foundItem != nil {
 		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage("teacher level/class")
+		err = constants.Http302ErrorMessage("teacher teaching unit/subject")
 		return
 	}
 
 	// Update teacher
-	result, err = service.Repository.UpdateLevelClass(teacherLevelClassID, item)
+	result, err = service.Repository.UpdateTUSubject(teacherTUSubjectID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("update teacher level/class from database")
+		err = constants.Http500ErrorMessage("update teacher teaching unit/subject from database")
 		return
 	}
 	return
@@ -178,17 +174,17 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, teacherID int64) (
 	return
 }
 
-// Delete teacher level/class with matching id and return affected rows
-func (service *Service) DeleteLevelClass(inputJwtToken *types.JwtToken, teacherLevelClassID int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteLevelClass(teacherLevelClassID)
+// Delete teacher teaching unit/subject with matching id and return affected rows
+func (service *Service) DeleteTUSubject(inputJwtToken *types.JwtToken, teacherTUSubjectID int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteTUSubject(teacherTUSubjectID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete teacher level/class from database")
+		err = constants.Http500ErrorMessage("delete teacher teaching unit/subject from database")
 		return
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Teacher level/class")
+		err = constants.Http404ErrorMessage("Teacher teaching unit/subject")
 		return
 	}
 	return
@@ -210,17 +206,17 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, teacherID int64) (res
 	return
 }
 
-// Get Returns teacher level/class with matching id
-func (service *Service) GetLevelClass(inputJwtToken *types.JwtToken, teacherLevelClassID int64) (result *model.TeacherLevelClass, errCode int, err error) {
-	result, err = service.Repository.GetLevelClassById(teacherLevelClassID)
+// Get Returns teacher teaching unit/subject with matching id
+func (service *Service) GetTUSubject(inputJwtToken *types.JwtToken, teacherTUSubjectID int64) (result *model.TUSubject, errCode int, err error) {
+	result, err = service.Repository.GetTUSubjectById(teacherTUSubjectID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get teacher level/class by id from database")
+		err = constants.Http500ErrorMessage("get teacher teaching unit/subject by id from database")
 		return
 	}
 	if result == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Teacher level/class")
+		err = constants.Http404ErrorMessage("Teacher teaching unit/subject")
 		return
 	}
 	return
@@ -236,12 +232,12 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 	return
 }
 
-// GetAll Returns all teachers level/class with support for search, filter and pagination
-func (service *Service) GetAllLevelClass(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, teacherID int64) (result []model.TeacherLevelClass, errCode int, err error) {
-	result, err = service.Repository.GetAllLevelClass(filter, pagination, teacherID)
+// GetAll Returns all teachers teaching unit/subject with support for search, filter and pagination
+func (service *Service) GetAllTUSubject(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, teacherID int64) (result []model.TUSubject, errCode int, err error) {
+	result, err = service.Repository.GetAllTUSubject(filter, pagination, teacherID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get teachers level/class from database")
+		err = constants.Http500ErrorMessage("get teachers teaching unit/subject from database")
 	}
 	return
 }

@@ -17,7 +17,7 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/schools/university/teaching-units",
+		Group: "/schools/university/tu",
 		Tag:   []string{"University - Teaching units"},
 	}
 	const tableName = "teaching_units"
@@ -56,48 +56,6 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct{ Body data.TeachingUnitResponse }{Body: *result.ToResponse()}, nil
-		},
-	)
-
-	// add professor
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "post-teaching-unit-professor",
-			Summary:     "Add new professor",
-			Description: "Add new professor and return the created object.",
-			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/{id}/professor", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
-						tableName,                  // Table name
-						constants.PermissionCreate, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				data.TeachingUnitID
-				Body data.TeachingUnitProfessorRequest
-			},
-		) (*struct {
-			Body data.TeachingUnitProfessorResponse
-		}, error) {
-			result, errCode, err := controller.AddProfessor(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct {
-				Body data.TeachingUnitProfessorResponse
-			}{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -169,44 +127,6 @@ func RegisterEndpoints(
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.Delete(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
-		},
-	)
-
-	// Delete teaching unit professor with id
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "delete-teaching-unit-professor",
-			Summary:     "Delete teaching unit professor",
-			Description: "Delete existing professor and return affected rows in database.",
-			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/{id}/professor", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
-						tableName,                  // Table name
-						constants.PermissionDelete, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				data.TeachingUnitID
-				Body data.TeachingUnitProfessorRequest
-			},
-		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteProfessor(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}

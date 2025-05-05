@@ -2,6 +2,7 @@ package year
 
 import (
 	"fmt"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -61,17 +62,26 @@ func (repository *Repository) GetByNameSchoolID(name string, schoolID int64) (*m
 	return result, repository.Db.Preload(clause.Associations).Where("name = ?", name).Where("school_id = ?", schoolID).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination) (result []model.Year, err error) {
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.Year, err error) {
 	result = make([]model.Year, 0)
 	var where string = ""
+	if schoolID > 0 {
+		where = fmt.Sprintf("WHERE years.school_id = %d", schoolID)
+	}
 	if filter != nil && len(filter.Search) >= 1 {
-		where = fmt.Sprintf(
-			"WHERE CAST(id AS TEXT) = '%s' OR name ILIKE '%s' OR start_date ILIKE '%s' OR end_date ILIKE '%s'",
+		tempWhere := fmt.Sprintf(
+			"CAST(id AS TEXT) = '%s' OR name ILIKE '%s' OR start_date ILIKE '%s' OR end_date ILIKE '%s'",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
+
+		if strings.HasPrefix(where, "WHERE") {
+			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
+		} else {
+			where = fmt.Sprintf("WHERE %s", tempWhere)
+		}
 	}
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(

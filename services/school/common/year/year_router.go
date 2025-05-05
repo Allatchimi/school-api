@@ -249,4 +249,47 @@ func RegisterEndpoints(
 			}{Body: *result}, nil
 		},
 	)
+
+	// Get all years by school id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-school-year-list",
+			Summary:     "Get all years by school id",
+			Description: "Get all years with matching school id with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        "/schools/{id}/years",
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						constants.FeatureAdmin,   // Feature scope
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllBySchoolRequest
+			},
+		) (*struct {
+			Body data.YearResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllBySchool(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct {
+				Body data.YearResponseList
+			}{Body: *result}, nil
+		},
+	)
 }

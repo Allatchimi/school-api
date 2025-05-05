@@ -34,22 +34,20 @@ func (controller *Controller) Create(
 	return
 }
 
-func (controller *Controller) CreateLevelClass(
+func (controller *Controller) CreateTUSubject(
 	ctx *context.Context,
 	input *struct {
-		Body data.TeacherLevelClassRequest
+		Body data.TUSubjectRequest
 	},
-) (result *model.TeacherLevelClass, errCode int, err error) {
-	result, errCode, err = controller.Service.CreateLevelClass(
+) (result *model.TUSubject, errCode int, err error) {
+	result, errCode, err = controller.Service.CreateTUSubject(
 		helpers.GetJwtContext(ctx),
-		&model.TeacherLevelClass{
+		&model.TUSubject{
 			TeacherID: input.Body.TeacherID,
 			YearID:    input.Body.YearID,
 
-			DomainID: input.Body.DomainID,
-			LevelID:  input.Body.LevelID,
-
-			ClassID: input.Body.ClassID,
+			TeachingUnitID: input.Body.TeachingUnitID,
+			SubjectID:      input.Body.SubjectID,
 		},
 	)
 	return
@@ -73,23 +71,21 @@ func (controller *Controller) Update(
 	return
 }
 
-func (controller *Controller) UpdateLevelClass(
+func (controller *Controller) UpdateTUSubject(
 	ctx *context.Context,
 	input *struct {
-		data.TeacherLevelClassID
-		Body data.TeacherLevelClassRequest
+		data.TUSubjectID
+		Body data.TUSubjectRequest
 	},
-) (result *model.TeacherLevelClass, errCode int, err error) {
-	result, errCode, err = controller.Service.UpdateLevelClass(
+) (result *model.TUSubject, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateTUSubject(
 		helpers.GetJwtContext(ctx), input.ID,
-		&model.TeacherLevelClass{
+		&model.TUSubject{
 			TeacherID: input.Body.TeacherID,
 			YearID:    input.Body.YearID,
 
-			DomainID: input.Body.DomainID,
-			LevelID:  input.Body.LevelID,
-
-			ClassID: input.Body.ClassID,
+			TeachingUnitID: input.Body.TeachingUnitID,
+			SubjectID:      input.Body.SubjectID,
 		},
 	)
 	return
@@ -109,13 +105,13 @@ func (controller *Controller) Delete(
 	return
 }
 
-func (controller *Controller) DeleteLevelClass(
+func (controller *Controller) DeleteTUSubject(
 	ctx *context.Context,
 	input *struct {
-		data.TeacherLevelClassID
+		data.TUSubjectID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteLevelClass(helpers.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.DeleteTUSubject(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -137,13 +133,13 @@ func (controller *Controller) Get(
 	return
 }
 
-func (controller *Controller) GetLevelClass(
+func (controller *Controller) GetTUSubject(
 	ctx *context.Context,
 	input *struct {
-		data.TeacherLevelClassID
+		data.TUSubjectID
 	},
-) (result *model.TeacherLevelClass, errCode int, err error) {
-	teacher, errCode, err := controller.Service.GetLevelClass(helpers.GetJwtContext(ctx), input.ID)
+) (result *model.TUSubject, errCode int, err error) {
+	teacher, errCode, err := controller.Service.GetTUSubject(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -172,21 +168,21 @@ func (controller *Controller) GetAll(
 	return
 }
 
-func (controller *Controller) GetAllLevelClass(
+func (controller *Controller) GetAllTUSubject(
 	ctx *context.Context,
 	input *struct {
 		types.Filter
 		types.PaginationRequest
-		data.GetAllLevelClassRequest
+		data.GetAllTUSubjectRequest
 	},
-) (result *data.TeacherLevelClassResponseList, errCode int, err error) {
+) (result *data.TUSubjectResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	teacherList, errCode, err := controller.Service.GetAllLevelClass(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllLevelClassRequest.TeacherID)
+	teacherList, errCode, err := controller.Service.GetAllTUSubject(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllTUSubjectRequest.TeacherID)
 	if err != nil {
 		return
 	}
-	result = &data.TeacherLevelClassResponseList{
-		Data: model.ToTeacherLevelClassResponseList(teacherList),
+	result = &data.TUSubjectResponseList{
+		Data: model.ToTUSubjectResponseList(teacherList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

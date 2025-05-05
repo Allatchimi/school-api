@@ -136,8 +136,8 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, yearID int64) (result
 }
 
 // GetAll Returns all years with support for search, filter and pagination
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination) (result []model.Year, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination)
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.Year, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination, schoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get years from database")

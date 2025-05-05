@@ -59,48 +59,6 @@ func RegisterEndpoints(
 		},
 	)
 
-	// add professor
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "post-subject-professor",
-			Summary:     "Add new professor",
-			Description: "Add new professor and return the created object.",
-			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/{id}/professor", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
-						tableName,                  // Table name
-						constants.PermissionCreate, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				data.SubjectID
-				Body data.SubjectProfessorRequest
-			},
-		) (*struct {
-			Body data.SubjectProfessorResponse
-		}, error) {
-			result, errCode, err := controller.AddProfessor(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct {
-				Body data.SubjectProfessorResponse
-			}{Body: *result.ToResponse()}, nil
-		},
-	)
-
 	// Update subject with id
 	huma.Register(
 		*humaApi,
@@ -169,44 +127,6 @@ func RegisterEndpoints(
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.Delete(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
-		},
-	)
-
-	// Delete subject professor with id
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "delete-subject-professor",
-			Summary:     "Delete subject professor",
-			Description: "Delete existing professor and return affected rows in database.",
-			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/{id}/professor", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
-						tableName,                  // Table name
-						constants.PermissionDelete, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				data.SubjectID
-				Body data.SubjectProfessorRequest
-			},
-		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteProfessor(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
