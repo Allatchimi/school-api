@@ -142,12 +142,13 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 func (repository *Repository) GetAllParentStudent(filter *types.Filter, pagination *types.Pagination, parentID int64) (result []model.ParentStudent, err error) {
 	result = make([]model.ParentStudent, 0)
 	var where string = ""
+	if parentID > 0 {
+		where = fmt.Sprintf("WHERE parent_lc.parent_id = %d", parentID)
+	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(parent_lc.id AS TEXT) = '%s' OR students.name ILIKE '%s' OR levels.name ILIKE '%s' OR levels.description ILIKE '%s' OR classes.name ILIKE '%s' OR classes.description ILIKE '%s'",
+			"CAST(parent_lc.id AS TEXT) = '%s' OR students.uid ILIKE '%s'",
 			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
 		where = fmt.Sprintf("WHERE %s", tempWhere)
@@ -155,9 +156,9 @@ func (repository *Repository) GetAllParentStudent(filter *types.Filter, paginati
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"SELECT parent_lc.id, parent_lc.parent_id, parent_lc.student_id, parent_lc.level_id"+
+			"SELECT parent_lc.id, parent_lc.parent_id, parent_lc.student_id"+
 				", parent_lc.created_at, parent_lc.updated_at FROM parent_level_classes AS parent_lc "+
-				"LEFT JOIN students ON parents.student_id = students.id ",
+				"LEFT JOIN students ON parent_lc.student_id = students.id ",
 			where,
 			pagination,
 			filter,
