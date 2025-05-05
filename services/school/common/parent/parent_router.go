@@ -1,4 +1,4 @@
-package student
+package parent
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
-	"api/services/school/common/student/data"
+	"api/services/school/common/parent/data"
 )
 
 func RegisterEndpoints(
@@ -17,18 +17,18 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/schools/students",
-		Tag:   []string{"Students"},
+		Group: "/schools/parents",
+		Tag:   []string{"Parents"},
 	}
-	const tableName = "students"
+	const tableName = "parents"
 
-	// Create student
+	// Create parent
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-student",
-			Summary:     "Create student",
-			Description: "Create new student by providing name and description and return created object. The name student should be unique.",
+			OperationID: "post-parent",
+			Summary:     "Create parent",
+			Description: "Create new parent by providing name and description and return created object. The name parent should be unique.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -48,24 +48,24 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.StudentRequest
+				Body data.ParentRequest
 			},
-		) (*struct{ Body data.StudentResponse }, error) {
+		) (*struct{ Body data.ParentResponse }, error) {
 			result, errCode, err := controller.Create(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.StudentResponse }{Body: *result.ToStudentResponse()}, nil
+			return &struct{ Body data.ParentResponse }{Body: *result.ToParentResponse()}, nil
 		},
 	)
 
-	// Create student level/class
+	// Create parent level/class
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-student-level/class",
-			Summary:     "Create student level/class",
-			Description: "Create new student level/class and return created object.",
+			OperationID: "post-parent-level/class",
+			Summary:     "Create parent level/class",
+			Description: "Create new parent level/class and return created object.",
 			Method:      http.MethodPost,
 			Path:        fmt.Sprintf("%s/levelclass", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -85,28 +85,28 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.StudentLevelClassRequest
+				Body data.ParentStudentRequest
 			},
 		) (*struct {
-			Body data.StudentLevelClassResponse
+			Body data.ParentStudentResponse
 		}, error) {
-			result, errCode, err := controller.CreateLevelClass(&ctx, input)
+			result, errCode, err := controller.CreateParentStudent(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.StudentLevelClassResponse
-			}{Body: *result.ToStudentLevelClassResponse()}, nil
+				Body data.ParentStudentResponse
+			}{Body: *result.ToParentStudentResponse()}, nil
 		},
 	)
 
-	// Update student with id
+	// Update parent with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "update-student",
-			Summary:     "Update student",
-			Description: "Update existing student with matching id and return the new object.",
+			OperationID: "update-parent",
+			Summary:     "Update parent",
+			Description: "Update existing parent with matching id and return the new object.",
 			Method:      http.MethodPut,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -126,25 +126,25 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.StudentID
-				Body data.StudentRequest
+				data.ParentID
+				Body data.ParentRequest
 			},
-		) (*struct{ Body data.StudentResponse }, error) {
+		) (*struct{ Body data.ParentResponse }, error) {
 			result, errCode, err := controller.Update(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.StudentResponse }{Body: *result.ToStudentResponse()}, nil
+			return &struct{ Body data.ParentResponse }{Body: *result.ToParentResponse()}, nil
 		},
 	)
 
-	// Update student level/class with id
+	// Update parent level/class with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "update-student-level/class",
-			Summary:     "Update student level/class",
-			Description: "Update existing student level/class with matching id and return the new object.",
+			OperationID: "update-parent-level/class",
+			Summary:     "Update parent level/class",
+			Description: "Update existing parent level/class with matching id and return the new object.",
 			Method:      http.MethodPut,
 			Path:        fmt.Sprintf("%s/levelclass/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -164,29 +164,29 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.StudentLevelClassID
-				Body data.StudentLevelClassRequest
+				data.ParentStudentID
+				Body data.ParentStudentRequest
 			},
 		) (*struct {
-			Body data.StudentLevelClassResponse
+			Body data.ParentStudentResponse
 		}, error) {
-			result, errCode, err := controller.UpdateLevelClass(&ctx, input)
+			result, errCode, err := controller.UpdateParentStudent(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.StudentLevelClassResponse
-			}{Body: *result.ToStudentLevelClassResponse()}, nil
+				Body data.ParentStudentResponse
+			}{Body: *result.ToParentStudentResponse()}, nil
 		},
 	)
 
-	// Delete student with id
+	// Delete parent with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-student",
-			Summary:     "Delete student",
-			Description: "Delete existing student with matching id and return affected rows in database.",
+			OperationID: "delete-parent",
+			Summary:     "Delete parent",
+			Description: "Delete existing parent with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -206,7 +206,7 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.StudentID
+				data.ParentID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.Delete(&ctx, input)
@@ -217,13 +217,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete student level/class with id
+	// Delete parent level/class with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-student-level/class",
-			Summary:     "Delete student level/class",
-			Description: "Delete existing student level/class with matching id and return affected rows in database.",
+			OperationID: "delete-parent-level/class",
+			Summary:     "Delete parent level/class",
+			Description: "Delete existing parent level/class with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/levelclass/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -243,10 +243,10 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.StudentLevelClassID
+				data.ParentStudentID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteLevelClass(&ctx, input)
+			result, errCode, err := controller.DeleteParentStudent(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -254,13 +254,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get student by id
+	// Get parent by id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-student-id",
-			Summary:     "Get student by id",
-			Description: "Return one student with matching id",
+			OperationID: "get-parent-id",
+			Summary:     "Get parent by id",
+			Description: "Return one parent with matching id",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -280,24 +280,24 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.StudentID
+				data.ParentID
 			},
-		) (*struct{ Body data.StudentResponse }, error) {
+		) (*struct{ Body data.ParentResponse }, error) {
 			result, errCode, err := controller.Get(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.StudentResponse }{Body: *result.ToStudentResponse()}, nil
+			return &struct{ Body data.ParentResponse }{Body: *result.ToParentResponse()}, nil
 		},
 	)
 
-	// Get student level/class by id
+	// Get parent level/class by id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-student-level/class-id",
-			Summary:     "Get student level/class by id",
-			Description: "Return one student level/class with matching id",
+			OperationID: "get-parent-level/class-id",
+			Summary:     "Get parent level/class by id",
+			Description: "Return one parent level/class with matching id",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/levelclass/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -317,28 +317,28 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.StudentLevelClassID
+				data.ParentStudentID
 			},
 		) (*struct {
-			Body data.StudentLevelClassResponse
+			Body data.ParentStudentResponse
 		}, error) {
-			result, errCode, err := controller.GetLevelClass(&ctx, input)
+			result, errCode, err := controller.GetParentStudent(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.StudentLevelClassResponse
-			}{Body: *result.ToStudentLevelClassResponse()}, nil
+				Body data.ParentStudentResponse
+			}{Body: *result.ToParentStudentResponse()}, nil
 		},
 	)
 
-	// Get all students
+	// Get all parents
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-student-list",
-			Summary:     "Get all students",
-			Description: "Get all students with support for search, filter and pagination",
+			OperationID: "get-parent-list",
+			Summary:     "Get all parents",
+			Description: "Get all parents with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -363,25 +363,25 @@ func RegisterEndpoints(
 				data.GetAllRequest
 			},
 		) (*struct {
-			Body data.StudentResponseList
+			Body data.ParentResponseList
 		}, error) {
 			result, errCode, err := controller.GetAll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.StudentResponseList
+				Body data.ParentResponseList
 			}{Body: *result}, nil
 		},
 	)
 
-	// Get all students level/class
+	// Get all parents level/class
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-student-level/class-list",
-			Summary:     "Get all students level/class",
-			Description: "Get all students level/class with support for search, filter and pagination",
+			OperationID: "get-parent-level/class-list",
+			Summary:     "Get all parents level/class",
+			Description: "Get all parents level/class with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/levelclass", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -403,17 +403,17 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
-				data.GetAllLevelClassRequest
+				data.GetAllRequest
 			},
 		) (*struct {
-			Body data.StudentLevelClassResponseList
+			Body data.ParentStudentResponseList
 		}, error) {
-			result, errCode, err := controller.GetAllLevelClass(&ctx, input)
+			result, errCode, err := controller.GetAllParentStudent(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.StudentLevelClassResponseList
+				Body data.ParentStudentResponseList
 			}{Body: *result}, nil
 		},
 	)

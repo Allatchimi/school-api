@@ -51,8 +51,11 @@ func (service *Service) CreateLevelClass(inputJwtToken *types.JwtToken, item *mo
 	foundItem, err := service.Repository.GetLevelClassByObject(&model.StudentLevelClass{
 		StudentID: item.StudentID,
 		YearID:    item.YearID,
-		LevelID:   item.LevelID,
-		ClassID:   item.ClassID,
+
+		DomainID: item.DomainID,
+		LevelID:  item.LevelID,
+
+		ClassID: item.ClassID,
 	})
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -132,8 +135,11 @@ func (service *Service) UpdateLevelClass(inputJwtToken *types.JwtToken, studentL
 	foundItem, err := service.Repository.GetLevelClassByObject(&model.StudentLevelClass{
 		StudentID: item.StudentID,
 		YearID:    item.YearID,
-		LevelID:   item.LevelID,
-		ClassID:   item.ClassID,
+
+		DomainID: item.DomainID,
+		LevelID:  item.LevelID,
+
+		ClassID: item.ClassID,
 	})
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -231,8 +237,8 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 }
 
 // GetAll Returns all students level/class with support for search, filter and pagination
-func (service *Service) GetAllLevelClass(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.StudentLevelClass, errCode int, err error) {
-	result, err = service.Repository.GetAllLevelClass(filter, pagination, schoolID)
+func (service *Service) GetAllLevelClass(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, studentID int64) (result []model.StudentLevelClass, errCode int, err error) {
+	result, err = service.Repository.GetAllLevelClass(filter, pagination, studentID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get students level/class from database")

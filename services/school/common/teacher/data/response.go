@@ -10,17 +10,17 @@ import (
 	dataUser "api/services/user/user/data"
 )
 
-type StudentResponse struct {
+type TeacherResponse struct {
 	types.BaseGormModelResponse
 	School *dataSchool.SchoolResponse `json:"school" required:"false" doc:"School"`
 	User   *dataUser.UserResponse     `json:"userID" required:"false" doc:"User id"`
 
-	UID string `json:"uid" required:"false" doc:"Student UID"`
+	UID string `json:"uid" required:"false" doc:"Teacher UID"`
 }
 
-type StudentLevelClassResponse struct {
+type TeacherLevelClassResponse struct {
 	types.BaseGormModelResponse
-	Student *StudentResponse       `json:"student" required:"false" doc:"Student"`
+	Teacher *TeacherResponse       `json:"teacher" required:"false" doc:"Teacher"`
 	Year    *dataYear.YearResponse `json:"year" required:"false" doc:"Year"`
 
 	Domain *dataDomain.DomainResponse `json:"domain" required:"false" doc:"Domain"`
@@ -29,12 +29,12 @@ type StudentLevelClassResponse struct {
 	Class *dataClass.ClassResponse `json:"class" required:"false" doc:"Class"`
 }
 
-type StudentResponseList struct {
+type TeacherResponseList struct {
 	types.PaginatedResponse
-	Data []StudentResponse `json:"data" required:"false" doc:"List of students" example:"[]"`
+	Data []TeacherResponse `json:"data" required:"false" doc:"List of teachers" example:"[]"`
 }
 
-type StudentLevelClassResponseList struct {
+type TeacherLevelClassResponseList struct {
 	types.PaginatedResponse
-	Data []StudentLevelClassResponse `json:"data" required:"false" doc:"List of students levels/classes" example:"[]"`
+	Data []TeacherLevelClassResponse `json:"data" required:"false" doc:"List of teachers levels/classes" example:"[]"`
 }

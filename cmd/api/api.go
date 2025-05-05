@@ -16,19 +16,19 @@ import (
 	"api/services/history"
 	"api/services/school/common/director"
 	"api/services/school/common/exam"
+	"api/services/school/common/parent"
 	"api/services/school/common/school"
+	"api/services/school/common/student"
+	"api/services/school/common/teacher"
 	"api/services/school/common/year"
 	"api/services/school/highschool/class"
-	"api/services/school/highschool/pupil"
 	"api/services/school/highschool/section"
 	"api/services/school/highschool/specialty"
 	"api/services/school/highschool/subject"
-	"api/services/school/highschool/test"
 	"api/services/school/university/department"
 	"api/services/school/university/domain"
 	"api/services/school/university/faculty"
 	"api/services/school/university/level"
-	"api/services/school/university/student"
 	"api/services/school/university/tu"
 	"api/services/user/auth"
 	"api/services/user/permission"
@@ -54,21 +54,21 @@ type Controllers struct {
 	YearController     *year.Controller
 	SchoolController   *school.Controller
 	DirectorController *director.Controller
+	TeacherController  *teacher.Controller
+	StudentController  *student.Controller
+	ParentController   *parent.Controller
 	ExamController     *exam.Controller
 	// Secondary
 	SectionController   *section.Controller
 	SpecialtyController *specialty.Controller
 	ClassController     *class.Controller
 	SubjectController   *subject.Controller
-	PupilController     *pupil.Controller
-	TestController      *test.Controller
 	// Faculty
 	FacultyController    *faculty.Controller
 	DepartmentController *department.Controller
 	DomainController     *domain.Controller
 	LevelController      *level.Controller
 	TUController         *tu.Controller
-	StudentController    *student.Controller
 }
 
 var AllControllers = &Controllers{}
@@ -91,20 +91,20 @@ func registerEndpoints(humaApi *huma.API) {
 	year.RegisterEndpoints(humaApi, AllControllers.YearController)
 	school.RegisterEndpoints(humaApi, AllControllers.SchoolController)
 	director.RegisterEndpoints(humaApi, AllControllers.DirectorController)
+	teacher.RegisterEndpoints(humaApi, AllControllers.TeacherController)
+	student.RegisterEndpoints(humaApi, AllControllers.StudentController)
+	parent.RegisterEndpoints(humaApi, AllControllers.ParentController)
 	exam.RegisterEndpoints(humaApi, AllControllers.ExamController)
 	// Highschool
 	section.RegisterEndpoints(humaApi, AllControllers.SectionController)
 	specialty.RegisterEndpoints(humaApi, AllControllers.SpecialtyController)
 	class.RegisterEndpoints(humaApi, AllControllers.ClassController)
 	subject.RegisterEndpoints(humaApi, AllControllers.SubjectController)
-	pupil.RegisterEndpoints(humaApi, AllControllers.PupilController)
-	test.RegisterEndpoints(humaApi, AllControllers.TestController)
 	// University
 	faculty.RegisterEndpoints(humaApi, AllControllers.FacultyController)
 	department.RegisterEndpoints(humaApi, AllControllers.DepartmentController)
 	domain.RegisterEndpoints(humaApi, AllControllers.DomainController)
 	level.RegisterEndpoints(humaApi, AllControllers.LevelController)
-	student.RegisterEndpoints(humaApi, AllControllers.StudentController)
 	tu.RegisterEndpoints(humaApi, AllControllers.TUController)
 }
 

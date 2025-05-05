@@ -8,19 +8,19 @@ import (
 	historyModel "api/services/history/model"
 	directorModel "api/services/school/common/director/model"
 	examModel "api/services/school/common/exam/model"
+	parentModel "api/services/school/common/parent/model"
 	schoolModel "api/services/school/common/school/model"
+	studentModel "api/services/school/common/student/model"
+	teacherModel "api/services/school/common/teacher/model"
 	yearModel "api/services/school/common/year/model"
 	classModel "api/services/school/highschool/class/model"
-	pupilModel "api/services/school/highschool/pupil/model"
 	sectionModel "api/services/school/highschool/section/model"
 	specialtyModel "api/services/school/highschool/specialty/model"
 	subjectModel "api/services/school/highschool/subject/model"
-	testModel "api/services/school/highschool/test/model"
 	departmentModel "api/services/school/university/department/model"
 	domainModel "api/services/school/university/domain/model"
 	facultyModel "api/services/school/university/faculty/model"
 	levelModel "api/services/school/university/level/model"
-	studentModel "api/services/school/university/student/model"
 	tuModel "api/services/school/university/tu/model"
 	permissionModel "api/services/user/permission/model"
 	roleModel "api/services/user/role/model"
@@ -42,15 +42,25 @@ func Start() error {
 		&userModel.UserMfa{},
 		&userModel.UserInfo{},
 
+		// Director
+		&directorModel.Director{},
+
 		// School
-		&yearModel.Year{},
 		&schoolModel.School{},
 		&schoolModel.SchoolInfo{},
 		&schoolModel.SchoolConfig{},
-		&examModel.Exam{},
+		&yearModel.Year{},
+		// Teacher
+		&teacherModel.Teacher{},
+		&teacherModel.TeacherLevelClass{},
+		// Student
+		&studentModel.Student{},
+		&studentModel.StudentLevelClass{},
+		// Parent
+		&parentModel.Parent{},
+		&parentModel.ParentStudent{},
 
-		// Director
-		&directorModel.Director{},
+		&examModel.Exam{},
 
 		// Highschool
 		&sectionModel.HighschoolSection{},
@@ -58,8 +68,6 @@ func Start() error {
 		&classModel.HighschoolClass{},
 		&subjectModel.Subject{},
 		&subjectModel.SubjectProfessor{},
-		&pupilModel.Pupil{},
-		&testModel.Test{},
 
 		// University
 		&facultyModel.UniversityFaculty{},
@@ -68,7 +76,6 @@ func Start() error {
 		&levelModel.UniversityLevel{},
 		&tuModel.TeachingUnit{},
 		&tuModel.TeachingUnitProfessor{},
-		&studentModel.Student{},
 	)
 	helpers.LogMigrations(
 		err,

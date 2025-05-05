@@ -1,12 +1,12 @@
-package student
+package teacher
 
 import (
 	"context"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/services/school/common/student/data"
-	"api/services/school/common/student/model"
+	"api/services/school/common/teacher/data"
+	"api/services/school/common/teacher/model"
 )
 
 type Controller struct {
@@ -20,12 +20,12 @@ func NewController(service *Service) *Controller {
 func (controller *Controller) Create(
 	ctx *context.Context,
 	input *struct {
-		Body data.StudentRequest
+		Body data.TeacherRequest
 	},
-) (result *model.Student, errCode int, err error) {
+) (result *model.Teacher, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.Student{
+		&model.Teacher{
 			SchoolID: input.Body.SchoolID,
 			UserID:   input.Body.UserID,
 			UID:      input.Body.UID,
@@ -37,13 +37,13 @@ func (controller *Controller) Create(
 func (controller *Controller) CreateLevelClass(
 	ctx *context.Context,
 	input *struct {
-		Body data.StudentLevelClassRequest
+		Body data.TeacherLevelClassRequest
 	},
-) (result *model.StudentLevelClass, errCode int, err error) {
+) (result *model.TeacherLevelClass, errCode int, err error) {
 	result, errCode, err = controller.Service.CreateLevelClass(
 		helpers.GetJwtContext(ctx),
-		&model.StudentLevelClass{
-			StudentID: input.Body.StudentID,
+		&model.TeacherLevelClass{
+			TeacherID: input.Body.TeacherID,
 			YearID:    input.Body.YearID,
 
 			DomainID: input.Body.DomainID,
@@ -58,13 +58,13 @@ func (controller *Controller) CreateLevelClass(
 func (controller *Controller) Update(
 	ctx *context.Context,
 	input *struct {
-		data.StudentID
-		Body data.StudentRequest
+		data.TeacherID
+		Body data.TeacherRequest
 	},
-) (result *model.Student, errCode int, err error) {
+) (result *model.Teacher, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx), input.ID,
-		&model.Student{
+		&model.Teacher{
 			SchoolID: input.Body.SchoolID,
 			UserID:   input.Body.UserID,
 			UID:      input.Body.UID,
@@ -76,14 +76,14 @@ func (controller *Controller) Update(
 func (controller *Controller) UpdateLevelClass(
 	ctx *context.Context,
 	input *struct {
-		data.StudentLevelClassID
-		Body data.StudentLevelClassRequest
+		data.TeacherLevelClassID
+		Body data.TeacherLevelClassRequest
 	},
-) (result *model.StudentLevelClass, errCode int, err error) {
+) (result *model.TeacherLevelClass, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateLevelClass(
 		helpers.GetJwtContext(ctx), input.ID,
-		&model.StudentLevelClass{
-			StudentID: input.Body.StudentID,
+		&model.TeacherLevelClass{
+			TeacherID: input.Body.TeacherID,
 			YearID:    input.Body.YearID,
 
 			DomainID: input.Body.DomainID,
@@ -98,7 +98,7 @@ func (controller *Controller) UpdateLevelClass(
 func (controller *Controller) Delete(
 	ctx *context.Context,
 	input *struct {
-		data.StudentID
+		data.TeacherID
 	},
 ) (result int64, errCode int, err error) {
 	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
@@ -112,7 +112,7 @@ func (controller *Controller) Delete(
 func (controller *Controller) DeleteLevelClass(
 	ctx *context.Context,
 	input *struct {
-		data.StudentLevelClassID
+		data.TeacherLevelClassID
 	},
 ) (result int64, errCode int, err error) {
 	affectedRows, errCode, err := controller.Service.DeleteLevelClass(helpers.GetJwtContext(ctx), input.ID)
@@ -126,28 +126,28 @@ func (controller *Controller) DeleteLevelClass(
 func (controller *Controller) Get(
 	ctx *context.Context,
 	input *struct {
-		data.StudentID
+		data.TeacherID
 	},
-) (result *model.Student, errCode int, err error) {
-	student, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+) (result *model.Teacher, errCode int, err error) {
+	teacher, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
-	result = student
+	result = teacher
 	return
 }
 
 func (controller *Controller) GetLevelClass(
 	ctx *context.Context,
 	input *struct {
-		data.StudentLevelClassID
+		data.TeacherLevelClassID
 	},
-) (result *model.StudentLevelClass, errCode int, err error) {
-	student, errCode, err := controller.Service.GetLevelClass(helpers.GetJwtContext(ctx), input.ID)
+) (result *model.TeacherLevelClass, errCode int, err error) {
+	teacher, errCode, err := controller.Service.GetLevelClass(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
-	result = student
+	result = teacher
 	return
 }
 
@@ -158,14 +158,14 @@ func (controller *Controller) GetAll(
 		types.PaginationRequest
 		data.GetAllRequest
 	},
-) (result *data.StudentResponseList, errCode int, err error) {
+) (result *data.TeacherResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	studentList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllRequest.SchoolID)
+	teacherList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllRequest.SchoolID)
 	if err != nil {
 		return
 	}
-	result = &data.StudentResponseList{
-		Data: model.ToStudentResponseList(studentList),
+	result = &data.TeacherResponseList{
+		Data: model.ToTeacherResponseList(teacherList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination
@@ -179,14 +179,14 @@ func (controller *Controller) GetAllLevelClass(
 		types.PaginationRequest
 		data.GetAllLevelClassRequest
 	},
-) (result *data.StudentLevelClassResponseList, errCode int, err error) {
+) (result *data.TeacherLevelClassResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	studentList, errCode, err := controller.Service.GetAllLevelClass(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllLevelClassRequest.StudentID)
+	teacherList, errCode, err := controller.Service.GetAllLevelClass(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllLevelClassRequest.TeacherID)
 	if err != nil {
 		return
 	}
-	result = &data.StudentLevelClassResponseList{
-		Data: model.ToStudentLevelClassResponseList(studentList),
+	result = &data.TeacherLevelClassResponseList{
+		Data: model.ToTeacherLevelClassResponseList(teacherList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

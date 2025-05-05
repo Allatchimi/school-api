@@ -2,18 +2,18 @@ package model
 
 import (
 	"api/common/types"
-	"api/services/school/common/student/data"
+	"api/services/school/common/teacher/data"
 	modelYear "api/services/school/common/year/model"
 	modelClass "api/services/school/highschool/class/model"
 	modelDomain "api/services/school/university/domain/model"
 	modelLevel "api/services/school/university/level/model"
 )
 
-type StudentLevelClass struct {
+type TeacherLevelClass struct {
 	types.BaseGormModel
 
-	StudentID int64    `gorm:"default:null"`
-	Student   *Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	TeacherID int64    `gorm:"default:null"`
+	Teacher   *Teacher `gorm:"default:null;foreignKey:TeacherID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	YearID int64           `gorm:"default:null"`
 	Year   *modelYear.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -27,13 +27,13 @@ type StudentLevelClass struct {
 	Class   *modelClass.HighschoolClass `gorm:"default:null;foreignKey:ClassID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
-func (item *StudentLevelClass) ToStudentLevelClassResponse() *data.StudentLevelClassResponse {
-	resp := &data.StudentLevelClassResponse{}
+func (item *TeacherLevelClass) ToTeacherLevelClassResponse() *data.TeacherLevelClassResponse {
+	resp := &data.TeacherLevelClassResponse{}
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
 
-	resp.Student = item.Student.ToStudentResponse()
+	resp.Teacher = item.Teacher.ToTeacherResponse()
 	resp.Year = item.Year.ToResponse()
 
 	resp.Domain = item.Domain.ToResponse()
@@ -43,10 +43,10 @@ func (item *StudentLevelClass) ToStudentLevelClassResponse() *data.StudentLevelC
 	return resp
 }
 
-func ToStudentLevelClassResponseList(itemList []StudentLevelClass) []data.StudentLevelClassResponse {
-	resp := make([]data.StudentLevelClassResponse, len(itemList))
+func ToTeacherLevelClassResponseList(itemList []TeacherLevelClass) []data.TeacherLevelClassResponse {
+	resp := make([]data.TeacherLevelClassResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToStudentLevelClassResponse()
+		resp[index] = *item.ToTeacherLevelClassResponse()
 	}
 	return resp
 }
