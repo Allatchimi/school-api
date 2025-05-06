@@ -36,14 +36,14 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Univer
 		return
 	}
 
-	// Check if the new one exists
-	foundNewSemester, err := service.Repository.GetBySchoolIDName(item.SchoolID, item.Name)
+	// Check unique
+	foundItem, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get semester by user school ids from database")
 		return
 	}
-	if foundNewSemester != nil && foundNewSemester.SchoolID == item.SchoolID && foundNewSemester.Name == item.Name {
+	if service.Repository.AreSameUniqueObjects(foundItem, item) {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage("Semester")
 		return
@@ -93,19 +93,17 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, semesterID int64, 
 		return
 	}
 
-	// Check if the new one exists
-	foundNewSemester, err := service.Repository.GetBySchoolIDName(item.SchoolID, item.Name)
+	// Check unique
+	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get semester by user school ids from database")
 		return
 	}
-	if foundNewSemester != nil && foundNewSemester.SchoolID == item.SchoolID && foundNewSemester.Name == item.Name {
-		if !(foundItem.SchoolID == foundNewSemester.SchoolID && foundItem.Name == foundNewSemester.Name) {
-			errCode = http.StatusFound
-			err = constants.Http302ErrorMessage("Semester")
-			return
-		}
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) && !service.Repository.AreSameUniqueObjects(foundUnique, foundItem) {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage("Semester")
+		return
 	}
 
 	// Update semester

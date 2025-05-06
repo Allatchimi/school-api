@@ -39,7 +39,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Role) 
 
 // Update Updates role
 func (service *Service) Update(inputJwtToken *types.JwtToken, roleID int64, item *model.Role) (result *model.Role, errCode int, err error) {
-	// Check if the role exists
+	// Check unique
 	foundRole, err := service.Repository.GetByID(roleID)
 	if err != nil {
 		errCode = http.StatusInternalServerError

@@ -25,6 +25,7 @@ func (item *Year) ToResponse() *data.YearResponse {
 	resp.Name = item.Name
 	resp.StartDate = item.StartDate
 	resp.EndDate = item.EndDate
+
 	resp.School = item.School.ToResponse()
 
 	resp.ID = item.ID

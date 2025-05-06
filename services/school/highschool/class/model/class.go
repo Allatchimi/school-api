@@ -24,10 +24,11 @@ func (item *HighschoolClass) ToResponse() *data.ClassResponse {
 		return nil
 	}
 	resp := &data.ClassResponse{}
-	resp.School = item.School.ToResponse()
-	resp.Specialty = item.Specialty.ToResponse()
 	resp.Name = item.Name
 	resp.Description = item.Description
+
+	resp.School = item.School.ToResponse()
+	resp.Specialty = item.Specialty.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

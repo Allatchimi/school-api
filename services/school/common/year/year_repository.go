@@ -29,7 +29,7 @@ func (repository *Repository) Create(year *model.Year) (*model.Year, error) {
 func (repository *Repository) Update(yearID int64, year *model.Year) (*model.Year, error) {
 	result := &model.Year{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", yearID).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"name":       year.Name,
 			"start_date": year.StartDate,
 			"end_date":   year.EndDate,

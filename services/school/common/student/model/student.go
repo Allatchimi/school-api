@@ -19,14 +19,18 @@ type Student struct {
 }
 
 func (item *Student) ToStudentResponse() *data.StudentResponse {
+	if item == nil {
+		return nil
+	}
 	resp := &data.StudentResponse{}
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.UID = item.UID
 
 	resp.School = item.School.ToResponse()
 	resp.User = item.User.ToResponse()
-	resp.UID = item.UID
+
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

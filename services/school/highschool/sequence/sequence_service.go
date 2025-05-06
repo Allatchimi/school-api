@@ -36,14 +36,14 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Highsc
 		return
 	}
 
-	// Check if the new one exists
-	foundNewSequence, err := service.Repository.GetBySchoolIDName(item.SchoolID, item.Name)
+	// Check unique
+	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get sequence by user school ids from database")
 		return
 	}
-	if foundNewSequence != nil && foundNewSequence.SchoolID == item.SchoolID && foundNewSequence.Name == item.Name {
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage("Sequence")
 		return
@@ -93,19 +93,17 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, sequenceID int64, 
 		return
 	}
 
-	// Check if the new one exists
-	foundNewSequence, err := service.Repository.GetBySchoolIDName(item.SchoolID, item.Name)
+	// Check unique
+	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get sequence by user school ids from database")
 		return
 	}
-	if foundNewSequence != nil && foundNewSequence.SchoolID == item.SchoolID && foundNewSequence.Name == item.Name {
-		if !(foundItem.SchoolID == foundNewSequence.SchoolID && foundItem.Name == foundNewSequence.Name) {
-			errCode = http.StatusFound
-			err = constants.Http302ErrorMessage("Sequence")
-			return
-		}
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) && !service.Repository.AreSameUniqueObjects(foundUnique, foundItem) {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage("Sequence")
+		return
 	}
 
 	// Update sequence

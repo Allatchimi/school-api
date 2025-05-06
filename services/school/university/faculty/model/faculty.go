@@ -20,9 +20,10 @@ func (item *UniversityFaculty) ToResponse() *data.FacultyResponse {
 		return nil
 	}
 	resp := &data.FacultyResponse{}
-	resp.School = item.School.ToResponse()
 	resp.Name = item.Name
 	resp.Description = item.Description
+
+	resp.School = item.School.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

@@ -28,7 +28,7 @@ func (repository *Repository) Create(item *model.Director) (*model.Director, err
 func (repository *Repository) Update(id int64, item *model.Director) (*model.Director, error) {
 	result := &model.Director{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"user_id":   item.UserID,
 			"school_id": item.SchoolID,
 		},

@@ -213,6 +213,7 @@ func InjectDependencies() {
 	api.AllControllers.TUController = tu.NewController(
 		tu.NewService(
 			tuRepo,
+			schoolRepo,
 		),
 	)
 }

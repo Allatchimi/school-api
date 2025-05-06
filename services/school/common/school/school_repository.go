@@ -39,7 +39,7 @@ func (repository *Repository) CreateConfig(item *model.SchoolConfig) (*model.Sch
 func (repository *Repository) Update(id int64, item *model.School) (*model.School, error) {
 	result := &model.School{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"name": item.Name,
 			"type": item.Type,
 		},
@@ -49,7 +49,7 @@ func (repository *Repository) Update(id int64, item *model.School) (*model.Schoo
 func (repository *Repository) UpdateConfigInfoIDs(id int64, configID int64, infoID int64) (*model.School, error) {
 	result := &model.School{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"config_id": configID,
 			"info_id":   infoID,
 		},
@@ -59,7 +59,7 @@ func (repository *Repository) UpdateConfigInfoIDs(id int64, configID int64, info
 func (repository *Repository) UpdateInfo(id int64, item *model.SchoolInfo) (*model.SchoolInfo, error) {
 	result := &model.SchoolInfo{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"full_name":   item.FullName,
 			"description": item.Description,
 			"slogan":      item.Slogan,
@@ -92,7 +92,7 @@ func (repository *Repository) UpdateInfo(id int64, item *model.SchoolInfo) (*mod
 func (repository *Repository) UpdateConfig(id int64, item *model.SchoolConfig) (*model.SchoolConfig, error) {
 	result := &model.SchoolConfig{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"email_domain": item.EmailDomain,
 		},
 	).Error

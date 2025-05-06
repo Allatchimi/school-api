@@ -17,7 +17,7 @@ type TeacherResponse struct {
 	UID string `json:"uid" required:"false" doc:"Teacher UID"`
 }
 
-type TUSubjectResponse struct {
+type TeacherTUSubjectResponse struct {
 	types.BaseGormModelResponse
 	Teacher *TeacherResponse       `json:"teacher" required:"false" doc:"Teacher"`
 	Year    *dataYear.YearResponse `json:"year" required:"false" doc:"Year"`
@@ -31,7 +31,7 @@ type TeacherResponseList struct {
 	Data []TeacherResponse `json:"data" required:"false" doc:"List of teachers" example:"[]"`
 }
 
-type TUSubjectResponseList struct {
+type TeacherTUSubjectResponseList struct {
 	types.PaginatedResponse
-	Data []TUSubjectResponse `json:"data" required:"false" doc:"List of subject/teaching unit for the specified teacher" example:"[]"`
+	Data []TeacherTUSubjectResponse `json:"data" required:"false" doc:"List of subject/teaching unit for the specified teacher" example:"[]"`
 }

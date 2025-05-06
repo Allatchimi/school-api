@@ -18,7 +18,7 @@ func NewService(repository *Repository) *Service {
 
 // Create new exam type
 func (service *Service) CreateType(inputJwtToken *types.JwtToken, item *model.ExamType) (result *model.ExamType, errCode int, err error) {
-	// Check if exam type already exists
+	// Check unique
 	foundItem, err := service.Repository.GetTypeByObject(&model.ExamType{
 		SchoolID: item.SchoolID,
 		Name:     item.Name,

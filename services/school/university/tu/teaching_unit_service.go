@@ -1,38 +1,50 @@
 package tu
 
 import (
+	"fmt"
 	"net/http"
 
 	"api/common/constants"
 	"api/common/types"
+	"api/services/school/common/school"
 	"api/services/school/university/tu/model"
 )
 
 type Service struct {
-	Repository *Repository
+	Repository       *Repository
+	SchoolRepository *school.Repository
 }
 
-func NewService(repository *Repository) *Service {
-	return &Service{Repository: repository}
+func NewService(repository *Repository, SchoolRepository *school.Repository) *Service {
+	return &Service{
+		Repository:       repository,
+		SchoolRepository: SchoolRepository,
+	}
 }
 
 // Create new teaching unit
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.UniversityTeachingUnit) (result *model.UniversityTeachingUnit, errCode int, err error) {
-	// Check if teaching unit already exists
-	foundItem, err := service.Repository.GetByObject(&model.UniversityTeachingUnit{
-		SchoolID:   item.SchoolID,
-		DomainID:   item.DomainID,
-		LevelID:    item.LevelID,
-		SemesterID: item.SemesterID,
+	// Check if the school type is university
+	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage("get school by id from database")
+		return
+	}
+	if foundSchool.Type != constants.SCHOOL_TYPE_UNIVERSITY {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessage()
+		return
+	}
 
-		Name: item.Name,
-	})
+	// Check unique
+	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get teaching unit by name from database")
 		return
 	}
-	if foundItem != nil {
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage("teaching unit")
 		return
@@ -50,39 +62,53 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Univer
 
 // Update teaching unit
 func (service *Service) Update(inputJwtToken *types.JwtToken, teachingUnitID int64, item *model.UniversityTeachingUnit) (result *model.UniversityTeachingUnit, errCode int, err error) {
-	// Check if teaching unit already exists
-	foundTeachingUnitByID, err := service.Repository.GetById(teachingUnitID, inputJwtToken.UserID)
+	// Check if the school type is university
+	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get teaching unit by name from database")
+		err = constants.Http500ErrorMessage("get school by id from database")
 		return
 	}
-	if foundTeachingUnitByID == nil {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("teaching unit")
+	if foundSchool.Type != constants.SCHOOL_TYPE_UNIVERSITY {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessage()
 		return
 	}
-	foundItem, err := service.Repository.GetByObject(&model.UniversityTeachingUnit{
-		SchoolID:   item.SchoolID,
-		DomainID:   item.DomainID,
-		LevelID:    item.LevelID,
-		SemesterID: item.SemesterID,
 
-		Name: item.Name,
-	})
+	// Check if tu exists
+	foundItem, err := service.Repository.GetById(teachingUnitID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get teaching unit by name from database")
 		return
 	}
-	if foundItem != nil {
+	if foundItem == nil || foundItem.ID != teachingUnitID {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage("Teaching unit")
+		return
+	}
+	// Check if the school type is university
+	if foundItem.School.Type != constants.SCHOOL_TYPE_UNIVERSITY {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessage()
+		return
+	}
+
+	// Check unique
+	foundUnique, err := service.Repository.GetUniqueObject(item)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage("get teaching unit by name from database")
+		return
+	}
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) && !service.Repository.AreSameUniqueObjects(foundUnique, foundItem) {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage("teaching unit")
 		return
 	}
 
 	// Update teaching unit
-	result, err = service.Repository.Update(teachingUnitID, inputJwtToken.UserID, item)
+	result, err = service.Repository.Update(teachingUnitID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("update teaching unit from database")
@@ -93,7 +119,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, teachingUnitID int
 
 // Delete teaching unit with matching id and return affected rows
 func (service *Service) Delete(inputJwtToken *types.JwtToken, teachingUnitID int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(teachingUnitID, inputJwtToken.UserID)
+	affectedRows, err = service.Repository.Delete(teachingUnitID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("delete teaching unit from database")
@@ -101,7 +127,7 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, teachingUnitID int
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("teaching unit")
+		err = constants.Http404ErrorMessage("teaching unit" + fmt.Sprint(teachingUnitID))
 		return
 	}
 	return
@@ -109,7 +135,7 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, teachingUnitID int
 
 // Get Returns teaching unit with matching id
 func (service *Service) Get(inputJwtToken *types.JwtToken, teachingUnitID int64) (result *model.UniversityTeachingUnit, errCode int, err error) {
-	result, err = service.Repository.GetById(teachingUnitID, inputJwtToken.UserID)
+	result, err = service.Repository.GetById(teachingUnitID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get teaching unit by id from database")
@@ -124,11 +150,11 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, teachingUnitID int64)
 }
 
 // GetAll Returns all teaching units with support for search, filter and pagination
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination) (result []model.UniversityTeachingUnit, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, inputJwtToken.UserID)
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.UniversityTeachingUnit, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination, schoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get faculties from database")
+		err = constants.Http500ErrorMessage("get teaching units from database")
 	}
 	return
 }

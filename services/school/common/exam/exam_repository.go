@@ -36,7 +36,7 @@ func (repository *Repository) UpdateType(id int64, data *model.ExamType) (*model
 
 	result := &model.ExamType{}
 	return result, repository.Db.Model(result).Where("id = ?", id).Where("school_id = ?", data.SchoolID).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"name":        data.Name,
 			"description": data.Description,
 		},
@@ -51,7 +51,7 @@ func (repository *Repository) Update(id int64, data *model.Exam) (*model.Exam, e
 
 	result := &model.Exam{}
 	return result, repository.Db.Model(result).Where("id = ?", id).Where("school_id = ?", data.SchoolID).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"percentage":       data.Percentage,
 			"description":      data.Description,
 			"type_id":          data.TypeID,

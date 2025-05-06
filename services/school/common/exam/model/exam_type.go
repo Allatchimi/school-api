@@ -21,13 +21,14 @@ func (item *ExamType) ToResponse() *data.ExamTypeResponse {
 		return nil
 	}
 	resp := &data.ExamTypeResponse{}
+	resp.Name = item.Name
+	resp.Description = item.Description
+
+	resp.School = item.School.ToResponse()
+
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-
-	resp.School = item.School.ToResponse()
-	resp.Name = item.Name
-	resp.Description = item.Description
 	return resp
 }
 

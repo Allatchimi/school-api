@@ -85,18 +85,18 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.TUSubjectRequest
+				Body data.TeacherTUSubjectRequest
 			},
 		) (*struct {
-			Body data.TUSubjectResponse
+			Body data.TeacherTUSubjectResponse
 		}, error) {
-			result, errCode, err := controller.CreateTUSubject(&ctx, input)
+			result, errCode, err := controller.CreateTeacherTUSubject(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.TUSubjectResponse
-			}{Body: *result.ToTUSubjectResponse()}, nil
+				Body data.TeacherTUSubjectResponse
+			}{Body: *result.ToTeacherTUSubjectResponse()}, nil
 		},
 	)
 
@@ -165,18 +165,18 @@ func RegisterEndpoints(
 			ctx context.Context,
 			input *struct {
 				data.TUSubjectID
-				Body data.TUSubjectRequest
+				Body data.TeacherTUSubjectRequest
 			},
 		) (*struct {
-			Body data.TUSubjectResponse
+			Body data.TeacherTUSubjectResponse
 		}, error) {
-			result, errCode, err := controller.UpdateTUSubject(&ctx, input)
+			result, errCode, err := controller.UpdateTeacherTUSubject(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.TUSubjectResponse
-			}{Body: *result.ToTUSubjectResponse()}, nil
+				Body data.TeacherTUSubjectResponse
+			}{Body: *result.ToTeacherTUSubjectResponse()}, nil
 		},
 	)
 
@@ -246,7 +246,7 @@ func RegisterEndpoints(
 				data.TUSubjectID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteTUSubject(&ctx, input)
+			result, errCode, err := controller.DeleteTeacherTUSubject(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -320,15 +320,15 @@ func RegisterEndpoints(
 				data.TUSubjectID
 			},
 		) (*struct {
-			Body data.TUSubjectResponse
+			Body data.TeacherTUSubjectResponse
 		}, error) {
-			result, errCode, err := controller.GetTUSubject(&ctx, input)
+			result, errCode, err := controller.GetTeacherTUSubject(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.TUSubjectResponse
-			}{Body: *result.ToTUSubjectResponse()}, nil
+				Body data.TeacherTUSubjectResponse
+			}{Body: *result.ToTeacherTUSubjectResponse()}, nil
 		},
 	)
 
@@ -403,17 +403,17 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
-				data.GetAllTUSubjectRequest
+				data.GetAllTeacherTUSubjectRequest
 			},
 		) (*struct {
-			Body data.TUSubjectResponseList
+			Body data.TeacherTUSubjectResponseList
 		}, error) {
-			result, errCode, err := controller.GetAllTUSubject(&ctx, input)
+			result, errCode, err := controller.GetAllTeacherTUSubject(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.TUSubjectResponseList
+				Body data.TeacherTUSubjectResponseList
 			}{Body: *result}, nil
 		},
 	)

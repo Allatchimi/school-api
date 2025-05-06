@@ -20,16 +20,15 @@ func (item *HighschoolClassSubject) ToClassSubjectResponse() *data.ClassSubjectR
 		return nil
 	}
 	resp := &data.ClassSubjectResponse{}
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
-
 	resp.SubjectID = item.SubjectID
 	resp.ClassID = item.ClassID
-
 	resp.Coefficient = item.Coefficient
 	resp.Program = item.Program
 	resp.Requirements = item.Requirements
+
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

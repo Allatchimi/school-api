@@ -14,7 +14,7 @@ type TeachingUnitRequest struct {
 
 	Name         string `json:"name" required:"true" doc:"Name" example:"MATH110"`
 	Description  string `json:"description" required:"false" doc:"Description" example:""`
-	Credit       int    `json:"credit" required:"true" doc:"Credit" example:"1"`
+	Credit       int    `json:"credit" required:"true" min:"1" doc:"Credit" example:"1"`
 	Program      string `json:"program" required:"false" doc:"Program" example:""`
 	Requirements string `json:"requirements" required:"false" doc:"Requirements" example:""`
 

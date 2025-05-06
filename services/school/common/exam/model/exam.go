@@ -35,19 +35,18 @@ func (item *Exam) ToResponse() *data.ExamResponse {
 		return nil
 	}
 	resp := &data.ExamResponse{}
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
-
 	resp.Percentage = item.Percentage
 	resp.Description = item.Description
 
 	resp.School = item.School.ToResponse()
 	resp.Year = item.Year.ToResponse()
 	resp.Type = item.Type.ToResponse()
-
 	resp.TeachingUnit = item.TeachingUnit.ToResponse()
 	resp.Subject = item.Subject.ToResponse()
+
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

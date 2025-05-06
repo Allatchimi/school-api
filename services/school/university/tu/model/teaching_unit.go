@@ -35,24 +35,26 @@ type UniversityTeachingUnit struct {
 }
 
 func (item *UniversityTeachingUnit) ToResponse() *data.TeachingUnitResponse {
+	if item == nil {
+		return nil
+	}
 	resp := &data.TeachingUnitResponse{}
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.Name = item.Name
+	resp.Description = item.Description
+	resp.Credit = item.Credit
+	resp.Program = item.Program
+	resp.Requirements = item.Requirements
+	resp.IsValid = item.IsValid
+	resp.InvalidDate = item.InvalidDate
 
 	resp.School = item.School.ToResponse()
 	resp.Domain = item.Domain.ToResponse()
 	resp.Level = item.Level.ToResponse()
 	resp.Semester = item.Semester.ToResponse()
 
-	resp.Name = item.Name
-	resp.Description = item.Description
-	resp.Credit = item.Credit
-	resp.Program = item.Program
-	resp.Requirements = item.Requirements
-
-	resp.IsValid = item.IsValid
-	resp.InvalidDate = item.InvalidDate
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

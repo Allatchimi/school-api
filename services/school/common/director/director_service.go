@@ -24,7 +24,7 @@ func NewService(repository *Repository, userRepository *user.Repository) *Servic
 
 // Create new director
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Director) (result *model.Director, errCode int, err error) {
-	// Check if the new one exists
+	// Check unique
 	foundNewDirector, err := service.Repository.GetByUserSchoolIDs(item.UserID, item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -80,7 +80,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 		return
 	}
 
-	// Check if the new one exists
+	// Check unique
 	foundNewDirector, err := service.Repository.GetByUserSchoolIDs(item.UserID, item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError

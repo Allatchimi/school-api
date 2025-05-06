@@ -22,7 +22,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Year) 
 	yearName := fmt.Sprintf("%d-%d", item.StartDate.Year(), item.EndDate.Year())
 	item.Name = yearName
 
-	// Check if the year exists
+	// Check unique
 	foundItem, err := service.Repository.GetByNameSchoolID(yearName, item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -62,7 +62,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, yearID int64, item
 
 	yearName := fmt.Sprintf("%d-%d", item.StartDate.Year(), item.EndDate.Year())
 	item.Name = yearName
-	// Check if the year exists
+	// Check unique
 	foundNewYear, err := service.Repository.GetByNameSchoolID(yearName, item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError

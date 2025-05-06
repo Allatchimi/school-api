@@ -36,14 +36,14 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Highsc
 		return
 	}
 
-	// Check if the new one exists
-	foundNewSpecialty, err := service.Repository.GetBySchoolIDSectionIDName(item.SchoolID, item.SectionID, item.Name)
+	// Check unique
+	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get specialty by user school ids from database")
 		return
 	}
-	if foundNewSpecialty != nil && foundNewSpecialty.SchoolID == item.SchoolID && foundNewSpecialty.SectionID == item.SectionID && foundNewSpecialty.Name == item.Name {
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage("Specialty")
 		return
@@ -93,19 +93,17 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, specialtyID int64,
 		return
 	}
 
-	// Check if the new one exists
-	foundNewSpecialty, err := service.Repository.GetBySchoolIDSectionIDName(item.SchoolID, item.SectionID, item.Name)
+	// Check unique
+	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get specialty by user school ids from database")
 		return
 	}
-	if foundNewSpecialty != nil && foundNewSpecialty.SchoolID == item.SchoolID && foundNewSpecialty.SectionID == item.SectionID && foundNewSpecialty.Name == item.Name {
-		if !(foundItem.SchoolID == foundNewSpecialty.SchoolID && foundItem.SectionID == foundNewSpecialty.SectionID && foundItem.Name == foundNewSpecialty.Name) {
-			errCode = http.StatusFound
-			err = constants.Http302ErrorMessage("Section")
-			return
-		}
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) && !service.Repository.AreSameUniqueObjects(foundUnique, foundItem) {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage("Specialty")
+		return
 	}
 
 	// Update specialty

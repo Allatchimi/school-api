@@ -38,7 +38,7 @@ func (repository *Repository) Update(id int64, item *model.Student) (*model.Stud
 
 	result := &model.Student{}
 	return result, repository.Db.Model(result).Where("id = ?", item.ID).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"school_id": item.SchoolID,
 			"user_id":   item.UserID,
 			"uid":       item.UID,
@@ -54,7 +54,7 @@ func (repository *Repository) UpdateLevelClass(id int64, item *model.StudentLeve
 
 	result := &model.StudentLevelClass{}
 	return result, repository.Db.Model(result).Where("id = ?", item.ID).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"student_id": item.StudentID,
 			"year_id":    item.YearID,
 

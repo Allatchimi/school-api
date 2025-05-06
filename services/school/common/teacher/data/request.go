@@ -14,7 +14,7 @@ type TeacherRequest struct {
 	UID      string `json:"uid" required:"false" doc:"Teacher UID" example:"1"`
 }
 
-type TUSubjectRequest struct {
+type TeacherTUSubjectRequest struct {
 	TeacherID int64 `json:"teacherID" required:"true" doc:"Teacher id" example:"1"`
 	YearID    int64 `json:"yearID" required:"true" doc:"Year id" example:"1"`
 
@@ -26,6 +26,6 @@ type GetAllRequest struct {
 	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
 }
 
-type GetAllTUSubjectRequest struct {
+type GetAllTeacherTUSubjectRequest struct {
 	TeacherID int64 `json:"teacherID" path:"id" required:"true" doc:"Teacher id" example:"1"`
 }

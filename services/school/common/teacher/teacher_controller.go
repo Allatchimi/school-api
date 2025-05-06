@@ -34,15 +34,15 @@ func (controller *Controller) Create(
 	return
 }
 
-func (controller *Controller) CreateTUSubject(
+func (controller *Controller) CreateTeacherTUSubject(
 	ctx *context.Context,
 	input *struct {
-		Body data.TUSubjectRequest
+		Body data.TeacherTUSubjectRequest
 	},
-) (result *model.TUSubject, errCode int, err error) {
-	result, errCode, err = controller.Service.CreateTUSubject(
+) (result *model.TeacherTeachingUnitSubject, errCode int, err error) {
+	result, errCode, err = controller.Service.CreateTeacherTUSubject(
 		helpers.GetJwtContext(ctx),
-		&model.TUSubject{
+		&model.TeacherTeachingUnitSubject{
 			TeacherID: input.Body.TeacherID,
 			YearID:    input.Body.YearID,
 
@@ -71,16 +71,16 @@ func (controller *Controller) Update(
 	return
 }
 
-func (controller *Controller) UpdateTUSubject(
+func (controller *Controller) UpdateTeacherTUSubject(
 	ctx *context.Context,
 	input *struct {
 		data.TUSubjectID
-		Body data.TUSubjectRequest
+		Body data.TeacherTUSubjectRequest
 	},
-) (result *model.TUSubject, errCode int, err error) {
-	result, errCode, err = controller.Service.UpdateTUSubject(
+) (result *model.TeacherTeachingUnitSubject, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateTeacherTUSubject(
 		helpers.GetJwtContext(ctx), input.ID,
-		&model.TUSubject{
+		&model.TeacherTeachingUnitSubject{
 			TeacherID: input.Body.TeacherID,
 			YearID:    input.Body.YearID,
 
@@ -105,13 +105,13 @@ func (controller *Controller) Delete(
 	return
 }
 
-func (controller *Controller) DeleteTUSubject(
+func (controller *Controller) DeleteTeacherTUSubject(
 	ctx *context.Context,
 	input *struct {
 		data.TUSubjectID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteTUSubject(helpers.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.DeleteTeacherTUSubject(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -133,13 +133,13 @@ func (controller *Controller) Get(
 	return
 }
 
-func (controller *Controller) GetTUSubject(
+func (controller *Controller) GetTeacherTUSubject(
 	ctx *context.Context,
 	input *struct {
 		data.TUSubjectID
 	},
-) (result *model.TUSubject, errCode int, err error) {
-	teacher, errCode, err := controller.Service.GetTUSubject(helpers.GetJwtContext(ctx), input.ID)
+) (result *model.TeacherTeachingUnitSubject, errCode int, err error) {
+	teacher, errCode, err := controller.Service.GetTeacherTUSubject(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -168,21 +168,21 @@ func (controller *Controller) GetAll(
 	return
 }
 
-func (controller *Controller) GetAllTUSubject(
+func (controller *Controller) GetAllTeacherTUSubject(
 	ctx *context.Context,
 	input *struct {
 		types.Filter
 		types.PaginationRequest
-		data.GetAllTUSubjectRequest
+		data.GetAllTeacherTUSubjectRequest
 	},
-) (result *data.TUSubjectResponseList, errCode int, err error) {
+) (result *data.TeacherTUSubjectResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	teacherList, errCode, err := controller.Service.GetAllTUSubject(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllTUSubjectRequest.TeacherID)
+	teacherList, errCode, err := controller.Service.GetAllTeacherTUSubject(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllTeacherTUSubjectRequest.TeacherID)
 	if err != nil {
 		return
 	}
-	result = &data.TUSubjectResponseList{
-		Data: model.ToTUSubjectResponseList(teacherList),
+	result = &data.TeacherTUSubjectResponseList{
+		Data: model.ToTeacherTUSubjectResponseList(teacherList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

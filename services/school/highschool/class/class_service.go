@@ -36,14 +36,14 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Highsc
 		return
 	}
 
-	// Check if the new one exists
-	foundNewClass, err := service.Repository.GetBySchoolIDSpecialtyIDName(item.SchoolID, item.SpecialtyID, item.Name)
+	// Check unique
+	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get class by user school ids from database")
 		return
 	}
-	if foundNewClass != nil && foundNewClass.SchoolID == item.SchoolID && foundNewClass.SpecialtyID == item.SpecialtyID && foundNewClass.Name == item.Name {
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage("Class")
 		return
@@ -93,19 +93,17 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, classID int64, ite
 		return
 	}
 
-	// Check if the new one exists
-	foundNewClass, err := service.Repository.GetBySchoolIDSpecialtyIDName(item.SchoolID, item.SpecialtyID, item.Name)
+	// Check unique
+	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get class by user school ids from database")
 		return
 	}
-	if foundNewClass != nil && foundNewClass.SchoolID == item.SchoolID && foundNewClass.SpecialtyID == item.SpecialtyID && foundNewClass.Name == item.Name {
-		if !(foundItem.SchoolID == foundNewClass.SchoolID && foundItem.SpecialtyID == foundNewClass.SpecialtyID && foundItem.Name == foundNewClass.Name) {
-			errCode = http.StatusFound
-			err = constants.Http302ErrorMessage("Specialty")
-			return
-		}
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) && !service.Repository.AreSameUniqueObjects(foundUnique, foundItem) {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage("Class")
+		return
 	}
 
 	// Update class

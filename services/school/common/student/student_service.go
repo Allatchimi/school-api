@@ -18,7 +18,7 @@ func NewService(repository *Repository) *Service {
 
 // Create new student
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Student) (result *model.Student, errCode int, err error) {
-	// Check if student already exists
+	// Check unique
 	foundItem, err := service.Repository.GetByObject(&model.Student{
 		SchoolID: item.SchoolID,
 		UserID:   item.UserID,
@@ -80,7 +80,7 @@ func (service *Service) CreateLevelClass(inputJwtToken *types.JwtToken, item *mo
 
 // Update student
 func (service *Service) Update(inputJwtToken *types.JwtToken, studentID int64, item *model.Student) (result *model.Student, errCode int, err error) {
-	// Check if student already exists
+	// Check unique
 	foundStudentByID, err := service.Repository.GetById(studentID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -120,7 +120,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, studentID int64, i
 
 // Update student level/class
 func (service *Service) UpdateLevelClass(inputJwtToken *types.JwtToken, studentLevelClassID int64, item *model.StudentLevelClass) (result *model.StudentLevelClass, errCode int, err error) {
-	// Check if student already exists
+	// Check unique
 	foundStudentByID, err := service.Repository.GetLevelClassById(studentLevelClassID)
 	if err != nil {
 		errCode = http.StatusInternalServerError

@@ -18,7 +18,7 @@ func NewService(repository *Repository) *Service {
 
 // Create new parent
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Parent) (result *model.Parent, errCode int, err error) {
-	// Check if parent already exists
+	// Check unique
 	foundItem, err := service.Repository.GetByObject(&model.Parent{
 		UserID: item.UserID,
 		UID:    item.UID,
@@ -74,7 +74,7 @@ func (service *Service) CreateParentStudent(inputJwtToken *types.JwtToken, item 
 
 // Update parent
 func (service *Service) Update(inputJwtToken *types.JwtToken, parentID int64, item *model.Parent) (result *model.Parent, errCode int, err error) {
-	// Check if parent already exists
+	// Check unique
 	foundParentByID, err := service.Repository.GetById(parentID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -113,7 +113,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, parentID int64, it
 
 // Update parent level/class
 func (service *Service) UpdateParentStudent(inputJwtToken *types.JwtToken, parentParentStudentID int64, item *model.ParentStudent) (result *model.ParentStudent, errCode int, err error) {
-	// Check if parent already exists
+	// Check unique
 	foundParentByID, err := service.Repository.GetParentStudentById(parentParentStudentID)
 	if err != nil {
 		errCode = http.StatusInternalServerError

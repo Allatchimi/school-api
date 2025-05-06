@@ -25,7 +25,7 @@ func (repository *Repository) Create(item *model.Teacher) (*model.Teacher, error
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) CreateTUSubject(item *model.TUSubject) (*model.TUSubject, error) {
+func (repository *Repository) CreateTeacherTUSubject(item *model.TeacherTeachingUnitSubject) (*model.TeacherTeachingUnitSubject, error) {
 	result := *item
 	return &result, repository.Db.Create(&result).Error
 }
@@ -38,7 +38,7 @@ func (repository *Repository) Update(id int64, item *model.Teacher) (*model.Teac
 
 	result := &model.Teacher{}
 	return result, repository.Db.Model(result).Where("id = ?", item.ID).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"school_id": item.SchoolID,
 			"user_id":   item.UserID,
 			"uid":       item.UID,
@@ -46,15 +46,15 @@ func (repository *Repository) Update(id int64, item *model.Teacher) (*model.Teac
 	).Error
 }
 
-func (repository *Repository) UpdateTUSubject(id int64, item *model.TUSubject) (*model.TUSubject, error) {
+func (repository *Repository) UpdateTeacherTUSubject(id int64, item *model.TeacherTeachingUnitSubject) (*model.TeacherTeachingUnitSubject, error) {
 	tempTeacher, err := repository.GetById(id)
 	if err != nil || tempTeacher == nil || tempTeacher.ID != id {
 		return nil, err
 	}
 
-	result := &model.TUSubject{}
+	result := &model.TeacherTeachingUnitSubject{}
 	return result, repository.Db.Model(result).Where("id = ?", item.ID).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"teacher_id": item.TeacherID,
 			"year_id":    item.YearID,
 
@@ -74,13 +74,13 @@ func (repository *Repository) Delete(id int64) (int64, error) {
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteTUSubject(id int64) (int64, error) {
-	foundItem, err := repository.GetTUSubjectById(id)
+func (repository *Repository) DeleteTeacherTUSubject(id int64) (int64, error) {
+	foundItem, err := repository.GetTeacherTUSubjectById(id)
 	if err != nil || foundItem == nil || foundItem.ID != id {
 		return -1, err
 	}
 
-	result := repository.Db.Where("id = ?", id).Delete(&model.TUSubject{})
+	result := repository.Db.Where("id = ?", id).Delete(&model.TeacherTeachingUnitSubject{})
 	return result.RowsAffected, result.Error
 }
 
@@ -89,8 +89,8 @@ func (repository *Repository) GetById(id int64) (*model.Teacher, error) {
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetTUSubjectById(id int64) (*model.TUSubject, error) {
-	result := &model.TUSubject{}
+func (repository *Repository) GetTeacherTUSubjectById(id int64) (*model.TeacherTeachingUnitSubject, error) {
+	result := &model.TeacherTeachingUnitSubject{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
@@ -99,8 +99,8 @@ func (repository *Repository) GetByObject(item *model.Teacher) (*model.Teacher, 
 	return result, repository.Db.Where(item).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetTUSubjectByObject(item *model.TUSubject) (*model.TUSubject, error) {
-	result := &model.TUSubject{}
+func (repository *Repository) GetTeacherTUSubjectByObject(item *model.TeacherTeachingUnitSubject) (*model.TeacherTeachingUnitSubject, error) {
+	result := &model.TeacherTeachingUnitSubject{}
 	return result, repository.Db.Where(item).Limit(1).Find(result).Error
 }
 
@@ -143,18 +143,18 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	return
 }
 
-func (repository *Repository) GetAllTUSubject(filter *types.Filter, pagination *types.Pagination, teacherID int64) (result []model.TUSubject, err error) {
-	result = make([]model.TUSubject, 0)
+func (repository *Repository) GetAllTeacherTUSubject(filter *types.Filter, pagination *types.Pagination, teacherID int64) (result []model.TeacherTeachingUnitSubject, err error) {
+	result = make([]model.TeacherTeachingUnitSubject, 0)
 	var where string = ""
 	if teacherID > 0 {
-		where = fmt.Sprintf("WHERE teacher_lc.teacher_id = %d", teacherID)
+		where = fmt.Sprintf("WHERE teacher_ts.teacher_id = %d", teacherID)
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(teacher_lc.id AS TEXT) = '%s' OR years.name ILIKE '%s'"+
-				" OR university_domains.name ILIKE '%s' OR university_domains.description ILIKE '%s'"+
+			"CAST(teacher_ts.id AS TEXT) = '%s' OR years.name ILIKE '%s'"+
+				" OR university_teaching_units.name ILIKE '%s' OR university_teaching_units.description ILIKE '%s'"+
 				" OR university_levels.name ILIKE '%s' OR university_levels.description ILIKE '%s'"+
-				" OR highschool_classes.name ILIKE '%s' OR highschool_classes.description ILIKE '%s'",
+				" OR highschool_subjects.name ILIKE '%s' OR highschool_subjects.description ILIKE '%s'",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -169,12 +169,11 @@ func (repository *Repository) GetAllTUSubject(filter *types.Filter, pagination *
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"SELECT teacher_lc.id, teacher_lc.teacher_id, teacher_lc.year_id, teacher_lc.domain_id, teacher_lc.level_id, teacher_lc.class_id"+
-				", teacher_lc.created_at, teacher_lc.updated_at FROM teacher_level_classes AS teacher_lc "+
-				"LEFT JOIN years ON teacher_lc.year_id = years.id "+
-				"LEFT JOIN university_domains ON teacher_lc.domain_id = university_domains.id "+
-				"LEFT JOIN university_levels ON teacher_lc.level_id = university_levels.id "+
-				"LEFT JOIN highschool_classes ON teacher_lc.class_id = highschool_classes.id ",
+			"SELECT teacher_ts.id, teacher_ts.teacher_id, teacher_ts.year_id, teacher_ts.teaching_unit_id, teacher_ts.subject_id"+
+				", teacher_ts.created_at, teacher_ts.updated_at FROM teacher_teaching_unit_subjects AS teacher_ts "+
+				"LEFT JOIN years ON teacher_ts.year_id = years.id "+
+				"LEFT JOIN university_teaching_units ON teacher_ts.teaching_unit_id = university_teaching_units.id "+
+				"LEFT JOIN highschool_subjects ON teacher_ts.subject_id = highschool_subjects.id ",
 			where,
 			pagination,
 			filter,

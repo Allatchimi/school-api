@@ -18,7 +18,7 @@ func NewService(repository *Repository) *Service {
 
 // Create new teacher
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Teacher) (result *model.Teacher, errCode int, err error) {
-	// Check if teacher already exists
+	// Check unique
 	foundItem, err := service.Repository.GetByObject(&model.Teacher{
 		SchoolID: item.SchoolID,
 		UserID:   item.UserID,
@@ -46,9 +46,9 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Teache
 }
 
 // Create new teacher
-func (service *Service) CreateTUSubject(inputJwtToken *types.JwtToken, item *model.TUSubject) (result *model.TUSubject, errCode int, err error) {
+func (service *Service) CreateTeacherTUSubject(inputJwtToken *types.JwtToken, item *model.TeacherTeachingUnitSubject) (result *model.TeacherTeachingUnitSubject, errCode int, err error) {
 	// Check if teacher teaching unit/subject already exists
-	foundItem, err := service.Repository.GetTUSubjectByObject(&model.TUSubject{
+	foundItem, err := service.Repository.GetTeacherTUSubjectByObject(&model.TeacherTeachingUnitSubject{
 		TeacherID: item.TeacherID,
 		YearID:    item.YearID,
 
@@ -67,7 +67,7 @@ func (service *Service) CreateTUSubject(inputJwtToken *types.JwtToken, item *mod
 	}
 
 	// Insert teacher teaching unit/subject
-	result, err = service.Repository.CreateTUSubject(item)
+	result, err = service.Repository.CreateTeacherTUSubject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("create teacher teaching unit/subject from database")
@@ -78,7 +78,7 @@ func (service *Service) CreateTUSubject(inputJwtToken *types.JwtToken, item *mod
 
 // Update teacher
 func (service *Service) Update(inputJwtToken *types.JwtToken, teacherID int64, item *model.Teacher) (result *model.Teacher, errCode int, err error) {
-	// Check if teacher already exists
+	// Check unique
 	foundTeacherByID, err := service.Repository.GetById(teacherID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -117,9 +117,9 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, teacherID int64, i
 }
 
 // Update teacher teaching unit/subject
-func (service *Service) UpdateTUSubject(inputJwtToken *types.JwtToken, teacherTUSubjectID int64, item *model.TUSubject) (result *model.TUSubject, errCode int, err error) {
-	// Check if teacher already exists
-	foundTeacherByID, err := service.Repository.GetTUSubjectById(teacherTUSubjectID)
+func (service *Service) UpdateTeacherTUSubject(inputJwtToken *types.JwtToken, teacherTUSubjectID int64, item *model.TeacherTeachingUnitSubject) (result *model.TeacherTeachingUnitSubject, errCode int, err error) {
+	// Check unique
+	foundTeacherByID, err := service.Repository.GetTeacherTUSubjectById(teacherTUSubjectID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get teacher teaching unit/subject by name from database")
@@ -130,7 +130,7 @@ func (service *Service) UpdateTUSubject(inputJwtToken *types.JwtToken, teacherTU
 		err = constants.Http404ErrorMessage("Teacher teaching unit/subject")
 		return
 	}
-	foundItem, err := service.Repository.GetTUSubjectByObject(&model.TUSubject{
+	foundItem, err := service.Repository.GetTeacherTUSubjectByObject(&model.TeacherTeachingUnitSubject{
 		TeacherID: item.TeacherID,
 		YearID:    item.YearID,
 
@@ -149,7 +149,7 @@ func (service *Service) UpdateTUSubject(inputJwtToken *types.JwtToken, teacherTU
 	}
 
 	// Update teacher
-	result, err = service.Repository.UpdateTUSubject(teacherTUSubjectID, item)
+	result, err = service.Repository.UpdateTeacherTUSubject(teacherTUSubjectID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("update teacher teaching unit/subject from database")
@@ -175,8 +175,8 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, teacherID int64) (
 }
 
 // Delete teacher teaching unit/subject with matching id and return affected rows
-func (service *Service) DeleteTUSubject(inputJwtToken *types.JwtToken, teacherTUSubjectID int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteTUSubject(teacherTUSubjectID)
+func (service *Service) DeleteTeacherTUSubject(inputJwtToken *types.JwtToken, teacherTUSubjectID int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteTeacherTUSubject(teacherTUSubjectID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("delete teacher teaching unit/subject from database")
@@ -207,8 +207,8 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, teacherID int64) (res
 }
 
 // Get Returns teacher teaching unit/subject with matching id
-func (service *Service) GetTUSubject(inputJwtToken *types.JwtToken, teacherTUSubjectID int64) (result *model.TUSubject, errCode int, err error) {
-	result, err = service.Repository.GetTUSubjectById(teacherTUSubjectID)
+func (service *Service) GetTeacherTUSubject(inputJwtToken *types.JwtToken, teacherTUSubjectID int64) (result *model.TeacherTeachingUnitSubject, errCode int, err error) {
+	result, err = service.Repository.GetTeacherTUSubjectById(teacherTUSubjectID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get teacher teaching unit/subject by id from database")
@@ -233,8 +233,8 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 }
 
 // GetAll Returns all teachers teaching unit/subject with support for search, filter and pagination
-func (service *Service) GetAllTUSubject(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, teacherID int64) (result []model.TUSubject, errCode int, err error) {
-	result, err = service.Repository.GetAllTUSubject(filter, pagination, teacherID)
+func (service *Service) GetAllTeacherTUSubject(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, teacherID int64) (result []model.TeacherTeachingUnitSubject, errCode int, err error) {
+	result, err = service.Repository.GetAllTeacherTUSubject(filter, pagination, teacherID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get teachers teaching unit/subject from database")

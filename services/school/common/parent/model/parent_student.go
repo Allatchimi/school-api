@@ -17,13 +17,16 @@ type ParentStudent struct {
 }
 
 func (item *ParentStudent) ToParentStudentResponse() *data.ParentStudentResponse {
+	if item == nil {
+		return nil
+	}
 	resp := &data.ParentStudentResponse{}
+	resp.Parent = item.Parent.ToParentResponse()
+	resp.Student = item.Student.ToStudentResponse()
+
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-
-	resp.Parent = item.Parent.ToParentResponse()
-	resp.Student = item.Student.ToStudentResponse()
 	return resp
 }
 

@@ -15,13 +15,17 @@ type Parent struct {
 }
 
 func (item *Parent) ToParentResponse() *data.ParentResponse {
+	if item == nil {
+		return nil
+	}
 	resp := &data.ParentResponse{}
+	resp.UID = item.UID
+
+	resp.User = item.User.ToResponse()
+
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-
-	resp.User = item.User.ToResponse()
-	resp.UID = item.UID
 	return resp
 }
 

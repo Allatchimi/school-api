@@ -18,7 +18,7 @@ func NewService(repository *Repository) *Service {
 
 // Create new document
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Document) (result *model.Document, errCode int, err error) {
-	// Check if document already exists
+	// Check unique
 	foundItem, err := service.Repository.GetByObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError

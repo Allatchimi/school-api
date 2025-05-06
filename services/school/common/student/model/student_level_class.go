@@ -28,18 +28,19 @@ type StudentLevelClass struct {
 }
 
 func (item *StudentLevelClass) ToStudentLevelClassResponse() *data.StudentLevelClassResponse {
+	if item == nil {
+		return nil
+	}
 	resp := &data.StudentLevelClassResponse{}
+	resp.Student = item.Student.ToStudentResponse()
+	resp.Year = item.Year.ToResponse()
+	resp.Domain = item.Domain.ToResponse()
+	resp.Level = item.Level.ToResponse()
+	resp.Class = item.Class.ToResponse()
+
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-
-	resp.Student = item.Student.ToStudentResponse()
-	resp.Year = item.Year.ToResponse()
-
-	resp.Domain = item.Domain.ToResponse()
-	resp.Level = item.Level.ToResponse()
-
-	resp.Class = item.Class.ToResponse()
 	return resp
 }
 

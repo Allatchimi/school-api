@@ -38,7 +38,7 @@ func (repository *Repository) Create(role *model.Role) (result *model.Role, err 
 func (repository *Repository) Update(roleID int64, role *model.Role) (result *model.Role, err error) {
 	result = &model.Role{}
 	tmpErr := repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", roleID).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"name":        role.Name,
 			"feature":     role.Feature,
 			"description": role.Description,

@@ -8,7 +8,7 @@ import (
 	modelTeachingUnit "api/services/school/university/tu/model"
 )
 
-type TUSubject struct {
+type TeacherTeachingUnitSubject struct {
 	types.BaseGormModel
 
 	TeacherID int64    `gorm:"default:null"`
@@ -24,27 +24,26 @@ type TUSubject struct {
 	Subject   *modelSubject.HighschoolSubject `gorm:"default:null;foreignKey:SubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
-func (item *TUSubject) ToTUSubjectResponse() *data.TUSubjectResponse {
+func (item *TeacherTeachingUnitSubject) ToTeacherTUSubjectResponse() *data.TeacherTUSubjectResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.TUSubjectResponse{}
+	resp := &data.TeacherTUSubjectResponse{}
+	resp.Teacher = item.Teacher.ToTeacherResponse()
+	resp.Year = item.Year.ToResponse()
+	resp.TeachingUnit = item.TeachingUnit.ToResponse()
+	resp.Subject = item.Subject.ToResponse()
+
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-
-	resp.Teacher = item.Teacher.ToTeacherResponse()
-	resp.Year = item.Year.ToResponse()
-
-	resp.TeachingUnit = item.TeachingUnit.ToResponse()
-	resp.Subject = item.Subject.ToResponse()
 	return resp
 }
 
-func ToTUSubjectResponseList(itemList []TUSubject) []data.TUSubjectResponse {
-	resp := make([]data.TUSubjectResponse, len(itemList))
+func ToTeacherTUSubjectResponseList(itemList []TeacherTeachingUnitSubject) []data.TeacherTUSubjectResponse {
+	resp := make([]data.TeacherTUSubjectResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToTUSubjectResponse()
+		resp[index] = *item.ToTeacherTUSubjectResponse()
 	}
 	return resp
 }

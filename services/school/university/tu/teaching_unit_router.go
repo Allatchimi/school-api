@@ -93,6 +93,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+			fmt.Print(result)
 			return &struct{ Body data.TeachingUnitResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
@@ -199,6 +200,7 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
+				data.GetAllRequest
 			},
 		) (*struct {
 			Body data.TeachingUnitResponseList

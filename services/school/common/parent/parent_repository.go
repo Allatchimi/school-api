@@ -38,7 +38,7 @@ func (repository *Repository) Update(id int64, item *model.Parent) (*model.Paren
 
 	result := &model.Parent{}
 	return result, repository.Db.Model(result).Where("id = ?", item.ID).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"user_id": item.UserID,
 			"uid":     item.UID,
 		},
@@ -53,7 +53,7 @@ func (repository *Repository) UpdateParentStudent(id int64, item *model.ParentSt
 
 	result := &model.ParentStudent{}
 	return result, repository.Db.Model(result).Where("id = ?", item.ID).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"parent_id":  item.ParentID,
 			"student_id": item.StudentID,
 		},

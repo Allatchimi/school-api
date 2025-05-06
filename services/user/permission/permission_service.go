@@ -23,7 +23,7 @@ func (service *Service) Update(
 	tableName string,
 	item *model.Permission,
 ) (result *model.Permission, errCode int, err error) {
-	// Check if the permission exists
+	// Check unique
 	foundPermission, err := service.Repository.GetByRoleIDTableName(roleID, tableName)
 	if err != nil {
 		errCode = http.StatusInternalServerError
