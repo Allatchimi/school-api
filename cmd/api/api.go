@@ -22,13 +22,16 @@ import (
 	"api/services/school/common/teacher"
 	"api/services/school/common/year"
 	"api/services/school/highschool/class"
+	"api/services/school/highschool/quarter"
 	"api/services/school/highschool/section"
+	"api/services/school/highschool/sequence"
 	"api/services/school/highschool/specialty"
 	"api/services/school/highschool/subject"
 	"api/services/school/university/department"
 	"api/services/school/university/domain"
 	"api/services/school/university/faculty"
 	"api/services/school/university/level"
+	"api/services/school/university/semester"
 	"api/services/school/university/tu"
 	"api/services/user/auth"
 	"api/services/user/permission"
@@ -63,11 +66,14 @@ type Controllers struct {
 	SpecialtyController *specialty.Controller
 	ClassController     *class.Controller
 	SubjectController   *subject.Controller
+	SequenceController  *sequence.Controller
+	QuarterController   *quarter.Controller
 	// Faculty
 	FacultyController    *faculty.Controller
 	DepartmentController *department.Controller
 	DomainController     *domain.Controller
 	LevelController      *level.Controller
+	SemesterController   *semester.Controller
 	TUController         *tu.Controller
 }
 
@@ -96,11 +102,14 @@ func registerEndpoints(humaApi *huma.API) {
 	parent.RegisterEndpoints(humaApi, AllControllers.ParentController)
 	exam.RegisterEndpoints(humaApi, AllControllers.ExamController)
 	// Highschool
+	sequence.RegisterEndpoints(humaApi, AllControllers.SequenceController)
+	quarter.RegisterEndpoints(humaApi, AllControllers.QuarterController)
 	section.RegisterEndpoints(humaApi, AllControllers.SectionController)
 	specialty.RegisterEndpoints(humaApi, AllControllers.SpecialtyController)
 	class.RegisterEndpoints(humaApi, AllControllers.ClassController)
 	subject.RegisterEndpoints(humaApi, AllControllers.SubjectController)
 	// University
+	semester.RegisterEndpoints(humaApi, AllControllers.SemesterController)
 	faculty.RegisterEndpoints(humaApi, AllControllers.FacultyController)
 	department.RegisterEndpoints(humaApi, AllControllers.DepartmentController)
 	domain.RegisterEndpoints(humaApi, AllControllers.DomainController)

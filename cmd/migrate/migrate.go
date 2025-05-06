@@ -14,13 +14,16 @@ import (
 	teacherModel "api/services/school/common/teacher/model"
 	yearModel "api/services/school/common/year/model"
 	classModel "api/services/school/highschool/class/model"
+	quarterModel "api/services/school/highschool/quarter/model"
 	sectionModel "api/services/school/highschool/section/model"
+	sequenceModel "api/services/school/highschool/sequence/model"
 	specialtyModel "api/services/school/highschool/specialty/model"
 	subjectModel "api/services/school/highschool/subject/model"
 	departmentModel "api/services/school/university/department/model"
 	domainModel "api/services/school/university/domain/model"
 	facultyModel "api/services/school/university/faculty/model"
 	levelModel "api/services/school/university/level/model"
+	semesterModel "api/services/school/university/semester/model"
 	tuModel "api/services/school/university/tu/model"
 	permissionModel "api/services/user/permission/model"
 	roleModel "api/services/user/role/model"
@@ -50,6 +53,7 @@ func Start() error {
 		&schoolModel.SchoolInfo{},
 		&schoolModel.SchoolConfig{},
 		&yearModel.Year{},
+		&examModel.Exam{},
 		// Teacher
 		&teacherModel.Teacher{},
 		&teacherModel.TUSubject{},
@@ -60,15 +64,16 @@ func Start() error {
 		&parentModel.Parent{},
 		&parentModel.ParentStudent{},
 
-		&examModel.Exam{},
-
 		// Highschool
+		&sequenceModel.HighschoolSequence{},
+		&quarterModel.HighschoolQuarter{},
 		&sectionModel.HighschoolSection{},
 		&specialtyModel.HighschoolSpecialty{},
 		&classModel.HighschoolClass{},
 		&subjectModel.HighschoolSubject{},
 
 		// University
+		&semesterModel.UniversitySemester{},
 		&facultyModel.UniversityFaculty{},
 		&departmentModel.UniversityDepartment{},
 		&domainModel.UniversityDomain{},

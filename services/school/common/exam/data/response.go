@@ -2,25 +2,31 @@ package data
 
 import (
 	"api/common/types"
+	schoolData "api/services/school/common/school/data"
+	yearData "api/services/school/common/year/data"
 	subjectData "api/services/school/highschool/subject/data"
 	tuData "api/services/school/university/tu/data"
 )
 
 type ExamResponse struct {
 	types.BaseGormModelResponse
-	SchoolID     int64                        `json:"schoolID" required:"true" doc:"School id"`
+	Percentage  int    `json:"percentage" required:"false" doc:"Percentage"`
+	Description string `json:"description" required:"false" doc:"Description"`
+
+	School *schoolData.SchoolResponse `json:"school" required:"true" doc:"School"`
+	Year   *yearData.YearResponse     `json:"Year" required:"true" doc:"Year"`
+	Type   *ExamTypeResponse          `json:"type" required:"false" doc:"Type"`
+
 	TeachingUnit *tuData.TeachingUnitResponse `json:"teachingUnit" required:"false" doc:"Teaching unit"`
 	Subject      *subjectData.SubjectResponse `json:"subject" required:"false" doc:"Subject"`
-	Type         *ExamTypeResponse            `json:"type" required:"false" doc:"Type"`
-	Percentage   int                          `json:"percentage" required:"false" doc:"Percentage"`
-	Description  string                       `json:"description" required:"false" doc:"Description"`
 }
 
 type ExamTypeResponse struct {
 	types.BaseGormModelResponse
-	SchoolID    int64  `json:"schoolID" required:"false" doc:"School id" example:"1"`
 	Name        string `json:"name" required:"false" doc:"Name"`
 	Description string `json:"description" required:"false" doc:"Description"`
+
+	School *schoolData.SchoolResponse `json:"school" required:"true" doc:"School"`
 }
 
 type ExamResponseList struct {

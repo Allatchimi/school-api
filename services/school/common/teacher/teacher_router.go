@@ -67,7 +67,7 @@ func RegisterEndpoints(
 			Summary:     "Create teacher tu/class",
 			Description: "Create new teacher teaching unit/class and return created object.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/tuclass", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/tusubject", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -146,7 +146,7 @@ func RegisterEndpoints(
 			Summary:     "Update teacher tu/class",
 			Description: "Update existing teacher teaching unit/class with matching id and return the new object.",
 			Method:      http.MethodPut,
-			Path:        fmt.Sprintf("%s/tuclass/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/tusubject/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -225,7 +225,7 @@ func RegisterEndpoints(
 			Summary:     "Delete teacher tu/class",
 			Description: "Delete existing teacher teaching unit/class with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/tuclass/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/tusubject/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -299,7 +299,7 @@ func RegisterEndpoints(
 			Summary:     "Get teacher tu/class by id",
 			Description: "Return one teacher teaching unit/class with matching id",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/tuclass/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/tusubject/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -383,7 +383,7 @@ func RegisterEndpoints(
 			Summary:     "Get all teachers tu/class",
 			Description: "Get all teaching unit/class for specified teacher with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/{id}/tuclass", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/{id}/tusubject", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{

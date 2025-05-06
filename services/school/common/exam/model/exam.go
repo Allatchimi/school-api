@@ -4,6 +4,7 @@ import (
 	"api/common/types"
 	"api/services/school/common/exam/data"
 	schoolModel "api/services/school/common/school/model"
+	yearModel "api/services/school/common/year/model"
 	subjectModel "api/services/school/highschool/subject/model"
 	TUmodel "api/services/school/university/tu/model"
 )
@@ -15,6 +16,9 @@ type Exam struct {
 
 	SchoolID int64               `gorm:"default:null"`
 	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	YearID int64           `gorm:"default:null"`
+	Year   *yearModel.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	TypeID int64     `gorm:"default:null"`
 	Type   *ExamType `gorm:"default:null;foreignKey:TypeID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -35,12 +39,15 @@ func (item *Exam) ToResponse() *data.ExamResponse {
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
 
-	resp.SchoolID = item.SchoolID
-	resp.TeachingUnit = item.TeachingUnit.ToResponse()
-	resp.Subject = item.Subject.ToResponse()
-	resp.Type = item.Type.ToResponse()
 	resp.Percentage = item.Percentage
 	resp.Description = item.Description
+
+	resp.School = item.School.ToResponse()
+	resp.Year = item.Year.ToResponse()
+	resp.Type = item.Type.ToResponse()
+
+	resp.TeachingUnit = item.TeachingUnit.ToResponse()
+	resp.Subject = item.Subject.ToResponse()
 	return resp
 }
 
