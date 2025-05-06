@@ -9,8 +9,7 @@ type ParentStudentID struct {
 }
 
 type ParentRequest struct {
-	UserID int64  `json:"userID" required:"true" doc:"User id" example:"1"`
-	UID    string `json:"uid" required:"false" doc:"Parent UID" example:"1"`
+	UserID int64 `json:"userID" required:"true" doc:"User id" example:"1"`
 }
 
 type ParentStudentRequest struct {

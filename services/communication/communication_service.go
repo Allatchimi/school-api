@@ -16,10 +16,10 @@ func NewService(repository *Repository) *Service {
 	return &Service{Repository: repository}
 }
 
-// Create new communication
-func (service *Service) Create(inputJwtToken *types.JwtToken, communication *model.Communication) (result *model.Communication, errCode int, err error) {
+// Create Creates a new communication and returns the newly created
+func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Communication) (result *model.Communication, errCode int, err error) {
 	// Insert communication
-	result, err = service.Repository.Create(communication)
+	result, err = service.Repository.Create(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("create communication from database")
@@ -29,27 +29,27 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, communication *mod
 }
 
 // Get Returns communication with matching id
-func (service *Service) Get(inputJwtToken *types.JwtToken, communicationID int64) (communication *model.Communication, errCode int, err error) {
-	communication, err = service.Repository.GetById(communicationID)
+func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Communication, errCode int, err error) {
+	result, err = service.Repository.GetById(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get communication by id from database")
+		err = constants.Http500ErrorMessage("get communication from database")
 		return
 	}
-	if communication == nil {
+	if result == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Communication")
+		err = constants.Http404ErrorMessage("communication")
 		return
 	}
 	return
 }
 
-// GetAll Returns all communications with support for search, filter and pagination
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination) (communicationList []model.Communication, errCode int, err error) {
-	communicationList, err = service.Repository.GetAll(filter, pagination)
+// GetAll Returns communication list with matching for search, filter and pagination
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination) (result []model.Communication, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get communications from database")
+		err = constants.Http500ErrorMessage("get communication list from database")
 	}
 	return
 }

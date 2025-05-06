@@ -1,4 +1,4 @@
-package tu
+package unit
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
-	"api/services/school/university/tu/data"
+	"api/services/school/university/unit/data"
 )
 
 func RegisterEndpoints(
@@ -17,18 +17,18 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/schools/university/tu",
-		Tag:   []string{"University - Teaching units"},
+		Group: "/schools/university/unit",
+		Tag:   []string{"University - Units"},
 	}
-	const tableName = "teaching_units"
+	const tableName = "units"
 
-	// Create teaching unit
+	// Create unit
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-teaching-unit",
-			Summary:     "Create teaching unit",
-			Description: "Create new teaching unit and return the created object.",
+			OperationID: "post-unit",
+			Summary:     "Create unit",
+			Description: "Create new unit and return the created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -48,24 +48,24 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.TeachingUnitRequest
+				Body data.UnitRequest
 			},
-		) (*struct{ Body data.TeachingUnitResponse }, error) {
+		) (*struct{ Body data.UnitResponse }, error) {
 			result, errCode, err := controller.Create(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.TeachingUnitResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.UnitResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Update teaching unit with id
+	// Update unit with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "update-teaching-unit",
-			Summary:     "Update teaching unit",
-			Description: "Update existing teaching unit with matching id and return the updated object.",
+			OperationID: "update-unit",
+			Summary:     "Update unit",
+			Description: "Update existing unit with matching id and return the updated object.",
 			Method:      http.MethodPut,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -85,26 +85,26 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.TeachingUnitID
-				Body data.TeachingUnitRequest
+				data.UnitID
+				Body data.UnitRequest
 			},
-		) (*struct{ Body data.TeachingUnitResponse }, error) {
+		) (*struct{ Body data.UnitResponse }, error) {
 			result, errCode, err := controller.Update(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			fmt.Print(result)
-			return &struct{ Body data.TeachingUnitResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.UnitResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Delete teaching unit with id
+	// Delete unit with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-teaching-unit",
-			Summary:     "Delete teaching unit",
-			Description: "Delete existing teaching unit and return affected rows in database.",
+			OperationID: "delete-unit",
+			Summary:     "Delete unit",
+			Description: "Delete existing unit and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -124,7 +124,7 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.TeachingUnitID
+				data.UnitID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.Delete(&ctx, input)
@@ -135,13 +135,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get teaching unit by id
+	// Get unit by id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-teaching-unit-id",
-			Summary:     "Get teaching unit by id",
-			Description: "Return one teaching unit with matching id",
+			OperationID: "get-unit-id",
+			Summary:     "Get unit by id",
+			Description: "Return one unit with matching id",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -161,24 +161,24 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.TeachingUnitID
+				data.UnitID
 			},
-		) (*struct{ Body data.TeachingUnitResponse }, error) {
+		) (*struct{ Body data.UnitResponse }, error) {
 			result, errCode, err := controller.Get(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.TeachingUnitResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.UnitResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Get all teaching units
+	// Get all units
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-teaching-unit-list",
-			Summary:     "Get all teaching units",
-			Description: "Get all teaching units with support for search, filter and pagination",
+			OperationID: "get-unit-list",
+			Summary:     "Get all units",
+			Description: "Get all units with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -203,14 +203,14 @@ func RegisterEndpoints(
 				data.GetAllRequest
 			},
 		) (*struct {
-			Body data.TeachingUnitResponseList
+			Body data.UnitResponseList
 		}, error) {
 			result, errCode, err := controller.GetAll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.TeachingUnitResponseList
+				Body data.UnitResponseList
 			}{Body: *result}, nil
 		},
 	)

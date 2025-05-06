@@ -1,4 +1,4 @@
-package tu
+package unit
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/services/school/university/tu/model"
+	"api/services/school/university/unit/model"
 )
 
 type Repository struct {
@@ -20,18 +20,18 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(item *model.UniversityTeachingUnit) (*model.UniversityTeachingUnit, error) {
+func (repository *Repository) Create(item *model.UniversityUnit) (*model.UniversityUnit, error) {
 	result := *item
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, item *model.UniversityTeachingUnit) (*model.UniversityTeachingUnit, error) {
-	tempTeachingUnit, err := repository.GetById(id)
-	if err != nil || tempTeachingUnit == nil || tempTeachingUnit.ID != id {
+func (repository *Repository) Update(id int64, item *model.UniversityUnit) (*model.UniversityUnit, error) {
+	tempUnit, err := repository.GetById(id)
+	if err != nil || tempUnit == nil || tempUnit.ID != id {
 		return nil, err
 	}
 
-	result := &model.UniversityTeachingUnit{}
+	result := &model.UniversityUnit{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
 			"school_id":   item.SchoolID,
@@ -52,23 +52,23 @@ func (repository *Repository) Update(id int64, item *model.UniversityTeachingUni
 }
 
 func (repository *Repository) Delete(id int64) (int64, error) {
-	tempTeachingUnit, err := repository.GetById(id)
-	if err != nil || tempTeachingUnit == nil || tempTeachingUnit.ID != id {
+	tempUnit, err := repository.GetById(id)
+	if err != nil || tempUnit == nil || tempUnit.ID != id {
 		return -1, err
 	}
 
-	result := repository.Db.Where("id = ?", id).Delete(&model.UniversityTeachingUnit{})
+	result := repository.Db.Where("id = ?", id).Delete(&model.UniversityUnit{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) GetById(id int64) (*model.UniversityTeachingUnit, error) {
-	result := &model.UniversityTeachingUnit{}
+func (repository *Repository) GetById(id int64) (*model.UniversityUnit, error) {
+	result := &model.UniversityUnit{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetUniqueObject(item *model.UniversityTeachingUnit) (*model.UniversityTeachingUnit, error) {
-	result := &model.UniversityTeachingUnit{}
-	return result, repository.Db.Where(&model.UniversityTeachingUnit{
+func (repository *Repository) GetUniqueObject(item *model.UniversityUnit) (*model.UniversityUnit, error) {
+	result := &model.UniversityUnit{}
+	return result, repository.Db.Where(&model.UniversityUnit{
 		SchoolID:   item.SchoolID,
 		DomainID:   item.DomainID,
 		LevelID:    item.LevelID,
@@ -78,9 +78,9 @@ func (repository *Repository) GetUniqueObject(item *model.UniversityTeachingUnit
 	}).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) AreSameUniqueObjects(item1 *model.UniversityTeachingUnit, item2 *model.UniversityTeachingUnit) bool {
+func (repository *Repository) AreSameUniqueObjects(item1 *model.UniversityUnit, item2 *model.UniversityUnit) bool {
 	if item1 != nil && item2 != nil &&
-		!(item1.SchoolID == item2.SchoolID &&
+		(item1.SchoolID == item2.SchoolID &&
 			item1.DomainID == item2.DomainID &&
 			item1.LevelID == item2.LevelID &&
 			item1.SemesterID == item2.SemesterID &&
@@ -90,8 +90,8 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.UniversityTeachi
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.UniversityTeachingUnit, err error) {
-	result = make([]model.UniversityTeachingUnit, 0)
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.UniversityUnit, err error) {
+	result = make([]model.UniversityUnit, 0)
 	var where string = ""
 	if schoolID > 0 {
 		where = fmt.Sprintf("WHERE tus.school_id = %d", schoolID)
@@ -118,7 +118,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 		helpers.PaginationScope(
 			repository.Db,
 			"SELECT tus.id, tus.name, tus.description, tus.school_id, tus.domain_id, tus.level_id, tus.semester_id"+
-				", tus.created_at, tus.updated_at FROM university_teaching_units tus "+
+				", tus.created_at, tus.updated_at FROM university_units tus "+
 				"LEFT JOIN schools ON tus.school_id = schools.id "+
 				"LEFT JOIN university_domains ON tus.domain_id = university_domains.id "+
 				"LEFT JOIN university_levels ON tus.level_id = university_levels.id "+

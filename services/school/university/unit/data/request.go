@@ -2,11 +2,11 @@ package data
 
 import "time"
 
-type TeachingUnitID struct {
-	ID int64 `json:"id" path:"id" required:"true" doc:"Teaching unit id" example:"1"`
+type UnitID struct {
+	ID int64 `json:"id" path:"id" required:"true" doc:"Unit id" example:"1"`
 }
 
-type TeachingUnitRequest struct {
+type UnitRequest struct {
 	SchoolID   int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
 	DomainID   int64 `json:"domainID" required:"true" doc:"Domain id" example:"1"`
 	LevelID    int64 `json:"levelID" required:"true" doc:"Level id" example:"1"`

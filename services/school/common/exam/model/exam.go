@@ -5,14 +5,22 @@ import (
 	"api/services/school/common/exam/data"
 	schoolModel "api/services/school/common/school/model"
 	yearModel "api/services/school/common/year/model"
+	sequenceModel "api/services/school/highschool/sequence/model"
 	subjectModel "api/services/school/highschool/subject/model"
-	TUmodel "api/services/school/university/tu/model"
+	Unitmodel "api/services/school/university/unit/model"
+	"time"
 )
 
 type Exam struct {
 	types.BaseGormModel
-	Percentage  int    `gorm:"default:null"`
-	Description string `gorm:"default:null"`
+	Percentage      int        `gorm:"default:null"`
+	Description     string     `gorm:"default:null"`
+	LocationType    string     `gorm:"default:null"`
+	LocationDetails string     `gorm:"default:null"`
+	Requirements    string     `gorm:"default:null"`
+	AllowedItems    string     `gorm:"default:null"`
+	StartDate       *time.Time `gorm:"default:null"`
+	EndDate         *time.Time `gorm:"default:null"`
 
 	SchoolID int64               `gorm:"default:null"`
 	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -23,11 +31,13 @@ type Exam struct {
 	TypeID int64     `gorm:"default:null"`
 	Type   *ExamType `gorm:"default:null;foreignKey:TypeID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	TeachingUnitID int64                           `gorm:"default:null"`
-	TeachingUnit   *TUmodel.UniversityTeachingUnit `gorm:"default:null;foreignKey:TeachingUnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	UnitID int64                     `gorm:"default:null"`
+	Unit   *Unitmodel.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	SubjectID int64                           `gorm:"default:null"`
-	Subject   *subjectModel.HighschoolSubject `gorm:"default:null;foreignKey:SubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	SubjectID  int64                             `gorm:"default:null"`
+	Subject    *subjectModel.HighschoolSubject   `gorm:"default:null;foreignKey:SubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	SequenceID int64                             `gorm:"default:null"`
+	Sequence   *sequenceModel.HighschoolSequence `gorm:"default:null;foreignKey:SequenceID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *Exam) ToResponse() *data.ExamResponse {
@@ -37,12 +47,19 @@ func (item *Exam) ToResponse() *data.ExamResponse {
 	resp := &data.ExamResponse{}
 	resp.Percentage = item.Percentage
 	resp.Description = item.Description
+	resp.LocationType = item.LocationType
+	resp.LocationDetails = item.LocationDetails
+	resp.Requirements = item.Requirements
+	resp.AllowedItems = item.AllowedItems
+	resp.StartDate = item.StartDate
+	resp.EndDate = item.EndDate
 
 	resp.School = item.School.ToResponse()
 	resp.Year = item.Year.ToResponse()
 	resp.Type = item.Type.ToResponse()
-	resp.TeachingUnit = item.TeachingUnit.ToResponse()
+	resp.Unit = item.Unit.ToResponse()
 	resp.Subject = item.Subject.ToResponse()
+	resp.Sequence = item.Sequence.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

@@ -17,7 +17,7 @@ func NewService(repository *Repository) *Service {
 	return &Service{Repository: repository}
 }
 
-// Create Creates role
+// Create Creates a new role and returns the newly created
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Role) (result *model.Role, errCode int, err error) {
 	result, err = service.Repository.Create(item)
 	if err != nil {
@@ -37,7 +37,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Role) 
 	return
 }
 
-// Update Updates role
+// Update Updates role and returns the new version
 func (service *Service) Update(inputJwtToken *types.JwtToken, roleID int64, item *model.Role) (result *model.Role, errCode int, err error) {
 	// Check unique
 	foundRole, err := service.Repository.GetByID(roleID)
@@ -48,7 +48,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, roleID int64, item
 	}
 	if foundRole == nil || foundRole.ID != roleID {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Role")
+		err = constants.Http404ErrorMessage("role")
 		return
 	}
 
@@ -75,7 +75,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, roleID int64, item
 	return
 }
 
-// Delete Deletes role
+// Delete Deletes role with matching id and returns the affected rows
 func (service *Service) Delete(inputJwtToken *types.JwtToken, roleID int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.Delete(roleID)
 	if err != nil {
@@ -85,13 +85,13 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, roleID int64) (aff
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Role")
+		err = constants.Http404ErrorMessage("role")
 		return
 	}
 	return
 }
 
-// Delete Deletes selection
+// Delete Deletes selection with matching ids and returns the affected rows
 func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultiple(list)
 	if err != nil {
@@ -101,34 +101,34 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Role selection")
+		err = constants.Http404ErrorMessage("role selection")
 		return
 	}
 	return
 }
 
-// Get Returns role
+// Get Returns role with matching id
 func (service *Service) GetByID(inputJwtToken *types.JwtToken, roleID int64) (result *model.Role, errCode int, err error) {
 	result, err = service.Repository.GetByID(roleID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get role by id from database")
+		err = constants.Http500ErrorMessage("get role from database")
 		return
 	}
 	if result == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Role")
+		err = constants.Http404ErrorMessage("role")
 		return
 	}
 	return
 }
 
-// GetAll Returns role list
+// GetAll Returns role list with matching search, filter and pagination
 func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination) (result []model.Role, errCode int, err error) {
 	result, err = service.Repository.GetAll(filter, pagination)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get roles from database")
+		err = constants.Http500ErrorMessage("get role list from database")
 	}
 	return
 }

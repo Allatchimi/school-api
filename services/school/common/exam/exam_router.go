@@ -85,7 +85,7 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.CreateExamRequest
+				Body data.ExamRequest
 			},
 		) (*struct{ Body data.ExamResponse }, error) {
 			result, errCode, err := controller.Create(&ctx, input)
@@ -161,7 +161,7 @@ func RegisterEndpoints(
 			ctx context.Context,
 			input *struct {
 				data.ExamID
-				Body data.UpdateExamRequest
+				Body data.ExamRequest
 			},
 		) (*struct{ Body data.ExamResponse }, error) {
 			result, errCode, err := controller.Update(&ctx, input)
@@ -348,11 +348,12 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
+				data.GetAllExamTypeRequest
 			},
 		) (*struct {
 			Body data.ExamTypeResponseList
 		}, error) {
-			result, errCode, err := controller.GetAllType(&ctx, input)
+			result, errCode, err := controller.GetAllExamType(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -390,6 +391,7 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
+				data.GetAllRequest
 			},
 		) (*struct {
 			Body data.ExamResponseList

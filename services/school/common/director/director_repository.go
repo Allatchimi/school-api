@@ -54,9 +54,21 @@ func (repository *Repository) GetById(id int64) (*model.Director, error) {
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetByUserSchoolIDs(userID int64, schoolID int64) (*model.Director, error) {
+func (repository *Repository) GetUniqueObject(item *model.Director) (*model.Director, error) {
 	result := &model.Director{}
-	return result, repository.Db.Preload(clause.Associations).Where("user_id = ?", userID).Where("school_id = ?", schoolID).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).Where(&model.Director{
+		SchoolID: item.SchoolID,
+		UserID:   item.UserID,
+	}).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) AreSameUniqueObjects(item1 *model.Director, item2 *model.Director) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID &&
+			item1.UserID == item2.UserID) {
+		return true
+	}
+	return false
 }
 
 func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination) (result []model.Director, err error) {

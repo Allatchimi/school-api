@@ -18,7 +18,7 @@ func RegisterEndpoints(
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
 		Group: "/schools/documents",
-		Tag:   []string{"School - Documents"},
+		Tag:   []string{"Documents"},
 	}
 	const tableName = "documents"
 
@@ -157,6 +157,7 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
+				data.GetAllRequest
 			},
 		) (*struct {
 			Body data.DocumentResponseList

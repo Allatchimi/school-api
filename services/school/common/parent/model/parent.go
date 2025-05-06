@@ -10,8 +10,6 @@ type Parent struct {
 	types.BaseGormModel
 	UserID int64           `gorm:"default:null"`
 	User   *modelUser.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-
-	UID string `gorm:"default:null"`
 }
 
 func (item *Parent) ToParentResponse() *data.ParentResponse {
@@ -19,7 +17,6 @@ func (item *Parent) ToParentResponse() *data.ParentResponse {
 		return nil
 	}
 	resp := &data.ParentResponse{}
-	resp.UID = item.UID
 
 	resp.User = item.User.ToResponse()
 

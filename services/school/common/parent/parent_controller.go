@@ -27,7 +27,6 @@ func (controller *Controller) Create(
 		helpers.GetJwtContext(ctx),
 		&model.Parent{
 			UserID: input.Body.UserID,
-			UID:    input.Body.UID,
 		},
 	)
 	return
@@ -60,7 +59,6 @@ func (controller *Controller) Update(
 		helpers.GetJwtContext(ctx), input.ID,
 		&model.Parent{
 			UserID: input.Body.UserID,
-			UID:    input.Body.UID,
 		},
 	)
 	return

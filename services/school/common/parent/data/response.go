@@ -9,8 +9,6 @@ import (
 type ParentResponse struct {
 	types.BaseGormModelResponse
 	User *dataUser.UserResponse `json:"userID" required:"false" doc:"User id"`
-
-	UID string `json:"uid" required:"false" doc:"Parent UID"`
 }
 
 type ParentStudentResponse struct {

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-type TeachingUnitResponse struct {
+type UnitResponse struct {
 	types.BaseGormModelResponse
 	School   *dataSchool.SchoolResponse     `json:"school" required:"false" doc:"School"`
 	Domain   *dataDomain.DomainResponse     `json:"domain" required:"false" doc:"Domain"`
@@ -26,7 +26,7 @@ type TeachingUnitResponse struct {
 	InvalidDate *time.Time `json:"invalidDate" required:"false" doc:"Invalid date"`
 }
 
-type TeachingUnitResponseList struct {
+type UnitResponseList struct {
 	types.PaginatedResponse
-	Data []TeachingUnitResponse `json:"data" required:"false" doc:"List of teaching unit" example:"[]"`
+	Data []UnitResponse `json:"data" required:"false" doc:"List of unit" example:"[]"`
 }

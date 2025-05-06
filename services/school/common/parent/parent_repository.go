@@ -40,7 +40,6 @@ func (repository *Repository) Update(id int64, item *model.Parent) (*model.Paren
 	return result, repository.Db.Model(result).Where("id = ?", item.ID).Updates(
 		map[string]any{
 			"user_id": item.UserID,
-			"uid":     item.UID,
 		},
 	).Error
 }

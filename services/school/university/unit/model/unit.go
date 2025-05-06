@@ -6,11 +6,11 @@ import (
 	modelDomain "api/services/school/university/domain/model"
 	modelLevel "api/services/school/university/level/model"
 	modelSemester "api/services/school/university/semester/model"
-	"api/services/school/university/tu/data"
+	"api/services/school/university/unit/data"
 	"time"
 )
 
-type UniversityTeachingUnit struct {
+type UniversityUnit struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
 	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -34,11 +34,11 @@ type UniversityTeachingUnit struct {
 	InvalidDate *time.Time `gorm:"default:null"`
 }
 
-func (item *UniversityTeachingUnit) ToResponse() *data.TeachingUnitResponse {
+func (item *UniversityUnit) ToResponse() *data.UnitResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.TeachingUnitResponse{}
+	resp := &data.UnitResponse{}
 	resp.Name = item.Name
 	resp.Description = item.Description
 	resp.Credit = item.Credit
@@ -58,8 +58,8 @@ func (item *UniversityTeachingUnit) ToResponse() *data.TeachingUnitResponse {
 	return resp
 }
 
-func ToTeachingUnitResponseList(itemList []UniversityTeachingUnit) []data.TeachingUnitResponse {
-	resp := make([]data.TeachingUnitResponse, len(itemList))
+func ToUnitResponseList(itemList []UniversityUnit) []data.UnitResponse {
+	resp := make([]data.UnitResponse, len(itemList))
 	for index, item := range itemList {
 		resp[index] = *item.ToResponse()
 	}

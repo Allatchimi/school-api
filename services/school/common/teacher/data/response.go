@@ -5,7 +5,7 @@ import (
 	dataSchool "api/services/school/common/school/data"
 	dataYear "api/services/school/common/year/data"
 	dataSubject "api/services/school/highschool/subject/data"
-	dataTeachingUnit "api/services/school/university/tu/data"
+	dataUnit "api/services/school/university/unit/data"
 	dataUser "api/services/user/user/data"
 )
 
@@ -17,13 +17,13 @@ type TeacherResponse struct {
 	UID string `json:"uid" required:"false" doc:"Teacher UID"`
 }
 
-type TeacherTUSubjectResponse struct {
+type TeacherUnitSubjectResponse struct {
 	types.BaseGormModelResponse
 	Teacher *TeacherResponse       `json:"teacher" required:"false" doc:"Teacher"`
 	Year    *dataYear.YearResponse `json:"year" required:"false" doc:"Year"`
 
-	TeachingUnit *dataTeachingUnit.TeachingUnitResponse `json:"domain" required:"false" doc:"Teaching unit"`
-	Subject      *dataSubject.SubjectResponse           `json:"subject" required:"false" doc:"Subject"`
+	Unit    *dataUnit.UnitResponse       `json:"domain" required:"false" doc:"Unit"`
+	Subject *dataSubject.SubjectResponse `json:"subject" required:"false" doc:"Subject"`
 }
 
 type TeacherResponseList struct {
@@ -31,7 +31,7 @@ type TeacherResponseList struct {
 	Data []TeacherResponse `json:"data" required:"false" doc:"List of teachers" example:"[]"`
 }
 
-type TeacherTUSubjectResponseList struct {
+type TeacherUnitSubjectResponseList struct {
 	types.PaginatedResponse
-	Data []TeacherTUSubjectResponse `json:"data" required:"false" doc:"List of subject/teaching unit for the specified teacher" example:"[]"`
+	Data []TeacherUnitSubjectResponse `json:"data" required:"false" doc:"List of unit/subject for the specified teacher" example:"[]"`
 }

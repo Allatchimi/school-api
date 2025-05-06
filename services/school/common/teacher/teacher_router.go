@@ -59,15 +59,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Create teacher tu/class
+	// Create teacher unit/subject
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-teacher-tu/class",
-			Summary:     "Create teacher tu/class",
-			Description: "Create new teacher teaching unit/class and return created object.",
+			OperationID: "post-teacher-unit/subject",
+			Summary:     "Create teacher unit/subject",
+			Description: "Create new teacher unit/subject and return created object.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/tusubject", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/unitsubjects", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -85,18 +85,18 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.TeacherTUSubjectRequest
+				Body data.TeacherUnitSubjectRequest
 			},
 		) (*struct {
-			Body data.TeacherTUSubjectResponse
+			Body data.TeacherUnitSubjectResponse
 		}, error) {
-			result, errCode, err := controller.CreateTeacherTUSubject(&ctx, input)
+			result, errCode, err := controller.CreateTeacherUnitSubject(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.TeacherTUSubjectResponse
-			}{Body: *result.ToTeacherTUSubjectResponse()}, nil
+				Body data.TeacherUnitSubjectResponse
+			}{Body: *result.ToTeacherUnitSubjectResponse()}, nil
 		},
 	)
 
@@ -138,15 +138,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Update teacher tu/class with id
+	// Update teacher unit/subject with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "update-teacher-tu/class",
-			Summary:     "Update teacher tu/class",
-			Description: "Update existing teacher teaching unit/class with matching id and return the new object.",
+			OperationID: "update-teacher-unit/subject",
+			Summary:     "Update teacher unit/subject",
+			Description: "Update existing teacher unit/subject with matching id and return the new object.",
 			Method:      http.MethodPut,
-			Path:        fmt.Sprintf("%s/tusubject/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/unitsubjects/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -164,19 +164,19 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.TUSubjectID
-				Body data.TeacherTUSubjectRequest
+				data.UnitSubjectID
+				Body data.TeacherUnitSubjectRequest
 			},
 		) (*struct {
-			Body data.TeacherTUSubjectResponse
+			Body data.TeacherUnitSubjectResponse
 		}, error) {
-			result, errCode, err := controller.UpdateTeacherTUSubject(&ctx, input)
+			result, errCode, err := controller.UpdateTeacherUnitSubject(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.TeacherTUSubjectResponse
-			}{Body: *result.ToTeacherTUSubjectResponse()}, nil
+				Body data.TeacherUnitSubjectResponse
+			}{Body: *result.ToTeacherUnitSubjectResponse()}, nil
 		},
 	)
 
@@ -217,15 +217,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete teacher tu/class with id
+	// Delete teacher unit/subject with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-teacher-tu/class",
-			Summary:     "Delete teacher tu/class",
-			Description: "Delete existing teacher teaching unit/class with matching id and return affected rows in database.",
+			OperationID: "delete-teacher-unit/subject",
+			Summary:     "Delete teacher unit/subject",
+			Description: "Delete existing teacher unit/subject with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/tusubject/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/unitsubjects/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -243,10 +243,10 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.TUSubjectID
+				data.UnitSubjectID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteTeacherTUSubject(&ctx, input)
+			result, errCode, err := controller.DeleteTeacherUnitSubject(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -291,15 +291,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get teacher tu/class by id
+	// Get teacher unit/subject by id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-teacher-tu/class-id",
-			Summary:     "Get teacher tu/class by id",
-			Description: "Return one teacher teaching unit/class with matching id",
+			OperationID: "get-teacher-unit/subject-id",
+			Summary:     "Get teacher unit/subject by id",
+			Description: "Return one teacher unit/subject with matching id",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/tusubject/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/unitsubjects/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -317,18 +317,18 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.TUSubjectID
+				data.UnitSubjectID
 			},
 		) (*struct {
-			Body data.TeacherTUSubjectResponse
+			Body data.TeacherUnitSubjectResponse
 		}, error) {
-			result, errCode, err := controller.GetTeacherTUSubject(&ctx, input)
+			result, errCode, err := controller.GetTeacherUnitSubject(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.TeacherTUSubjectResponse
-			}{Body: *result.ToTeacherTUSubjectResponse()}, nil
+				Body data.TeacherUnitSubjectResponse
+			}{Body: *result.ToTeacherUnitSubjectResponse()}, nil
 		},
 	)
 
@@ -375,15 +375,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all teachers tu/class
+	// Get all teachers unit/subject
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-teacher-tu/class-list",
-			Summary:     "Get all teachers tu/class",
-			Description: "Get all teaching unit/class for specified teacher with support for search, filter and pagination",
+			OperationID: "get-teacher-unit/subject-list",
+			Summary:     "Get all teachers unit/subject",
+			Description: "Get all unit/subject for specified teacher with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/{id}/tusubject", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/{id}/unitsubjects", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -403,17 +403,17 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
-				data.GetAllTeacherTUSubjectRequest
+				data.GetAllTeacherUnitSubjectRequest
 			},
 		) (*struct {
-			Body data.TeacherTUSubjectResponseList
+			Body data.TeacherUnitSubjectResponseList
 		}, error) {
-			result, errCode, err := controller.GetAllTeacherTUSubject(&ctx, input)
+			result, errCode, err := controller.GetAllTeacherUnitSubject(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.TeacherTUSubjectResponseList
+				Body data.TeacherUnitSubjectResponseList
 			}{Body: *result}, nil
 		},
 	)

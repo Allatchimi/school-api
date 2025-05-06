@@ -1,12 +1,12 @@
-package tu
+package unit
 
 import (
 	"context"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/services/school/university/tu/data"
-	"api/services/school/university/tu/model"
+	"api/services/school/university/unit/data"
+	"api/services/school/university/unit/model"
 )
 
 type Controller struct {
@@ -20,12 +20,12 @@ func NewController(service *Service) *Controller {
 func (controller *Controller) Create(
 	ctx *context.Context,
 	input *struct {
-		Body data.TeachingUnitRequest
+		Body data.UnitRequest
 	},
-) (result *model.UniversityTeachingUnit, errCode int, err error) {
+) (result *model.UniversityUnit, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.UniversityTeachingUnit{
+		&model.UniversityUnit{
 			SchoolID:   input.Body.SchoolID,
 			DomainID:   input.Body.DomainID,
 			LevelID:    input.Body.LevelID,
@@ -46,13 +46,13 @@ func (controller *Controller) Create(
 func (controller *Controller) Update(
 	ctx *context.Context,
 	input *struct {
-		data.TeachingUnitID
-		Body data.TeachingUnitRequest
+		data.UnitID
+		Body data.UnitRequest
 	},
-) (result *model.UniversityTeachingUnit, errCode int, err error) {
+) (result *model.UniversityUnit, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx), input.ID,
-		&model.UniversityTeachingUnit{
+		&model.UniversityUnit{
 			SchoolID:   input.Body.SchoolID,
 			DomainID:   input.Body.DomainID,
 			LevelID:    input.Body.LevelID,
@@ -73,7 +73,7 @@ func (controller *Controller) Update(
 func (controller *Controller) Delete(
 	ctx *context.Context,
 	input *struct {
-		data.TeachingUnitID
+		data.UnitID
 	},
 ) (result int64, errCode int, err error) {
 	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
@@ -87,14 +87,14 @@ func (controller *Controller) Delete(
 func (controller *Controller) Get(
 	ctx *context.Context,
 	input *struct {
-		data.TeachingUnitID
+		data.UnitID
 	},
-) (result *model.UniversityTeachingUnit, errCode int, err error) {
-	teachingUnit, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+) (result *model.UniversityUnit, errCode int, err error) {
+	unit, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
-	result = teachingUnit
+	result = unit
 	return
 }
 
@@ -105,14 +105,14 @@ func (controller *Controller) GetAll(
 		types.PaginationRequest
 		data.GetAllRequest
 	},
-) (result *data.TeachingUnitResponseList, errCode int, err error) {
+) (result *data.UnitResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	teachingUnitList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllRequest.SchoolID)
+	unitList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllRequest.SchoolID)
 	if err != nil {
 		return
 	}
-	result = &data.TeachingUnitResponseList{
-		Data: model.ToTeachingUnitResponseList(teachingUnitList),
+	result = &data.UnitResponseList{
+		Data: model.ToUnitResponseList(unitList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

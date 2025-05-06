@@ -16,7 +16,7 @@ func NewService(repository *Repository) *Service {
 	return &Service{Repository: repository}
 }
 
-// Update Update permission
+// Update Updates permission and returns the new version
 func (service *Service) Update(
 	inputJwtToken *types.JwtToken,
 	roleID int64,
@@ -51,7 +51,7 @@ func (service *Service) Update(
 	return
 }
 
-// Delete Deletes permission
+// Delete Deletes permission with matching id and returns the affected rows
 func (service *Service) Delete(inputJwtToken *types.JwtToken, roleID int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.Delete(roleID)
 	if err != nil {
@@ -61,13 +61,13 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, roleID int64) (aff
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Permission")
+		err = constants.Http404ErrorMessage("permission")
 		return
 	}
 	return
 }
 
-// Delete Deletes selection
+// Delete Deletes selection with matching ids and returns the affected rows
 func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultiple(list)
 	if err != nil {
@@ -77,14 +77,13 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Permission selection")
+		err = constants.Http404ErrorMessage("permission selection")
 		return
 	}
 	return
 }
 
-// GetAll Returns all permissions with matching role id and
-// support for search, filter and pagination
+// GetAll Returns permission list with matching search, filter and pagination
 func (service *Service) GetAll(
 	inputJwtToken *types.JwtToken,
 	filter *types.Filter,
@@ -93,7 +92,7 @@ func (service *Service) GetAll(
 	result, err = service.Repository.GetAll(filter, pagination)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get permissions from database")
+		err = constants.Http500ErrorMessage("get permission list from database")
 	}
 	return
 }

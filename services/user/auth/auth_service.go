@@ -30,7 +30,7 @@ func NewAuthService(repository *user.Repository, roleRepository *role.Repository
 	return &Service{Repository: repository, RoleRepository: roleRepository}
 }
 
-// Login with email or phone number
+// Login Sign in user with email or phone number
 func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice) (accessToken string, accessExpires *time.Time, activateAccountToken string, errCode int, err error) {
 	// Check if user exists
 	var userFound *model.User
@@ -141,7 +141,7 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	return
 }
 
-// LoginWithProvider Login with provider like Google and Facebook
+// LoginWithProvider Sign in user with provider like Google and Facebook
 func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, device *data.LoginDevice) (accessToken string, accessExpires *time.Time, errCode int, err error) {
 	// Validate provider token and update user
 	var newUser = &model.User{
@@ -264,7 +264,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 	return
 }
 
-// Register with email or phone number
+// Register Sign up user with email or phone number
 func (service *Service) Register(input *data.RegisterRequest) (activateAccountToken string, errCode int, err error) {
 	// Check if user exists
 	var userFound *model.User
@@ -365,7 +365,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	return
 }
 
-// ActivateAccount Activate user account
+// ActivateAccount Activates user account
 func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (activatedAt *time.Time, errCode int, err error) {
 	// Extract token information and validate the token
 	errMsg := "Invalid or expired token! Please enter valid information."
@@ -689,7 +689,7 @@ func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewP
 	return
 }
 
-// Logout user with provided token
+// Logout closes user session with provided token
 func (service *Service) Logout(jwtToken *types.JwtToken, bearerToken string) (errCode int, err error) {
 	// Invalidate the token
 	sessions, err := config.GetRedisStringList(security.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))

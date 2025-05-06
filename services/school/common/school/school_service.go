@@ -17,7 +17,9 @@ func NewService(repository *Repository) *Service {
 	return &Service{Repository: repository}
 }
 
-// Create new school
+const MODEL_NAME = "school"
+const DEFAULT_ERROR_MESSAGE = "interact with school model"
+
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.School) (result *model.School, errCode int, err error) {
 	// Create school
 	result, err = service.Repository.Create(item)
@@ -26,12 +28,12 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.School
 		if errPgState == nil {
 			if pgState == constants.PG_ERROR_UNIQUE_COLUMN {
 				errCode = http.StatusFound
-				err = constants.Http302ErrorMessage("school")
+				err = constants.Http302ErrorMessage(MODEL_NAME)
 				return
 			}
 		}
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("create school from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
@@ -54,18 +56,17 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.School
 	return
 }
 
-// Update school
 func (service *Service) Update(inputJwtToken *types.JwtToken, schoolID int64, item *model.School) (result *model.School, errCode int, err error) {
-	// Check if school exists
-	foundSchool, err := service.Repository.GetByName(item.Name)
+	// Check unique
+	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get school by name from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundSchool != nil && foundSchool.Name == item.Name {
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) {
 		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage("school")
+		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
 	}
 
@@ -76,12 +77,12 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, schoolID int64, it
 		if errPgState == nil {
 			if pgState == constants.PG_ERROR_UNIQUE_COLUMN {
 				errCode = http.StatusFound
-				err = constants.Http302ErrorMessage("school")
+				err = constants.Http302ErrorMessage(MODEL_NAME)
 				return
 			}
 		}
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("update school from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
@@ -101,13 +102,12 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, schoolID int64, it
 	return
 }
 
-// Update info
 func (service *Service) UpdateInfo(inputJwtToken *types.JwtToken, id int64, item *model.SchoolInfo) (result *model.SchoolInfo, errCode int, err error) {
 	// Check if school info already exists
 	foundItem, err := service.Repository.GetInfoByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get school info by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundItem != nil && foundItem.ID == id {
@@ -115,7 +115,7 @@ func (service *Service) UpdateInfo(inputJwtToken *types.JwtToken, id int64, item
 		result, err = service.Repository.UpdateInfo(id, item)
 		if err != nil {
 			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage("update school info from database")
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
 		}
 		return
@@ -125,19 +125,18 @@ func (service *Service) UpdateInfo(inputJwtToken *types.JwtToken, id int64, item
 	result, err = service.Repository.CreateInfo(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("create school info from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Update config
 func (service *Service) UpdateConfig(inputJwtToken *types.JwtToken, id int64, item *model.SchoolConfig) (result *model.SchoolConfig, errCode int, err error) {
 	// Check if school config already exists
 	foundItem, err := service.Repository.GetConfigByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get school config by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundItem != nil && foundItem.ID == id {
@@ -145,7 +144,7 @@ func (service *Service) UpdateConfig(inputJwtToken *types.JwtToken, id int64, it
 		result, err = service.Repository.UpdateConfig(id, item)
 		if err != nil {
 			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage("update school config from database")
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
 		}
 		return
@@ -155,66 +154,62 @@ func (service *Service) UpdateConfig(inputJwtToken *types.JwtToken, id int64, it
 	result, err = service.Repository.CreateConfig(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("create school config from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Delete school with matching id and return affected rows
 func (service *Service) Delete(inputJwtToken *types.JwtToken, schoolID int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.Delete(schoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete school from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("School")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// Delete Deletes selection
 func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultiple(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete multiple school from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("School selection")
+		err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Get Returns school with matching id
 func (service *Service) Get(inputJwtToken *types.JwtToken, schoolID int64) (result *model.School, errCode int, err error) {
 	result, err = service.Repository.GetByID(schoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get school by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if result == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("School")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// GetAll Returns all schools with support for search, filter and pagination
 func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, typeName string) (result []model.School, errCode int, err error) {
 	result, err = service.Repository.GetAll(filter, pagination, typeName)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get schools from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}
 	return
 }

@@ -117,9 +117,19 @@ func (repository *Repository) GetByID(id int64) (*model.School, error) {
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetByName(name string) (*model.School, error) {
+func (repository *Repository) GetUniqueObject(item *model.School) (*model.School, error) {
 	result := &model.School{}
-	return result, repository.Db.Preload(clause.Associations).Where("name = ?", name).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).Where(&model.School{
+		Name: item.Name,
+	}).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) AreSameUniqueObjects(item1 *model.School, item2 *model.School) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.Name == item2.Name) {
+		return true
+	}
+	return false
 }
 
 func (repository *Repository) GetInfoByID(id int64) (*model.SchoolInfo, error) {

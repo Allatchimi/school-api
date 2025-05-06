@@ -68,7 +68,7 @@ func (repository *Repository) GetUniqueObject(item *model.HighschoolClass) (*mod
 
 func (repository *Repository) AreSameUniqueObjects(item1 *model.HighschoolClass, item2 *model.HighschoolClass) bool {
 	if item1 != nil && item2 != nil &&
-		!(item1.SchoolID == item2.SchoolID &&
+		(item1.SchoolID == item2.SchoolID &&
 			item1.Name == item2.Name) {
 		return true
 	}

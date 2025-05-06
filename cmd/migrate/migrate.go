@@ -24,7 +24,7 @@ import (
 	facultyModel "api/services/school/university/faculty/model"
 	levelModel "api/services/school/university/level/model"
 	semesterModel "api/services/school/university/semester/model"
-	tuModel "api/services/school/university/tu/model"
+	tuModel "api/services/school/university/unit/model"
 	permissionModel "api/services/user/permission/model"
 	roleModel "api/services/user/role/model"
 	userModel "api/services/user/user/model"
@@ -56,7 +56,7 @@ func Start() error {
 		&examModel.Exam{},
 		// Teacher
 		&teacherModel.Teacher{},
-		&teacherModel.TeacherTeachingUnitSubject{},
+		&teacherModel.TeacherUnitSubject{},
 		// Student
 		&studentModel.Student{},
 		&studentModel.StudentLevelClass{},
@@ -78,7 +78,7 @@ func Start() error {
 		&departmentModel.UniversityDepartment{},
 		&domainModel.UniversityDomain{},
 		&levelModel.UniversityLevel{},
-		&tuModel.UniversityTeachingUnit{},
+		&tuModel.UniversityUnit{},
 	)
 	helpers.LogMigrations(
 		err,
