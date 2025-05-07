@@ -24,7 +24,7 @@ func NewService(repository *Repository, SchoolRepository *school.Repository) *Se
 // Create new department
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.UniversityDepartment) (result *model.UniversityDepartment, errCode int, err error) {
 	// Check if the school type is university
-	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get school by id from database")
@@ -62,7 +62,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Univer
 // Update department
 func (service *Service) Update(inputJwtToken *types.JwtToken, departmentID int64, item *model.UniversityDepartment) (result *model.UniversityDepartment, errCode int, err error) {
 	// Check if the school type is university
-	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("get school by id from database")

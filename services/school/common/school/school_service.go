@@ -21,8 +21,59 @@ const MODEL_NAME = "school"
 const DEFAULT_ERROR_MESSAGE = "interact with school model"
 
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.School) (result *model.School, errCode int, err error) {
+	// Create info
+	newInfo, err := service.Repository.CreateInfo(&model.SchoolInfo{
+		FullName:    item.Info.FullName,
+		Description: item.Info.Description,
+		Slogan:      item.Info.Slogan,
+
+		PhoneNumber1: item.Info.PhoneNumber1,
+		PhoneNumber2: item.Info.PhoneNumber2,
+		PhoneNumber3: item.Info.PhoneNumber3,
+
+		Email1: item.Info.Email1,
+		Email2: item.Info.Email2,
+		Email3: item.Info.Email3,
+
+		Founder:   item.Info.Founder,
+		FoundedAt: item.Info.FoundedAt,
+
+		Address:           item.Info.Address,
+		LocationLongitude: item.Info.LocationLongitude,
+		LocationLatitude:  item.Info.LocationLatitude,
+
+		Logo: item.Info.Logo,
+
+		Image1: item.Info.Image1,
+		Image2: item.Info.Image2,
+		Image3: item.Info.Image3,
+		Image4: item.Info.Image4,
+	})
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+
+	// Create config
+	newConfig, err := service.Repository.CreateConfig(&model.SchoolConfig{
+		EmailDomain:  item.Config.EmailDomain,
+		ColorPrimary: item.Config.ColorPrimary,
+	})
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+
 	// Create school
-	result, err = service.Repository.Create(item)
+	result, err = service.Repository.Create(&model.School{
+		Name: item.Name,
+		Type: item.Type,
+
+		SchoolConfigID: newConfig.ID,
+		SchoolInfoID:   newInfo.ID,
+	})
 	if err != nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
 		if errPgState == nil {
@@ -36,27 +87,23 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.School
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-
-	// Create config
-	newConfig, _, err := service.UpdateConfig(inputJwtToken, -1, item.Config)
-	if err != nil {
-		return
-	}
-
-	// Create info
-	newInfo, errCode, err := service.UpdateInfo(inputJwtToken, -1, item.Info)
-	if err != nil {
-		return
-	}
-
-	// Update school
-	result, err = service.Repository.UpdateConfigInfoIDs(result.ID, newConfig.ID, newInfo.ID)
-	result.Config = newConfig
-	result.Info = newInfo
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, schoolID int64, item *model.School) (result *model.School, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.School) (result *model.School, errCode int, err error) {
+	// Check if school exists
+	foundItem, err := service.Repository.GetById(id)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundItem == nil || foundItem.ID != id {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
 	// Check unique
 	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
@@ -64,14 +111,14 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, schoolID int64, it
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if service.Repository.AreSameUniqueObjects(foundUnique, item) {
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) && !service.Repository.AreSameUniqueObjects(foundUnique, foundItem) {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
 	}
 
 	// Update school
-	result, err = service.Repository.Update(schoolID, item)
+	result, err = service.Repository.Update(id, item)
 	if err != nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
 		if errPgState == nil {
@@ -85,17 +132,26 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, schoolID int64, it
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+	if result == nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
 
 	// Update config
-	newConfig, _, err := service.UpdateConfig(inputJwtToken, result.SchoolInfoID, item.Config)
+	newConfig, _, err := service.UpdateConfig(inputJwtToken, foundItem.SchoolConfigID, item.Config)
 	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	result.Config = newConfig
 
 	// Update info
-	newInfo, errCode, err := service.UpdateInfo(inputJwtToken, result.SchoolConfigID, item.Info)
+	newInfo, errCode, err := service.UpdateInfo(inputJwtToken, foundItem.SchoolInfoID, item.Info)
 	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	result.Info = newInfo
@@ -104,25 +160,20 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, schoolID int64, it
 
 func (service *Service) UpdateInfo(inputJwtToken *types.JwtToken, id int64, item *model.SchoolInfo) (result *model.SchoolInfo, errCode int, err error) {
 	// Check if school info already exists
-	foundItem, err := service.Repository.GetInfoByID(id)
+	foundItem, err := service.Repository.GetInfoById(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem != nil && foundItem.ID == id {
-		// Update
-		result, err = service.Repository.UpdateInfo(id, item)
-		if err != nil {
-			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			return
-		}
+	if foundItem == nil || foundItem.ID != id {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 
-	// Create
-	result, err = service.Repository.CreateInfo(item)
+	// Update
+	result, err = service.Repository.UpdateInfo(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -133,25 +184,20 @@ func (service *Service) UpdateInfo(inputJwtToken *types.JwtToken, id int64, item
 
 func (service *Service) UpdateConfig(inputJwtToken *types.JwtToken, id int64, item *model.SchoolConfig) (result *model.SchoolConfig, errCode int, err error) {
 	// Check if school config already exists
-	foundItem, err := service.Repository.GetConfigByID(id)
+	foundItem, err := service.Repository.GetConfigById(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem != nil && foundItem.ID == id {
-		// Update
-		result, err = service.Repository.UpdateConfig(id, item)
-		if err != nil {
-			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			return
-		}
+	if foundItem == nil || foundItem.ID != id {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 
-	// Create
-	result, err = service.Repository.CreateConfig(item)
+	// Update
+	result, err = service.Repository.UpdateConfig(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -160,8 +206,8 @@ func (service *Service) UpdateConfig(inputJwtToken *types.JwtToken, id int64, it
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, schoolID int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(schoolID)
+func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.Delete(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -190,8 +236,8 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, schoolID int64) (result *model.School, errCode int, err error) {
-	result, err = service.Repository.GetByID(schoolID)
+func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.School, errCode int, err error) {
+	result, err = service.Repository.GetById(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

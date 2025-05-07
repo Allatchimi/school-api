@@ -7,7 +7,8 @@ import (
 
 type SchoolConfig struct {
 	types.BaseGormModel
-	EmailDomain string `gorm:"default:null"`
+	EmailDomain  string `gorm:"default:null"`
+	ColorPrimary string `gorm:"default:null"`
 }
 
 func (item *SchoolConfig) ToResponse() *data.SchoolConfigResponse {
@@ -16,12 +17,14 @@ func (item *SchoolConfig) ToResponse() *data.SchoolConfigResponse {
 	}
 	resp := &data.SchoolConfigResponse{}
 	resp.EmailDomain = item.EmailDomain
+	resp.ColorPrimary = item.ColorPrimary
 	return resp
 }
 
 func FromConfigRequest(item *data.SchoolConfigRequest) *SchoolConfig {
 	resp := &SchoolConfig{
-		EmailDomain: item.EmailDomain,
+		EmailDomain:  item.EmailDomain,
+		ColorPrimary: item.ColorPrimary,
 	}
 	return resp
 }

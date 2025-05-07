@@ -44,7 +44,8 @@ type SchoolInfoRequest struct {
 }
 
 type SchoolConfigRequest struct {
-	EmailDomain string `json:"emailDomain" required:"false" maxLength:"150" doc:"Email domain" example:"ditgitschool.cm"`
+	EmailDomain  string `json:"emailDomain" required:"false" minLength:"3" maxLength:"150" doc:"Email domain" example:"google.com"`
+	ColorPrimary string `json:"colorPrimary" required:"true" minLength:"4" maxLength:"7" doc:"Primary color in HEX" example:"#FFFFFF"`
 }
 
 type GetAllRequest struct {

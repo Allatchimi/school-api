@@ -46,7 +46,7 @@ func (repository *Repository) Update(id int64, item *model.School) (*model.Schoo
 	).Error
 }
 
-func (repository *Repository) UpdateConfigInfoIDs(id int64, configID int64, infoID int64) (*model.School, error) {
+func (repository *Repository) UpdateConfigInfoIds(id int64, configID int64, infoID int64) (*model.School, error) {
 	result := &model.School{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
@@ -93,7 +93,8 @@ func (repository *Repository) UpdateConfig(id int64, item *model.SchoolConfig) (
 	result := &model.SchoolConfig{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
-			"email_domain": item.EmailDomain,
+			"email_domain":  item.EmailDomain,
+			"color_primary": item.ColorPrimary,
 		},
 	).Error
 }
@@ -112,7 +113,7 @@ func (repository *Repository) DeleteMultiple(list []int64) (result int64, err er
 	return
 }
 
-func (repository *Repository) GetByID(id int64) (*model.School, error) {
+func (repository *Repository) GetById(id int64) (*model.School, error) {
 	result := &model.School{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
@@ -132,12 +133,12 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.School, item2 *m
 	return false
 }
 
-func (repository *Repository) GetInfoByID(id int64) (*model.SchoolInfo, error) {
+func (repository *Repository) GetInfoById(id int64) (*model.SchoolInfo, error) {
 	result := &model.SchoolInfo{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetConfigByID(id int64) (*model.SchoolConfig, error) {
+func (repository *Repository) GetConfigById(id int64) (*model.SchoolConfig, error) {
 	result := &model.SchoolConfig{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }

@@ -43,7 +43,8 @@ type SchoolInfoResponse struct {
 }
 
 type SchoolConfigResponse struct {
-	EmailDomain string `json:"emailDomain" doc:"Email domain"`
+	EmailDomain  string `json:"emailDomain" doc:"Email domain"`
+	ColorPrimary string `json:"colorPrimary" doc:"Color primary"`
 }
 
 type SchoolResponseList struct {

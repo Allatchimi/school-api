@@ -94,11 +94,11 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	result = make([]model.UniversityUnit, 0)
 	var where string = ""
 	if schoolID > 0 {
-		where = fmt.Sprintf("WHERE tus.school_id = %d", schoolID)
+		where = fmt.Sprintf("WHERE units.school_id = %d", schoolID)
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(tus.id AS TEXT) = '%s' OR tus.name ILIKE '%s' OR tus.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR university_domains.name ILIKE '%s' OR university_levels.name ILIKE '%s' OR university_semesters.name ILIKE '%s'",
+			"CAST(units.id AS TEXT) = '%s' OR units.name ILIKE '%s' OR units.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR university_domains.name ILIKE '%s' OR university_levels.name ILIKE '%s' OR university_semesters.name ILIKE '%s'",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -117,12 +117,12 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"SELECT tus.id, tus.name, tus.description, tus.school_id, tus.domain_id, tus.level_id, tus.semester_id"+
-				", tus.created_at, tus.updated_at FROM university_units tus "+
-				"LEFT JOIN schools ON tus.school_id = schools.id "+
-				"LEFT JOIN university_domains ON tus.domain_id = university_domains.id "+
-				"LEFT JOIN university_levels ON tus.level_id = university_levels.id "+
-				"LEFT JOIN university_semesters ON tus.semester_id = university_semesters.id ",
+			"SELECT units.id, units.name, units.description, units.credit, units.program, units.requirements, units.is_valid, units.invalid_date, units.school_id, units.domain_id, units.level_id, units.semester_id"+
+				", units.created_at, units.updated_at FROM university_units units "+
+				"LEFT JOIN schools ON units.school_id = schools.id "+
+				"LEFT JOIN university_domains ON units.domain_id = university_domains.id "+
+				"LEFT JOIN university_levels ON units.level_id = university_levels.id "+
+				"LEFT JOIN university_semesters ON units.semester_id = university_semesters.id ",
 			where,
 			pagination,
 			filter,
