@@ -21,13 +21,15 @@ func NewService(repository *Repository, SchoolRepository *school.Repository) *Se
 	}
 }
 
-// Create new domain
+const MODEL_NAME = "domain"
+const DEFAULT_ERROR_MESSAGE = "interact with domain model"
+
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.UniversityDomain) (result *model.UniversityDomain, errCode int, err error) {
 	// Check if the school type is university
-	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get school by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundSchool.Type != constants.SCHOOL_TYPE_UNIVERSITY {
@@ -36,16 +38,16 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Univer
 		return
 	}
 
-	// Check if the new one exists
-	foundNewDomain, err := service.Repository.GetBySchoolIDDepartmentIDName(item.SchoolID, item.DepartmentID, item.Name)
+	// Check unique
+	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get domain by user school ids from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundNewDomain != nil && foundNewDomain.SchoolID == item.SchoolID && foundNewDomain.DepartmentID == item.DepartmentID && foundNewDomain.Name == item.Name {
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) {
 		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage("Domain")
+		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
 	}
 
@@ -53,19 +55,18 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Univer
 	result, err = service.Repository.Create(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("create domain from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Update domain
 func (service *Service) Update(inputJwtToken *types.JwtToken, domainID int64, item *model.UniversityDomain) (result *model.UniversityDomain, errCode int, err error) {
 	// Check if the school type is university
-	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get school by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundSchool.Type != constants.SCHOOL_TYPE_UNIVERSITY {
@@ -78,12 +79,12 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, domainID int64, it
 	foundItem, err := service.Repository.GetById(domainID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get domain by name from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundItem == nil || foundItem.ID != domainID {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Domain")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	// Check if the school type is university
@@ -93,85 +94,79 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, domainID int64, it
 		return
 	}
 
-	// Check if the new one exists
-	foundNewDomain, err := service.Repository.GetBySchoolIDDepartmentIDName(item.SchoolID, item.DepartmentID, item.Name)
+	// Check unique
+	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get domain by user school ids from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundNewDomain != nil && foundNewDomain.SchoolID == item.SchoolID && foundNewDomain.DepartmentID == item.DepartmentID && foundNewDomain.Name == item.Name {
-		if !(foundItem.SchoolID == foundNewDomain.SchoolID && foundItem.DepartmentID == foundNewDomain.DepartmentID && foundItem.Name == foundNewDomain.Name) {
-			errCode = http.StatusFound
-			err = constants.Http302ErrorMessage("Department")
-			return
-		}
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) && !service.Repository.AreSameUniqueObjects(foundUnique, foundItem) {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage(MODEL_NAME)
+		return
 	}
 
 	// Update domain
 	result, err = service.Repository.Update(domainID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("update domain from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Delete domain with matching id and return affected rows
 func (service *Service) Delete(inputJwtToken *types.JwtToken, domainID int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.Delete(domainID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete domain from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Domain")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// Delete Deletes selection
 func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultiple(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete multiple domain from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Domain selection")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// Get Returns domain with matching id
 func (service *Service) Get(inputJwtToken *types.JwtToken, domainID int64) (result *model.UniversityDomain, errCode int, err error) {
 	result, err = service.Repository.GetById(domainID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get domain by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if result == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Domain")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// GetAll Returns all domains with support for search, filter and pagination
 func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.UniversityDomain, errCode int, err error) {
 	result, err = service.Repository.GetAll(filter, pagination, schoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get domains from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}
 	return
 }

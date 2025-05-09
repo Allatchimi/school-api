@@ -39,17 +39,18 @@ func (repository *Repository) CreateConfig(item *model.SchoolConfig) (*model.Sch
 func (repository *Repository) Update(id int64, item *model.School) (*model.School, error) {
 	result := &model.School{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"name": item.Name,
 			"type": item.Type,
+			"logo": item.Logo,
 		},
 	).Error
 }
 
-func (repository *Repository) UpdateConfigInfoIDs(id int64, configID int64, infoID int64) (*model.School, error) {
+func (repository *Repository) UpdateConfigInfoIds(id int64, configID int64, infoID int64) (*model.School, error) {
 	result := &model.School{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"config_id": configID,
 			"info_id":   infoID,
 		},
@@ -59,7 +60,7 @@ func (repository *Repository) UpdateConfigInfoIDs(id int64, configID int64, info
 func (repository *Repository) UpdateInfo(id int64, item *model.SchoolInfo) (*model.SchoolInfo, error) {
 	result := &model.SchoolInfo{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"full_name":   item.FullName,
 			"description": item.Description,
 			"slogan":      item.Slogan,
@@ -79,8 +80,6 @@ func (repository *Repository) UpdateInfo(id int64, item *model.SchoolInfo) (*mod
 			"location_longitude": item.LocationLongitude,
 			"location_latitude":  item.LocationLatitude,
 
-			"logo": item.Logo,
-
 			"image1": item.Image1,
 			"image2": item.Image2,
 			"image3": item.Image3,
@@ -92,8 +91,9 @@ func (repository *Repository) UpdateInfo(id int64, item *model.SchoolInfo) (*mod
 func (repository *Repository) UpdateConfig(id int64, item *model.SchoolConfig) (*model.SchoolConfig, error) {
 	result := &model.SchoolConfig{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]interface{}{
-			"email_domain": item.EmailDomain,
+		map[string]any{
+			"email_domain":  item.EmailDomain,
+			"color_primary": item.ColorPrimary,
 		},
 	).Error
 }
@@ -112,22 +112,32 @@ func (repository *Repository) DeleteMultiple(list []int64) (result int64, err er
 	return
 }
 
-func (repository *Repository) GetByID(id int64) (*model.School, error) {
+func (repository *Repository) GetById(id int64) (*model.School, error) {
 	result := &model.School{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetByName(name string) (*model.School, error) {
+func (repository *Repository) GetUniqueObject(item *model.School) (*model.School, error) {
 	result := &model.School{}
-	return result, repository.Db.Preload(clause.Associations).Where("name = ?", name).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).Where(&model.School{
+		Name: item.Name,
+	}).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetInfoByID(id int64) (*model.SchoolInfo, error) {
+func (repository *Repository) AreSameUniqueObjects(item1 *model.School, item2 *model.School) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.Name == item2.Name) {
+		return true
+	}
+	return false
+}
+
+func (repository *Repository) GetInfoById(id int64) (*model.SchoolInfo, error) {
 	result := &model.SchoolInfo{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetConfigByID(id int64) (*model.SchoolConfig, error) {
+func (repository *Repository) GetConfigById(id int64) (*model.SchoolConfig, error) {
 	result := &model.SchoolConfig{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
@@ -159,7 +169,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"SELECT schools.id, schools.name, schools.type, schools.school_config_id, schools.school_info_id"+
+			"SELECT schools.id, schools.name, schools.type, schools.logo, schools.school_config_id, schools.school_info_id"+
 				", schools.created_at, schools.updated_at FROM schools "+
 				"LEFT JOIN school_infos as infos ON schools.school_info_id = infos.id",
 			where,

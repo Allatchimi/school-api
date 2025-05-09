@@ -8,10 +8,17 @@ import (
 
 type SpecialtyResponse struct {
 	types.BaseGormModelResponse
-	School      *schoolData.SchoolResponse   `json:"school" doc:"School"`
-	Section     *sectionData.SectionResponse `json:"section" doc:"Section"`
-	Name        string                       `json:"name" required:"false" doc:"Specialty name"`
-	Description string                       `json:"description" required:"false" doc:"Specialty description"`
+	School      *schoolData.SchoolPublicResponse   `json:"school" doc:"School"`
+	Section     *sectionData.SectionPublicResponse `json:"section" doc:"Section"`
+	Name        string                             `json:"name" required:"false" doc:"Specialty name"`
+	Description string                             `json:"description" required:"false" doc:"Specialty description"`
+}
+
+type SpecialtyPublicResponse struct {
+	School      *schoolData.SchoolPublicResponse   `json:"school" doc:"School"`
+	Section     *sectionData.SectionPublicResponse `json:"section" doc:"Section"`
+	Name        string                             `json:"name" required:"false" doc:"Specialty name"`
+	Description string                             `json:"description" required:"false" doc:"Specialty description"`
 }
 
 type SpecialtyResponseList struct {

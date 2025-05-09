@@ -30,7 +30,7 @@ func (repository *Repository) Update(id int64, item *model.HighschoolSpecialty) 
 	result := &model.HighschoolSpecialty{}
 	fmt.Println(item)
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"school_id":   item.SchoolID,
 			"section_id":  item.SectionID,
 			"name":        item.Name,
@@ -58,9 +58,21 @@ func (repository *Repository) GetById(id int64) (*model.HighschoolSpecialty, err
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetBySchoolIDSectionIDName(schoolID int64, sectionID int64, name string) (*model.HighschoolSpecialty, error) {
+func (repository *Repository) GetUniqueObject(item *model.HighschoolSpecialty) (*model.HighschoolSpecialty, error) {
 	result := &model.HighschoolSpecialty{}
-	return result, repository.Db.Preload(clause.Associations).Where("school_id = ?", schoolID).Where("section_id = ?", sectionID).Where("name = ?", name).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).Where(&model.HighschoolSpecialty{
+		SchoolID: item.SchoolID,
+		Name:     item.Name,
+	}).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) AreSameUniqueObjects(item1 *model.HighschoolSpecialty, item2 *model.HighschoolSpecialty) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID &&
+			item1.Name == item2.Name) {
+		return true
+	}
+	return false
 }
 
 func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.HighschoolSpecialty, err error) {

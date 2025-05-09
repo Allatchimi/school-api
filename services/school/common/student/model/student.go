@@ -19,14 +19,30 @@ type Student struct {
 }
 
 func (item *Student) ToStudentResponse() *data.StudentResponse {
+	if item == nil {
+		return nil
+	}
 	resp := &data.StudentResponse{}
+	resp.UID = item.UID
+
+	resp.School = item.School.ToPublicResponse()
+	resp.User = item.User.ToPublicResponse()
+
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+	return resp
+}
 
-	resp.School = item.School.ToResponse()
-	resp.User = item.User.ToResponse()
+func (item *Student) ToStudentPublicResponse() *data.StudentPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.StudentPublicResponse{}
 	resp.UID = item.UID
+
+	resp.School = item.School.ToPublicResponse()
+	resp.User = item.User.ToPublicResponse()
 	return resp
 }
 

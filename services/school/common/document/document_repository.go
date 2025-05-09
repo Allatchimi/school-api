@@ -18,33 +18,33 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(document *model.Document) (*model.Document, error) {
-	result := *document
+func (repository *Repository) Create(item *model.Document) (*model.Document, error) {
+	result := *item
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) Delete(documentID int64) (int64, error) {
-	result := repository.Db.Where("id = ?", documentID).Delete(&model.Document{})
+func (repository *Repository) Delete(id int64) (int64, error) {
+	result := repository.Db.Where("id = ?", id).Delete(&model.Document{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) GetById(documentID int64) (*model.Document, error) {
+func (repository *Repository) GetById(id int64) (*model.Document, error) {
 	result := &model.Document{}
-	return result, repository.Db.Where("id = ?", documentID).Limit(1).Find(result).Error
+	return result, repository.Db.Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetByObject(document *model.Document) (*model.Document, error) {
+func (repository *Repository) GetByObject(item *model.Document) (*model.Document, error) {
 	result := &model.Document{}
-	return result, repository.Db.Where(document).Limit(1).Find(result).Error
+	return result, repository.Db.Where(item).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination) ([]model.Document, error) {
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) ([]model.Document, error) {
 	var result []model.Document
-	var condition string = ""
+	var where string = ""
 	if filter != nil && len(filter.Search) >= 1 {
-		condition = fmt.Sprintf(
-			"WHERE name ILIKE %s OR WHERE description ILIKE %s OR WHERE type ILIKE %s",
-			filter.Search,
+		where = fmt.Sprintf(
+			"WHERE school_id = '%d' AND (type ILIKE %s OR WHERE name ILIKE %s)",
+			schoolID,
 			filter.Search,
 			filter.Search,
 		)
@@ -53,7 +53,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 		helpers.PaginationScope(
 			repository.Db,
 			"documents",
-			condition,
+			where,
 			pagination,
 			filter,
 		),

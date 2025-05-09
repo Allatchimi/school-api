@@ -11,3 +11,7 @@ type YearRequest struct {
 	StartDate *time.Time `json:"startDate" required:"true" doc:"Academic year start date" example:""`
 	EndDate   *time.Time `json:"endDate" required:"true" doc:"Academic year end date" example:""`
 }
+
+type GetAllRequest struct {
+	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
+}

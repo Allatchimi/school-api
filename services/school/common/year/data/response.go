@@ -8,10 +8,17 @@ import (
 
 type YearResponse struct {
 	types.BaseGormModelResponse
-	Name      string                     `json:"name" doc:"Name"`
-	StartDate *time.Time                 `json:"startDate" doc:"Academic year start date"`
-	EndDate   *time.Time                 `json:"endDate" doc:"Academic year end date"`
-	School    *dataSchool.SchoolResponse `json:"school" doc:"School"`
+	Name      string                           `json:"name" doc:"Name"`
+	StartDate *time.Time                       `json:"startDate" doc:"Academic year start date"`
+	EndDate   *time.Time                       `json:"endDate" doc:"Academic year end date"`
+	School    *dataSchool.SchoolPublicResponse `json:"school" doc:"School"`
+}
+
+type YearPublicResponse struct {
+	Name      string                           `json:"name" doc:"Name"`
+	StartDate *time.Time                       `json:"startDate" doc:"Academic year start date"`
+	EndDate   *time.Time                       `json:"endDate" doc:"Academic year end date"`
+	School    *dataSchool.SchoolPublicResponse `json:"school" doc:"School"`
 }
 
 type YearResponseList struct {

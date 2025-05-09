@@ -23,6 +23,10 @@ type UserResponse struct {
 	Mfa  *UserMfaResponse   `json:"mfa" required:"false" doc:"Multiple factor authenticator enabled by the user"`
 }
 
+type UserPublicResponse struct {
+	Info *UserInfoPublicResponse `json:"info" required:"false" doc:"Additional user info(e.g. address, first name, last name, ...)" `
+}
+
 type UserInfoResponse struct {
 	Gender    string `json:"gender" required:"false" doc:"Gender"`
 	Username  string `json:"username" required:"false" doc:"User name"`
@@ -34,6 +38,15 @@ type UserInfoResponse struct {
 	Address       string     `json:"address" required:"false" doc:"Address"`
 	Language      string     `json:"language" required:"false" doc:"Language"`
 	Image         string     `json:"image" required:"false" doc:"Thumbnail"`
+}
+
+type UserInfoPublicResponse struct {
+	Gender    string `json:"gender" required:"false" doc:"Gender"`
+	Username  string `json:"username" required:"false" doc:"User name"`
+	FirstName string `json:"firstName" required:"false" doc:"First name"`
+	LastName  string `json:"lastName" required:"false" doc:"Last name or family name"`
+
+	Image string `json:"image" required:"false" doc:"Thumbnail"`
 }
 
 type UserMfaResponse struct {

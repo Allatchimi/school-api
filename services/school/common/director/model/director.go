@@ -22,21 +22,36 @@ func (item *Director) ToResponse() *data.DirectorResponse {
 		return nil
 	}
 	resp := &data.DirectorResponse{}
-	resp.User = item.User.ToResponse()
 	if resp.User != nil {
 		resp.User.Role = nil
 		resp.User.Info = nil
 		resp.User.Mfa = nil
 	}
-	resp.School = item.School.ToResponse()
 	if resp.School != nil {
 		resp.School.Config = nil
 		resp.School.Info = nil
 	}
 
+	resp.User = item.User.ToResponse()
+	resp.School = item.School.ToResponse()
+
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+	return resp
+}
+
+func (item *Director) ToPublicResponse() *data.DirectorPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.DirectorPublicResponse{}
+	if resp.User != nil {
+		resp.User.Info = nil
+	}
+	if resp.School != nil {
+		resp.School.Info = nil
+	}
 	return resp
 }
 

@@ -28,7 +28,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-subject",
 			Summary:     "Create subject",
-			Description: "Create new subject and return the created object.",
+			Description: "Create new subject.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -48,7 +48,7 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.CreateSubjectRequest
+				Body data.SubjectRequest
 			},
 		) (*struct{ Body data.SubjectResponse }, error) {
 			result, errCode, err := controller.Create(&ctx, input)
@@ -59,55 +59,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// add professor
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "post-subject-professor",
-			Summary:     "Add new professor",
-			Description: "Add new professor and return the created object.",
-			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/{id}/professor", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
-						tableName,                  // Table name
-						constants.PermissionCreate, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				data.SubjectID
-				Body data.SubjectProfessorRequest
-			},
-		) (*struct {
-			Body data.SubjectProfessorResponse
-		}, error) {
-			result, errCode, err := controller.AddProfessor(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct {
-				Body data.SubjectProfessorResponse
-			}{Body: *result.ToResponse()}, nil
-		},
-	)
-
 	// Update subject with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "update-subject",
 			Summary:     "Update subject",
-			Description: "Update existing subject with matching id and return the updated object.",
+			Description: "Update existing subject with matching id and return the new object.",
 			Method:      http.MethodPut,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -128,7 +86,7 @@ func RegisterEndpoints(
 			ctx context.Context,
 			input *struct {
 				data.SubjectID
-				Body data.UpdateSubjectRequest
+				Body data.SubjectRequest
 			},
 		) (*struct{ Body data.SubjectResponse }, error) {
 			result, errCode, err := controller.Update(&ctx, input)
@@ -145,7 +103,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-subject",
 			Summary:     "Delete subject",
-			Description: "Delete existing subject and return affected rows in database.",
+			Description: "Delete existing subject with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -176,15 +134,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete subject professor with id
+	// Delete multiple subject
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-subject-professor",
-			Summary:     "Delete subject professor",
-			Description: "Delete existing professor and return affected rows in database.",
+			OperationID: "delete-subject-multiple",
+			Summary:     "Delete multiple subject",
+			Description: "Delete multiple subject by providing a lis of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/{id}/professor", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -202,11 +160,10 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.SubjectID
-				Body data.SubjectProfessorRequest
+				Body types.DeleteMultipleRequest
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteProfessor(&ctx, input)
+			result, errCode, err := controller.DeleteMultiple(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}

@@ -20,13 +20,26 @@ func (item *HighschoolSection) ToResponse() *data.SectionResponse {
 		return nil
 	}
 	resp := &data.SectionResponse{}
-	resp.School = item.School.ToResponse()
 	resp.Name = item.Name
 	resp.Description = item.Description
+
+	resp.School = item.School.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+	return resp
+}
+
+func (item *HighschoolSection) ToPublicResponse() *data.SectionPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.SectionPublicResponse{}
+	resp.Name = item.Name
+	resp.Description = item.Description
+
+	resp.School = item.School.ToPublicResponse()
 	return resp
 }
 

@@ -28,6 +28,7 @@ func (controller *Controller) Create(
 		&model.School{
 			Name:   input.Body.Name,
 			Type:   input.Body.Type,
+			Logo:   input.Body.Logo,
 			Info:   model.FromInfoRequest(input.Body.Info),
 			Config: model.FromConfigRequest(input.Body.Config),
 		},
@@ -47,6 +48,7 @@ func (controller *Controller) Update(
 		&model.School{
 			Name:   input.Body.Name,
 			Type:   input.Body.Type,
+			Logo:   input.Body.Logo,
 			Info:   model.FromInfoRequest(input.Body.Info),
 			Config: model.FromConfigRequest(input.Body.Config),
 		},

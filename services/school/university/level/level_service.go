@@ -21,13 +21,15 @@ func NewService(repository *Repository, SchoolRepository *school.Repository) *Se
 	}
 }
 
-// Create new level
+const MODEL_NAME = "level"
+const DEFAULT_ERROR_MESSAGE = "interact with level model"
+
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.UniversityLevel) (result *model.UniversityLevel, errCode int, err error) {
 	// Check if the school type is university
-	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get school by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundSchool.Type != constants.SCHOOL_TYPE_UNIVERSITY {
@@ -36,16 +38,16 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Univer
 		return
 	}
 
-	// Check if the new one exists
-	foundNewLevel, err := service.Repository.GetBySchoolIDName(item.SchoolID, item.Name)
+	// Check unique
+	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get level by user school ids from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundNewLevel != nil && foundNewLevel.SchoolID == item.SchoolID && foundNewLevel.Name == item.Name {
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) {
 		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage("Level")
+		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
 	}
 
@@ -53,19 +55,41 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Univer
 	result, err = service.Repository.Create(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("create level from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	return
+}
+func (service *Service) CreateLevelDomain(inputJwtToken *types.JwtToken, item *model.UniversityLevelDomain) (result *model.UniversityLevelDomain, errCode int, err error) {
+	// Check unique
+	foundUnique, err := service.Repository.GetLevelDomainUniqueObject(item)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if service.Repository.AreLevelDomainSameUniqueObjects(foundUnique, item) {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Insert
+	result, err = service.Repository.CreateLevelDomain(item)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Update level
-func (service *Service) Update(inputJwtToken *types.JwtToken, levelID int64, item *model.UniversityLevel) (result *model.UniversityLevel, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.UniversityLevel) (result *model.UniversityLevel, errCode int, err error) {
 	// Check if the school type is university
-	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get school by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundSchool.Type != constants.SCHOOL_TYPE_UNIVERSITY {
@@ -75,15 +99,15 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, levelID int64, ite
 	}
 
 	// Check if level exists
-	foundItem, err := service.Repository.GetById(levelID)
+	foundItem, err := service.Repository.GetById(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get level by name from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem == nil || foundItem.ID != levelID {
+	if foundItem == nil || foundItem.ID != id {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Level")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	// Check if the school type is university
@@ -93,85 +117,103 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, levelID int64, ite
 		return
 	}
 
-	// Check if the new one exists
-	foundNewLevel, err := service.Repository.GetBySchoolIDName(item.SchoolID, item.Name)
+	// Check unique
+	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get level by user school ids from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundNewLevel != nil && foundNewLevel.SchoolID == item.SchoolID && foundNewLevel.Name == item.Name {
-		if !(foundItem.SchoolID == foundNewLevel.SchoolID && foundItem.Name == foundNewLevel.Name) {
-			errCode = http.StatusFound
-			err = constants.Http302ErrorMessage("Level")
-			return
-		}
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) && !service.Repository.AreSameUniqueObjects(foundUnique, foundItem) {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage(MODEL_NAME)
+		return
 	}
 
 	// Update level
-	result, err = service.Repository.Update(levelID, item)
+	result, err = service.Repository.Update(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("update level from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Delete level with matching id and return affected rows
-func (service *Service) Delete(inputJwtToken *types.JwtToken, levelID int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(levelID)
+func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.Delete(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete level from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Level")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// Delete Deletes selection
+func (service *Service) DeleteLevelDomain(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteLevelDomain(id)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if affectedRows <= 0 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+	return
+}
+
 func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultiple(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete multiple level from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Level selection")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// Get Returns level with matching id
-func (service *Service) Get(inputJwtToken *types.JwtToken, levelID int64) (result *model.UniversityLevel, errCode int, err error) {
-	result, err = service.Repository.GetById(levelID)
+func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.UniversityLevel, errCode int, err error) {
+	result, err = service.Repository.GetById(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get level by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if result == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Level")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// GetAll Returns all levels with support for search, filter and pagination
 func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.UniversityLevel, errCode int, err error) {
 	result, err = service.Repository.GetAll(filter, pagination, schoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get levels from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+	}
+	return
+}
+
+func (service *Service) GetAllLevelDomain(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64, levelID int64) (result []model.UniversityLevelDomain, errCode int, err error) {
+	result, err = service.Repository.GetAllLevelDomain(filter, pagination, schoolID, levelID)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}
 	return
 }

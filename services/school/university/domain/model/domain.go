@@ -24,14 +24,28 @@ func (item *UniversityDomain) ToResponse() *data.DomainResponse {
 		return nil
 	}
 	resp := &data.DomainResponse{}
-	resp.School = item.School.ToResponse()
-	resp.Department = item.Department.ToResponse()
 	resp.Name = item.Name
 	resp.Description = item.Description
+
+	resp.School = item.School.ToPublicResponse()
+	resp.Department = item.Department.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+	return resp
+}
+
+func (item *UniversityDomain) ToPublicResponse() *data.DomainPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.DomainPublicResponse{}
+	resp.Name = item.Name
+	resp.Description = item.Description
+
+	resp.School = item.School.ToPublicResponse()
+	resp.Department = item.Department.ToPublicResponse()
 	return resp
 }
 

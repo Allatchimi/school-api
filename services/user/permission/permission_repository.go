@@ -32,7 +32,7 @@ func (repository *Repository) Update(
 ) (result *model.Permission, err error) {
 	result = &model.Permission{}
 	tmpErr := repository.Db.Preload(clause.Associations).Model(result).Where("role_id = ?", roleID).Where("table_name = ?", tableName).Updates(
-		map[string]interface{}{
+		map[string]any{
 			"table_name": data.TableName,
 			"create":     data.Create,
 			"read":       data.Read,

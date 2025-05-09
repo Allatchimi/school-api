@@ -20,36 +20,16 @@ func NewController(service *Service) *Controller {
 func (controller *Controller) Create(
 	ctx *context.Context,
 	input *struct {
-		Body data.CreateSubjectRequest
+		Body data.SubjectRequest
 	},
-) (result *model.Subject, errCode int, err error) {
+) (result *model.HighschoolSubject, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.Subject{
-			SchoolID:     input.Body.SchoolID,
-			ClassID:      input.Body.ClassID,
-			Name:         input.Body.Name,
-			Description:  input.Body.Description,
-			Coefficient:  input.Body.Coefficient,
-			Program:      input.Body.Program,
-			Requirements: input.Body.Requirements,
-		},
-	)
-	return
-}
+		&model.HighschoolSubject{
+			SchoolID: input.Body.SchoolID,
 
-func (controller *Controller) AddProfessor(
-	ctx *context.Context,
-	input *struct {
-		data.SubjectID
-		Body data.SubjectProfessorRequest
-	},
-) (result *model.SubjectProfessor, errCode int, err error) {
-	result, errCode, err = controller.Service.AddProfessor(
-		helpers.GetJwtContext(ctx),
-		&model.SubjectProfessor{
-			SubjectID: input.ID,
-			UserID:    input.Body.UserID,
+			Name:        input.Body.Name,
+			Description: input.Body.Description,
 		},
 	)
 	return
@@ -59,17 +39,16 @@ func (controller *Controller) Update(
 	ctx *context.Context,
 	input *struct {
 		data.SubjectID
-		Body data.UpdateSubjectRequest
+		Body data.SubjectRequest
 	},
-) (result *model.Subject, errCode int, err error) {
+) (result *model.HighschoolSubject, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx), input.ID,
-		&model.Subject{
-			Name:         input.Body.Name,
-			Description:  input.Body.Description,
-			Coefficient:  input.Body.Coefficient,
-			Program:      input.Body.Program,
-			Requirements: input.Body.Requirements,
+		&model.HighschoolSubject{
+			SchoolID: input.Body.SchoolID,
+
+			Name:        input.Body.Name,
+			Description: input.Body.Description,
 		},
 	)
 	return
@@ -89,14 +68,13 @@ func (controller *Controller) Delete(
 	return
 }
 
-func (controller *Controller) DeleteProfessor(
+func (controller *Controller) DeleteMultiple(
 	ctx *context.Context,
 	input *struct {
-		data.SubjectID
-		Body data.SubjectProfessorRequest
+		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteProfessor(helpers.GetJwtContext(ctx), input.ID, input.Body.UserID)
+	affectedRows, errCode, err := controller.Service.DeleteMultiple(helpers.GetJwtContext(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -109,7 +87,7 @@ func (controller *Controller) Get(
 	input *struct {
 		data.SubjectID
 	},
-) (result *model.Subject, errCode int, err error) {
+) (result *model.HighschoolSubject, errCode int, err error) {
 	subject, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
@@ -132,7 +110,7 @@ func (controller *Controller) GetAll(
 		return
 	}
 	result = &data.SubjectResponseList{
-		Data: model.ToSubjectResponseList(subjectList),
+		Data: model.ToResponseList(subjectList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

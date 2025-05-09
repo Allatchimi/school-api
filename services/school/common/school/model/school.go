@@ -9,6 +9,7 @@ type School struct {
 	types.BaseGormModel
 	Name string `gorm:"unique;not null"`
 	Type string `gorm:"not null"`
+	Logo string `gorm:"default:null"`
 
 	SchoolConfigID int64         `gorm:"default:null"`
 	Config         *SchoolConfig `gorm:"default:null;foreignKey:SchoolConfigID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -24,6 +25,7 @@ func (item *School) ToResponse() *data.SchoolResponse {
 	resp := &data.SchoolResponse{}
 	resp.Name = item.Name
 	resp.Type = item.Type
+	resp.Logo = item.Logo
 
 	resp.Info = item.Info.ToResponse()
 	resp.Config = item.Config.ToResponse()
@@ -31,6 +33,19 @@ func (item *School) ToResponse() *data.SchoolResponse {
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+	return resp
+}
+
+func (item *School) ToPublicResponse() *data.SchoolPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.SchoolPublicResponse{}
+	resp.Name = item.Name
+	resp.Type = item.Type
+	resp.Logo = item.Logo
+
+	resp.Info = item.Info.ToResponse()
 	return resp
 }
 

@@ -28,8 +28,6 @@ type SchoolInfo struct {
 	LocationLongitude float64 `gorm:"default:0"`
 	LocationLatitude  float64 `gorm:"default:0"`
 
-	Logo string `gorm:"default:null"`
-
 	Image1 string `gorm:"default:null"`
 	Image2 string `gorm:"default:null"`
 	Image3 string `gorm:"default:null"`
@@ -59,8 +57,6 @@ func (item *SchoolInfo) ToResponse() *data.SchoolInfoResponse {
 	resp.Address = item.Address
 	resp.LocationLongitude = item.LocationLongitude
 	resp.LocationLatitude = item.LocationLatitude
-
-	resp.Logo = item.Logo
 
 	resp.Image1 = item.Image1
 	resp.Image2 = item.Image2
@@ -92,8 +88,6 @@ func FromInfoRequest(item *data.SchoolInfoRequest) *SchoolInfo {
 	resp.Address = item.Address
 	resp.LocationLongitude = item.LocationLongitude
 	resp.LocationLatitude = item.LocationLatitude
-
-	resp.Logo = item.Logo
 
 	resp.Image1 = item.Image1
 	resp.Image2 = item.Image2

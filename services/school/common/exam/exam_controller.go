@@ -37,18 +37,27 @@ func (controller *Controller) CreateType(
 func (controller *Controller) Create(
 	ctx *context.Context,
 	input *struct {
-		Body data.CreateExamRequest
+		Body data.ExamRequest
 	},
 ) (result *model.Exam, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
 		&model.Exam{
-			SchoolID:       input.Body.SchoolID,
-			TeachingUnitID: input.Body.TeachingUnitID,
-			SubjectID:      input.Body.SubjectID,
-			TypeID:         input.Body.TypeID,
-			Percentage:     input.Body.Percentage,
-			Description:    input.Body.Description,
+			SchoolID:   input.Body.SchoolID,
+			YearID:     input.Body.YearID,
+			TypeID:     input.Body.TypeID,
+			UnitID:     input.Body.UnitID,
+			SubjectID:  input.Body.SubjectID,
+			SequenceID: input.Body.SequenceID,
+
+			Percentage:      input.Body.Percentage,
+			Description:     input.Body.Description,
+			LocationType:    input.Body.LocationType,
+			LocationDetails: input.Body.LocationDetails,
+			Requirements:    input.Body.Requirements,
+			AllowedItems:    input.Body.AllowedItems,
+			StartDate:       input.Body.StartDate,
+			EndDate:         input.Body.EndDate,
 		},
 	)
 	return
@@ -76,15 +85,27 @@ func (controller *Controller) Update(
 	ctx *context.Context,
 	input *struct {
 		data.ExamID
-		Body data.UpdateExamRequest
+		Body data.ExamRequest
 	},
 ) (result *model.Exam, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx), input.ID,
 		&model.Exam{
-			TypeID:      input.Body.TypeID,
-			Percentage:  input.Body.Percentage,
-			Description: input.Body.Description,
+			SchoolID:   input.Body.SchoolID,
+			YearID:     input.Body.YearID,
+			TypeID:     input.Body.TypeID,
+			UnitID:     input.Body.UnitID,
+			SubjectID:  input.Body.SubjectID,
+			SequenceID: input.Body.SequenceID,
+
+			Percentage:      input.Body.Percentage,
+			Description:     input.Body.Description,
+			LocationType:    input.Body.LocationType,
+			LocationDetails: input.Body.LocationDetails,
+			Requirements:    input.Body.Requirements,
+			AllowedItems:    input.Body.AllowedItems,
+			StartDate:       input.Body.StartDate,
+			EndDate:         input.Body.EndDate,
 		},
 	)
 	return
@@ -146,15 +167,16 @@ func (controller *Controller) Get(
 	return
 }
 
-func (controller *Controller) GetAllType(
+func (controller *Controller) GetAllExamType(
 	ctx *context.Context,
 	input *struct {
 		types.Filter
 		types.PaginationRequest
+		data.GetAllExamTypeRequest
 	},
 ) (result *data.ExamTypeResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	examList, errCode, err := controller.Service.GetAllType(helpers.GetJwtContext(ctx), newFilter, newPagination)
+	examList, errCode, err := controller.Service.GetAllExamType(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllExamTypeRequest.SchoolID)
 	if err != nil {
 		return
 	}
@@ -171,10 +193,11 @@ func (controller *Controller) GetAll(
 	input *struct {
 		types.Filter
 		types.PaginationRequest
+		data.GetAllRequest
 	},
 ) (result *data.ExamResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	examList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination)
+	examList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllRequest.SchoolID)
 	if err != nil {
 		return
 	}

@@ -35,6 +35,27 @@ func (controller *Controller) Create(
 	return
 }
 
+func (controller *Controller) CreateClassSubject(
+	ctx *context.Context,
+	input *struct {
+		Body data.ClassSubjectRequest
+	},
+) (result *model.HighschoolClassSubject, errCode int, err error) {
+	result, errCode, err = controller.Service.CreateClassSubject(
+		helpers.GetJwtContext(ctx),
+		&model.HighschoolClassSubject{
+			ClassID:   input.Body.ClassID,
+			SubjectID: input.Body.SubjectID,
+
+			Coefficient:  input.Body.Coefficient,
+			Program:      input.Body.Program,
+			Requirements: input.Body.Requirements,
+			IsValid:      input.Body.IsValid,
+		},
+	)
+	return
+}
+
 func (controller *Controller) Update(
 	ctx *context.Context,
 	input *struct {
@@ -61,6 +82,20 @@ func (controller *Controller) Delete(
 	},
 ) (result int64, errCode int, err error) {
 	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
+	if err != nil {
+		return
+	}
+	result = affectedRows
+	return
+}
+
+func (controller *Controller) DeleteClassSubject(
+	ctx *context.Context,
+	input *struct {
+		data.ClassSubjectID
+	},
+) (result int64, errCode int, err error) {
+	affectedRows, errCode, err := controller.Service.DeleteClassSubject(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -111,6 +146,27 @@ func (controller *Controller) GetAll(
 	}
 	result = &data.ClassResponseList{
 		Data: model.ToResponseList(classList),
+	}
+	result.Filter = newFilter
+	result.Pagination = newPagination
+	return
+}
+
+func (controller *Controller) GetAllClassSubject(
+	ctx *context.Context,
+	input *struct {
+		types.Filter
+		types.PaginationRequest
+		data.GetAllClassSubjectRequest
+	},
+) (result *data.ClassSubjectResponseList, errCode int, err error) {
+	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
+	classList, errCode, err := controller.Service.GetAllClassSubject(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllClassSubjectRequest.SchoolID, input.GetAllClassSubjectRequest.ClassID)
+	if err != nil {
+		return
+	}
+	result = &data.ClassSubjectResponseList{
+		Data: model.ToClassSubjectResponseList(classList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

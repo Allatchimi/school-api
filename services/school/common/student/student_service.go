@@ -16,22 +16,32 @@ func NewService(repository *Repository) *Service {
 	return &Service{Repository: repository}
 }
 
-// Create new student
+const MODEL_NAME = "student"
+const DEFAULT_ERROR_MESSAGE = "interact with student model"
+
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Student) (result *model.Student, errCode int, err error) {
-	// Check if student already exists
-	foundItem, err := service.Repository.GetByObject(&model.Student{
-		SchoolID: item.SchoolID,
-		UserID:   item.UserID,
-		UID:      item.UID,
-	})
+	// Check unique by user id
+	foundUnique1, err := service.Repository.GetUniqueObjectByUserID(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get student by name from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem != nil {
+	if service.Repository.AreSameUniqueObjectsByUserID(foundUnique1, item) {
 		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage("student")
+		err = constants.Http302ErrorMessage(MODEL_NAME)
+		return
+	}
+	// Check unique by uid
+	foundUnique2, err := service.Repository.GetUniqueObjectByUID(item)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if service.Repository.AreSameUniqueObjectsByUID(foundUnique2, item) {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
 	}
 
@@ -39,203 +49,196 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Studen
 	result, err = service.Repository.Create(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("create student from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Create new student
-func (service *Service) CreateLevelClass(inputJwtToken *types.JwtToken, item *model.StudentLevelClass) (result *model.StudentLevelClass, errCode int, err error) {
-	// Check if student level/class already exists
-	foundItem, err := service.Repository.GetLevelClassByObject(&model.StudentLevelClass{
-		StudentID: item.StudentID,
-		YearID:    item.YearID,
-		LevelID:   item.LevelID,
-		ClassID:   item.ClassID,
-	})
+func (service *Service) CreateStudentLevelDomainClass(inputJwtToken *types.JwtToken, item *model.StudentLevelDomainClass) (result *model.StudentLevelDomainClass, errCode int, err error) {
+	// Check unique
+	foundUnique, err := service.Repository.GetLevelDomainClassUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get student level/class by name from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem != nil {
+	if service.Repository.AreLevelDomainClassSameUniqueObjects(foundUnique, item) {
 		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage("student level/class")
+		err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
-	// Insert student level/class
-	result, err = service.Repository.CreateLevelClass(item)
+	// Insert student level domain/class
+	result, err = service.Repository.CreateStudentLevelDomainClass(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("create student level/class from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Update student
-func (service *Service) Update(inputJwtToken *types.JwtToken, studentID int64, item *model.Student) (result *model.Student, errCode int, err error) {
-	// Check if student already exists
-	foundStudentByID, err := service.Repository.GetById(studentID)
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.Student) (result *model.Student, errCode int, err error) {
+	// Check if student exists
+	foundItem, err := service.Repository.GetById(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get student by name from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundStudentByID == nil {
+	if foundItem == nil || foundItem.ID != id {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Student")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
-	foundItem, err := service.Repository.GetByObject(&model.Student{
-		SchoolID: foundStudentByID.SchoolID,
-		UserID:   foundStudentByID.UserID,
-		UID:      item.UID,
-	})
+
+	// Check unique by user id
+	foundUnique1, err := service.Repository.GetUniqueObjectByUserID(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get student by name from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem != nil {
+	if service.Repository.AreSameUniqueObjectsByUserID(foundUnique1, item) && !service.Repository.AreSameUniqueObjectsByUserID(foundUnique1, foundItem) {
 		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage("student")
+		err = constants.Http302ErrorMessage(MODEL_NAME)
+		return
+	}
+	// Check unique by uid
+	foundUnique2, err := service.Repository.GetUniqueObjectByUID(item)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if service.Repository.AreSameUniqueObjectsByUID(foundUnique2, item) && !service.Repository.AreSameUniqueObjectsByUID(foundUnique2, foundItem) {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
 	}
 
 	// Update student
-	result, err = service.Repository.Update(studentID, item)
+	result, err = service.Repository.Update(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("update student from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Update student level/class
-func (service *Service) UpdateLevelClass(inputJwtToken *types.JwtToken, studentLevelClassID int64, item *model.StudentLevelClass) (result *model.StudentLevelClass, errCode int, err error) {
-	// Check if student already exists
-	foundStudentByID, err := service.Repository.GetLevelClassById(studentLevelClassID)
+func (service *Service) UpdateStudentLevelDomainClass(inputJwtToken *types.JwtToken, id int64, item *model.StudentLevelDomainClass) (result *model.StudentLevelDomainClass, errCode int, err error) {
+	// Check if student level domain/class exists
+	foundItem, err := service.Repository.GetStudentLevelDomainClassById(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get student level/class by name from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundStudentByID == nil {
+	if foundItem == nil || foundItem.ID != id {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Student level/class")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
-	foundItem, err := service.Repository.GetLevelClassByObject(&model.StudentLevelClass{
-		StudentID: item.StudentID,
-		YearID:    item.YearID,
-		LevelID:   item.LevelID,
-		ClassID:   item.ClassID,
-	})
+
+	// Check unique
+	foundUnique, err := service.Repository.GetLevelDomainClassUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get student level/class by name from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem != nil {
+	if service.Repository.AreLevelDomainClassSameUniqueObjects(foundUnique, item) && !service.Repository.AreLevelDomainClassSameUniqueObjects(foundUnique, foundItem) {
 		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage("student level/class")
+		err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
 	// Update student
-	result, err = service.Repository.UpdateLevelClass(studentLevelClassID, item)
+	result, err = service.Repository.UpdateStudentLevelDomainClass(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("update student level/class from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Delete student with matching id and return affected rows
-func (service *Service) Delete(inputJwtToken *types.JwtToken, studentID int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(studentID)
+func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.Delete(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete student from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Student")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// Delete student level/class with matching id and return affected rows
-func (service *Service) DeleteLevelClass(inputJwtToken *types.JwtToken, studentLevelClassID int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteLevelClass(studentLevelClassID)
+func (service *Service) DeleteStudentLevelDomainClass(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteStudentLevelDomainClass(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete student level/class from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Student level/class")
+		err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Get Returns student with matching id
-func (service *Service) Get(inputJwtToken *types.JwtToken, studentID int64) (result *model.Student, errCode int, err error) {
-	result, err = service.Repository.GetById(studentID)
+func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Student, errCode int, err error) {
+	result, err = service.Repository.GetById(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get student by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if result == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Student")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// Get Returns student level/class with matching id
-func (service *Service) GetLevelClass(inputJwtToken *types.JwtToken, studentLevelClassID int64) (result *model.StudentLevelClass, errCode int, err error) {
-	result, err = service.Repository.GetLevelClassById(studentLevelClassID)
+func (service *Service) GetStudentLevelDomainClass(inputJwtToken *types.JwtToken, id int64) (result *model.StudentLevelDomainClass, errCode int, err error) {
+	result, err = service.Repository.GetStudentLevelDomainClassById(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get student level/class by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if result == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Student level/class")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// GetAll Returns all students with support for search, filter and pagination
 func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.Student, errCode int, err error) {
 	result, err = service.Repository.GetAll(filter, pagination, schoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get students from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}
 	return
 }
 
-// GetAll Returns all students level/class with support for search, filter and pagination
-func (service *Service) GetAllLevelClass(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.StudentLevelClass, errCode int, err error) {
-	result, err = service.Repository.GetAllLevelClass(filter, pagination, schoolID)
+func (service *Service) GetAllStudentLevelDomainClass(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64, studentID int64) (result []model.StudentLevelDomainClass, errCode int, err error) {
+	result, err = service.Repository.GetAllStudentLevelDomainClass(filter, pagination, schoolID, studentID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get students level/class from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}
 	return
 }

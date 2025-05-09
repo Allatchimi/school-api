@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -19,32 +18,27 @@ func NewService(repository *Repository) *Service {
 	return &Service{Repository: repository}
 }
 
-// Create user
+const MODEL_NAME = "user"
+const DEFAULT_ERROR_MESSAGE = "interact with user model"
+
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.User) (result *model.User, errCode int, err error) {
 	// Check if user exists
 	var foundItem *model.User
-	var errMsg string = ""
 	var isEmailValid = utils.IsEmailValid(item.Email)
 	if isEmailValid {
-		errMsg = "email"
 		foundItem, err = service.Repository.GetByEmail(item.Email)
 	} else {
-		errMsg = "phone number"
 		foundItem, err = service.Repository.GetByPhoneNumber(item.PhoneNumber)
 	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(
-			fmt.Sprintf("get user by %s from database", errMsg),
-		)
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundItem != nil {
 		if (isEmailValid && foundItem.Email == item.Email) || (!isEmailValid && foundItem.PhoneNumber == item.PhoneNumber) {
 			errCode = http.StatusFound
-			err = constants.Http302ErrorMessage(
-				fmt.Sprintf("user %s", errMsg),
-			)
+			err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
 		}
 	}
@@ -68,61 +62,48 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.User) 
 	result, err = service.Repository.Create(newUser)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("create user from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// CreateUserRole assign role to user
 func (service *Service) AssignRole(inputJwtToken *types.JwtToken, userID int64, roleID int64) (result *model.User, errCode int, err error) {
 	result, err = service.Repository.AssignRole(userID, roleID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("assign role to user from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// UpdateUser Update user
-func (service *Service) Update(inputJwtToken *types.JwtToken, userID int64, item *model.User) (result *model.User, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.User) (result *model.User, errCode int, err error) {
 	// Check if user exists
-	var errMsg string = ""
-	errMsg = "email"
 	foundItem, err := service.Repository.GetByEmail(item.Email)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(
-			fmt.Sprintf("get user by %s from database", errMsg),
-		)
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundItem != nil {
 		if foundItem.Email != item.Email {
 			errCode = http.StatusFound
-			err = constants.Http302ErrorMessage(
-				fmt.Sprintf("user %s", errMsg),
-			)
+			err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
 		}
 	}
 
-	errMsg = "phone number"
 	foundItem, err = service.Repository.GetByPhoneNumber(item.PhoneNumber)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(
-			fmt.Sprintf("get user by %s from database", errMsg),
-		)
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundItem != nil {
 		if foundItem.PhoneNumber != item.PhoneNumber {
 			errCode = http.StatusFound
-			err = constants.Http302ErrorMessage(
-				fmt.Sprintf("user %s", errMsg),
-			)
+			err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
 		}
 	}
@@ -134,84 +115,79 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, userID int64, item
 		tmpTime := time.Now()
 		item.ActivatedAt = &tmpTime
 	}
-	result, err = service.Repository.Update(userID, item)
+	result, err = service.Repository.Update(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("update user from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}
 	return
 }
 
-// Delete user with matching id and return affected rows
-func (service *Service) Delete(inputJwtToken *types.JwtToken, userID int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(userID)
+func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.Delete(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete user from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("User")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// DeleteUserRole remove user role and return affected rows
 func (service *Service) DeleteRole(inputJwtToken *types.JwtToken, userID int64, roleID int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteRole(userID, roleID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete user role from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("User role")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// Delete Deletes selection
 func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultiple(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete multiple user from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("User selection")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// Get Returns user with matching id
-func (service *Service) Get(inputJwtToken *types.JwtToken, userID int64) (result *model.User, errCode int, err error) {
-	result, err = service.Repository.GetByID(userID)
+func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.User, errCode int, err error) {
+	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get user by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if result == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("User")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// GetAll Returns all users with support for search, filter and pagination
 func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, roleName string) (result []model.User, errCode int, err error) {
 	result, err = service.Repository.GetAll(filter, pagination, roleName)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get users from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}
 	return
 }

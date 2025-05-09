@@ -43,8 +43,8 @@ docker-ghcr-login:
 docker-ghcr-push-specific:
 	@echo "" ;\
 	echo "Tag - GitHub Docker Registry" ;\
-	gCorp="4kpros" ;\
-	gRepo="go-api" ;\
+	gCorp="emenec-finance" ;\
+	gRepo="school-api" ;\
 	read -p "Enter your package name(redis, postgres, api): " gPackage; gTag=$${gPackage:-"api"} ;\
 	read -p "Enter your tag(default is 1): " gTag; gTag=$${gTag:-"1"} ;\
 	docker tag go-api-$$gPackage ghcr.io/$$gCorp/$$gRepo/$$gPackage:$$gTag ;\
@@ -54,8 +54,8 @@ docker-ghcr-push-specific:
 docker-ghcr-pull-specific:
 	@echo "" ;\
 	echo "Tag - GitHub Docker Registry" ;\
-	gCorp="4kpros" ;\
-	gRepo="go-api" ;\
+	gCorp="emenec-finance" ;\
+	gRepo="school-api" ;\
 	read -p "Enter your package name(redis, postgres, api): " gPackage; gTag=$${gPackage:-"api"} ;\
 	read -p "Enter your tag(default is 1): " gTag; gTag=$${gTag:-"1"} ;\
 	echo "" ;\

@@ -16,40 +16,40 @@ func NewService(repository *Repository) *Service {
 	return &Service{Repository: repository}
 }
 
-// Create new contact
-func (service *Service) Create(inputJwtToken *types.JwtToken, contact *model.Contact) (result *model.Contact, errCode int, err error) {
+const MODEL_NAME = "contact"
+const DEFAULT_ERROR_MESSAGE = "interact with contact model"
+
+func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Contact) (result *model.Contact, errCode int, err error) {
 	// Insert contact
-	result, err = service.Repository.Create(contact)
+	result, err = service.Repository.Create(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("create contact from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Get Returns contact with matching id
-func (service *Service) Get(inputJwtToken *types.JwtToken, contactID int64) (contact *model.Contact, errCode int, err error) {
-	contact, err = service.Repository.GetById(contactID)
+func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Contact, errCode int, err error) {
+	result, err = service.Repository.GetById(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get contact by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if contact == nil {
+	if result == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Contact")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// GetAll Returns all contacts with support for search, filter and pagination
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination) (contactList []model.Contact, errCode int, err error) {
-	contactList, err = service.Repository.GetAll(filter, pagination)
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination) (result []model.Contact, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get contacts from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}
 	return
 }

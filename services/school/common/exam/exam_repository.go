@@ -2,8 +2,10 @@ package exam
 
 import (
 	"fmt"
+	"strings"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"api/common/helpers"
 	"api/common/types"
@@ -29,14 +31,15 @@ func (repository *Repository) Create(data *model.Exam) (*model.Exam, error) {
 }
 
 func (repository *Repository) UpdateType(id int64, data *model.ExamType) (*model.ExamType, error) {
-	tempExam, err := repository.GetTypeById(id, data.SchoolID)
+	tempExam, err := repository.GetTypeById(id)
 	if err != nil || tempExam == nil || tempExam.ID != id {
 		return nil, err
 	}
 
 	result := &model.ExamType{}
-	return result, repository.Db.Model(result).Where("id = ?", id).Where("school_id = ?", data.SchoolID).Updates(
-		map[string]interface{}{
+	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
+		map[string]any{
+			"school_id":   data.SchoolID,
 			"name":        data.Name,
 			"description": data.Description,
 		},
@@ -44,104 +47,184 @@ func (repository *Repository) UpdateType(id int64, data *model.ExamType) (*model
 }
 
 func (repository *Repository) Update(id int64, data *model.Exam) (*model.Exam, error) {
-	tempExam, err := repository.GetById(id, data.SchoolID)
+	tempExam, err := repository.GetById(id)
 	if err != nil || tempExam == nil || tempExam.ID != id {
 		return nil, err
 	}
 
 	result := &model.Exam{}
-	return result, repository.Db.Model(result).Where("id = ?", id).Where("school_id = ?", data.SchoolID).Updates(
-		map[string]interface{}{
+	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
+		map[string]any{
+			"school_id":   data.SchoolID,
+			"year_id":     data.YearID,
+			"type_id":     data.TypeID,
+			"unit_id":     data.UnitID,
+			"subject_id":  data.SubjectID,
+			"sequence_id": data.SequenceID,
+
 			"percentage":       data.Percentage,
 			"description":      data.Description,
-			"type_id":          data.TypeID,
-			"teaching_unit_id": data.TeachingUnitID,
-			"subject_id":       data.SubjectID,
+			"location_type":    data.LocationType,
+			"location_details": data.LocationDetails,
+			"requirements":     data.Requirements,
+			"allowed_items":    data.AllowedItems,
+			"start_date":       data.StartDate,
+			"end_date":         data.EndDate,
 		},
 	).Error
 }
 
-func (repository *Repository) DeleteType(id int64, schoolID int64) (int64, error) {
-	tempExam, err := repository.GetTypeById(id, schoolID)
+func (repository *Repository) DeleteType(id int64) (int64, error) {
+	tempExam, err := repository.GetTypeById(id)
 	if err != nil || tempExam == nil || tempExam.ID != id {
 		return -1, err
 	}
 
-	result := repository.Db.Where("id = ?", id).Where("school_id = ?", schoolID).Delete(&model.ExamType{})
+	result := repository.Db.Where("id = ?", id).Delete(&model.ExamType{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) Delete(id int64, schoolID int64) (int64, error) {
-	tempExam, err := repository.GetTypeById(id, schoolID)
+func (repository *Repository) Delete(id int64) (int64, error) {
+	tempExam, err := repository.GetTypeById(id)
 	if err != nil || tempExam == nil || tempExam.ID != id {
 		return -1, err
 	}
 
-	result := repository.Db.Where("id = ?", id).Where("school_id = ?", schoolID).Delete(&model.Exam{})
+	result := repository.Db.Where("id = ?", id).Delete(&model.Exam{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) GetTypeById(id int64, schoolID int64) (*model.ExamType, error) {
+func (repository *Repository) GetTypeById(id int64) (*model.ExamType, error) {
 	result := &model.ExamType{}
-	return result, repository.Db.Model(&model.ExamType{}).Where("id = ?", id).Where("school_id = ?", schoolID).Limit(1).Find(result).Error
+	return result, repository.Db.Model(&model.ExamType{}).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetById(id int64, schoolID int64) (*model.Exam, error) {
+func (repository *Repository) GetById(id int64) (*model.Exam, error) {
 	result := &model.Exam{}
-	return result, repository.Db.Model(&model.Exam{}).Where("id = ?", id).Where("school_id = ?", schoolID).Limit(1).Find(result).Error
+	return result, repository.Db.Model(&model.Exam{}).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetByObject(data *model.Exam) (*model.Exam, error) {
+func (repository *Repository) GetUniqueObject(item *model.Exam) (*model.Exam, error) {
 	result := &model.Exam{}
-	return result, repository.Db.Model(&model.Exam{}).Where("id = ?", data.ID).Where("school_id = ?", data.SchoolID).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).Where(&model.Exam{
+		SchoolID:   item.SchoolID,
+		YearID:     item.YearID,
+		TypeID:     item.TypeID,
+		UnitID:     item.UnitID,
+		SubjectID:  item.SubjectID,
+		SequenceID: item.SequenceID,
+	}).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetTypeByObject(data *model.ExamType) (*model.ExamType, error) {
+func (repository *Repository) AreSameUniqueObjects(item1 *model.Exam, item2 *model.Exam) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID &&
+			item1.YearID == item2.YearID &&
+			item1.TypeID == item2.TypeID &&
+			item1.UnitID == item2.UnitID &&
+			item1.SubjectID == item2.SubjectID &&
+			item1.SequenceID == item2.SequenceID) {
+		return true
+	}
+	return false
+}
+
+func (repository *Repository) GetExamTypeUniqueObject(item *model.ExamType) (*model.ExamType, error) {
 	result := &model.ExamType{}
-	return result, repository.Db.Model(&model.ExamType{}).Where("id = ?", data.ID).Where("school_id = ?", data.SchoolID).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).Where(&model.ExamType{
+		SchoolID: item.SchoolID,
+		Name:     item.Name,
+	}).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetAllType(filter *types.Filter, pagination *types.Pagination, schoolID int64) ([]model.ExamType, error) {
-	var result []model.ExamType
+func (repository *Repository) AreSameExamTypeUniqueObjects(item1 *model.ExamType, item2 *model.ExamType) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID &&
+			item1.Name == item2.Name) {
+		return true
+	}
+	return false
+}
+
+func (repository *Repository) GetAllExamType(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.ExamType, err error) {
+	result = make([]model.ExamType, 0)
 	var where string = ""
-	if filter != nil && len(filter.Search) >= 1 {
-		where = fmt.Sprintf(
-			"WHERE school_id = '%d' AND (type ILIKE %s OR WHERE name ILIKE %s OR WHERE description ILIKE %s)",
-			schoolID,
-			filter.Search,
-			filter.Search,
-			filter.Search,
-		)
+	if schoolID > 0 {
+		where = fmt.Sprintf("WHERE exam_types.school_id = %d", schoolID)
 	}
-	return result, repository.Db.Scopes(
+	if filter != nil && len(filter.Search) >= 1 {
+		tempWhere := fmt.Sprintf(
+			"CAST(exam_types.id AS TEXT) = '%s' OR exam_types.name ILIKE '%s' OR exam_types.description ILIKE '%s' OR schools.name ILIKE '%s'",
+			filter.Search,
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+		)
+
+		if strings.HasPrefix(where, "WHERE") {
+			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
+		} else {
+			where = fmt.Sprintf("WHERE %s", tempWhere)
+		}
+	}
+	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"exam_types",
+			"SELECT exam_types.id, exam_types.school_id, exam_types.name, exam_types.description"+
+				", exam_types.created_at, exam_types.updated_at FROM exam_types "+
+				"LEFT JOIN schools ON exam_types.school_id = schools.id",
 			where,
 			pagination,
 			filter,
 		),
 	).Find(&result).Error
+
+	err = tmpErr
+	return
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) ([]model.Exam, error) {
-	var result []model.Exam
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.Exam, err error) {
+	result = make([]model.Exam, 0)
 	var where string = ""
-	if filter != nil && len(filter.Search) >= 1 {
-		where = fmt.Sprintf(
-			"WHERE school_id = '%d' AND (type ILIKE %s OR WHERE description ILIKE %s)",
-			schoolID,
-			filter.Search,
-			filter.Search,
-		)
+	if schoolID > 0 {
+		where = fmt.Sprintf("WHERE exams.school_id = %d", schoolID)
 	}
-	return result, repository.Db.Scopes(
+	if filter != nil && len(filter.Search) >= 1 {
+		tempWhere := fmt.Sprintf(
+			"CAST(exams.id AS TEXT) = '%s' OR exams.description ILIKE '%s' OR schools.name ILIKE '%s' OR years.name ILIKE '%s' OR exam_types.name ILIKE '%s' OR university_units.name ILIKE '%s' OR highschool_subjects.name ILIKE '%s' OR highschool_sequences.name ILIKE '%s'",
+			filter.Search,
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+		)
+
+		if strings.HasPrefix(where, "WHERE") {
+			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
+		} else {
+			where = fmt.Sprintf("WHERE %s", tempWhere)
+		}
+	}
+	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"exams",
+			"SELECT exams.id, exams.school_id, exams.year_id, exams.type_id, exams.unit_id, exams.subject_id, exams.sequence_id"+
+				", exams.created_at, exams.updated_at FROM exams "+
+				"LEFT JOIN schools ON exams.school_id = schools.id "+
+				"LEFT JOIN years ON exams.year_id = years.id "+
+				"LEFT JOIN exam_types ON exams.type_id = exam_types.id "+
+				"LEFT JOIN university_units ON exams.unit_id = university_units.id "+
+				"LEFT JOIN highschool_subjects ON exams.subject_id = highschool_subjects.id "+
+				"LEFT JOIN highschool_sequences ON exams.sequence_id = highschool_sequences.id",
 			where,
 			pagination,
 			filter,
 		),
 	).Find(&result).Error
+
+	err = tmpErr
+	return
 }
