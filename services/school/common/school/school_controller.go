@@ -26,11 +26,12 @@ func (controller *Controller) Create(
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
 		&model.School{
-			Name:   input.Body.Name,
-			Type:   input.Body.Type,
-			Logo:   input.Body.Logo,
-			Info:   model.FromInfoRequest(input.Body.Info),
-			Config: model.FromConfigRequest(input.Body.Config),
+			Name:     input.Body.Name,
+			Type:     input.Body.Type,
+			Logo:     input.Body.Logo,
+			Currency: input.Body.Currency,
+			Info:     model.FromInfoRequest(input.Body.Info),
+			Config:   model.FromConfigRequest(input.Body.Config),
 		},
 	)
 	return
@@ -46,11 +47,12 @@ func (controller *Controller) Update(
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx), input.ID,
 		&model.School{
-			Name:   input.Body.Name,
-			Type:   input.Body.Type,
-			Logo:   input.Body.Logo,
-			Info:   model.FromInfoRequest(input.Body.Info),
-			Config: model.FromConfigRequest(input.Body.Config),
+			Name:     input.Body.Name,
+			Type:     input.Body.Type,
+			Logo:     input.Body.Logo,
+			Currency: input.Body.Currency,
+			Info:     model.FromInfoRequest(input.Body.Info),
+			Config:   model.FromConfigRequest(input.Body.Config),
 		},
 	)
 	return

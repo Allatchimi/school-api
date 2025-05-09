@@ -7,6 +7,7 @@ import (
 	dataClass "api/services/school/highschool/class/data"
 	dataLevelDomain "api/services/school/university/level/data"
 	dataUser "api/services/user/user/data"
+	"time"
 )
 
 type StudentResponse struct {
@@ -26,19 +27,53 @@ type StudentPublicResponse struct {
 
 type StudentEnrollResponse struct {
 	types.BaseGormModelResponse
-	Student *StudentPublicResponse       `json:"student" required:"false" doc:"Student"`
-	Year    *dataYear.YearPublicResponse `json:"year" required:"false" doc:"Year"`
-
+	Student     *StudentPublicResponse                     `json:"student" required:"false" doc:"Student"`
+	Year        *dataYear.YearPublicResponse               `json:"year" required:"false" doc:"Year"`
 	LevelDomain *dataLevelDomain.LevelDomainPublicResponse `json:"levelDomain" required:"false" doc:"Level for domain"`
 	Class       *dataClass.ClassPublicResponse             `json:"class" required:"false" doc:"Class"`
+
+	Origin string `json:"Origin" required:"false" doc:"Origin"`
+	Status string `json:"Status" required:"false" doc:"Status"`
+
+	Email       string `json:"email" required:"false" doc:"Email"`
+	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number"`
+
+	Gender        string     `json:"gender" required:"false" doc:"Gender"`
+	FirstName     string     `json:"firstName" required:"false" doc:"First name"`
+	LastName      string     `json:"lastName" required:"false" doc:"Last name or family name"`
+	Birthday      *time.Time `json:"birthday" required:"false" doc:"Birthday date time"`
+	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
+
+	File1 string `json:"file1" required:"false" doc:"File1"`
+	File2 string `json:"file2" required:"false" doc:"File2"`
+	File3 string `json:"file3" required:"false" doc:"File3"`
+	File4 string `json:"file4" required:"false" doc:"File4"`
+	File5 string `json:"file5" required:"false" doc:"File5"`
 }
 
 type StudentEnrollPublicResponse struct {
-	Student *StudentPublicResponse       `json:"student" required:"false" doc:"Student"`
-	Year    *dataYear.YearPublicResponse `json:"year" required:"false" doc:"Year"`
-
+	Student     *StudentPublicResponse                     `json:"student" required:"false" doc:"Student"`
+	Year        *dataYear.YearPublicResponse               `json:"year" required:"false" doc:"Year"`
 	LevelDomain *dataLevelDomain.LevelDomainPublicResponse `json:"levelDomain" required:"false" doc:"Level for domain"`
 	Class       *dataClass.ClassPublicResponse             `json:"class" required:"false" doc:"Class"`
+
+	Origin string `json:"Origin" required:"false" doc:"Origin"`
+	Status string `json:"Status" required:"false" doc:"Status"`
+
+	Email       string `json:"email" required:"false" doc:"Email"`
+	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number"`
+
+	Gender        string     `json:"gender" required:"false" doc:"Gender"`
+	FirstName     string     `json:"firstName" required:"false" doc:"First name"`
+	LastName      string     `json:"lastName" required:"false" doc:"Last name or family name"`
+	Birthday      *time.Time `json:"birthday" required:"false" doc:"Birthday date time"`
+	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
+
+	File1 string `json:"file1" required:"false" doc:"File1"`
+	File2 string `json:"file2" required:"false" doc:"File2"`
+	File3 string `json:"file3" required:"false" doc:"File3"`
+	File4 string `json:"file4" required:"false" doc:"File4"`
+	File5 string `json:"file5" required:"false" doc:"File5"`
 }
 
 type StudentResponseList struct {

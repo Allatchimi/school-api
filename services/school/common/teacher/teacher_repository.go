@@ -213,7 +213,7 @@ func (repository *Repository) GetAllTeacherUnitSubject(filter *types.Filter, pag
 	}
 	tmpErr := repository.Db.Preload(clause.Associations).
 		Preload("Teacher.School").
-		Preload("Teacher.User.Public").
+		Preload("Teacher.User").
 		Preload("ClassSubject.Class").
 		Preload("ClassSubject.Subject").
 		Preload("Unit.Domain").

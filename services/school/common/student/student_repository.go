@@ -55,11 +55,10 @@ func (repository *Repository) UpdateStudentEnroll(id int64, item *model.StudentE
 	result := &model.StudentEnroll{}
 	return result, repository.Db.Model(result).Where("id = ?", item.ID).Updates(
 		map[string]any{
-			"student_id": item.StudentID,
-			"year_id":    item.YearID,
-
-			"unit_id":          item.UnitID,
-			"class_subject_id": item.ClassSubjectID,
+			"student_id":      item.StudentID,
+			"year_id":         item.YearID,
+			"level_domain_id": item.LevelDomainID,
+			"class_id":        item.ClassID,
 		},
 	).Error
 }
@@ -128,20 +127,20 @@ func (repository *Repository) AreSameUniqueObjectsByUID(item1 *model.Student, it
 	return false
 }
 
-func (repository *Repository) GetEnrollUniqueObject(item *model.StudentEnroll) (*model.StudentEnroll, error) {
+func (repository *Repository) GetStudentEnrollUniqueObject(item *model.StudentEnroll) (*model.StudentEnroll, error) {
 	result := &model.StudentEnroll{}
 	return result, repository.Db.Preload(clause.Associations).Where(&model.StudentEnroll{
-		StudentID:      item.StudentID,
-		YearID:         item.YearID,
-		UnitID:         item.UnitID,
-		ClassSubjectID: item.ClassSubjectID,
+		StudentID:     item.StudentID,
+		YearID:        item.YearID,
+		LevelDomainID: item.LevelDomainID,
+		ClassID:       item.ClassID,
 	}).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) AreEnrollSameUniqueObjects(item1 *model.StudentEnroll, item2 *model.StudentEnroll) bool {
+func (repository *Repository) AreStudentEnrollSameUniqueObjects(item1 *model.StudentEnroll, item2 *model.StudentEnroll) bool {
 	if item1 != nil && item2 != nil &&
 		(item1.StudentID == item2.StudentID &&
-			item1.YearID == item2.YearID && item1.UnitID == item2.UnitID && item1.ClassSubjectID == item2.ClassSubjectID) {
+			item1.YearID == item2.YearID && item1.LevelDomainID == item2.LevelDomainID && item1.ClassID == item2.ClassID) {
 		return true
 	}
 	return false

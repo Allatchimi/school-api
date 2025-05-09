@@ -169,7 +169,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"SELECT schools.id, schools.name, schools.type, schools.logo, schools.school_config_id, schools.school_info_id"+
+			"SELECT schools.id, schools.name, schools.type, schools.logo, schools.currency, schools.school_config_id, schools.school_info_id"+
 				", schools.created_at, schools.updated_at FROM schools "+
 				"LEFT JOIN school_infos as infos ON schools.school_info_id = infos.id",
 			where,

@@ -6,6 +6,7 @@ import (
 	modelYear "api/services/school/common/year/model"
 	modelClassSubject "api/services/school/highschool/class/model"
 	modelLevel "api/services/school/university/level/model"
+	"time"
 )
 
 type StudentEnroll struct {
@@ -23,11 +24,17 @@ type StudentEnroll struct {
 	ClassID int64                              `gorm:"default:null"`
 	Class   *modelClassSubject.HighschoolClass `gorm:"default:null;foreignKey:ClassID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	PaymentID int64    `gorm:"default:null"`
-	Payment   *Payment `gorm:"default:null;foreignKey:PaymentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Origin string `gorm:"default:null"`
+	Status string `gorm:"default:null"`
 
-	Status string `gorm:"default:null"`
-	Status string `gorm:"default:null"`
+	Email       string `gorm:"default:null"`
+	PhoneNumber uint64 `gorm:"default:null"`
+
+	Gender        string     `gorm:"default:null"`
+	FirstName     string     `gorm:"default:null"`
+	LastName      string     `gorm:"default:null"`
+	Birthday      *time.Time `gorm:"default:null"`
+	BirthLocation string     `gorm:"default:null"`
 
 	File1 string `gorm:"default:null"`
 	File2 string `gorm:"default:null"`
@@ -41,6 +48,20 @@ func (item *StudentEnroll) ToStudentEnrollResponse() *data.StudentEnrollResponse
 		return nil
 	}
 	resp := &data.StudentEnrollResponse{}
+	resp.Origin = item.Origin
+	resp.Status = item.Status
+	resp.Email = item.Email
+	resp.PhoneNumber = item.PhoneNumber
+	resp.Gender = item.Gender
+	resp.FirstName = item.FirstName
+	resp.Birthday = item.Birthday
+	resp.BirthLocation = item.BirthLocation
+	resp.File1 = item.File1
+	resp.File2 = item.File2
+	resp.File3 = item.File3
+	resp.File4 = item.File4
+	resp.File5 = item.File5
+
 	resp.Student = item.Student.ToStudentPublicResponse()
 	resp.Year = item.Year.ToPublicResponse()
 	resp.LevelDomain = item.LevelDomain.ToLevelDomainPublicResponse()
@@ -57,6 +78,20 @@ func (item *StudentEnroll) ToStudentEnrollPublicResponse() *data.StudentEnrollPu
 		return nil
 	}
 	resp := &data.StudentEnrollPublicResponse{}
+	resp.Origin = item.Origin
+	resp.Status = item.Status
+	resp.Email = item.Email
+	resp.PhoneNumber = item.PhoneNumber
+	resp.Gender = item.Gender
+	resp.FirstName = item.FirstName
+	resp.Birthday = item.Birthday
+	resp.BirthLocation = item.BirthLocation
+	resp.File1 = item.File1
+	resp.File2 = item.File2
+	resp.File3 = item.File3
+	resp.File4 = item.File4
+	resp.File5 = item.File5
+
 	resp.Student = item.Student.ToStudentPublicResponse()
 	resp.Year = item.Year.ToPublicResponse()
 	resp.LevelDomain = item.LevelDomain.ToLevelDomainPublicResponse()
