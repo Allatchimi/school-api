@@ -59,6 +59,43 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Create level domain
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "post-level-domain",
+			Summary:     "Create level domain",
+			Description: "Create new level domain.",
+			Method:      http.MethodPost,
+			Path:        fmt.Sprintf("%s/leveldomains", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						constants.FeatureAdmin,     // Feature scope
+						tableName,                  // Table name
+						constants.PermissionCreate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body data.LevelDomainRequest
+			},
+		) (*struct{ Body data.LevelDomainResponse }, error) {
+			result, errCode, err := controller.CreateLevelDomain(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.LevelDomainResponse }{Body: *result.ToLevelDomainResponse()}, nil
+		},
+	)
+
 	// Update level with id
 	huma.Register(
 		*humaApi,
@@ -127,6 +164,43 @@ func RegisterEndpoints(
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.Delete(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
+	// Delete level domain with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "delete-level-domain",
+			Summary:     "Delete level domain",
+			Description: "Delete existing level domain with matching id and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/leveldomains/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						constants.FeatureAdmin,     // Feature scope
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.LevelDomainID
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteLevelDomain(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -247,6 +321,49 @@ func RegisterEndpoints(
 			}
 			return &struct {
 				Body data.LevelResponseList
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get all level domains
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-level-domain-list",
+			Summary:     "Get all level domains",
+			Description: "Get all level domains with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/leveldomains", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						constants.FeatureAdmin,   // Feature scope
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllLevelDomainRequest
+			},
+		) (*struct {
+			Body data.LevelDomainResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllLevelDomain(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct {
+				Body data.LevelDomainResponseList
 			}{Body: *result}, nil
 		},
 	)

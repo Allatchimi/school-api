@@ -5,9 +5,10 @@ type SubjectID struct {
 }
 
 type SubjectRequest struct {
-	SchoolID    int64  `json:"schoolID" required:"true" doc:"School id" example:"1"`
-	Name        string `json:"name" required:"true" doc:"Subject name" example:"Sciences"`
-	Description string `json:"description" required:"false" doc:"Subject description" example:""`
+	SchoolID int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
+
+	Name        string `json:"name" required:"true" doc:"Name" example:"MATH110"`
+	Description string `json:"description" required:"false" doc:"Description" example:""`
 }
 
 type GetAllRequest struct {

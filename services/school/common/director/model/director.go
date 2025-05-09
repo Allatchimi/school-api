@@ -41,6 +41,20 @@ func (item *Director) ToResponse() *data.DirectorResponse {
 	return resp
 }
 
+func (item *Director) ToPublicResponse() *data.DirectorPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.DirectorPublicResponse{}
+	if resp.User != nil {
+		resp.User.Info = nil
+	}
+	if resp.School != nil {
+		resp.School.Info = nil
+	}
+	return resp
+}
+
 func ToResponseList(itemList []Director) []data.DirectorResponse {
 	resp := make([]data.DirectorResponse, len(itemList))
 	for index, school := range itemList {

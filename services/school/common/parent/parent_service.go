@@ -58,7 +58,7 @@ func (service *Service) CreateParentStudent(inputJwtToken *types.JwtToken, item 
 	}
 	if foundItem != nil {
 		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
 	}
 
@@ -119,7 +119,7 @@ func (service *Service) UpdateParentStudent(inputJwtToken *types.JwtToken, paren
 	}
 	if foundParentByID == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	foundItem, err := service.Repository.GetParentStudentByObject(&model.ParentStudent{
@@ -133,7 +133,7 @@ func (service *Service) UpdateParentStudent(inputJwtToken *types.JwtToken, paren
 	}
 	if foundItem != nil {
 		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
 	}
 
@@ -171,7 +171,7 @@ func (service *Service) DeleteParentStudent(inputJwtToken *types.JwtToken, paren
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
@@ -201,7 +201,7 @@ func (service *Service) GetParentStudent(inputJwtToken *types.JwtToken, parentPa
 	}
 	if result == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return

@@ -11,6 +11,12 @@ type RoleResponse struct {
 	Description string `json:"description" required:"false" doc:"Role description"`
 }
 
+type RolePublicResponse struct {
+	Name        string `json:"name" required:"false" doc:"Role name"`
+	Feature     string `json:"feature" required:"false" doc:"Feature name"`
+	Description string `json:"description" required:"false" doc:"Role description"`
+}
+
 type RoleResponseList struct {
 	types.PaginatedResponse
 	Data []RoleResponse `json:"data" required:"false" doc:"List of roles" example:"[]"`

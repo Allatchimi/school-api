@@ -7,9 +7,17 @@ import (
 
 type SubjectResponse struct {
 	types.BaseGormModelResponse
-	School      *data.SchoolResponse `json:"school" doc:"School"`
-	Name        string               `json:"name" required:"false" doc:"Subject name"`
-	Description string               `json:"description" required:"false" doc:"Subject description"`
+	School *data.SchoolPublicResponse `json:"school" doc:"School"`
+
+	Name        string `json:"name" required:"false" doc:"Name"`
+	Description string `json:"description" required:"false" doc:"Description"`
+}
+
+type SubjectPublicResponse struct {
+	School *data.SchoolPublicResponse `json:"school" doc:"School"`
+
+	Name        string `json:"name" required:"false" doc:"Name"`
+	Description string `json:"description" required:"false" doc:"Description"`
 }
 
 type SubjectResponseList struct {

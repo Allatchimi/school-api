@@ -4,7 +4,7 @@ import (
 	"api/common/types"
 	"api/services/school/common/teacher/data"
 	modelYear "api/services/school/common/year/model"
-	modelSubject "api/services/school/highschool/subject/model"
+	modelClassSubject "api/services/school/highschool/class/model"
 	modelUnit "api/services/school/university/unit/model"
 )
 
@@ -20,8 +20,8 @@ type TeacherUnitSubject struct {
 	UnitID int64                     `gorm:"default:null"`
 	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	SubjectID int64                           `gorm:"default:null"`
-	Subject   *modelSubject.HighschoolSubject `gorm:"default:null;foreignKey:SubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	ClassSubjectID int64                                     `gorm:"default:null"`
+	ClassSubject   *modelClassSubject.HighschoolClassSubject `gorm:"default:null;foreignKey:ClassSubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *TeacherUnitSubject) ToTeacherUnitSubjectResponse() *data.TeacherUnitSubjectResponse {
@@ -29,14 +29,26 @@ func (item *TeacherUnitSubject) ToTeacherUnitSubjectResponse() *data.TeacherUnit
 		return nil
 	}
 	resp := &data.TeacherUnitSubjectResponse{}
-	resp.Teacher = item.Teacher.ToTeacherResponse()
-	resp.Year = item.Year.ToResponse()
-	resp.Unit = item.Unit.ToResponse()
-	resp.Subject = item.Subject.ToResponse()
+	resp.Teacher = item.Teacher.ToTeacherPublicResponse()
+	resp.Year = item.Year.ToPublicResponse()
+	resp.Unit = item.Unit.ToPublicResponse()
+	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+	return resp
+}
+
+func (item *TeacherUnitSubject) ToTeacherUnitSubjectPublicResponse() *data.TeacherUnitSubjectPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.TeacherUnitSubjectPublicResponse{}
+	resp.Teacher = item.Teacher.ToTeacherPublicResponse()
+	resp.Year = item.Year.ToPublicResponse()
+	resp.Unit = item.Unit.ToPublicResponse()
+	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
 	return resp
 }
 

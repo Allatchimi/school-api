@@ -8,15 +8,26 @@ import (
 
 type QuarterResponse struct {
 	types.BaseGormModelResponse
-	School      *schoolData.SchoolResponse `json:"school" doc:"School"`
-	Name        string                     `json:"name" required:"false" doc:"Quarter name"`
-	Description string                     `json:"description" required:"false" doc:"Quarter description"`
+	School      *schoolData.SchoolPublicResponse `json:"school" doc:"School"`
+	Name        string                           `json:"name" required:"false" doc:"Quarter name"`
+	Description string                           `json:"description" required:"false" doc:"Quarter description"`
+}
+
+type QuarterPublicResponse struct {
+	School      *schoolData.SchoolPublicResponse `json:"school" doc:"School"`
+	Name        string                           `json:"name" required:"false" doc:"Quarter name"`
+	Description string                           `json:"description" required:"false" doc:"Quarter description"`
 }
 
 type QuarterSequenceResponse struct {
 	types.BaseGormModelResponse
-	Quarter  *QuarterResponse               `json:"Quarter" doc:"Quarter"`
-	Sequence *sequenceData.SequenceResponse `json:"Sequence" doc:"Sequence"`
+	Quarter  *QuarterPublicResponse               `json:"Quarter" doc:"Quarter"`
+	Sequence *sequenceData.SequencePublicResponse `json:"Sequence" doc:"Sequence"`
+}
+
+type QuarterSequencePublicResponse struct {
+	Quarter  *QuarterPublicResponse               `json:"Quarter" doc:"Quarter"`
+	Sequence *sequenceData.SequencePublicResponse `json:"Sequence" doc:"Sequence"`
 }
 
 type QuarterResponseList struct {

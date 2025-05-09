@@ -30,7 +30,8 @@ func (repository *Repository) Update(id int64, item *model.HighschoolSubject) (*
 	result := &model.HighschoolSubject{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
-			"school_id":   item.SchoolID,
+			"school_id": item.SchoolID,
+
 			"name":        item.Name,
 			"description": item.Description,
 		},
@@ -97,7 +98,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"SELECT subjects.id, subjects.name, subjects.description, subjects.school_id"+
+			"SELECT subjects.id, subjects.school_id, subjects.name, subjects.description"+
 				", subjects.created_at, subjects.updated_at FROM highschool_subjects subjects "+
 				"LEFT JOIN schools ON subjects.school_id = schools.id",
 			where,

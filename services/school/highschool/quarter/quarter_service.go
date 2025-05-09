@@ -21,13 +21,15 @@ func NewService(repository *Repository, SchoolRepository *school.Repository) *Se
 	}
 }
 
-// Create new quarter
+const MODEL_NAME = "quarter"
+const DEFAULT_ERROR_MESSAGE = "interact with quarter model"
+
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.HighschoolQuarter) (result *model.HighschoolQuarter, errCode int, err error) {
 	// Check if the school type is highschool
 	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get school by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundSchool.Type != constants.SCHOOL_TYPE_HIGHSCHOOL {
@@ -40,12 +42,12 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Highsc
 	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get quarter by user school ids from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if service.Repository.AreSameUniqueObjects(foundUnique, item) {
 		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage("Quarter")
+		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
 	}
 
@@ -53,19 +55,18 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Highsc
 	result, err = service.Repository.Create(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("create quarter from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Update quarter
 func (service *Service) Update(inputJwtToken *types.JwtToken, quarterID int64, item *model.HighschoolQuarter) (result *model.HighschoolQuarter, errCode int, err error) {
 	// Check if the school type is highschool
 	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get school by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundSchool.Type != constants.SCHOOL_TYPE_HIGHSCHOOL {
@@ -78,12 +79,12 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, quarterID int64, i
 	foundItem, err := service.Repository.GetById(quarterID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get quarter by name from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundItem == nil || foundItem.ID != quarterID {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Quarter")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	// Check if the school type is highschool
@@ -97,12 +98,12 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, quarterID int64, i
 	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get quarter by user school ids from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if service.Repository.AreSameUniqueObjects(foundUnique, item) && !service.Repository.AreSameUniqueObjects(foundUnique, foundItem) {
 		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage("Quarter")
+		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
 	}
 
@@ -110,66 +111,62 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, quarterID int64, i
 	result, err = service.Repository.Update(quarterID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("update quarter from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Delete quarter with matching id and return affected rows
 func (service *Service) Delete(inputJwtToken *types.JwtToken, quarterID int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.Delete(quarterID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete quarter from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Quarter")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// Delete Deletes selection
 func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultiple(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete multiple quarter from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Quarter selection")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// Get Returns quarter with matching id
 func (service *Service) Get(inputJwtToken *types.JwtToken, quarterID int64) (result *model.HighschoolQuarter, errCode int, err error) {
 	result, err = service.Repository.GetById(quarterID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get quarter by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if result == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Quarter")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// GetAll Returns all quarters with support for search, filter and pagination
 func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.HighschoolQuarter, errCode int, err error) {
 	result, err = service.Repository.GetAll(filter, pagination, schoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get quarters from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}
 	return
 }

@@ -8,13 +8,22 @@ import (
 
 type ParentResponse struct {
 	types.BaseGormModelResponse
-	User *dataUser.UserResponse `json:"userID" required:"false" doc:"User id"`
+	User *dataUser.UserPublicResponse `json:"userID" required:"false" doc:"User id"`
+}
+
+type ParentPublicResponse struct {
+	User *dataUser.UserPublicResponse `json:"userID" required:"false" doc:"User id"`
 }
 
 type ParentStudentResponse struct {
 	types.BaseGormModelResponse
-	Parent  *ParentResponse              `json:"parent" required:"false" doc:"Parent"`
-	Student *dataStudent.StudentResponse `json:"student" required:"false" doc:"Student"`
+	Parent  *ParentPublicResponse              `json:"parent" required:"false" doc:"Parent"`
+	Student *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
+}
+
+type ParentStudentPublicResponse struct {
+	Parent  *ParentPublicResponse              `json:"parent" required:"false" doc:"Parent"`
+	Student *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
 }
 
 type ParentResponseList struct {

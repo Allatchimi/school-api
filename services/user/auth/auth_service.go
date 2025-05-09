@@ -30,7 +30,9 @@ func NewAuthService(repository *user.Repository, roleRepository *role.Repository
 	return &Service{Repository: repository, RoleRepository: roleRepository}
 }
 
-// Login Sign in user with email or phone number
+const MODEL_NAME = "user"
+const DEFAULT_ERROR_MESSAGE = "interact with auth service"
+
 func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice) (accessToken string, accessExpires *time.Time, activateAccountToken string, errCode int, err error) {
 	// Check if user exists
 	var userFound *model.User
@@ -73,7 +75,7 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 		)
 		if err != nil || accessJwtToken == nil || len(accessToken) <= 0 {
 			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage("encode JWT token")
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
 		}
 
@@ -87,7 +89,7 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	randomCode, err = utils.GenerateRandomCode(6)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("generate random code")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
@@ -109,7 +111,7 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	)
 	if err != nil || activateAccountJwtToken == nil || len(activateAccountToken) <= 0 {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("encode jwt token")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	errCode = http.StatusForbidden
@@ -141,7 +143,6 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	return
 }
 
-// LoginWithProvider Sign in user with provider like Google and Facebook
 func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, device *data.LoginDevice) (accessToken string, accessExpires *time.Time, errCode int, err error) {
 	// Validate provider token and update user
 	var newUser = &model.User{
@@ -188,7 +189,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 	userFound, err := service.Repository.GetByProvider(input.Provider, newUser.ProviderUserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("check user session")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if userFound == nil || userFound.ID < 1 {
@@ -197,7 +198,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 		userInfo, err = service.Repository.CreateUserInfo(newUser.Info)
 		if err != nil {
 			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage("create user info on database")
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
 		}
 		// Add mfa
@@ -205,7 +206,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 		userMfa, err = service.Repository.CreateUserMfa(newUser.Mfa)
 		if err != nil {
 			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage("create user mfa on database")
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
 		}
 
@@ -214,7 +215,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 		defaultRole, err = service.RoleRepository.GetByName(config.Env.RoleDefault)
 		if err != nil {
 			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage("get role on database")
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
 		}
 
@@ -235,7 +236,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 		)
 		if err != nil {
 			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage("create user on database")
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
 		}
 	}
@@ -257,14 +258,13 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 	)
 	if err != nil || jwtToken == nil || len(accessToken) <= 0 {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("encode JWT token")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	accessExpires = &jwtToken.ExpiresAt.Time
 	return
 }
 
-// Register Sign up user with email or phone number
 func (service *Service) Register(input *data.RegisterRequest) (activateAccountToken string, errCode int, err error) {
 	// Check if user exists
 	var userFound *model.User
@@ -278,7 +278,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("find user on database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if userFound != nil && userFound.Email == input.Email {
@@ -292,7 +292,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	defaultRole, err = service.RoleRepository.GetByName(config.Env.RoleDefault)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get role on database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	// Create new user
@@ -304,7 +304,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	createdUser, err := service.Repository.Create(userFound)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("create user on database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
@@ -314,7 +314,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	randomCode, err = utils.GenerateRandomCode(6)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("generate random code")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
@@ -336,7 +336,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	)
 	if err != nil || activateAccountJwtToken == nil || len(activateAccountToken) <= 0 {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("encode jwt token")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}
 
 	// Send code to email or phone number
@@ -365,7 +365,6 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	return
 }
 
-// ActivateAccount Activates user account
 func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (activatedAt *time.Time, errCode int, err error) {
 	// Extract token information and validate the token
 	errMsg := "Invalid or expired token! Please enter valid information."
@@ -411,13 +410,13 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	newUserInfo, err := service.Repository.CreateUserInfo(&model.UserInfo{})
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("create user info")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	newUserMfa, err := service.Repository.CreateUserMfa(&model.UserMfa{})
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("create user MFA")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
@@ -430,7 +429,7 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	updatedUser, err := service.Repository.UpdateUserActivation(userFound.ID, userFound)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("update user" + err.Error())
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	activatedAt = updatedUser.ActivatedAt
@@ -454,7 +453,6 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	return
 }
 
-// ForgotPasswordInit Forgot password step 1: request forgot password
 func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest) (token string, errCode int, err error) {
 	// Check input
 	var errMsg string
@@ -492,7 +490,7 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 	randomCode, err := utils.GenerateRandomCode(6)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("generate random code")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	expires := security.NewExpiresDateDefault()
@@ -512,7 +510,7 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 	)
 	if err != nil || newJwtToken == nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("generate new JWT token")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	token = newToken
@@ -543,7 +541,6 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 	return
 }
 
-// ForgotPasswordCode Forgot password step 2: validate sent code
 func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest) (token string, errCode int, err error) {
 	// Check input
 	if len(input.Token) <= 0 && input.Code < 10000 {
@@ -616,13 +613,12 @@ func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest
 	)
 	if err != nil || newJwtToken == nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("generate new JWT token")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}
 	token = newToken
 	return
 }
 
-// ForgotPasswordNewPassword Forgot password step 3: setup new password
 func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewPasswordRequest) (errCode int, err error) {
 	// Check input
 	isPasswordValid, missingPasswordChars := utils.IsPasswordValid(input.NewPassword)
@@ -680,7 +676,7 @@ func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewP
 	userUpdated, err := service.Repository.UpdateUserPassword(jwtToken.UserID, input.NewPassword)
 	if err != nil || userUpdated == nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("update password")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
@@ -689,7 +685,6 @@ func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewP
 	return
 }
 
-// Logout closes user session with provided token
 func (service *Service) Logout(jwtToken *types.JwtToken, bearerToken string) (errCode int, err error) {
 	// Invalidate the token
 	sessions, err := config.GetRedisStringList(security.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
@@ -707,7 +702,7 @@ func (service *Service) Logout(jwtToken *types.JwtToken, bearerToken string) (er
 	err = config.RemoveFromRedisStringList(fmt.Sprintf("%d", jwtToken.UserID), int64(tokenIndex))
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete cached session")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return

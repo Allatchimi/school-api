@@ -69,8 +69,9 @@ func Start() error {
 		&quarterModel.HighschoolQuarter{},
 		&sectionModel.HighschoolSection{},
 		&specialtyModel.HighschoolSpecialty{},
-		&classModel.HighschoolClass{},
 		&subjectModel.HighschoolSubject{},
+		&classModel.HighschoolClass{},
+		&classModel.HighschoolClassSubject{},
 
 		// University
 		&semesterModel.UniversitySemester{},
@@ -78,6 +79,7 @@ func Start() error {
 		&departmentModel.UniversityDepartment{},
 		&domainModel.UniversityDomain{},
 		&levelModel.UniversityLevel{},
+		&levelModel.UniversityLevelDomain{},
 		&tuModel.UniversityUnit{},
 	)
 	helpers.LogMigrations(

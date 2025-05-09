@@ -66,6 +66,15 @@ func (item *User) ToResponse() *data.UserResponse {
 	return resp
 }
 
+func (item *User) ToPublicResponse() *data.UserPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.UserPublicResponse{}
+	resp.Info = item.Info.ToPublicResponse()
+	return resp
+}
+
 func (item *User) FromGoogleUser(googleUser *types.GoogleUserProfileResponse) {
 	item.ProviderUserID = googleUser.ID
 	item.Email = googleUser.Email

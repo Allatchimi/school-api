@@ -99,31 +99,11 @@ func (controller *Controller) GetAll(
 	input *struct {
 		types.Filter
 		types.PaginationRequest
+		data.GetAllRequest
 	},
 ) (result *data.YearResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	yearList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, -1)
-	if err != nil {
-		return
-	}
-	result = &data.YearResponseList{
-		Data: model.ToResponseList(yearList),
-	}
-	result.Filter = newFilter
-	result.Pagination = newPagination
-	return
-}
-
-func (controller *Controller) GetAllBySchool(
-	ctx *context.Context,
-	input *struct {
-		types.Filter
-		types.PaginationRequest
-		data.GetAllBySchoolRequest
-	},
-) (result *data.YearResponseList, errCode int, err error) {
-	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	yearList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllBySchoolRequest.ID)
+	yearList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.SchoolID)
 	if err != nil {
 		return
 	}

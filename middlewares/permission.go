@@ -44,7 +44,7 @@ func PermissionMiddleware(api huma.API, roleRepo *role.Repository, permissionRep
 			// Retrieve role
 			foundRole, errFound := roleRepo.GetByID(jwtToken.RoleID)
 			if errFound != nil {
-				tempErr := constants.Http500ErrorMessage("get role from database")
+				tempErr := constants.Http500ErrorMessage("interact with role model")
 				_ = huma.WriteErr(api, ctx, http.StatusInternalServerError, tempErr.Error(), tempErr)
 				return
 			}
@@ -58,7 +58,7 @@ func PermissionMiddleware(api huma.API, roleRepo *role.Repository, permissionRep
 			// Retrieve permission
 			userPermission, errPerm := permissionRepo.GetByRoleIDTableNameAll(jwtToken.RoleID, tableName, "*")
 			if errPerm != nil {
-				tempErr := constants.Http500ErrorMessage("get permission from database")
+				tempErr := constants.Http500ErrorMessage("interact with permission model")
 				_ = huma.WriteErr(api, ctx, http.StatusInternalServerError, tempErr.Error(), tempErr)
 				return
 			}

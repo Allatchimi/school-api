@@ -58,8 +58,8 @@ func (repository *Repository) UpdateTeacherUnitSubject(id int64, item *model.Tea
 			"teacher_id": item.TeacherID,
 			"year_id":    item.YearID,
 
-			"unit_id":    item.UnitID,
-			"subject_id": item.SubjectID,
+			"unit_id":          item.UnitID,
+			"class_subject_id": item.ClassSubjectID,
 		},
 	).Error
 }
@@ -131,17 +131,17 @@ func (repository *Repository) AreSameUniqueObjectsByUID(item1 *model.Teacher, it
 func (repository *Repository) GetUnitSubjectUniqueObject(item *model.TeacherUnitSubject) (*model.TeacherUnitSubject, error) {
 	result := &model.TeacherUnitSubject{}
 	return result, repository.Db.Preload(clause.Associations).Where(&model.TeacherUnitSubject{
-		TeacherID: item.TeacherID,
-		YearID:    item.YearID,
-		UnitID:    item.UnitID,
-		SubjectID: item.SubjectID,
+		TeacherID:      item.TeacherID,
+		YearID:         item.YearID,
+		UnitID:         item.UnitID,
+		ClassSubjectID: item.ClassSubjectID,
 	}).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) AreUnitSubjectSameUniqueObjects(item1 *model.TeacherUnitSubject, item2 *model.TeacherUnitSubject) bool {
 	if item1 != nil && item2 != nil &&
 		(item1.TeacherID == item2.TeacherID &&
-			item1.YearID == item2.YearID && item1.UnitID == item2.UnitID && item1.SubjectID == item2.SubjectID) {
+			item1.YearID == item2.YearID && item1.UnitID == item2.UnitID && item1.ClassSubjectID == item2.ClassSubjectID) {
 		return true
 	}
 	return false
@@ -186,43 +186,57 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	return
 }
 
-func (repository *Repository) GetAllTeacherUnitSubject(filter *types.Filter, pagination *types.Pagination, teacherID int64) (result []model.TeacherUnitSubject, err error) {
+func (repository *Repository) GetAllTeacherUnitSubject(filter *types.Filter, pagination *types.Pagination, schoolID int64, teacherID int64) (result []model.TeacherUnitSubject, err error) {
 	result = make([]model.TeacherUnitSubject, 0)
 	var where string = ""
+	if schoolID > 0 {
+		where = fmt.Sprintf("WHERE teachers.school_id = %d", schoolID)
+	}
 	if teacherID > 0 {
-		where = fmt.Sprintf("WHERE tus.teacher_id = %d", teacherID)
+		tempWhere := fmt.Sprintf("tus.teacher_id = %d", teacherID)
+		if strings.HasPrefix(where, "WHERE") {
+			where = fmt.Sprintf("%s AND %s", where, tempWhere)
+		} else {
+			where = fmt.Sprintf("WHERE %s", tempWhere)
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
 			"CAST(tus.id AS TEXT) = '%s' OR years.name ILIKE '%s'"+
 				" OR university_units.name ILIKE '%s' OR university_units.description ILIKE '%s'"+
-				" OR university_levels.name ILIKE '%s' OR university_levels.description ILIKE '%s'"+
-				" OR highschool_subjects.name ILIKE '%s' OR highschool_subjects.description ILIKE '%s'",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
+				filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
 		where = fmt.Sprintf("WHERE %s", tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT tus.id, tus.teacher_id, tus.year_id, tus.unit_id, tus.subject_id"+
-				", tus.created_at, tus.updated_at FROM tus AS tus "+
-				"LEFT JOIN years ON tus.year_id = years.id "+
-				"LEFT JOIN university_units ON tus.unit_id = university_units.id "+
-				"LEFT JOIN highschool_subjects ON tus.subject_id = highschool_subjects.id ",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.Preload(clause.Associations).
+		Preload("Teacher.School").
+		Preload("Teacher.User.Public").
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.Domain").
+		Preload("Unit.Level").
+		Preload("Unit.Semester").
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT tus.id, tus.teacher_id, tus.year_id, tus.unit_id, tus.class_subject_id"+
+					", tus.created_at, tus.updated_at FROM teacher_unit_subjects AS tus "+
+					"LEFT JOIN teachers ON tus.teacher_id = teachers.id "+
+					"LEFT JOIN years ON tus.year_id = years.id "+
+					"LEFT JOIN university_units ON tus.unit_id = university_units.id "+
+					"LEFT JOIN highschool_class_subjects ON tus.class_subject_id = highschool_class_subjects.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return
+}
+func preload(d *gorm.DB) *gorm.DB {
+	return d.Preload("Class", preload)
 }

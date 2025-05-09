@@ -59,6 +59,43 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Create class subject
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "post-class-subject",
+			Summary:     "Create class subject",
+			Description: "Create new class subject.",
+			Method:      http.MethodPost,
+			Path:        fmt.Sprintf("%s/subjects", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						constants.FeatureAdmin,     // Feature scope
+						tableName,                  // Table name
+						constants.PermissionCreate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body data.ClassSubjectRequest
+			},
+		) (*struct{ Body data.ClassSubjectResponse }, error) {
+			result, errCode, err := controller.CreateClassSubject(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.ClassSubjectResponse }{Body: *result.ToClassSubjectResponse()}, nil
+		},
+	)
+
 	// Update class with id
 	huma.Register(
 		*humaApi,
@@ -127,6 +164,43 @@ func RegisterEndpoints(
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.Delete(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
+	// Delete class subject with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "delete-class-subject",
+			Summary:     "Delete class subject",
+			Description: "Delete existing class subject with matching id and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/subjects/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						constants.FeatureAdmin,     // Feature scope
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.ClassSubjectID
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteClassSubject(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -208,7 +282,7 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all classes
+	// Get class list
 	huma.Register(
 		*humaApi,
 		huma.Operation{
@@ -247,6 +321,49 @@ func RegisterEndpoints(
 			}
 			return &struct {
 				Body data.ClassResponseList
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get subject list by class id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-subject-list-by-class-id",
+			Summary:     "Get all subjects by class id",
+			Description: "Get all subjects for matching class with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/subjects", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						constants.FeatureAdmin,   // Feature scope
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllClassSubjectRequest
+			},
+		) (*struct {
+			Body data.ClassSubjectResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllClassSubject(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct {
+				Body data.ClassSubjectResponseList
 			}{Body: *result}, nil
 		},
 	)

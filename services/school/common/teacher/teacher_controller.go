@@ -46,8 +46,8 @@ func (controller *Controller) CreateTeacherUnitSubject(
 			TeacherID: input.Body.TeacherID,
 			YearID:    input.Body.YearID,
 
-			UnitID:    input.Body.UnitID,
-			SubjectID: input.Body.SubjectID,
+			UnitID:         input.Body.UnitID,
+			ClassSubjectID: input.Body.ClassSubjectID,
 		},
 	)
 	return
@@ -84,8 +84,8 @@ func (controller *Controller) UpdateTeacherUnitSubject(
 			TeacherID: input.Body.TeacherID,
 			YearID:    input.Body.YearID,
 
-			UnitID:    input.Body.UnitID,
-			SubjectID: input.Body.SubjectID,
+			UnitID:         input.Body.UnitID,
+			ClassSubjectID: input.Body.ClassSubjectID,
 		},
 	)
 	return
@@ -177,7 +177,7 @@ func (controller *Controller) GetAllTeacherUnitSubject(
 	},
 ) (result *data.TeacherUnitSubjectResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	teacherList, errCode, err := controller.Service.GetAllTeacherUnitSubject(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllTeacherUnitSubjectRequest.TeacherID)
+	teacherList, errCode, err := controller.Service.GetAllTeacherUnitSubject(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllTeacherUnitSubjectRequest.SchoolID, input.GetAllTeacherUnitSubjectRequest.TeacherID)
 	if err != nil {
 		return
 	}

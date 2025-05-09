@@ -7,10 +7,9 @@ type UnitID struct {
 }
 
 type UnitRequest struct {
-	SchoolID   int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
-	DomainID   int64 `json:"domainID" required:"true" doc:"Domain id" example:"1"`
-	LevelID    int64 `json:"levelID" required:"true" doc:"Level id" example:"1"`
-	SemesterID int64 `json:"semesterID" required:"true" doc:"Semester id" example:"1"`
+	SchoolID      int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
+	LevelDomainID int64 `json:"levelDomainID" required:"true" doc:"Level domain id" example:"1"`
+	SemesterID    int64 `json:"semesterID" required:"true" doc:"Semester id" example:"1"`
 
 	Name         string `json:"name" required:"true" doc:"Name" example:"MATH110"`
 	Description  string `json:"description" required:"false" doc:"Description" example:""`

@@ -32,6 +32,18 @@ func (item *ExamType) ToResponse() *data.ExamTypeResponse {
 	return resp
 }
 
+func (item *ExamType) ToPublicResponse() *data.ExamTypePublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.ExamTypePublicResponse{}
+	resp.Name = item.Name
+	resp.Description = item.Description
+
+	resp.School = item.School.ToPublicResponse()
+	return resp
+}
+
 func ToExamTypeResponseList(itemList []ExamType) []data.ExamTypeResponse {
 	resp := make([]data.ExamTypeResponse, len(itemList))
 	for index, item := range itemList {

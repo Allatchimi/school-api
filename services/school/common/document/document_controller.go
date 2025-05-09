@@ -28,8 +28,8 @@ func (controller *Controller) Create(
 		&model.Document{
 			SchoolID:       input.Body.SchoolID,
 			YearID:         input.Body.YearID,
-			SubjectID:      input.Body.SubjectID,
-			TeachingUnitID: input.Body.TeachingUnitID,
+			ClassSubjectID: input.Body.ClassSubjectID,
+			UnitID:         input.Body.UnitID,
 		},
 	)
 	return

@@ -3,7 +3,6 @@ package model
 import (
 	"api/common/types"
 	modelSchool "api/services/school/common/school/model"
-	modelDomain "api/services/school/university/domain/model"
 	modelLevel "api/services/school/university/level/model"
 	modelSemester "api/services/school/university/semester/model"
 	"api/services/school/university/unit/data"
@@ -15,11 +14,8 @@ type UniversityUnit struct {
 	SchoolID int64               `gorm:"default:null"`
 	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	DomainID int64                         `gorm:"default:null"`
-	Domain   *modelDomain.UniversityDomain `gorm:"default:null;foreignKey:DomainID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-
-	LevelID int64                       `gorm:"default:null"`
-	Level   *modelLevel.UniversityLevel `gorm:"default:null;foreignKey:LevelID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	LevelDomainID int64                             `gorm:"default:null"`
+	LevelDomain   *modelLevel.UniversityLevelDomain `gorm:"default:null;foreignKey:LevelDomainID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	SemesterID int64                             `gorm:"default:null"`
 	Semester   *modelSemester.UniversitySemester `gorm:"default:null;foreignKey:SemesterID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -47,14 +43,32 @@ func (item *UniversityUnit) ToResponse() *data.UnitResponse {
 	resp.IsValid = item.IsValid
 	resp.InvalidDate = item.InvalidDate
 
-	resp.School = item.School.ToResponse()
-	resp.Domain = item.Domain.ToResponse()
-	resp.Level = item.Level.ToResponse()
-	resp.Semester = item.Semester.ToResponse()
+	resp.School = item.School.ToPublicResponse()
+	resp.LevelDomain = item.LevelDomain.ToLevelDomainPublicResponse()
+	resp.Semester = item.Semester.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+	return resp
+}
+
+func (item *UniversityUnit) ToPublicResponse() *data.UnitPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.UnitPublicResponse{}
+	resp.Name = item.Name
+	resp.Description = item.Description
+	resp.Credit = item.Credit
+	resp.Program = item.Program
+	resp.Requirements = item.Requirements
+	resp.IsValid = item.IsValid
+	resp.InvalidDate = item.InvalidDate
+
+	resp.School = item.School.ToPublicResponse()
+	resp.LevelDomain = item.LevelDomain.ToLevelDomainPublicResponse()
+	resp.Semester = item.Semester.ToPublicResponse()
 	return resp
 }
 

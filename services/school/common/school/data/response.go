@@ -9,9 +9,18 @@ type SchoolResponse struct {
 	types.BaseGormModelResponse
 	Name string `json:"name" doc:"School name"`
 	Type string `json:"type" doc:"Type"`
+	Logo string `json:"logo" doc:"School logo"`
 
 	Info   *SchoolInfoResponse   `json:"info" doc:"Information"`
 	Config *SchoolConfigResponse `json:"config" doc:"Configuration"`
+}
+
+type SchoolPublicResponse struct {
+	Name string `json:"name" doc:"School name"`
+	Type string `json:"type" doc:"Type"`
+	Logo string `json:"logo" doc:"School logo"`
+
+	Info *SchoolInfoResponse `json:"info" doc:"Information"`
 }
 
 type SchoolInfoResponse struct {
@@ -33,8 +42,6 @@ type SchoolInfoResponse struct {
 	Address           string  `json:"address" doc:"Address"`
 	LocationLongitude float64 `json:"locationLongitude" doc:"Location longitude"`
 	LocationLatitude  float64 `json:"locationLatitude" doc:"Location latitude"`
-
-	Logo string `json:"logo" doc:"School logo"`
 
 	Image1 string `json:"image1" doc:"Image 1"`
 	Image2 string `json:"image2" doc:"Image 2"`

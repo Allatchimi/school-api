@@ -23,11 +23,23 @@ func (item *UniversitySemester) ToResponse() *data.SemesterResponse {
 	resp.Name = item.Name
 	resp.Description = item.Description
 
-	resp.School = item.School.ToResponse()
+	resp.School = item.School.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+	return resp
+}
+
+func (item *UniversitySemester) ToPublicResponse() *data.SemesterPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.SemesterPublicResponse{}
+	resp.Name = item.Name
+	resp.Description = item.Description
+
+	resp.School = item.School.ToPublicResponse()
 	return resp
 }
 

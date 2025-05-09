@@ -67,6 +67,29 @@ func (item *Exam) ToResponse() *data.ExamResponse {
 	return resp
 }
 
+func (item *Exam) ToPublicResponse() *data.ExamPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.ExamPublicResponse{}
+	resp.Percentage = item.Percentage
+	resp.Description = item.Description
+	resp.LocationType = item.LocationType
+	resp.LocationDetails = item.LocationDetails
+	resp.Requirements = item.Requirements
+	resp.AllowedItems = item.AllowedItems
+	resp.StartDate = item.StartDate
+	resp.EndDate = item.EndDate
+
+	resp.School = item.School.ToPublicResponse()
+	resp.Year = item.Year.ToPublicResponse()
+	resp.Type = item.Type.ToPublicResponse()
+	resp.Unit = item.Unit.ToPublicResponse()
+	resp.Subject = item.Subject.ToPublicResponse()
+	resp.Sequence = item.Sequence.ToPublicResponse()
+	return resp
+}
+
 func ToExamResponseList(itemList []Exam) []data.ExamResponse {
 	resp := make([]data.ExamResponse, len(itemList))
 	for index, item := range itemList {

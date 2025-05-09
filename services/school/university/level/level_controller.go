@@ -34,6 +34,26 @@ func (controller *Controller) Create(
 	return
 }
 
+func (controller *Controller) CreateLevelDomain(
+	ctx *context.Context,
+	input *struct {
+		Body data.LevelDomainRequest
+	},
+) (result *model.UniversityLevelDomain, errCode int, err error) {
+	result, errCode, err = controller.Service.CreateLevelDomain(
+		helpers.GetJwtContext(ctx),
+		&model.UniversityLevelDomain{
+			LevelID:  input.Body.LevelID,
+			DomainID: input.Body.DomainID,
+
+			Program:      input.Body.Program,
+			Requirements: input.Body.Requirements,
+			IsValid:      input.Body.IsValid,
+		},
+	)
+	return
+}
+
 func (controller *Controller) Update(
 	ctx *context.Context,
 	input *struct {
@@ -59,6 +79,20 @@ func (controller *Controller) Delete(
 	},
 ) (result int64, errCode int, err error) {
 	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
+	if err != nil {
+		return
+	}
+	result = affectedRows
+	return
+}
+
+func (controller *Controller) DeleteLevelDomain(
+	ctx *context.Context,
+	input *struct {
+		data.LevelDomainID
+	},
+) (result int64, errCode int, err error) {
+	affectedRows, errCode, err := controller.Service.DeleteLevelDomain(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -109,6 +143,27 @@ func (controller *Controller) GetAll(
 	}
 	result = &data.LevelResponseList{
 		Data: model.ToResponseList(levelList),
+	}
+	result.Filter = newFilter
+	result.Pagination = newPagination
+	return
+}
+
+func (controller *Controller) GetAllLevelDomain(
+	ctx *context.Context,
+	input *struct {
+		types.Filter
+		types.PaginationRequest
+		data.GetAllLevelDomainRequest
+	},
+) (result *data.LevelDomainResponseList, errCode int, err error) {
+	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
+	levelList, errCode, err := controller.Service.GetAllLevelDomain(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllLevelDomainRequest.SchoolID, input.GetAllLevelDomainRequest.LevelID)
+	if err != nil {
+		return
+	}
+	result = &data.LevelDomainResponseList{
+		Data: model.ToLevelDomainResponseList(levelList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

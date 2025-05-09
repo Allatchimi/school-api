@@ -25,12 +25,24 @@ func (item *Teacher) ToTeacherResponse() *data.TeacherResponse {
 	resp := &data.TeacherResponse{}
 	resp.UID = item.UID
 
-	resp.School = item.School.ToResponse()
-	resp.User = item.User.ToResponse()
+	resp.School = item.School.ToPublicResponse()
+	resp.User = item.User.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+	return resp
+}
+
+func (item *Teacher) ToTeacherPublicResponse() *data.TeacherPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.TeacherPublicResponse{}
+	resp.UID = item.UID
+
+	resp.School = item.School.ToPublicResponse()
+	resp.User = item.User.ToPublicResponse()
 	return resp
 }
 

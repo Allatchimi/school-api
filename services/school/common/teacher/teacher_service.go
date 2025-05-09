@@ -16,8 +16,8 @@ func NewService(repository *Repository) *Service {
 	return &Service{Repository: repository}
 }
 
-const MODEL_NAME = "teacher/unit-subject"
-const DEFAULT_ERROR_MESSAGE = "interact with teacher/unit-subject model"
+const MODEL_NAME = "teacher"
+const DEFAULT_ERROR_MESSAGE = "interact with teacher model"
 
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Teacher) (result *model.Teacher, errCode int, err error) {
 	// Check unique by user id
@@ -138,7 +138,7 @@ func (service *Service) UpdateTeacherUnitSubject(inputJwtToken *types.JwtToken, 
 	}
 	if foundItem == nil || foundItem.ID != id {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 
@@ -219,7 +219,7 @@ func (service *Service) GetTeacherUnitSubject(inputJwtToken *types.JwtToken, id 
 	}
 	if result == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
@@ -234,8 +234,8 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 	return
 }
 
-func (service *Service) GetAllTeacherUnitSubject(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, id int64) (result []model.TeacherUnitSubject, errCode int, err error) {
-	result, err = service.Repository.GetAllTeacherUnitSubject(filter, pagination, id)
+func (service *Service) GetAllTeacherUnitSubject(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64, teacherID int64) (result []model.TeacherUnitSubject, errCode int, err error) {
+	result, err = service.Repository.GetAllTeacherUnitSubject(filter, pagination, schoolID, teacherID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

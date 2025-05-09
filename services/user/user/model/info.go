@@ -36,3 +36,16 @@ func (item *UserInfo) ToResponse() *data.UserInfoResponse {
 	resp.Image = item.Image
 	return resp
 }
+
+func (item *UserInfo) ToPublicResponse() *data.UserInfoPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.UserInfoPublicResponse{}
+	resp.Gender = item.Gender
+	resp.Username = item.Username
+	resp.FirstName = item.FirstName
+	resp.LastName = item.LastName
+	resp.Image = item.Image
+	return resp
+}

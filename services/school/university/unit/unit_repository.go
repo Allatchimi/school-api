@@ -34,10 +34,9 @@ func (repository *Repository) Update(id int64, item *model.UniversityUnit) (*mod
 	result := &model.UniversityUnit{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
-			"school_id":   item.SchoolID,
-			"domain_id":   item.DomainID,
-			"level_id":    item.LevelID,
-			"semester_id": item.SemesterID,
+			"school_id":       item.SchoolID,
+			"level_domain_id": item.LevelDomainID,
+			"semester_id":     item.SemesterID,
 
 			"name":         item.Name,
 			"description":  item.Description,
@@ -69,10 +68,9 @@ func (repository *Repository) GetById(id int64) (*model.UniversityUnit, error) {
 func (repository *Repository) GetUniqueObject(item *model.UniversityUnit) (*model.UniversityUnit, error) {
 	result := &model.UniversityUnit{}
 	return result, repository.Db.Where(&model.UniversityUnit{
-		SchoolID:   item.SchoolID,
-		DomainID:   item.DomainID,
-		LevelID:    item.LevelID,
-		SemesterID: item.SemesterID,
+		SchoolID:      item.SchoolID,
+		LevelDomainID: item.LevelDomainID,
+		SemesterID:    item.SemesterID,
 
 		Name: item.Name,
 	}).Limit(1).Find(result).Error
@@ -81,8 +79,7 @@ func (repository *Repository) GetUniqueObject(item *model.UniversityUnit) (*mode
 func (repository *Repository) AreSameUniqueObjects(item1 *model.UniversityUnit, item2 *model.UniversityUnit) bool {
 	if item1 != nil && item2 != nil &&
 		(item1.SchoolID == item2.SchoolID &&
-			item1.DomainID == item2.DomainID &&
-			item1.LevelID == item2.LevelID &&
+			item1.LevelDomainID == item2.LevelDomainID &&
 			item1.SemesterID == item2.SemesterID &&
 			item1.Name == item2.Name) {
 		return true
@@ -98,10 +95,8 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(units.id AS TEXT) = '%s' OR units.name ILIKE '%s' OR units.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR university_domains.name ILIKE '%s' OR university_levels.name ILIKE '%s' OR university_semesters.name ILIKE '%s'",
+			"CAST(units.id AS TEXT) = '%s' OR units.name ILIKE '%s' OR units.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR university_semesters.name ILIKE '%s'",
 			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -117,11 +112,10 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"SELECT units.id, units.name, units.description, units.credit, units.program, units.requirements, units.is_valid, units.invalid_date, units.school_id, units.domain_id, units.level_id, units.semester_id"+
+			"SELECT units.id, units.school_id, units.level_domain_id, units.semester_id, units.name, units.description, units.credit, units.program, units.requirements, units.is_valid, units.invalid_date"+
 				", units.created_at, units.updated_at FROM university_units units "+
 				"LEFT JOIN schools ON units.school_id = schools.id "+
-				"LEFT JOIN university_domains ON units.domain_id = university_domains.id "+
-				"LEFT JOIN university_levels ON units.level_id = university_levels.id "+
+				"LEFT JOIN university_level_domains ON units.level_domain_id = university_level_domains.id "+
 				"LEFT JOIN university_semesters ON units.semester_id = university_semesters.id ",
 			where,
 			pagination,

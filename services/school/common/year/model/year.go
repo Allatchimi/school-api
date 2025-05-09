@@ -26,11 +26,24 @@ func (item *Year) ToResponse() *data.YearResponse {
 	resp.StartDate = item.StartDate
 	resp.EndDate = item.EndDate
 
-	resp.School = item.School.ToResponse()
+	resp.School = item.School.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+	return resp
+}
+
+func (item *Year) ToPublicResponse() *data.YearPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.YearPublicResponse{}
+	resp.Name = item.Name
+	resp.StartDate = item.StartDate
+	resp.EndDate = item.EndDate
+
+	resp.School = item.School.ToPublicResponse()
 	return resp
 }
 

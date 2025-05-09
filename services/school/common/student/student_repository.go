@@ -25,7 +25,7 @@ func (repository *Repository) Create(item *model.Student) (*model.Student, error
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) CreateLevelClass(item *model.StudentLevelClass) (*model.StudentLevelClass, error) {
+func (repository *Repository) CreateStudentEnroll(item *model.StudentEnroll) (*model.StudentEnroll, error) {
 	result := *item
 	return &result, repository.Db.Create(&result).Error
 }
@@ -46,22 +46,20 @@ func (repository *Repository) Update(id int64, item *model.Student) (*model.Stud
 	).Error
 }
 
-func (repository *Repository) UpdateLevelClass(id int64, item *model.StudentLevelClass) (*model.StudentLevelClass, error) {
+func (repository *Repository) UpdateStudentEnroll(id int64, item *model.StudentEnroll) (*model.StudentEnroll, error) {
 	tempStudent, err := repository.GetById(id)
 	if err != nil || tempStudent == nil || tempStudent.ID != id {
 		return nil, err
 	}
 
-	result := &model.StudentLevelClass{}
+	result := &model.StudentEnroll{}
 	return result, repository.Db.Model(result).Where("id = ?", item.ID).Updates(
 		map[string]any{
 			"student_id": item.StudentID,
 			"year_id":    item.YearID,
 
-			"domain_id": item.DomainID,
-			"level_id":  item.LevelID,
-
-			"class_id": item.ClassID,
+			"unit_id":          item.UnitID,
+			"class_subject_id": item.ClassSubjectID,
 		},
 	).Error
 }
@@ -76,13 +74,13 @@ func (repository *Repository) Delete(id int64) (int64, error) {
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteLevelClass(id int64) (int64, error) {
-	foundItem, err := repository.GetLevelClassById(id)
+func (repository *Repository) DeleteStudentEnroll(id int64) (int64, error) {
+	foundItem, err := repository.GetStudentEnrollById(id)
 	if err != nil || foundItem == nil || foundItem.ID != id {
 		return -1, err
 	}
 
-	result := repository.Db.Where("id = ?", id).Delete(&model.StudentLevelClass{})
+	result := repository.Db.Where("id = ?", id).Delete(&model.StudentEnroll{})
 	return result.RowsAffected, result.Error
 }
 
@@ -91,19 +89,62 @@ func (repository *Repository) GetById(id int64) (*model.Student, error) {
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetLevelClassById(id int64) (*model.StudentLevelClass, error) {
-	result := &model.StudentLevelClass{}
+func (repository *Repository) GetStudentEnrollById(id int64) (*model.StudentEnroll, error) {
+	result := &model.StudentEnroll{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetByObject(item *model.Student) (*model.Student, error) {
+func (repository *Repository) GetUniqueObjectByUserID(item *model.Student) (*model.Student, error) {
 	result := &model.Student{}
-	return result, repository.Db.Where(item).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).Where(&model.Student{
+		SchoolID: item.SchoolID,
+		UserID:   item.UserID,
+	}).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetLevelClassByObject(item *model.StudentLevelClass) (*model.StudentLevelClass, error) {
-	result := &model.StudentLevelClass{}
-	return result, repository.Db.Where(item).Limit(1).Find(result).Error
+func (repository *Repository) AreSameUniqueObjectsByUserID(item1 *model.Student, item2 *model.Student) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID &&
+			item1.UserID == item2.UserID) {
+		return true
+	}
+	return false
+}
+
+func (repository *Repository) GetUniqueObjectByUID(item *model.Student) (*model.Student, error) {
+	result := &model.Student{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.Student{
+		SchoolID: item.SchoolID,
+		UID:      item.UID,
+	}).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) AreSameUniqueObjectsByUID(item1 *model.Student, item2 *model.Student) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID &&
+			item1.UID == item2.UID) {
+		return true
+	}
+	return false
+}
+
+func (repository *Repository) GetEnrollUniqueObject(item *model.StudentEnroll) (*model.StudentEnroll, error) {
+	result := &model.StudentEnroll{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.StudentEnroll{
+		StudentID:      item.StudentID,
+		YearID:         item.YearID,
+		UnitID:         item.UnitID,
+		ClassSubjectID: item.ClassSubjectID,
+	}).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) AreEnrollSameUniqueObjects(item1 *model.StudentEnroll, item2 *model.StudentEnroll) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.StudentID == item2.StudentID &&
+			item1.YearID == item2.YearID && item1.UnitID == item2.UnitID && item1.ClassSubjectID == item2.ClassSubjectID) {
+		return true
+	}
+	return false
 }
 
 func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.Student, err error) {
@@ -114,9 +155,8 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(students.id AS TEXT) = '%s' OR students.uid ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR users.email ILIKE '%s' OR users.phone_number ILIKE '%s'",
+			"CAST(students.id AS TEXT) = '%s' OR students.uid ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR users.email ILIKE '%s'",
 			filter.Search,
-			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -146,44 +186,57 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	return
 }
 
-func (repository *Repository) GetAllLevelClass(filter *types.Filter, pagination *types.Pagination, studentID int64) (result []model.StudentLevelClass, err error) {
-	result = make([]model.StudentLevelClass, 0)
+func (repository *Repository) GetAllStudentEnroll(filter *types.Filter, pagination *types.Pagination, schoolID int64, studentID int64) (result []model.StudentEnroll, err error) {
+	result = make([]model.StudentEnroll, 0)
 	var where string = ""
+	if schoolID > 0 {
+		where = fmt.Sprintf("WHERE students.school_id = %d", schoolID)
+	}
 	if studentID > 0 {
-		where = fmt.Sprintf("WHERE student_lc.student_id = %d", studentID)
+		tempWhere := fmt.Sprintf("tus.student_id = %d", studentID)
+		if strings.HasPrefix(where, "WHERE") {
+			where = fmt.Sprintf("%s AND %s", where, tempWhere)
+		} else {
+			where = fmt.Sprintf("WHERE %s", tempWhere)
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(student_lc.id AS TEXT) = '%s' OR years.name ILIKE '%s'"+
-				" OR university_domains.name ILIKE '%s' OR university_domains.description ILIKE '%s'"+
-				" OR university_levels.name ILIKE '%s' OR university_levels.description ILIKE '%s'"+
-				" OR highschool_classes.name ILIKE '%s' OR highschool_classes.description ILIKE '%s'",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
+			"CAST(tus.id AS TEXT) = '%s' OR years.name ILIKE '%s'"+
+				" OR university_units.name ILIKE '%s' OR university_units.description ILIKE '%s'"+
+				filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
 		where = fmt.Sprintf("WHERE %s", tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT student_lc.id, student_lc.student_id, student_lc.year_id, student_lc.level_id"+
-				", student_lc.created_at, student_lc.updated_at FROM student_level_classes AS student_lc "+
-				"LEFT JOIN years ON student_lc.year_id = years.id "+
-				"LEFT JOIN university_domains ON student_lc.domain_id = university_domains.id "+
-				"LEFT JOIN university_levels ON student_lc.level_id = university_levels.id "+
-				"LEFT JOIN highschool_classes ON student_lc.class_id = highschool_classes.id ",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.Preload(clause.Associations).
+		Preload("Student.School").
+		Preload("Student.User.Public").
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.Domain").
+		Preload("Unit.Level").
+		Preload("Unit.Semester").
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT tus.id, tus.student_id, tus.year_id, tus.unit_id, tus.class_subject_id"+
+					", tus.created_at, tus.updated_at FROM student_unit_subjects AS tus "+
+					"LEFT JOIN students ON tus.student_id = students.id "+
+					"LEFT JOIN years ON tus.year_id = years.id "+
+					"LEFT JOIN university_units ON tus.unit_id = university_units.id "+
+					"LEFT JOIN highschool_class_subjects ON tus.class_subject_id = highschool_class_subjects.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return
+}
+func preload(d *gorm.DB) *gorm.DB {
+	return d.Preload("Class", preload)
 }

@@ -34,22 +34,20 @@ func (controller *Controller) Create(
 	return
 }
 
-func (controller *Controller) CreateLevelClass(
+func (controller *Controller) CreateStudentEnroll(
 	ctx *context.Context,
 	input *struct {
-		Body data.StudentLevelClassRequest
+		Body data.StudentEnrollRequest
 	},
-) (result *model.StudentLevelClass, errCode int, err error) {
-	result, errCode, err = controller.Service.CreateLevelClass(
+) (result *model.StudentEnroll, errCode int, err error) {
+	result, errCode, err = controller.Service.CreateStudentEnroll(
 		helpers.GetJwtContext(ctx),
-		&model.StudentLevelClass{
+		&model.StudentEnroll{
 			StudentID: input.Body.StudentID,
 			YearID:    input.Body.YearID,
 
-			DomainID: input.Body.DomainID,
-			LevelID:  input.Body.LevelID,
-
-			ClassID: input.Body.ClassID,
+			UnitID:         input.Body.UnitID,
+			ClassSubjectID: input.Body.ClassSubjectID,
 		},
 	)
 	return
@@ -73,23 +71,21 @@ func (controller *Controller) Update(
 	return
 }
 
-func (controller *Controller) UpdateLevelClass(
+func (controller *Controller) UpdateStudentEnroll(
 	ctx *context.Context,
 	input *struct {
-		data.StudentLevelClassID
-		Body data.StudentLevelClassRequest
+		data.EnrollID
+		Body data.StudentEnrollRequest
 	},
-) (result *model.StudentLevelClass, errCode int, err error) {
-	result, errCode, err = controller.Service.UpdateLevelClass(
+) (result *model.StudentEnroll, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateStudentEnroll(
 		helpers.GetJwtContext(ctx), input.ID,
-		&model.StudentLevelClass{
+		&model.StudentEnroll{
 			StudentID: input.Body.StudentID,
 			YearID:    input.Body.YearID,
 
-			DomainID: input.Body.DomainID,
-			LevelID:  input.Body.LevelID,
-
-			ClassID: input.Body.ClassID,
+			UnitID:         input.Body.UnitID,
+			ClassSubjectID: input.Body.ClassSubjectID,
 		},
 	)
 	return
@@ -109,13 +105,13 @@ func (controller *Controller) Delete(
 	return
 }
 
-func (controller *Controller) DeleteLevelClass(
+func (controller *Controller) DeleteStudentEnroll(
 	ctx *context.Context,
 	input *struct {
-		data.StudentLevelClassID
+		data.EnrollID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteLevelClass(helpers.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.DeleteStudentEnroll(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -137,13 +133,13 @@ func (controller *Controller) Get(
 	return
 }
 
-func (controller *Controller) GetLevelClass(
+func (controller *Controller) GetStudentEnroll(
 	ctx *context.Context,
 	input *struct {
-		data.StudentLevelClassID
+		data.EnrollID
 	},
-) (result *model.StudentLevelClass, errCode int, err error) {
-	student, errCode, err := controller.Service.GetLevelClass(helpers.GetJwtContext(ctx), input.ID)
+) (result *model.StudentEnroll, errCode int, err error) {
+	student, errCode, err := controller.Service.GetStudentEnroll(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -172,21 +168,21 @@ func (controller *Controller) GetAll(
 	return
 }
 
-func (controller *Controller) GetAllLevelClass(
+func (controller *Controller) GetAllStudentEnroll(
 	ctx *context.Context,
 	input *struct {
 		types.Filter
 		types.PaginationRequest
-		data.GetAllLevelClassRequest
+		data.GetAllStudentEnrollRequest
 	},
-) (result *data.StudentLevelClassResponseList, errCode int, err error) {
+) (result *data.StudentEnrollResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	studentList, errCode, err := controller.Service.GetAllLevelClass(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllLevelClassRequest.StudentID)
+	studentList, errCode, err := controller.Service.GetAllStudentEnroll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllStudentEnrollRequest.SchoolID, input.GetAllStudentEnrollRequest.StudentID)
 	if err != nil {
 		return
 	}
-	result = &data.StudentLevelClassResponseList{
-		Data: model.ToStudentLevelClassResponseList(studentList),
+	result = &data.StudentEnrollResponseList{
+		Data: model.ToStudentEnrollResponseList(studentList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

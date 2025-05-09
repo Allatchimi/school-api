@@ -13,8 +13,5 @@ type YearRequest struct {
 }
 
 type GetAllRequest struct {
-}
-
-type GetAllBySchoolRequest struct {
-	ID int64 `json:"id" path:"id" required:"true" doc:"School id" example:"1"`
+	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
 }

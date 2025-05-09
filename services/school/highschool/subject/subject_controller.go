@@ -26,7 +26,8 @@ func (controller *Controller) Create(
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
 		&model.HighschoolSubject{
-			SchoolID:    input.Body.SchoolID,
+			SchoolID: input.Body.SchoolID,
+
 			Name:        input.Body.Name,
 			Description: input.Body.Description,
 		},
@@ -44,7 +45,8 @@ func (controller *Controller) Update(
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx), input.ID,
 		&model.HighschoolSubject{
-			SchoolID:    input.Body.SchoolID,
+			SchoolID: input.Body.SchoolID,
+
 			Name:        input.Body.Name,
 			Description: input.Body.Description,
 		},

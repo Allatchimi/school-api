@@ -23,11 +23,23 @@ func (item *HighschoolSequence) ToResponse() *data.SequenceResponse {
 	resp.Name = item.Name
 	resp.Description = item.Description
 
-	resp.School = item.School.ToResponse()
+	resp.School = item.School.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+	return resp
+}
+
+func (item *HighschoolSequence) ToPublicResponse() *data.SequencePublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.SequencePublicResponse{}
+	resp.Name = item.Name
+	resp.Description = item.Description
+
+	resp.School = item.School.ToPublicResponse()
 	return resp
 }
 

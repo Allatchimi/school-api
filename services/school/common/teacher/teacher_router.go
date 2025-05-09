@@ -383,7 +383,7 @@ func RegisterEndpoints(
 			Summary:     "Get all teachers unit/subject",
 			Description: "Get all unit/subject for specified teacher with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/{id}/unitsubjects", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/unitsubjects", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{

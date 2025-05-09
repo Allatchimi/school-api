@@ -17,6 +17,7 @@ type HighschoolClass struct {
 
 	Name        string `gorm:"not null"`
 	Description string `gorm:"default:null"`
+	Fees        int64  `gorm:"default:null"`
 }
 
 func (item *HighschoolClass) ToResponse() *data.ClassResponse {
@@ -27,12 +28,25 @@ func (item *HighschoolClass) ToResponse() *data.ClassResponse {
 	resp.Name = item.Name
 	resp.Description = item.Description
 
-	resp.School = item.School.ToResponse()
-	resp.Specialty = item.Specialty.ToResponse()
+	resp.School = item.School.ToPublicResponse()
+	resp.Specialty = item.Specialty.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+	return resp
+}
+
+func (item *HighschoolClass) ToPublicResponse() *data.ClassPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.ClassPublicResponse{}
+	resp.Name = item.Name
+	resp.Description = item.Description
+
+	resp.School = item.School.ToPublicResponse()
+	resp.Specialty = item.Specialty.ToPublicResponse()
 	return resp
 }
 

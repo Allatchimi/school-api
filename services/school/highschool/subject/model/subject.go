@@ -11,7 +11,7 @@ type HighschoolSubject struct {
 	SchoolID int64         `gorm:"default:null"`
 	School   *model.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Name        string `gorm:"not null"`
+	Name        string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
 }
 
@@ -23,11 +23,23 @@ func (item *HighschoolSubject) ToResponse() *data.SubjectResponse {
 	resp.Name = item.Name
 	resp.Description = item.Description
 
-	resp.School = item.School.ToResponse()
+	resp.School = item.School.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+	return resp
+}
+
+func (item *HighschoolSubject) ToPublicResponse() *data.SubjectPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.SubjectPublicResponse{}
+	resp.Name = item.Name
+	resp.Description = item.Description
+
+	resp.School = item.School.ToPublicResponse()
 	return resp
 }
 

@@ -42,8 +42,6 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.School
 		LocationLongitude: item.Info.LocationLongitude,
 		LocationLatitude:  item.Info.LocationLatitude,
 
-		Logo: item.Info.Logo,
-
 		Image1: item.Info.Image1,
 		Image2: item.Info.Image2,
 		Image3: item.Info.Image3,
@@ -70,6 +68,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.School
 	result, err = service.Repository.Create(&model.School{
 		Name: item.Name,
 		Type: item.Type,
+		Logo: item.Logo,
 
 		SchoolConfigID: newConfig.ID,
 		SchoolInfoID:   newInfo.ID,
@@ -230,7 +229,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return

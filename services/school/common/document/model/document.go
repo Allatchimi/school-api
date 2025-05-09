@@ -9,8 +9,8 @@ type Document struct {
 	types.BaseGormModel
 	SchoolID       int64  `gorm:"not null"`
 	YearID         int64  `gorm:"not null"`
-	SubjectID      int64  `gorm:"default:null"`
-	TeachingUnitID int64  `gorm:"default:null"`
+	ClassSubjectID int64  `gorm:"default:null"`
+	UnitID         int64  `gorm:"default:null"`
 	Type           string `gorm:"not null"`
 	URL            string `gorm:"default:null"`
 	Name           string `gorm:"not null"`
@@ -24,8 +24,8 @@ func (item *Document) ToResponse() *data.DocumentResponse {
 	resp := &data.DocumentResponse{}
 	resp.SchoolID = item.SchoolID
 	resp.YearID = item.YearID
-	resp.SubjectID = item.SubjectID
-	resp.TeachingUnitID = item.TeachingUnitID
+	resp.ClassSubjectID = item.ClassSubjectID
+	resp.UnitID = item.UnitID
 	resp.Type = item.Type
 	resp.URL = item.URL
 	resp.Description = item.Description

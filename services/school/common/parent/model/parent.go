@@ -18,11 +18,20 @@ func (item *Parent) ToParentResponse() *data.ParentResponse {
 	}
 	resp := &data.ParentResponse{}
 
-	resp.User = item.User.ToResponse()
+	resp.User = item.User.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+	return resp
+}
+
+func (item *Parent) ToParentPublicResponse() *data.ParentPublicResponse {
+	if item == nil {
+		return nil
+	}
+	resp := &data.ParentPublicResponse{}
+	resp.User = item.User.ToPublicResponse()
 	return resp
 }
 

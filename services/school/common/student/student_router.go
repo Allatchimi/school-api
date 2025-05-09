@@ -59,15 +59,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Create student level/class
+	// Create student level domain/class
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-student-level/class",
-			Summary:     "Create student level/class",
-			Description: "Create new student level/class and return created object.",
+			OperationID: "post-student-level-domain/class",
+			Summary:     "Create student level domain/class",
+			Description: "Create new student level domain/class and return created object.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/levelclass", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/leveldomainclasses", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -85,18 +85,18 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.StudentLevelClassRequest
+				Body data.StudentEnrollRequest
 			},
 		) (*struct {
-			Body data.StudentLevelClassResponse
+			Body data.StudentEnrollResponse
 		}, error) {
-			result, errCode, err := controller.CreateLevelClass(&ctx, input)
+			result, errCode, err := controller.CreateStudentEnroll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.StudentLevelClassResponse
-			}{Body: *result.ToStudentLevelClassResponse()}, nil
+				Body data.StudentEnrollResponse
+			}{Body: *result.ToStudentEnrollResponse()}, nil
 		},
 	)
 
@@ -138,15 +138,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Update student level/class with id
+	// Update student level domain/class with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "update-student-level/class",
-			Summary:     "Update student level/class",
-			Description: "Update existing student level/class with matching id and return the new object.",
+			OperationID: "update-student-level-domain/class",
+			Summary:     "Update student level domain/class",
+			Description: "Update existing student level domain/class with matching id and return the new object.",
 			Method:      http.MethodPut,
-			Path:        fmt.Sprintf("%s/levelclass/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/leveldomainclasses/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -164,19 +164,19 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.StudentLevelClassID
-				Body data.StudentLevelClassRequest
+				data.EnrollID
+				Body data.StudentEnrollRequest
 			},
 		) (*struct {
-			Body data.StudentLevelClassResponse
+			Body data.StudentEnrollResponse
 		}, error) {
-			result, errCode, err := controller.UpdateLevelClass(&ctx, input)
+			result, errCode, err := controller.UpdateStudentEnroll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.StudentLevelClassResponse
-			}{Body: *result.ToStudentLevelClassResponse()}, nil
+				Body data.StudentEnrollResponse
+			}{Body: *result.ToStudentEnrollResponse()}, nil
 		},
 	)
 
@@ -217,15 +217,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete student level/class with id
+	// Delete student level domain/class with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-student-level/class",
-			Summary:     "Delete student level/class",
-			Description: "Delete existing student level/class with matching id and return affected rows in database.",
+			OperationID: "delete-student-level-domain/class",
+			Summary:     "Delete student level domain/class",
+			Description: "Delete existing student level domain/class with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/levelclass/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/leveldomainclasses/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -243,10 +243,10 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.StudentLevelClassID
+				data.EnrollID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteLevelClass(&ctx, input)
+			result, errCode, err := controller.DeleteStudentEnroll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -291,15 +291,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get student level/class by id
+	// Get student level domain/class by id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-student-level/class-id",
-			Summary:     "Get student level/class by id",
-			Description: "Return one student level/class with matching id",
+			OperationID: "get-student-level-domain/class-id",
+			Summary:     "Get student level domain/class by id",
+			Description: "Return one student level domain/class with matching id",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/levelclass/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/leveldomainclasses/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -317,18 +317,18 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.StudentLevelClassID
+				data.EnrollID
 			},
 		) (*struct {
-			Body data.StudentLevelClassResponse
+			Body data.StudentEnrollResponse
 		}, error) {
-			result, errCode, err := controller.GetLevelClass(&ctx, input)
+			result, errCode, err := controller.GetStudentEnroll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.StudentLevelClassResponse
-			}{Body: *result.ToStudentLevelClassResponse()}, nil
+				Body data.StudentEnrollResponse
+			}{Body: *result.ToStudentEnrollResponse()}, nil
 		},
 	)
 
@@ -375,15 +375,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all students level/class
+	// Get all students level domain/class
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-student-level/class-list",
-			Summary:     "Get all students level/class",
-			Description: "Get all students level/class with support for search, filter and pagination",
+			OperationID: "get-student-level-domain/class-list",
+			Summary:     "Get all students level domain/class",
+			Description: "Get all level domain/class for specified student with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/levelclass", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/leveldomainclasses", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -403,17 +403,17 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
-				data.GetAllLevelClassRequest
+				data.GetAllStudentEnrollRequest
 			},
 		) (*struct {
-			Body data.StudentLevelClassResponseList
+			Body data.StudentEnrollResponseList
 		}, error) {
-			result, errCode, err := controller.GetAllLevelClass(&ctx, input)
+			result, errCode, err := controller.GetAllStudentEnroll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.StudentLevelClassResponseList
+				Body data.StudentEnrollResponseList
 			}{Body: *result}, nil
 		},
 	)

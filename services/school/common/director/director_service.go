@@ -146,7 +146,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return

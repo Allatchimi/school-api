@@ -9,8 +9,10 @@ type SchoolID struct {
 }
 
 type SchoolRequest struct {
-	Name   string               `json:"name" required:"true" minLength:"2" maxLength:"50" doc:"School name" example:"uy1"`
-	Type   string               `json:"type" required:"true" minLength:"2" maxLength:"50" enum:"highschool,university" doc:"School type" example:"university"`
+	Name string `json:"name" required:"true" minLength:"2" maxLength:"50" doc:"School name" example:"uy1"`
+	Type string `json:"type" required:"true" minLength:"2" maxLength:"50" enum:"highschool,university" doc:"School type" example:"university"`
+	Logo string `json:"logo" required:"false" doc:"School logo" example:""`
+
 	Info   *SchoolInfoRequest   `json:"info" required:"true" doc:"Information"`
 	Config *SchoolConfigRequest `json:"config" required:"true" doc:"Configuration"`
 }
@@ -34,8 +36,6 @@ type SchoolInfoRequest struct {
 	Address           string  `json:"address" required:"false" maxLength:"150" doc:"Address" example:""`
 	LocationLongitude float64 `json:"locationLongitude" required:"false" doc:"Location longitude" example:""`
 	LocationLatitude  float64 `json:"locationLatitude" required:"false" doc:"Location latitude" example:""`
-
-	Logo string `json:"logo" required:"false" doc:"School logo" example:""`
 
 	Image1 string `json:"image1" required:"false" doc:"Image 1" example:""`
 	Image2 string `json:"image2" required:"false" doc:"Image 2" example:""`

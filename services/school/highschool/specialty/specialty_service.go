@@ -21,13 +21,15 @@ func NewService(repository *Repository, SchoolRepository *school.Repository) *Se
 	}
 }
 
-// Create new specialty
+const MODEL_NAME = "specialty"
+const DEFAULT_ERROR_MESSAGE = "interact with specialty model"
+
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.HighschoolSpecialty) (result *model.HighschoolSpecialty, errCode int, err error) {
 	// Check if the school type is highschool
 	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get school by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundSchool.Type != constants.SCHOOL_TYPE_HIGHSCHOOL {
@@ -40,12 +42,12 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Highsc
 	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get specialty by user school ids from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if service.Repository.AreSameUniqueObjects(foundUnique, item) {
 		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage("Specialty")
+		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
 	}
 
@@ -53,19 +55,18 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Highsc
 	result, err = service.Repository.Create(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("create specialty from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Update specialty
 func (service *Service) Update(inputJwtToken *types.JwtToken, specialtyID int64, item *model.HighschoolSpecialty) (result *model.HighschoolSpecialty, errCode int, err error) {
 	// Check if the school type is highschool
 	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get school by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundSchool.Type != constants.SCHOOL_TYPE_HIGHSCHOOL {
@@ -78,12 +79,12 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, specialtyID int64,
 	foundItem, err := service.Repository.GetById(specialtyID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get specialty by name from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if foundItem == nil || foundItem.ID != specialtyID {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Specialty")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	// Check if the school type is highschool
@@ -97,12 +98,12 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, specialtyID int64,
 	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get specialty by user school ids from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if service.Repository.AreSameUniqueObjects(foundUnique, item) && !service.Repository.AreSameUniqueObjects(foundUnique, foundItem) {
 		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage("Specialty")
+		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
 	}
 
@@ -110,34 +111,32 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, specialtyID int64,
 	result, err = service.Repository.Update(specialtyID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("update specialty from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
-// Delete specialty with matching id and return affected rows
 func (service *Service) Delete(inputJwtToken *types.JwtToken, specialtyID int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.Delete(specialtyID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete specialty from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Specialty")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// Delete Deletes selection
 func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultiple(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("delete multiple specialty from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if affectedRows <= 0 {
@@ -148,28 +147,26 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-// Get Returns specialty with matching id
 func (service *Service) Get(inputJwtToken *types.JwtToken, specialtyID int64) (result *model.HighschoolSpecialty, errCode int, err error) {
 	result, err = service.Repository.GetById(specialtyID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get specialty by id from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	if result == nil {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage("Specialty")
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
-// GetAll Returns all specialties with support for search, filter and pagination
 func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.HighschoolSpecialty, errCode int, err error) {
 	result, err = service.Repository.GetAll(filter, pagination, schoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get specialties from database")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}
 	return
 }
