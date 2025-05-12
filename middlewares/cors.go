@@ -28,6 +28,9 @@ func CorsMiddleware(api huma.API) func(huma.Context, func(huma.Context)) {
 
 // Utility function for CORS
 func isOriginKnown(host string) bool {
+	if config.Env.AllowedHosts == "*" {
+		return true
+	}
 	hosts := strings.Split(config.Env.AllowedHosts, ",")
 	return slices.Contains(hosts, host)
 }

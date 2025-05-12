@@ -59,7 +59,7 @@ func Start() error {
 		&teacherModel.TeacherUnitSubject{},
 		// Student
 		&studentModel.Student{},
-		&studentModel.StudentLevelClass{},
+		&studentModel.StudentEnroll{},
 		// Parent
 		&parentModel.Parent{},
 		&parentModel.ParentStudent{},

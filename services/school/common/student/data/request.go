@@ -1,5 +1,7 @@
 package data
 
+import "time"
+
 type StudentID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Student id" example:"1"`
 }
@@ -15,11 +17,25 @@ type StudentRequest struct {
 }
 
 type StudentEnrollRequest struct {
-	StudentID int64 `json:"teacherID" required:"true" doc:"Student id" example:"1"`
-	YearID    int64 `json:"yearID" required:"true" doc:"Year id" example:"1"`
-
+	StudentID     int64 `json:"teacherID" required:"false" doc:"Student id" example:"1"`
+	YearID        int64 `json:"yearID" required:"true" doc:"Year id" example:"1"`
 	LevelDomainID int64 `json:"levelDomainID" required:"false" doc:"Level domain id" example:"1"`
 	ClassID       int64 `json:"classID" required:"false" doc:"Class id" example:"1"`
+
+	Email       string `json:"email" required:"true" minLength:"3" max:"100" doc:"Email" example:"example@domain.com"`
+	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number" example:"237690909090"`
+
+	Gender        string     `json:"Gender" required:"true" enum:"m,f" doc:"Gender" example:"M"`
+	FirstName     string     `json:"firstName" required:"true" max:"30" doc:"First name" example:"John"`
+	LastName      string     `json:"lastName" required:"true" max:"30" doc:"Last name" example:"Doe"`
+	Birthday      *time.Time `json:"birthday" required:"true" doc:"Birthday date time"`
+	BirthLocation string     `json:"birthLocation" required:"true" doc:"Birth location"`
+
+	File1 string `json:"file1" required:"false" doc:"File1" example:""`
+	File2 string `json:"file2" required:"false" doc:"File2" example:""`
+	File3 string `json:"file3" required:"false" doc:"File3" example:""`
+	File4 string `json:"file4" required:"false" doc:"File4" example:""`
+	File5 string `json:"file5" required:"false" doc:"File5" example:""`
 }
 
 type GetAllRequest struct {

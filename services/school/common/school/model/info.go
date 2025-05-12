@@ -25,6 +25,7 @@ type SchoolInfo struct {
 	FoundedAt *time.Time `gorm:"default:null"`
 
 	Address           string  `gorm:"default:null"`
+	PoBox             string  `gorm:"default:null"`
 	LocationLongitude float64 `gorm:"default:0"`
 	LocationLatitude  float64 `gorm:"default:0"`
 
@@ -55,6 +56,7 @@ func (item *SchoolInfo) ToResponse() *data.SchoolInfoResponse {
 	resp.FoundedAt = item.FoundedAt
 
 	resp.Address = item.Address
+	resp.PoBox = item.PoBox
 	resp.LocationLongitude = item.LocationLongitude
 	resp.LocationLatitude = item.LocationLatitude
 
@@ -86,6 +88,7 @@ func FromInfoRequest(item *data.SchoolInfoRequest) *SchoolInfo {
 	resp.FoundedAt = item.FoundedAt
 
 	resp.Address = item.Address
+	resp.PoBox = item.PoBox
 	resp.LocationLongitude = item.LocationLongitude
 	resp.LocationLatitude = item.LocationLatitude
 

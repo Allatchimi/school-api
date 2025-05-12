@@ -1,0 +1,27 @@
+name: School API Production CI
+run-name: ${{ github.actor }} is building school API Docker image
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [main] # Branch name
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+jobs:
+  docker-build-image:
+    runs-on: ubuntu-latest
+    env:
+      CONTAINER_PROVIDER: ghcr.io
+      CONTAINER_ORG: emenec-finance
+      CONTAINER_REPO: school-api
+      CONTAINER_IMAGE: school-api
+      CONTAINER_IMAGE_TAG: ${{ github.run_number }} # $GITHUB_RUN_NUMBER
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.7
+        with:
+          ref: ${{ github.head_ref }} # Branch name
+      
+      - name: Build Docker image
+        run: docker build ./ --file ./docker/api/Dockerfile --tag ${{ env.CONTAINER_PROVIDER}}/${{ env.CONTAINER_ORG }}/${{ env.CONTAINER_REPO }}/${{ env.CONTAINER_IMAGE }}:${{ env.CONTAINER_IMAGE_TAG }}
+      
+      - name: Cleanup ENV
+        run: unset CONTAINER_PROVIDER && unset CONTAINER_ORG && unset CONTAINER_REPO && unset CONTAINER_IMAGE && unset CONTAINER_IMAGE_TAG

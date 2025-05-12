@@ -55,22 +55,22 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Studen
 	return
 }
 
-func (service *Service) CreateStudentLevelDomainClass(inputJwtToken *types.JwtToken, item *model.StudentLevelDomainClass) (result *model.StudentLevelDomainClass, errCode int, err error) {
+func (service *Service) CreateStudentEnroll(inputJwtToken *types.JwtToken, item *model.StudentEnroll) (result *model.StudentEnroll, errCode int, err error) {
 	// Check unique
-	foundUnique, err := service.Repository.GetLevelDomainClassUniqueObject(item)
+	foundUnique, err := service.Repository.GetStudentEnrollUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if service.Repository.AreLevelDomainClassSameUniqueObjects(foundUnique, item) {
+	if service.Repository.AreStudentEnrollSameUniqueObjects(foundUnique, item) {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
 	// Insert student level domain/class
-	result, err = service.Repository.CreateStudentLevelDomainClass(item)
+	result, err = service.Repository.CreateStudentEnroll(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -128,9 +128,9 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	return
 }
 
-func (service *Service) UpdateStudentLevelDomainClass(inputJwtToken *types.JwtToken, id int64, item *model.StudentLevelDomainClass) (result *model.StudentLevelDomainClass, errCode int, err error) {
+func (service *Service) UpdateStudentEnroll(inputJwtToken *types.JwtToken, id int64, item *model.StudentEnroll) (result *model.StudentEnroll, errCode int, err error) {
 	// Check if student level domain/class exists
-	foundItem, err := service.Repository.GetStudentLevelDomainClassById(id)
+	foundItem, err := service.Repository.GetStudentEnrollById(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -143,20 +143,20 @@ func (service *Service) UpdateStudentLevelDomainClass(inputJwtToken *types.JwtTo
 	}
 
 	// Check unique
-	foundUnique, err := service.Repository.GetLevelDomainClassUniqueObject(item)
+	foundUnique, err := service.Repository.GetStudentEnrollUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if service.Repository.AreLevelDomainClassSameUniqueObjects(foundUnique, item) && !service.Repository.AreLevelDomainClassSameUniqueObjects(foundUnique, foundItem) {
+	if service.Repository.AreStudentEnrollSameUniqueObjects(foundUnique, item) && !service.Repository.AreStudentEnrollSameUniqueObjects(foundUnique, foundItem) {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
 	// Update student
-	result, err = service.Repository.UpdateStudentLevelDomainClass(id, item)
+	result, err = service.Repository.UpdateStudentEnroll(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -180,8 +180,8 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteStudentLevelDomainClass(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteStudentLevelDomainClass(id)
+func (service *Service) DeleteStudentEnroll(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteStudentEnroll(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -210,8 +210,8 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetStudentLevelDomainClass(inputJwtToken *types.JwtToken, id int64) (result *model.StudentLevelDomainClass, errCode int, err error) {
-	result, err = service.Repository.GetStudentLevelDomainClassById(id)
+func (service *Service) GetStudentEnroll(inputJwtToken *types.JwtToken, id int64) (result *model.StudentEnroll, errCode int, err error) {
+	result, err = service.Repository.GetStudentEnrollById(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -234,8 +234,8 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 	return
 }
 
-func (service *Service) GetAllStudentLevelDomainClass(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64, studentID int64) (result []model.StudentLevelDomainClass, errCode int, err error) {
-	result, err = service.Repository.GetAllStudentLevelDomainClass(filter, pagination, schoolID, studentID)
+func (service *Service) GetAllStudentEnroll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64, studentID int64) (result []model.StudentEnroll, errCode int, err error) {
+	result, err = service.Repository.GetAllStudentEnroll(filter, pagination, schoolID, studentID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

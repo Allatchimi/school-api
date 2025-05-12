@@ -1,0 +1,44 @@
+name: School API Production CI
+run-name: ${{ github.actor }} is building school API Docker image
+on:
+  push:
+    branches: [main] # Branch name
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+jobs:
+  docker-build-image:
+    runs-on: ubuntu-latest
+    env:
+      CONTAINER_PROVIDER: ghcr.io
+      CONTAINER_ORG: emenec-finance
+      CONTAINER_REPO: school-api
+      CONTAINER_IMAGE: school-api
+      CONTAINER_IMAGE_TAG: ${{ github.run_number }} # $GITHUB_RUN_NUMBER
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.7
+        with:
+          ref: 'main' # Branch name
+      
+      - name: Build Docker image
+        run: docker build ./ --file ./docker/api/Dockerfile --tag ${{ env.CONTAINER_PROVIDER}}/${{ env.CONTAINER_ORG }}/${{ env.CONTAINER_REPO }}/${{ env.CONTAINER_IMAGE }}:${{ env.CONTAINER_IMAGE_TAG }}
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        continue-on-error: true
+        with:
+          image-ref: "${{ env.CONTAINER_PROVIDER}}/${{ env.CONTAINER_ORG }}/${{ env.CONTAINER_REPO }}/${{ env.CONTAINER_IMAGE }}:${{ env.CONTAINER_IMAGE_TAG }}"
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'MEDIUM,HIGH,CRITICAL'
+      
+      - name: Login to GitHub Docker Registry
+        run: echo ${{ secrets.GHCR_PASSWORD }} | docker login ${{ env.CONTAINER_PROVIDER}} -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+      
+      - name: Push image to GitHub Docker Registry
+        run: |
+          docker push ${{ env.CONTAINER_PROVIDER}}/${{ env.CONTAINER_ORG }}/${{ env.CONTAINER_REPO }}/${{ env.CONTAINER_IMAGE }}:${{ env.CONTAINER_IMAGE_TAG }}
+          
+      - name: Cleanup ENV
+        run: unset CONTAINER_PROVIDER && unset CONTAINER_ORG && unset CONTAINER_REPO && unset CONTAINER_IMAGE && unset CONTAINER_IMAGE_TAG

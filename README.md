@@ -1,28 +1,3 @@
-# Simple and well-structured API for multiple projects
-
-This repository contains a simple API written in Go, designed to be reusable and easily integrated into multiple
-projects. The API is built with a focus on performance, scalability, and maintainability.
-
-# Features
-
-- [x] History
-
-- [x] Roles
-
-- [x] Permissions
-
-- [x] Authentication
-
-- [x] Users
-
-# TODO
-
-- Add 2FA and passKey, and add Google reCAPTCHA to all endpoints starting with /auth
-
-- Add testing
-
-- Add CI pipeline with GitHub actions(build image)
-
 # To get started with the API, follow these steps:
 
 ### 1. Requirements
@@ -84,17 +59,24 @@ If you want to scan vulnerabilities(security issues)
 make scan
 ```
 
-You can choose between 4 templates: Scalar(Default), Redocly, Stoplight, Swagger.
 
-<ins>Scalar(default) template screenshot</ins>
-![Scalar](https://github.com/user-attachments/assets/b0a5304a-7b77-496c-a5c8-d6f81581aba5)
+# Update GitHub Action Secrets for continuous integration(build and package)
 
-<ins>Redocly template screenshot</ins>
-![Redocly](https://github.com/user-attachments/assets/abb7a0b4-e481-4a8e-8fba-08498283ad21)
+Go to this link: [GitHub Action Secrets](https://github.com/EMENEC-FINANCE/school-api/settings/secrets/actions)
 
-<ins>Stoplight template screenshot</ins>
-![Stoplight](https://github.com/user-attachments/assets/2b18f7f3-2577-4617-b64a-b5981de3dfc3)
+- ------------- On your GitHub Action Secrets page -------------
+    - Set Secrets `GHCR_USERNAME` `GHCR_PASSWORD` with value your GitHub credentials. `GHCR_PASSWORD` is your personal access token with `write package` permission enabled
+        
 
-<ins>Swagger template screenshot</ins>
-![Swagger](https://github.com/user-attachments/assets/9f2a7fab-4472-42f7-bad6-33d46b44f374)
+# Makefile Targets
 
+- `docker-api`: Builds and starts the Docker container for local development.
+
+- `docker-ghcr-push`: Builds the Docker image and pushes it to the GitHub Container Registry.
+
+- `docker-ghcr-pull`: Pulls a specific image from the GitHub Container Registry.
+
+
+# Additional Notes
+
+By following these steps and customizing the Makefile to fit your specific needs, you can effectively manage your project using Docker and Make.

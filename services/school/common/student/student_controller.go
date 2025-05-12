@@ -43,11 +43,10 @@ func (controller *Controller) CreateStudentEnroll(
 	result, errCode, err = controller.Service.CreateStudentEnroll(
 		helpers.GetJwtContext(ctx),
 		&model.StudentEnroll{
-			StudentID: input.Body.StudentID,
-			YearID:    input.Body.YearID,
-
-			UnitID:         input.Body.UnitID,
-			ClassSubjectID: input.Body.ClassSubjectID,
+			StudentID:     input.Body.StudentID,
+			YearID:        input.Body.YearID,
+			LevelDomainID: input.Body.LevelDomainID,
+			ClassID:       input.Body.ClassID,
 		},
 	)
 	return
@@ -74,18 +73,17 @@ func (controller *Controller) Update(
 func (controller *Controller) UpdateStudentEnroll(
 	ctx *context.Context,
 	input *struct {
-		data.EnrollID
+		data.StudentEnrollID
 		Body data.StudentEnrollRequest
 	},
 ) (result *model.StudentEnroll, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateStudentEnroll(
 		helpers.GetJwtContext(ctx), input.ID,
 		&model.StudentEnroll{
-			StudentID: input.Body.StudentID,
-			YearID:    input.Body.YearID,
-
-			UnitID:         input.Body.UnitID,
-			ClassSubjectID: input.Body.ClassSubjectID,
+			StudentID:     input.Body.StudentID,
+			YearID:        input.Body.YearID,
+			LevelDomainID: input.Body.LevelDomainID,
+			ClassID:       input.Body.ClassID,
 		},
 	)
 	return
@@ -108,7 +106,7 @@ func (controller *Controller) Delete(
 func (controller *Controller) DeleteStudentEnroll(
 	ctx *context.Context,
 	input *struct {
-		data.EnrollID
+		data.StudentEnrollID
 	},
 ) (result int64, errCode int, err error) {
 	affectedRows, errCode, err := controller.Service.DeleteStudentEnroll(helpers.GetJwtContext(ctx), input.ID)
@@ -136,7 +134,7 @@ func (controller *Controller) Get(
 func (controller *Controller) GetStudentEnroll(
 	ctx *context.Context,
 	input *struct {
-		data.EnrollID
+		data.StudentEnrollID
 	},
 ) (result *model.StudentEnroll, errCode int, err error) {
 	student, errCode, err := controller.Service.GetStudentEnroll(helpers.GetJwtContext(ctx), input.ID)
