@@ -8,7 +8,7 @@ WORKDIR /app
 RUN apk update &&\
     apk add --update --no-cache bash make
 
-# Install dependencies and build the app
+# Install dependencies
 COPY ./go.mod .
 COPY ./go.sum .
 RUN go mod download

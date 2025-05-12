@@ -164,7 +164,7 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.EnrollID
+				data.StudentEnrollID
 				Body data.StudentEnrollRequest
 			},
 		) (*struct {
@@ -243,7 +243,7 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.EnrollID
+				data.StudentEnrollID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.DeleteStudentEnroll(&ctx, input)
@@ -317,7 +317,7 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.EnrollID
+				data.StudentEnrollID
 			},
 		) (*struct {
 			Body data.StudentEnrollResponse

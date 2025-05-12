@@ -106,7 +106,7 @@ func (controller *Controller) Delete(
 func (controller *Controller) DeleteStudentEnroll(
 	ctx *context.Context,
 	input *struct {
-		data.EnrollID
+		data.StudentEnrollID
 	},
 ) (result int64, errCode int, err error) {
 	affectedRows, errCode, err := controller.Service.DeleteStudentEnroll(helpers.GetJwtContext(ctx), input.ID)
@@ -134,7 +134,7 @@ func (controller *Controller) Get(
 func (controller *Controller) GetStudentEnroll(
 	ctx *context.Context,
 	input *struct {
-		data.EnrollID
+		data.StudentEnrollID
 	},
 ) (result *model.StudentEnroll, errCode int, err error) {
 	student, errCode, err := controller.Service.GetStudentEnroll(helpers.GetJwtContext(ctx), input.ID)
