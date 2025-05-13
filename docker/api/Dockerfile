@@ -37,7 +37,7 @@ RUN chmod +x /app/main
 # Copy entrypoint.sh and conf files
 COPY ./docker/api/entrypoint.sh ./entrypoint.sh
 # Add permissions
-RUN chmod +x /app/entrypoint.sh
+RUN chmod 777 ./entrypoint.sh
 
 EXPOSE 3100
 
