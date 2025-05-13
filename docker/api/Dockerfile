@@ -29,10 +29,10 @@ WORKDIR /app
 RUN apk add bash
 
 # Copy the binary and assets to the container
-COPY --from=builder /app/.build/ ./
+COPY --from=builder /app/.build/main ./main
 COPY --from=builder /app/assets ./assets
-RUN chmod +x /app/.build/main
+RUN chmod +x /app/main
 
 EXPOSE 3100
 
-ENTRYPOINT ["/app/.build/main"]
+ENTRYPOINT ["/app/main"]
