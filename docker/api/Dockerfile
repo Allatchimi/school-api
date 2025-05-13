@@ -5,8 +5,8 @@ ENV LANG=C.UTF-8
 WORKDIR /app
 
 # Install packages
-RUN apk update &&
-apk add --update --no-cache bash make
+RUN apk update &&\
+    apk add --update --no-cache bash make
 
 # Install dependencies
 COPY ./go.mod .
@@ -16,6 +16,7 @@ RUN go mod download
 # Build the app
 COPY . .
 RUN GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o ./.build/main ./cmd/main.go
+
 
 # ----------------------- Stage serve -----------------------
 
