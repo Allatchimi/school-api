@@ -22,6 +22,10 @@ func main() {
 			"There are some errors when initializing app!",
 			zap.String("Error", "Please fix previous errors before."),
 		)
+		helpers.Logger.Warn(
+			errInit.Error(),
+			zap.String("Error", errInit.Error()),
+		)
 		panic(errInit)
 	}
 
