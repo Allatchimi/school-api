@@ -34,12 +34,6 @@ COPY --from=builder /app/assets ./assets
 COPY --from=builder /app/.env.example ./app.env
 RUN chmod +x /app/main
 
-# Copy entrypoint.sh and conf files
-COPY ./docker/api/entrypoint.sh ./entrypoint.sh
-# Add permissions
-RUN chmod 777 ./entrypoint.sh
-
 EXPOSE 3100
 
-# ENTRYPOINT ["/app/main"]
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/app/main"]
