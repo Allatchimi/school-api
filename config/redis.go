@@ -17,7 +17,7 @@ var RedisContext = context.Background()
 func ConnectRedis() error {
 	addr := fmt.Sprintf("%s:%d", Env.RedisHost, Env.RedisPort)
 	helpers.Logger.Warn(
-		"REDISSSSSSSS: ",
+		"Redis address: ",
 		zap.String("Value: ", addr),
 	)
 	RedisClient = redis.NewClient(&redis.Options{
