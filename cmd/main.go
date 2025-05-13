@@ -22,10 +22,6 @@ func main() {
 			"There are some errors when initializing app!",
 			zap.String("Error", "Please fix previous errors before."),
 		)
-		helpers.Logger.Warn(
-			errInit.Error(),
-			zap.String("Error", errInit.Error()),
-		)
 		panic(errInit)
 	}
 
@@ -53,7 +49,7 @@ func init() {
 	errEnv := config.LoadEnv()
 	if errEnv != nil {
 		errInit = errEnv
-		helpers.Logger.Error(
+		helpers.Logger.Warn(
 			"Failed to load env!",
 			zap.String("Error", errEnv.Error()),
 		)
@@ -65,7 +61,7 @@ func init() {
 	_, errArgon2id := security.EncodeArgon2id("Testing")
 	if errArgon2id != nil {
 		errInit = errArgon2id
-		helpers.Logger.Error(
+		helpers.Logger.Warn(
 			"Failed to initialize argon2id!",
 			zap.String("Error", errArgon2id.Error()),
 		)
@@ -77,7 +73,7 @@ func init() {
 	errDB := config.ConnectDatabase()
 	if errDB != nil {
 		errInit = errDB
-		helpers.Logger.Error(
+		helpers.Logger.Warn(
 			"Failed to connect to database!",
 			zap.String("Error", errDB.Error()),
 		)
@@ -89,7 +85,7 @@ func init() {
 	errRedis := config.ConnectRedis()
 	if errRedis != nil {
 		errInit = errRedis
-		helpers.Logger.Error(
+		helpers.Logger.Warn(
 			"Failed to connect to Redis!",
 			zap.String("Error", errRedis.Error()),
 		)
@@ -101,7 +97,7 @@ func init() {
 	errKeys := config.LoadKeys()
 	if errKeys != nil {
 		errInit = errKeys
-		helpers.Logger.Error(
+		helpers.Logger.Warn(
 			"Failed to load keys!",
 			zap.String("Error", errRedis.Error()),
 		)
@@ -113,7 +109,7 @@ func init() {
 	errOpenAPITemplates := config.LoadOpenAPITemplates()
 	if errOpenAPITemplates != nil {
 		errInit = errOpenAPITemplates
-		helpers.Logger.Error(
+		helpers.Logger.Warn(
 			"Failed to load OpenAPI templates!",
 			zap.String("Error", errRedis.Error()),
 		)
