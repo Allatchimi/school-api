@@ -24,7 +24,7 @@ func ConnectDatabase() error {
 		Env.PostgresTimeZone,
 	)
 	helpers.Logger.Warn(
-		"DSNNNNNNNNNNN: ",
+		"Database DSN: ",
 		zap.String("Value: ", dsn),
 	)
 	var err error

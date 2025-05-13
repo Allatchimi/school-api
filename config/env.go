@@ -18,20 +18,20 @@ type Environment struct {
 	AllowedHosts string `mapstructure:"ALLOWED_HOSTS"`
 
 	// Redis for fast memory key-value storage
-	RedisHost     string `mapstructure:"REDIS_HOST"`
-	RedisPort     int    `mapstructure:"REDIS_PORT"`
-	RedisUsername string `mapstructure:"REDIS_USERNAME"`
-	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
-	RedisDatabase int    `mapstructure:"REDIS_DB"`
+	RedisHost     string `mapstructure:"SERVER_REDIS_HOST"`
+	RedisPort     int    `mapstructure:"SERVER_REDIS_PORT"`
+	RedisUsername string `mapstructure:"SERVER_REDIS_USER"`
+	RedisPassword string `mapstructure:"SERVER_REDIS_PASSWORD"`
+	RedisDatabase int    `mapstructure:"SERVER_REDIS_DB"`
 
 	// Postgres database
-	PostgresHost     string `mapstructure:"POSTGRES_HOST"`
-	PostgresPort     int    `mapstructure:"POSTGRES_PORT"`
-	PostgresUsername string `mapstructure:"POSTGRES_USERNAME"`
-	PostgresPassword string `mapstructure:"POSTGRES_PASSWORD"`
-	PostgresDatabase string `mapstructure:"POSTGRES_DATABASE"`
-	PostgresSslMode  string `mapstructure:"POSTGRES_SSL_MODE"`
-	PostgresTimeZone string `mapstructure:"POSTGRES_TIME_ZONE"`
+	PostgresHost     string `mapstructure:"SERVER_POSTGRES_HOST"`
+	PostgresPort     int    `mapstructure:"SERVER_POSTGRES_PORT"`
+	PostgresUsername string `mapstructure:"SERVER_POSTGRES_USER"`
+	PostgresPassword string `mapstructure:"SERVER_POSTGRES_PASSWORD"`
+	PostgresDatabase string `mapstructure:"SERVER_POSTGRES_DB"`
+	PostgresSslMode  string `mapstructure:"SERVER_POSTGRES_SSL_MODE"`
+	PostgresTimeZone string `mapstructure:"SERVER_POSTGRES_TIME_ZONE"`
 
 	// Argon 2id to hash password
 	ArgonMemoryLeft  int `mapstructure:"ARGON_PARAM_MEMORY_L"`
