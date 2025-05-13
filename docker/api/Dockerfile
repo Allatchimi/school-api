@@ -31,7 +31,6 @@ RUN apk add bash
 # Copy the binary and assets to the container
 COPY --from=builder /app/.build/ ./
 COPY --from=builder /app/assets ./assets
-COPY --from=builder /app/.env.example ./app.env
 RUN chmod +x /app/main
 
 EXPOSE 3100
