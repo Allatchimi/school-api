@@ -3,6 +3,7 @@ package config
 import (
 	"api/common/helpers"
 	"fmt"
+	"time"
 
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
@@ -30,9 +31,20 @@ func ConnectDatabase() error {
 	var err error
 	DB, err = gorm.Open(
 		postgres.New(postgres.Config{
-			DSN: dsn,
+			DSN:                  dsn,
+			PreferSimpleProtocol: true, // disables implicit prepared statement usage
 		}),
-		&gorm.Config{},
 	)
+	if err != nil {
+		return err
+	}
+
+	sqlDB, err := DB.DB()
+	if err != nil {
+		return err
+	}
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(time.Hour)
 	return err
 }
