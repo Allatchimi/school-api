@@ -65,6 +65,7 @@ make scan
 Go to this link: [GitHub Action Secrets](https://github.com/EMENEC-FINANCE/school-api/settings/secrets/actions)
 
 - ------------- On your GitHub Action Secrets page -------------
+
     - Set Secrets `GHCR_USERNAME` `GHCR_PASSWORD` with value your GitHub credentials. `GHCR_PASSWORD` is your personal access token with `write package` permission enabled
         
 
