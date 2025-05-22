@@ -21,15 +21,15 @@ func RegisterEndpoints(
 		Tag:   []string{"Healthz"},
 	}
 
-	// Get postgres health
+	// Get live health
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID:   "get-health-postgres",
-			Summary:       "Get postgres health",
-			Description:   "Checks if the API can communicate with postgres",
+			OperationID:   "get-health-live",
+			Summary:       "Get health live",
+			Description:   "Checks if the API is alive.",
 			Method:        http.MethodGet,
-			Path:          fmt.Sprintf("%s/postgres", endpointConfig.Group),
+			Path:          fmt.Sprintf("%s/live", endpointConfig.Group),
 			Tags:          endpointConfig.Tag,
 			MaxBodyBytes:  constants.DefaultBodySize,
 			DefaultStatus: http.StatusOK,
@@ -41,12 +41,12 @@ func RegisterEndpoints(
 				data.HealthRequest
 			},
 		) (*struct{ Body data.HealthResponse }, error) {
-			isOk, errCode, err := controller.GetPostgresHealth(&ctx, input)
+			isOk, errCode, err := controller.HealthLive(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			if !isOk {
-				return nil, huma.NewError(errCode, "can't join postgres", err)
+				return nil, huma.NewError(errCode, "can't join http server", err)
 			}
 			return &struct{ Body data.HealthResponse }{Body: data.HealthResponse{
 				Message: "OK",
@@ -54,15 +54,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get redis health
+	// Get dependencies health
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID:   "get-health-redis",
-			Summary:       "Get redis health",
-			Description:   "Checks if the API can communicate with redis",
+			OperationID:   "get-health-deps",
+			Summary:       "Get dependencies health",
+			Description:   "Checks if the API can communicate with dependencies: postgres, redis",
 			Method:        http.MethodGet,
-			Path:          fmt.Sprintf("%s/redis", endpointConfig.Group),
+			Path:          fmt.Sprintf("%s/dependencies", endpointConfig.Group),
 			Tags:          endpointConfig.Tag,
 			MaxBodyBytes:  constants.DefaultBodySize,
 			DefaultStatus: http.StatusOK,
@@ -74,12 +74,12 @@ func RegisterEndpoints(
 				data.HealthRequest
 			},
 		) (*struct{ Body data.HealthResponse }, error) {
-			result, errCode, err := controller.GetRedisHealth(&ctx, input)
+			result, errCode, err := controller.HealthDepencencies(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			if !result {
-				return nil, huma.NewError(errCode, "can't join redis", err)
+				return nil, huma.NewError(errCode, "can't join dependencies", err)
 			}
 			return &struct{ Body data.HealthResponse }{Body: data.HealthResponse{
 				Message: "OK",

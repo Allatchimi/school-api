@@ -15,13 +15,13 @@ func NewController(service *Service) *Controller {
 	return &Controller{Service: service}
 }
 
-func (controller *Controller) GetPostgresHealth(
+func (controller *Controller) HealthLive(
 	ctx *context.Context,
 	input *struct {
 		data.HealthRequest
 	},
 ) (result bool, errCode int, err error) {
-	health, errCode, err := controller.Service.GetPostgresHealth(helpers.GetJwtContext(ctx))
+	health, errCode, err := controller.Service.HealthLive(helpers.GetJwtContext(ctx))
 	if err != nil {
 		return
 	}
@@ -29,13 +29,13 @@ func (controller *Controller) GetPostgresHealth(
 	return
 }
 
-func (controller *Controller) GetRedisHealth(
+func (controller *Controller) HealthDepencencies(
 	ctx *context.Context,
 	input *struct {
 		data.HealthRequest
 	},
 ) (result bool, errCode int, err error) {
-	health, errCode, err := controller.Service.GetRedisHealth(helpers.GetJwtContext(ctx))
+	health, errCode, err := controller.Service.HealthDepencencies(helpers.GetJwtContext(ctx))
 	if err != nil {
 		return
 	}
