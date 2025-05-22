@@ -28,8 +28,14 @@ func ConnectRedis() error {
 	})
 
 	// Check redis status
-	err := RedisClient.Ping(RedisContext).Err()
+	err := CheckRedis()
 	return err
+}
+
+// Check redis status
+func CheckRedis() (err error) {
+	err = RedisClient.Ping(RedisContext).Err()
+	return
 }
 
 //

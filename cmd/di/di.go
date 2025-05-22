@@ -5,6 +5,7 @@ import (
 	"api/config"
 	"api/services/communication"
 	"api/services/contact"
+	"api/services/health"
 	"api/services/history"
 	"api/services/school/common/director"
 	"api/services/school/common/exam"
@@ -38,12 +39,13 @@ func InjectDependencies() {
 	var communicationRepo = communication.NewRepository(config.DB)
 	var contactRepo = contact.NewRepository(config.DB)
 	var historyRepo = history.NewRepository(config.DB)
+	var healthRepo = health.NewRepository(config.DB)
 	api.AllControllers.CommunicationController = communication.NewController(
 		communication.NewService(
 			communicationRepo,
 		),
 	)
-	api.AllControllers.ContactControllerController = contact.NewController(
+	api.AllControllers.ContactController = contact.NewController(
 		contact.NewService(
 			contactRepo,
 		),
@@ -51,6 +53,11 @@ func InjectDependencies() {
 	api.AllControllers.HistoryController = history.NewController(
 		history.NewService(
 			historyRepo,
+		),
+	)
+	api.AllControllers.HealthController = health.NewController(
+		health.NewService(
+			healthRepo,
 		),
 	)
 

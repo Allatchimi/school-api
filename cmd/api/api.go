@@ -13,6 +13,7 @@ import (
 	"api/middlewares"
 	"api/services/communication"
 	"api/services/contact"
+	"api/services/health"
 	"api/services/history"
 	"api/services/school/common/director"
 	"api/services/school/common/exam"
@@ -42,9 +43,10 @@ import (
 
 type Controllers struct {
 	// Others service
-	CommunicationController     *communication.Controller
-	ContactControllerController *contact.Controller
-	HistoryController           *history.Controller
+	CommunicationController *communication.Controller
+	ContactController       *contact.Controller
+	HistoryController       *history.Controller
+	HealthController        *health.Controller
 
 	// User service
 	AuthController       *auth.Controller
@@ -83,8 +85,9 @@ var AllControllers = &Controllers{}
 func registerEndpoints(humaApi *huma.API) {
 	// Others service
 	communication.RegisterEndpoints(humaApi, AllControllers.CommunicationController)
-	contact.RegisterEndpoints(humaApi, AllControllers.ContactControllerController)
+	contact.RegisterEndpoints(humaApi, AllControllers.ContactController)
 	history.RegisterEndpoints(humaApi, AllControllers.HistoryController)
+	health.RegisterEndpoints(humaApi, AllControllers.HealthController)
 
 	// User service
 	auth.RegisterEndpoints(humaApi, AllControllers.AuthController)
