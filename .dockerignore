@@ -19,8 +19,10 @@ Thumbs.db # Windows
 *.tmp
 
 # Specific Docker files (should not be copied into the image)
-Dockerfile
 .dockerignore
+**Dockerfile
+**docker-compose.yml
+**docker-compose.*.yml
 
 # Other temporary or generated files
 *.swp # Vim swap files
