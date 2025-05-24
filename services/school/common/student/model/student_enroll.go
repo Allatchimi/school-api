@@ -36,11 +36,11 @@ type StudentEnroll struct {
 	Birthday      *time.Time `gorm:"default:null"`
 	BirthLocation string     `gorm:"default:null"`
 
-	File1 string `gorm:"default:null"`
-	File2 string `gorm:"default:null"`
-	File3 string `gorm:"default:null"`
-	File4 string `gorm:"default:null"`
-	File5 string `gorm:"default:null"`
+	Document1 string `gorm:"default:null"`
+	Document2 string `gorm:"default:null"`
+	Document3 string `gorm:"default:null"`
+	Document4 string `gorm:"default:null"`
+	Document5 string `gorm:"default:null"`
 }
 
 func (item *StudentEnroll) ToStudentEnrollResponse() *data.StudentEnrollResponse {
@@ -56,11 +56,11 @@ func (item *StudentEnroll) ToStudentEnrollResponse() *data.StudentEnrollResponse
 	resp.FirstName = item.FirstName
 	resp.Birthday = item.Birthday
 	resp.BirthLocation = item.BirthLocation
-	resp.File1 = item.File1
-	resp.File2 = item.File2
-	resp.File3 = item.File3
-	resp.File4 = item.File4
-	resp.File5 = item.File5
+	resp.Document1 = item.Document1
+	resp.Document2 = item.Document2
+	resp.Document3 = item.Document3
+	resp.Document4 = item.Document4
+	resp.Document5 = item.Document5
 
 	resp.Student = item.Student.ToStudentPublicResponse()
 	resp.Year = item.Year.ToPublicResponse()
@@ -86,11 +86,11 @@ func (item *StudentEnroll) ToStudentEnrollPublicResponse() *data.StudentEnrollPu
 	resp.FirstName = item.FirstName
 	resp.Birthday = item.Birthday
 	resp.BirthLocation = item.BirthLocation
-	resp.File1 = item.File1
-	resp.File2 = item.File2
-	resp.File3 = item.File3
-	resp.File4 = item.File4
-	resp.File5 = item.File5
+	resp.Document1 = item.Document1
+	resp.Document2 = item.Document2
+	resp.Document3 = item.Document3
+	resp.Document4 = item.Document4
+	resp.Document5 = item.Document5
 
 	resp.Student = item.Student.ToStudentPublicResponse()
 	resp.Year = item.Year.ToPublicResponse()

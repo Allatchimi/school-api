@@ -31,11 +31,11 @@ type StudentEnrollRequest struct {
 	Birthday      *time.Time `json:"birthday" required:"true" doc:"Birthday date time"`
 	BirthLocation string     `json:"birthLocation" required:"true" doc:"Birth location"`
 
-	File1 string `json:"file1" required:"false" doc:"File1" example:""`
-	File2 string `json:"file2" required:"false" doc:"File2" example:""`
-	File3 string `json:"file3" required:"false" doc:"File3" example:""`
-	File4 string `json:"file4" required:"false" doc:"File4" example:""`
-	File5 string `json:"file5" required:"false" doc:"File5" example:""`
+	Document1 string `json:"file1" required:"false" doc:"Document1" example:""`
+	Document2 string `json:"file2" required:"false" doc:"Document2" example:""`
+	Document3 string `json:"file3" required:"false" doc:"Document3" example:""`
+	Document4 string `json:"file4" required:"false" doc:"Document4" example:""`
+	Document5 string `json:"file5" required:"false" doc:"Document5" example:""`
 }
 
 type GetAllRequest struct {

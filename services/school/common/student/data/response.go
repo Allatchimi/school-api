@@ -44,11 +44,11 @@ type StudentEnrollResponse struct {
 	Birthday      *time.Time `json:"birthday" required:"false" doc:"Birthday date time"`
 	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
 
-	File1 string `json:"file1" required:"false" doc:"File1"`
-	File2 string `json:"file2" required:"false" doc:"File2"`
-	File3 string `json:"file3" required:"false" doc:"File3"`
-	File4 string `json:"file4" required:"false" doc:"File4"`
-	File5 string `json:"file5" required:"false" doc:"File5"`
+	Document1 string `json:"file1" required:"false" doc:"Document1"`
+	Document2 string `json:"file2" required:"false" doc:"Document2"`
+	Document3 string `json:"file3" required:"false" doc:"Document3"`
+	Document4 string `json:"file4" required:"false" doc:"Document4"`
+	Document5 string `json:"file5" required:"false" doc:"Document5"`
 }
 
 type StudentEnrollPublicResponse struct {
@@ -69,11 +69,11 @@ type StudentEnrollPublicResponse struct {
 	Birthday      *time.Time `json:"birthday" required:"false" doc:"Birthday date time"`
 	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
 
-	File1 string `json:"file1" required:"false" doc:"File1"`
-	File2 string `json:"file2" required:"false" doc:"File2"`
-	File3 string `json:"file3" required:"false" doc:"File3"`
-	File4 string `json:"file4" required:"false" doc:"File4"`
-	File5 string `json:"file5" required:"false" doc:"File5"`
+	Document1 string `json:"file1" required:"false" doc:"Document1"`
+	Document2 string `json:"file2" required:"false" doc:"Document2"`
+	Document3 string `json:"file3" required:"false" doc:"Document3"`
+	Document4 string `json:"file4" required:"false" doc:"Document4"`
+	Document5 string `json:"file5" required:"false" doc:"Document5"`
 }
 
 type StudentResponseList struct {
