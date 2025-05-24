@@ -26,6 +26,24 @@ type ParentStudentPublicResponse struct {
 	Student *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
 }
 
+type ParentStudentAssignResponse struct {
+	types.BaseGormModelResponse
+	FirstName      string `json:"firstName" required:"false" doc:"First name"`
+	LastName       string `json:"lastName" required:"false" doc:"Last name"`
+	IDCard         string `json:"IDCard" required:"false" doc:"ID Card"`
+	Document1      string `json:"document1" required:"false" doc:"Document 1"`
+	Document2      string `json:"document2" required:"false" doc:"Document 2"`
+	Status         string `json:"status" required:"false" doc:"Status"`
+	StatusFeedback string `json:"statusFeedback" required:"false" doc:"Status feedback"`
+
+	Parent *ParentPublicResponse `json:"parent" required:"false" doc:"Parent"`
+}
+
+type ParentStudentAssignPublicResponse struct {
+	Parent  *ParentPublicResponse              `json:"parent" required:"false" doc:"Parent"`
+	Student *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
+}
+
 type ParentResponseList struct {
 	types.PaginatedResponse
 	Data []ParentResponse `json:"data" required:"false" doc:"List of parents" example:"[]"`
