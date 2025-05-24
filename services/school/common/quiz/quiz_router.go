@@ -1,4 +1,4 @@
-package enroll
+package quiz
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
-	"api/services/enroll/common/enroll/data"
+	"api/services/school/common/quiz/data"
 )
 
 func RegisterEndpoints(
@@ -17,18 +17,18 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/enrolls",
-		Tag:   []string{"Schools"},
+		Group: "/schools/quizs",
+		Tag:   []string{"Quizs"},
 	}
-	const tableName = "enrolls"
+	const tableName = "quizs"
 
-	// Create enroll
+	// Create quiz
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-enroll",
-			Summary:     "Create enroll",
-			Description: "Create new enroll by providing name and description and return created object. The name enroll should be unique.",
+			OperationID: "post-quiz",
+			Summary:     "Create quiz",
+			Description: "Create new quiz.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -48,24 +48,24 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.SchoolRequest
+				Body data.QuizRequest
 			},
-		) (*struct{ Body data.SchoolResponse }, error) {
+		) (*struct{ Body data.QuizResponse }, error) {
 			result, errCode, err := controller.Create(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.SchoolResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.QuizResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Update enroll with id
+	// Update quiz with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "update-enroll",
-			Summary:     "Update enroll",
-			Description: "Update existing enroll with matching id and return the new enroll object.",
+			OperationID: "update-quiz",
+			Summary:     "Update quiz",
+			Description: "Update existing quiz with matching id and return the new object.",
 			Method:      http.MethodPut,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -85,25 +85,25 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.SchoolID
-				Body data.SchoolRequest
+				data.QuizID
+				Body data.QuizRequest
 			},
-		) (*struct{ Body data.SchoolResponse }, error) {
+		) (*struct{ Body data.QuizResponse }, error) {
 			result, errCode, err := controller.Update(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.SchoolResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.QuizResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Delete enroll with id
+	// Delete quiz with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-enroll",
-			Summary:     "Delete enroll",
-			Description: "Delete existing enroll with matching id and return affected rows in database.",
+			OperationID: "delete-quiz",
+			Summary:     "Delete quiz",
+			Description: "Delete existing quiz with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -123,7 +123,7 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.SchoolID
+				data.QuizID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.Delete(&ctx, input)
@@ -134,13 +134,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete multiple enroll
+	// Delete multiple quiz
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-enroll-multiple",
-			Summary:     "Delete multiple enroll",
-			Description: "Delete multiple enroll by providing a lis of IDs and return affected rows in database.",
+			OperationID: "delete-quiz-multiple",
+			Summary:     "Delete multiple quiz",
+			Description: "Delete multiple quiz by providing a lis of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -171,13 +171,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get enroll by id
+	// Get quiz by id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-enroll-id",
-			Summary:     "Get enroll by id",
-			Description: "Return one enroll with matching id",
+			OperationID: "get-quiz-id",
+			Summary:     "Get quiz by id",
+			Description: "Return one quiz with matching id",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -197,24 +197,24 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.SchoolID
+				data.QuizID
 			},
-		) (*struct{ Body data.SchoolResponse }, error) {
+		) (*struct{ Body data.QuizResponse }, error) {
 			result, errCode, err := controller.Get(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.SchoolResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.QuizResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Get all enrolls
+	// Get all quizs
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-enroll-list",
-			Summary:     "Get all enrolls",
-			Description: "Get all enrolls with support for search, filter and pagination",
+			OperationID: "get-quiz-list",
+			Summary:     "Get all quizs",
+			Description: "Get all quizs with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -236,17 +236,16 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
-				data.GetAllRequest
 			},
 		) (*struct {
-			Body data.SchoolResponseList
+			Body data.QuizResponseList
 		}, error) {
 			result, errCode, err := controller.GetAll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.SchoolResponseList
+				Body data.QuizResponseList
 			}{Body: *result}, nil
 		},
 	)

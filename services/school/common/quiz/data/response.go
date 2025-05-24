@@ -6,18 +6,18 @@ import (
 	dataUser "api/services/user/user/data"
 )
 
-type DirectorResponse struct {
+type QuizResponse struct {
 	types.BaseGormModelResponse
 	User   *dataUser.UserResponse     `json:"user" doc:"User"`
 	School *dataSchool.SchoolResponse `json:"school" doc:"School"`
 }
 
-type DirectorPublicResponse struct {
+type QuizPublicResponse struct {
 	User   *dataUser.UserPublicResponse     `json:"user" doc:"User"`
 	School *dataSchool.SchoolPublicResponse `json:"school" doc:"School"`
 }
 
-type DirectorResponseList struct {
+type QuizResponseList struct {
 	types.PaginatedResponse
-	Data []DirectorResponse `json:"data" required:"false" doc:"List of directors" example:"[]"`
+	Data []QuizResponse `json:"data" required:"false" doc:"List of quiz" example:"[]"`
 }

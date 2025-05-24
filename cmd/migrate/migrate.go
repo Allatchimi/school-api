@@ -63,6 +63,8 @@ func Start() error {
 		// Parent
 		&parentModel.Parent{},
 		&parentModel.ParentStudent{},
+		&parentModel.ParentAssign{},
+		&parentModel.ParentAssignStudent{},
 
 		// Highschool
 		&sequenceModel.HighschoolSequence{},

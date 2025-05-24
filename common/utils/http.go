@@ -1,10 +1,17 @@
 package utils
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 )
+
+type HttpHeader struct {
+	Label string
+	Value string
+}
 
 // HttpGet Fetches url and return response
 func HttpGet(url string, response any) error {
@@ -12,6 +19,40 @@ func HttpGet(url string, response any) error {
 	if err != nil {
 		return err
 	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(body, response)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// HttpPost Post data to url and return response
+func HttpPost(url string, contentType string, headers []HttpHeader, bodyStruct any, response any) error {
+	jsonBody, _ := json.Marshal(&bodyStruct)
+	bodyReader := bytes.NewReader(jsonBody)
+
+	req, err := http.NewRequest(http.MethodPost, url, bodyReader)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", contentType)
+	for i := 0; i < len(headers); i++ {
+		req.Header.Set(headers[i].Label, headers[i].Value)
+	}
+
+	client := http.Client{
+		Timeout: 30 * time.Second,
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err

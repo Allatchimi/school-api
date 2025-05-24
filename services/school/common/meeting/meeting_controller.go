@@ -1,12 +1,12 @@
-package enroll
+package meeting
 
 import (
 	"context"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/services/enroll/common/enroll/data"
-	"api/services/enroll/common/enroll/model"
+	"api/services/school/common/meeting/data"
+	"api/services/school/common/meeting/model"
 )
 
 type Controller struct {
@@ -20,39 +20,15 @@ func NewController(service *Service) *Controller {
 func (controller *Controller) Create(
 	ctx *context.Context,
 	input *struct {
-		Body data.SchoolRequest
+		Body data.MeetingRoomRequest
 	},
-) (result *model.School, errCode int, err error) {
+) (result *model.MeetingRoom, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.School{
-			Name:     input.Body.Name,
-			Type:     input.Body.Type,
-			Logo:     input.Body.Logo,
-			Currency: input.Body.Currency,
-			Info:     model.FromInfoRequest(input.Body.Info),
-			Config:   model.FromConfigRequest(input.Body.Config),
-		},
-	)
-	return
-}
-
-func (controller *Controller) Update(
-	ctx *context.Context,
-	input *struct {
-		data.SchoolID
-		Body data.SchoolRequest
-	},
-) (result *model.School, errCode int, err error) {
-	result, errCode, err = controller.Service.Update(
-		helpers.GetJwtContext(ctx), input.ID,
-		&model.School{
-			Name:     input.Body.Name,
-			Type:     input.Body.Type,
-			Logo:     input.Body.Logo,
-			Currency: input.Body.Currency,
-			Info:     model.FromInfoRequest(input.Body.Info),
-			Config:   model.FromConfigRequest(input.Body.Config),
+		&model.MeetingRoom{
+			SchoolID:      input.Body.SchoolID,
+			LevelDomainID: input.Body.LevelDomainID,
+			ClassID:       input.Body.ClassID,
 		},
 	)
 	return
@@ -61,7 +37,7 @@ func (controller *Controller) Update(
 func (controller *Controller) Delete(
 	ctx *context.Context,
 	input *struct {
-		data.SchoolID
+		data.MeetingRoomID
 	},
 ) (result int64, errCode int, err error) {
 	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
@@ -89,14 +65,14 @@ func (controller *Controller) DeleteMultiple(
 func (controller *Controller) Get(
 	ctx *context.Context,
 	input *struct {
-		data.SchoolID
+		data.MeetingRoomID
 	},
-) (result *model.School, errCode int, err error) {
-	enroll, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+) (result *model.MeetingRoom, errCode int, err error) {
+	meeting, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
-	result = enroll
+	result = meeting
 	return
 }
 
@@ -105,18 +81,31 @@ func (controller *Controller) GetAll(
 	input *struct {
 		types.Filter
 		types.PaginationRequest
-		data.GetAllRequest
 	},
-) (result *data.SchoolResponseList, errCode int, err error) {
+) (result *data.MeetingRoomResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	enrollList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllRequest.Type)
+	meetingList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination)
 	if err != nil {
 		return
 	}
-	result = &data.SchoolResponseList{
-		Data: model.ToSchoolResponseList(enrollList),
+	result = &data.MeetingRoomResponseList{
+		Data: model.ToResponseList(meetingList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination
+	return
+}
+
+func (controller *Controller) Join(
+	ctx *context.Context,
+	input *struct {
+		data.MeetingRoomID
+	},
+) (result *model.MeetingRoom, errCode int, err error) {
+	meeting, errCode, err := controller.Service.Join(helpers.GetJwtContext(ctx), input.ID)
+	if err != nil {
+		return
+	}
+	result = meeting
 	return
 }

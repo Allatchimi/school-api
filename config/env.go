@@ -77,6 +77,11 @@ type Environment struct {
 	FacebookDebugTokenUrl string `mapstructure:"FACEBOOK_DEBUG_TOKEN_URL"`
 	FacebookProfileUrl    string `mapstructure:"FACEBOOK_PROFILE_URL"`
 
+	// Meetings
+	MeetingApiUrl    string `mapstructure:"MEETING_API_URL"`
+	MeetingApiKey    string `mapstructure:"MEETING_API_KEY"`
+	MeetingApiSecret string `mapstructure:"MEETING_API_SECRET"`
+
 	// Database fixtures
 	RoleDefault  string `mapstructure:"ROLE_DEFAULT"`
 	RoleAdmin    string `mapstructure:"ROLE_ADMIN"`

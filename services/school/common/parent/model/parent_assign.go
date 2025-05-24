@@ -5,7 +5,7 @@ import (
 	"api/services/school/common/parent/data"
 )
 
-type ParentStudentAssign struct {
+type ParentAssign struct {
 	types.BaseGormModel
 	FirstName string `gorm:"default:null"`
 	LastName  string `gorm:"default:null"`
@@ -20,11 +20,11 @@ type ParentStudentAssign struct {
 	Parent   *Parent `gorm:"default:null;foreignKey:ParentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
-func (item *ParentStudentAssign) ToResponse() *data.ParentStudentAssignResponse {
+func (item *ParentAssign) ToResponse() *data.ParentAssignResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.ParentStudentAssignResponse{}
+	resp := &data.ParentAssignResponse{}
 	resp.FirstName = item.FirstName
 	resp.LastName = item.LastName
 	resp.IDCard = item.IDCard
@@ -41,11 +41,11 @@ func (item *ParentStudentAssign) ToResponse() *data.ParentStudentAssignResponse 
 	return resp
 }
 
-func (item *ParentStudentAssign) ToPublicResponse() *data.ParentStudentAssignPublicResponse {
+func (item *ParentAssign) ToPublicResponse() *data.ParentAssignPublicResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.ParentStudentAssignPublicResponse{}
+	resp := &data.ParentAssignPublicResponse{}
 	resp.FirstName = item.FirstName
 	resp.LastName = item.LastName
 	resp.IDCard = item.IDCard
@@ -58,8 +58,8 @@ func (item *ParentStudentAssign) ToPublicResponse() *data.ParentStudentAssignPub
 	return resp
 }
 
-func ToParentStudentAssignResponseList(itemList []ParentStudentAssign) []data.ParentStudentAssignResponse {
-	resp := make([]data.ParentStudentAssignResponse, len(itemList))
+func ToParentAssignResponseList(itemList []ParentAssign) []data.ParentAssignResponse {
+	resp := make([]data.ParentAssignResponse, len(itemList))
 	for index, item := range itemList {
 		resp[index] = *item.ToResponse()
 	}
