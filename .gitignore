@@ -50,5 +50,9 @@ go.work.sum
 
 /build
 /bin
-/.
-build
+/.build
+
+# public uploads folders
+/public/uploads/*
+!.gitkeep
+
