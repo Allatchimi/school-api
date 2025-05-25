@@ -35,8 +35,6 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						// Feature scope
-						// Operation
 					},
 				},
 			},
@@ -71,8 +69,6 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						// Feature scope
-						// Operation
 					},
 				},
 			},
@@ -107,8 +103,6 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						// Feature scope
-						// Operation
 					},
 				},
 			},
@@ -141,8 +135,6 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						// Feature scope
-						// Operation
 					},
 				},
 			},

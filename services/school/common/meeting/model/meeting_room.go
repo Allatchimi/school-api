@@ -5,7 +5,7 @@ import (
 	"api/services/school/common/meeting/data"
 	schoolModel "api/services/school/common/school/model"
 	modelClassSubject "api/services/school/highschool/class/model"
-	modelLevel "api/services/school/university/level/model"
+	modelUnit "api/services/school/university/unit/model"
 )
 
 type MeetingRoom struct {
@@ -16,11 +16,11 @@ type MeetingRoom struct {
 	SchoolID int64               `gorm:"default:null"`
 	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	LevelDomainID int64                             `gorm:"default:null"`
-	LevelDomain   *modelLevel.UniversityLevelDomain `gorm:"default:null;foreignKey:LevelID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	UnitID int64                     `gorm:"default:null"`
+	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	ClassID int64                              `gorm:"default:null"`
-	Class   *modelClassSubject.HighschoolClass `gorm:"default:null;foreignKey:ClassID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	ClassSubjectID int64                                     `gorm:"default:null"`
+	ClassSubject   *modelClassSubject.HighschoolClassSubject `gorm:"default:null;foreignKey:ClassSubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *MeetingRoom) ToResponse() *data.MeetingRoomResponse {
@@ -31,8 +31,8 @@ func (item *MeetingRoom) ToResponse() *data.MeetingRoomResponse {
 	resp.ApiRoomID = item.ApiRoomID
 
 	resp.School = item.School.ToPublicResponse()
-	resp.LevelDomain = item.LevelDomain.ToLevelDomainPublicResponse()
-	resp.Class = item.Class.ToPublicResponse()
+	resp.Unit = item.Unit.ToPublicResponse()
+	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -48,15 +48,15 @@ func (item *MeetingRoom) ToPublicResponse() *data.MeetingRoomPublicResponse {
 	resp.ApiRoomID = item.ApiRoomID
 
 	resp.School = item.School.ToPublicResponse()
-	resp.LevelDomain = item.LevelDomain.ToLevelDomainPublicResponse()
-	resp.Class = item.Class.ToPublicResponse()
+	resp.Unit = item.Unit.ToPublicResponse()
+	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
 	return resp
 }
 
 func ToResponseList(itemList []MeetingRoom) []data.MeetingRoomResponse {
 	resp := make([]data.MeetingRoomResponse, len(itemList))
-	for index, school := range itemList {
-		resp[index] = *school.ToResponse()
+	for index, item := range itemList {
+		resp[index] = *item.ToResponse()
 	}
 	return resp
 }

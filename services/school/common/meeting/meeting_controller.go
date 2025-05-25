@@ -26,9 +26,9 @@ func (controller *Controller) Create(
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
 		&model.MeetingRoom{
-			SchoolID:      input.Body.SchoolID,
-			LevelDomainID: input.Body.LevelDomainID,
-			ClassID:       input.Body.ClassID,
+			SchoolID:       input.Body.SchoolID,
+			UnitID:         input.Body.UnitID,
+			ClassSubjectID: input.Body.ClassSubjectID,
 		},
 	)
 	return
@@ -101,7 +101,7 @@ func (controller *Controller) Join(
 	input *struct {
 		data.MeetingRoomID
 	},
-) (result *model.MeetingRoom, errCode int, err error) {
+) (result string, errCode int, err error) {
 	meeting, errCode, err := controller.Service.Join(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return

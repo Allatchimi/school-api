@@ -4,22 +4,22 @@ import (
 	"api/common/types"
 	dataSchool "api/services/school/common/school/data"
 	dataClass "api/services/school/highschool/class/data"
-	dataLevelDomain "api/services/school/university/level/data"
+	dataUnit "api/services/school/university/unit/data"
 )
 
 type MeetingRoomResponse struct {
 	types.BaseGormModelResponse
-	School      *dataSchool.SchoolPublicResponse           `json:"school" required:"false" doc:"School"`
-	LevelDomain *dataLevelDomain.LevelDomainPublicResponse `json:"levelDomain" required:"false" doc:"Level for domain"`
-	Class       *dataClass.ClassPublicResponse             `json:"class" required:"false" doc:"Class"`
+	School       *dataSchool.SchoolPublicResponse      `json:"school" required:"false" doc:"School"`
+	Unit         *dataUnit.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
+	ClassSubject *dataClass.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Subject for specific class"`
 
 	ApiRoomID string `json:"apiRoomID" required:"false" doc:"Room id for the API"`
 }
 
 type MeetingRoomPublicResponse struct {
-	School      *dataSchool.SchoolPublicResponse           `json:"school" required:"false" doc:"School"`
-	LevelDomain *dataLevelDomain.LevelDomainPublicResponse `json:"levelDomain" required:"false" doc:"Level for domain"`
-	Class       *dataClass.ClassPublicResponse             `json:"class" required:"false" doc:"Class"`
+	School       *dataSchool.SchoolPublicResponse      `json:"school" required:"false" doc:"School"`
+	Unit         *dataUnit.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
+	ClassSubject *dataClass.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Subject for specific class"`
 
 	ApiRoomID string `json:"apiRoomID" required:"false" doc:"Room id for the API"`
 }

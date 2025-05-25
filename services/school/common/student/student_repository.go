@@ -236,6 +236,3 @@ func (repository *Repository) GetAllStudentEnroll(filter *types.Filter, paginati
 	err = tmpErr
 	return
 }
-func preload(d *gorm.DB) *gorm.DB {
-	return d.Preload("Class", preload)
-}

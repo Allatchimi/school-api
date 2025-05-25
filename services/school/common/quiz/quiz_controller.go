@@ -3,8 +3,8 @@ package quiz
 import (
 	"api/common/helpers"
 	"api/common/types"
-	"api/services/school/common/meeting/model"
 	"api/services/school/common/quiz/data"
+	"api/services/school/common/quiz/model"
 	"context"
 )
 

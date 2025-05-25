@@ -1,7 +1,7 @@
 package health
 
 import (
-	"api/services/history/model"
+	"api/services/user/role/model"
 
 	"gorm.io/gorm"
 )
@@ -14,7 +14,9 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) GetHistory() (*model.History, error) {
-	result := &model.History{}
+func (repository *Repository) GetRole() (*model.Role, error) {
+	result := &model.Role{
+		Name: "default",
+	}
 	return result, repository.Db.Limit(1).Find(result).Error
 }

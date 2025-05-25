@@ -14,9 +14,9 @@ import (
 	"api/services/communication"
 	"api/services/contact"
 	"api/services/health"
-	"api/services/history"
 	"api/services/school/common/director"
 	"api/services/school/common/exam"
+	"api/services/school/common/meeting"
 	"api/services/school/common/parent"
 	"api/services/school/common/school"
 	"api/services/school/common/student"
@@ -45,7 +45,6 @@ type Controllers struct {
 	// Others service
 	CommunicationController *communication.Controller
 	ContactController       *contact.Controller
-	HistoryController       *history.Controller
 	HealthController        *health.Controller
 
 	// User service
@@ -63,6 +62,7 @@ type Controllers struct {
 	StudentController  *student.Controller
 	ParentController   *parent.Controller
 	ExamController     *exam.Controller
+	MeetingController  *meeting.Controller
 	// Secondary
 	SectionController   *section.Controller
 	SpecialtyController *specialty.Controller
@@ -86,7 +86,6 @@ func registerEndpoints(humaApi *huma.API) {
 	// Others service
 	communication.RegisterEndpoints(humaApi, AllControllers.CommunicationController)
 	contact.RegisterEndpoints(humaApi, AllControllers.ContactController)
-	history.RegisterEndpoints(humaApi, AllControllers.HistoryController)
 	health.RegisterEndpoints(humaApi, AllControllers.HealthController)
 
 	// User service
@@ -104,6 +103,7 @@ func registerEndpoints(humaApi *huma.API) {
 	student.RegisterEndpoints(humaApi, AllControllers.StudentController)
 	parent.RegisterEndpoints(humaApi, AllControllers.ParentController)
 	exam.RegisterEndpoints(humaApi, AllControllers.ExamController)
+	meeting.RegisterEndpoints(humaApi, AllControllers.MeetingController)
 	// Highschool
 	sequence.RegisterEndpoints(humaApi, AllControllers.SequenceController)
 	quarter.RegisterEndpoints(humaApi, AllControllers.QuarterController)
@@ -133,6 +133,10 @@ func Start() {
 	if err != nil {
 		panic(err)
 	}
+	// Register gin middlewares
+	engine.Use(middlewares.GinContextRegister())
+
+	// Group API
 	ginGroup := engine.Group(config.Env.ApiGroup)
 
 	// OpenAPI documentation based on huma

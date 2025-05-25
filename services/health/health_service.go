@@ -23,7 +23,7 @@ func (service *Service) HealthLive(inputJwtToken *types.JwtToken) (result bool, 
 
 func (service *Service) HealthDepencencies(inputJwtToken *types.JwtToken) (result bool, errCode int, err error) {
 	// Check postgres
-	_, err = service.Repository.GetHistory()
+	_, err = service.Repository.GetRole()
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("postgres")

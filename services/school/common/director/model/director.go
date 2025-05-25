@@ -57,8 +57,8 @@ func (item *Director) ToPublicResponse() *data.DirectorPublicResponse {
 
 func ToResponseList(itemList []Director) []data.DirectorResponse {
 	resp := make([]data.DirectorResponse, len(itemList))
-	for index, school := range itemList {
-		resp[index] = *school.ToResponse()
+	for index, item := range itemList {
+		resp[index] = *item.ToResponse()
 	}
 	return resp
 }

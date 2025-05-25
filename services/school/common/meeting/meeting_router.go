@@ -6,9 +6,12 @@ import (
 	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
+	"github.com/gin-gonic/gin"
 
 	"api/common/constants"
 	"api/common/types"
+	"api/config"
+	"api/middlewares"
 	"api/services/school/common/meeting/data"
 )
 
@@ -35,7 +38,10 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
 					},
@@ -72,7 +78,10 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -109,7 +118,10 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -146,7 +158,13 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,   // Feature scope
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Features scope
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -183,7 +201,13 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,   // Feature scope
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Features scope
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -220,11 +244,18 @@ func RegisterEndpoints(
 			Summary:     "Join room",
 			Description: "Join the provided room",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/join/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Features scope
 					},
 				},
 			},
@@ -237,12 +268,23 @@ func RegisterEndpoints(
 			input *struct {
 				data.MeetingRoomID
 			},
-		) (*struct{ Body data.MeetingRoomResponse }, error) {
+		) (
+			*huma.StreamResponse,
+			error,
+		) {
 			result, errCode, err := controller.Join(&ctx, input)
 			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
+				return nil, huma.NewError(errCode, err.Error())
 			}
-			return &struct{ Body data.MeetingRoomResponse }{Body: *result.ToResponse()}, nil
+			if len(result) < 1 {
+				return nil, huma.NewError(http.StatusNotFound, "Invalid url!")
+			}
+
+			ginCtx := ctx.Value(middlewares.GIN_CONTEXT_KEY).(*gin.Context)
+			if ginCtx != nil {
+				ginCtx.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/?access_token=%s", config.Env.MeetingApiUrl, result))
+			}
+			return nil, nil
 		},
 	)
 }

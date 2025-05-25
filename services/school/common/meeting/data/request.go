@@ -5,7 +5,8 @@ type MeetingRoomID struct {
 }
 
 type MeetingRoomRequest struct {
-	SchoolID      int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
-	LevelDomainID int64 `json:"levelDomainID" required:"false" doc:"Level domain id" example:"1"`
-	ClassID       int64 `json:"classID" required:"false" doc:"Class id" example:"1"`
+	SchoolID int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
+
+	UnitID         int64 `json:"unitID" required:"false" doc:"Unit id" example:"1"`
+	ClassSubjectID int64 `json:"classSubjectID" required:"false" doc:"Subject class id" example:"1"`
 }

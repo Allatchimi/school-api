@@ -6,9 +6,9 @@ import (
 	"api/services/communication"
 	"api/services/contact"
 	"api/services/health"
-	"api/services/history"
 	"api/services/school/common/director"
 	"api/services/school/common/exam"
+	"api/services/school/common/meeting"
 	"api/services/school/common/parent"
 	"api/services/school/common/school"
 	"api/services/school/common/student"
@@ -38,7 +38,6 @@ func InjectDependencies() {
 	// Others
 	var communicationRepo = communication.NewRepository(config.DB)
 	var contactRepo = contact.NewRepository(config.DB)
-	var historyRepo = history.NewRepository(config.DB)
 	var healthRepo = health.NewRepository(config.DB)
 	api.AllControllers.CommunicationController = communication.NewController(
 		communication.NewService(
@@ -48,11 +47,6 @@ func InjectDependencies() {
 	api.AllControllers.ContactController = contact.NewController(
 		contact.NewService(
 			contactRepo,
-		),
-	)
-	api.AllControllers.HistoryController = history.NewController(
-		history.NewService(
-			historyRepo,
 		),
 	)
 	api.AllControllers.HealthController = health.NewController(
@@ -100,6 +94,7 @@ func InjectDependencies() {
 	var teacherRepo = teacher.NewRepository(config.DB)
 	var studentRepo = student.NewRepository(config.DB)
 	var parentRepo = parent.NewRepository(config.DB)
+	var meetingRepo = meeting.NewRepository(config.DB)
 	api.AllControllers.SchoolController = school.NewController(
 		school.NewService(
 			schoolRepo,
@@ -133,6 +128,13 @@ func InjectDependencies() {
 	api.AllControllers.ParentController = parent.NewController(
 		parent.NewService(
 			parentRepo,
+		),
+	)
+	api.AllControllers.MeetingController = meeting.NewController(
+		meeting.NewService(
+			meetingRepo,
+			userRepo,
+			teacherRepo,
 		),
 	)
 
@@ -186,7 +188,7 @@ func InjectDependencies() {
 	var departmentRepo = department.NewRepository(config.DB)
 	var domainRepo = domain.NewRepository(config.DB)
 	var levelRepo = level.NewRepository(config.DB)
-	var tuRepo = unit.NewRepository(config.DB)
+	var unitRepo = unit.NewRepository(config.DB)
 	api.AllControllers.SemesterController = semester.NewController(
 		semester.NewService(
 			semesterRepo,
@@ -219,7 +221,7 @@ func InjectDependencies() {
 	)
 	api.AllControllers.TUController = unit.NewController(
 		unit.NewService(
-			tuRepo,
+			unitRepo,
 			schoolRepo,
 		),
 	)

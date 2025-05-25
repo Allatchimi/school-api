@@ -26,17 +26,17 @@ type TeacherPublicResponse struct {
 
 type TeacherUnitSubjectResponse struct {
 	types.BaseGormModelResponse
-	Teacher *TeacherPublicResponse       `json:"teacher" required:"false" doc:"Teacher"`
-	Year    *dataYear.YearPublicResponse `json:"year" required:"false" doc:"Year"`
+	Teacher *TeacherPublicResponse `json:"teacher" required:"false" doc:"Teacher"`
 
+	Year         *dataYear.YearPublicResponse          `json:"year" required:"false" doc:"Year"`
 	Unit         *dataUnit.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
 	ClassSubject *dataClass.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Subject for specific class"`
 }
 
 type TeacherUnitSubjectPublicResponse struct {
-	Teacher *TeacherPublicResponse       `json:"teacher" required:"false" doc:"Teacher"`
-	Year    *dataYear.YearPublicResponse `json:"year" required:"false" doc:"Year"`
+	Teacher *TeacherPublicResponse `json:"teacher" required:"false" doc:"Teacher"`
 
+	Year         *dataYear.YearPublicResponse          `json:"year" required:"false" doc:"Year"`
 	Unit         *dataUnit.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
 	ClassSubject *dataClass.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Subject for specific class"`
 }

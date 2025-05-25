@@ -31,7 +31,7 @@ func (repository *Repository) CreateTeacherUnitSubject(item *model.TeacherUnitSu
 }
 
 func (repository *Repository) Update(id int64, item *model.Teacher) (*model.Teacher, error) {
-	tempTeacher, err := repository.GetById(id)
+	tempTeacher, err := repository.GetByID(id)
 	if err != nil || tempTeacher == nil || tempTeacher.ID != id {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (repository *Repository) Update(id int64, item *model.Teacher) (*model.Teac
 }
 
 func (repository *Repository) UpdateTeacherUnitSubject(id int64, item *model.TeacherUnitSubject) (*model.TeacherUnitSubject, error) {
-	tempTeacher, err := repository.GetById(id)
+	tempTeacher, err := repository.GetByID(id)
 	if err != nil || tempTeacher == nil || tempTeacher.ID != id {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (repository *Repository) UpdateTeacherUnitSubject(id int64, item *model.Tea
 }
 
 func (repository *Repository) Delete(id int64) (int64, error) {
-	foundItem, err := repository.GetById(id)
+	foundItem, err := repository.GetByID(id)
 	if err != nil || foundItem == nil || foundItem.ID != id {
 		return -1, err
 	}
@@ -84,9 +84,28 @@ func (repository *Repository) DeleteTeacherUnitSubject(id int64) (int64, error) 
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) GetById(id int64) (*model.Teacher, error) {
+func (repository *Repository) GetByID(id int64) (*model.Teacher, error) {
 	result := &model.Teacher{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByUserID(userID int64) (*model.Teacher, error) {
+	result := &model.Teacher{}
+	return result, repository.Db.Preload(clause.Associations).Where("user_id = ?", userID).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetUnitSubjectByUserIDUnitID(userID int64, unitID int64) (*model.TeacherUnitSubject, error) {
+	result := &model.TeacherUnitSubject{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("user_id = ?", userID).Where("unit_id = ?", unitID).
+		Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetUnitSubjectByUserIDClassSubjectID(userID int64, classSubjectID int64) (*model.TeacherUnitSubject, error) {
+	result := &model.TeacherUnitSubject{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("user_id = ?", userID).Where("class_subject_id = ?", classSubjectID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetTeacherUnitSubjectById(id int64) (*model.TeacherUnitSubject, error) {
@@ -236,7 +255,4 @@ func (repository *Repository) GetAllTeacherUnitSubject(filter *types.Filter, pag
 
 	err = tmpErr
 	return
-}
-func preload(d *gorm.DB) *gorm.DB {
-	return d.Preload("Class", preload)
 }

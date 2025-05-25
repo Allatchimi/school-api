@@ -35,6 +35,10 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
 					},
@@ -71,6 +75,10 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -107,6 +115,10 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},

@@ -17,10 +17,10 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/schools/quizs",
-		Tag:   []string{"Quizs"},
+		Group: "/schools/quizzes",
+		Tag:   []string{"Quizzes"},
 	}
-	const tableName = "quizs"
+	const tableName = "quizzes"
 
 	// Create quiz
 	huma.Register(
@@ -35,7 +35,11 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
 					},
@@ -59,6 +63,45 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Create quiz attempt
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "post-quiz-attempt",
+			Summary:     "Create quiz attempt",
+			Description: "Create quiz attempt.",
+			Method:      http.MethodPost,
+			Path:        endpointConfig.Group,
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s",
+							constants.FeatureStudent,
+						), // Features scope
+						tableName,                  // Table name
+						constants.PermissionCreate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body data.QuizAttemptRequest
+			},
+		) (*struct{ Body data.QuizAttemptResponse }, error) {
+			result, errCode, err := controller.CreateAttempt(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.QuizAttemptResponse }{Body: *result.ToResponse()}, nil
+		},
+	)
+
 	// Update quiz with id
 	huma.Register(
 		*humaApi,
@@ -72,7 +115,11 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionUpdate, // Operation
 					},
@@ -110,7 +157,11 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -147,7 +198,11 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -184,7 +239,13 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,   // Feature scope
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Features scope
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -221,7 +282,13 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,   // Feature scope
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Features scope
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -246,6 +313,55 @@ func RegisterEndpoints(
 			}
 			return &struct {
 				Body data.QuizResponseList
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get all quiz attemps
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-quiz-attempt-list",
+			Summary:     "Get all quiz attempts",
+			Description: "Get all quiz attempts with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        endpointConfig.Group,
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Features scope
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.QuizID
+			},
+		) (*struct {
+			Body data.QuizAttemptResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllAttempts(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct {
+				Body data.QuizAttemptResponseList
 			}{Body: *result}, nil
 		},
 	)

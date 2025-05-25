@@ -5,7 +5,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
-	"api/services/school/common/meeting/model"
+	"api/services/school/common/quiz/model"
 	"api/services/user/user"
 )
 

@@ -137,17 +137,17 @@ func (repository *Repository) GetById(id int64) (*model.MeetingRoom, error) {
 func (repository *Repository) GetUniqueObject(item *model.MeetingRoom) (*model.MeetingRoom, error) {
 	result := &model.MeetingRoom{}
 	return result, repository.Db.Preload(clause.Associations).Where(&model.MeetingRoom{
-		SchoolID:      item.SchoolID,
-		LevelDomainID: item.LevelDomainID,
-		ClassID:       item.ClassID,
+		SchoolID:       item.SchoolID,
+		UnitID:         item.UnitID,
+		ClassSubjectID: item.ClassSubjectID,
 	}).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) AreSameUniqueObjects(item1 *model.MeetingRoom, item2 *model.MeetingRoom) bool {
 	if item1 != nil && item2 != nil &&
 		(item1.SchoolID == item2.SchoolID &&
-			item1.LevelDomainID == item2.LevelDomainID &&
-			item1.ClassID == item2.ClassID) {
+			item1.UnitID == item2.UnitID &&
+			item1.ClassSubjectID == item2.ClassSubjectID) {
 		return true
 	}
 	return false

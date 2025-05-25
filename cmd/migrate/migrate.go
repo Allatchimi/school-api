@@ -5,9 +5,9 @@ import (
 	"api/config"
 	communicationModel "api/services/communication/model"
 	contactModel "api/services/contact/model"
-	historyModel "api/services/history/model"
 	directorModel "api/services/school/common/director/model"
 	examModel "api/services/school/common/exam/model"
+	meetingModel "api/services/school/common/meeting/model"
 	parentModel "api/services/school/common/parent/model"
 	schoolModel "api/services/school/common/school/model"
 	studentModel "api/services/school/common/student/model"
@@ -36,7 +36,6 @@ func Start() error {
 		// Others
 		&communicationModel.Communication{},
 		&contactModel.Contact{},
-		&historyModel.History{},
 
 		// User
 		&permissionModel.Permission{},
@@ -65,6 +64,12 @@ func Start() error {
 		&parentModel.ParentStudent{},
 		&parentModel.ParentAssign{},
 		&parentModel.ParentAssignStudent{},
+		// Meeting
+		&meetingModel.MeetingRoom{},
+		// Quiz
+		// &quizModel.Quiz{},
+		// &quizModel.QuizQuestion{},
+		// &quizModel.QuizResponse{},
 
 		// Highschool
 		&sequenceModel.HighschoolSequence{},

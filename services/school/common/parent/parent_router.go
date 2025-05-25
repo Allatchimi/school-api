@@ -35,7 +35,10 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
 					},
@@ -72,7 +75,10 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
 					},
@@ -113,7 +119,10 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionUpdate, // Operation
 					},
@@ -151,7 +160,10 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionUpdate, // Operation
 					},
@@ -193,7 +205,10 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -230,7 +245,10 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,     // Feature scope
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -267,7 +285,13 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,   // Feature scope
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Features scope
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -291,47 +315,6 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get parent level/class by id
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "get-parent-level/class-id",
-			Summary:     "Get parent level/class by id",
-			Description: "Return one parent level/class with matching id",
-			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/levelclass/{id}", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,   // Feature scope
-						tableName,                // Table name
-						constants.PermissionRead, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				data.ParentStudentID
-			},
-		) (*struct {
-			Body data.ParentStudentResponse
-		}, error) {
-			result, errCode, err := controller.GetParentStudent(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct {
-				Body data.ParentStudentResponse
-			}{Body: *result.ToParentStudentResponse()}, nil
-		},
-	)
-
 	// Get all parents
 	huma.Register(
 		*humaApi,
@@ -345,7 +328,13 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,   // Feature scope
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Features scope
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -388,7 +377,13 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						constants.FeatureAdmin,   // Feature scope
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Features scope
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},

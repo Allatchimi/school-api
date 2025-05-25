@@ -79,6 +79,7 @@ type Environment struct {
 
 	// Meetings
 	MeetingApiUrl    string `mapstructure:"MEETING_API_URL"`
+	MeetingJoinUrl   string `mapstructure:"MEETING_JOIN_URL"`
 	MeetingApiKey    string `mapstructure:"MEETING_API_KEY"`
 	MeetingApiSecret string `mapstructure:"MEETING_API_SECRET"`
 

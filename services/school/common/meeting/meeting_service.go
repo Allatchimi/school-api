@@ -6,21 +6,24 @@ import (
 	"api/common/constants"
 	"api/common/types"
 	"api/services/school/common/meeting/model"
+	"api/services/school/common/teacher"
 	"api/services/user/user"
 )
 
 type Service struct {
-	Repository     *Repository
-	UserRepository *user.Repository
+	Repository        *Repository
+	UserRepository    *user.Repository
+	TeacherRepository *teacher.Repository
 }
 
 const MODEL_NAME = "meeting"
 const DEFAULT_ERROR_MESSAGE = "interact with meeting service"
 
-func NewService(repository *Repository, userRepository *user.Repository) *Service {
+func NewService(repository *Repository, userRepository *user.Repository, teacherRepository *teacher.Repository) *Service {
 	return &Service{
-		Repository:     repository,
-		UserRepository: userRepository,
+		Repository:        repository,
+		UserRepository:    userRepository,
+		TeacherRepository: teacherRepository,
 	}
 }
 
@@ -115,17 +118,40 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 func (service *Service) Join(inputJwtToken *types.JwtToken, id int64) (result string, errCode int, err error) {
 	// Check if the meeting room exists
 	meetingRoom, errCode, err := service.Get(inputJwtToken, id)
-	if err != nil {
+	if err != nil || meetingRoom == nil || meetingRoom.ID <= 0 || meetingRoom.ID != id {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 
-	// Get the teacher
-
 	// Get the user
+	user, err := service.UserRepository.GetByID(inputJwtToken.UserID)
+	if err != nil || user == nil || user.ID <= 0 {
+		errCode = http.StatusForbidden
+		err = constants.Http403InvalidPermissionErrorMessage()
+		return
+	}
+
+	// Get the teacher and check if it's the teacher for this room(room is associated to unit/class subject)
+	var isAdmin bool = false
+	teacher, _ := service.TeacherRepository.GetByUserID(inputJwtToken.UserID)
+	if teacher != nil && teacher.ID > 0 {
+		if meetingRoom.School.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
+			teacherUnit, _ := service.TeacherRepository.GetUnitSubjectByUserIDUnitID(teacher.ID, meetingRoom.UnitID)
+			if teacherUnit != nil && teacherUnit.ID > 0 {
+				isAdmin = true
+			}
+		} else {
+			teacherClassSubject, _ := service.TeacherRepository.GetUnitSubjectByUserIDClassSubjectID(teacher.ID, meetingRoom.ClassSubjectID)
+			if teacherClassSubject != nil && teacherClassSubject.ID > 0 {
+				isAdmin = true
+			}
+		}
+	}
 
 	// Call external meeting API to get join token
-	apiResp, err := service.Repository.ApiJoinRoom(meetingRoom.ApiRoomID, nil)
-	if err != nil || apiResp == nil || apiResp.Status == false {
+	apiResp, err := service.Repository.ApiJoinRoom(meetingRoom.ApiRoomID, user, isAdmin)
+	if err != nil || apiResp == nil || !apiResp.Status {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
