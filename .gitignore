@@ -1,3 +1,23 @@
+#----------------- Default -----------------
+
+# IDE/Editor files and folders
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store # macOS
+Thumbs.db # Windows
+
+# Common and output files
+*.log
+*.tmp
+
+# Other temporary or generated files
+*.swp # Vim swap files
+*.bak # Backup files
+
+#----------------- App -----------------
+
 # If you prefer the allow list template instead of the deny list, see community template:
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
@@ -30,4 +50,5 @@ go.work.sum
 
 /build
 /bin
-/.build
+/.
+build
