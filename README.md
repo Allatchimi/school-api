@@ -15,7 +15,7 @@
 - JWT .pem files with ES512(ECDSA SHA-512) algorithm: ```./assets/private/keys/jwt/private.pem``` ```./assets/private/keys/jwt/public.pem```
   You ca use this website to generate JWT keys for your tests [JWT online generator](https://jwt-keys.21no.de/)
 
-- Password is hashed using Argon2id algorithm. If you want to customize salinity, you can edit the .env.example file
+- Password is hashed using Argon2id algorithm. If you want to customize salinity, you can edit the ```app.env``` file
 
 Others information such configurations are on ```app.env```
 
