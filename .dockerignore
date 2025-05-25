@@ -57,10 +57,7 @@ go.work
 go.work.sum
 
 # env files (can opt-in for commiting if needed)
-*.env
-*.env.*
-!.env.example
-*.pem
+.env.example
 
 /build
 /bin
