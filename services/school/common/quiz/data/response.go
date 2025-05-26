@@ -61,3 +61,8 @@ type QuizResponseList struct {
 	types.PaginatedResponse
 	Data []QuizResponse `json:"data" required:"false" doc:"List of quiz" example:"[]"`
 }
+
+type QuizAttemptResponseList struct {
+	types.PaginatedResponse
+	Data []QuizAttemptResponse `json:"data" required:"false" doc:"List of quiz attempts" example:"[]"`
+}

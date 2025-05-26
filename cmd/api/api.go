@@ -18,6 +18,7 @@ import (
 	"api/services/school/common/exam"
 	"api/services/school/common/meeting"
 	"api/services/school/common/parent"
+	"api/services/school/common/quiz"
 	"api/services/school/common/school"
 	"api/services/school/common/student"
 	"api/services/school/common/teacher"
@@ -63,6 +64,7 @@ type Controllers struct {
 	ParentController   *parent.Controller
 	ExamController     *exam.Controller
 	MeetingController  *meeting.Controller
+	QuizController     *quiz.Controller
 	// Secondary
 	SectionController   *section.Controller
 	SpecialtyController *specialty.Controller
@@ -104,6 +106,7 @@ func registerEndpoints(humaApi *huma.API) {
 	parent.RegisterEndpoints(humaApi, AllControllers.ParentController)
 	exam.RegisterEndpoints(humaApi, AllControllers.ExamController)
 	meeting.RegisterEndpoints(humaApi, AllControllers.MeetingController)
+	quiz.RegisterEndpoints(humaApi, AllControllers.QuizController)
 	// Highschool
 	sequence.RegisterEndpoints(humaApi, AllControllers.SequenceController)
 	quarter.RegisterEndpoints(humaApi, AllControllers.QuarterController)

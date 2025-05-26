@@ -9,6 +9,7 @@ import (
 	examModel "api/services/school/common/exam/model"
 	meetingModel "api/services/school/common/meeting/model"
 	parentModel "api/services/school/common/parent/model"
+	quizModel "api/services/school/common/quiz/model"
 	schoolModel "api/services/school/common/school/model"
 	studentModel "api/services/school/common/student/model"
 	teacherModel "api/services/school/common/teacher/model"
@@ -67,9 +68,11 @@ func Start() error {
 		// Meeting
 		&meetingModel.MeetingRoom{},
 		// Quiz
-		// &quizModel.Quiz{},
-		// &quizModel.QuizQuestion{},
-		// &quizModel.QuizResponse{},
+		&quizModel.Quiz{},
+		&quizModel.QuizQuestion{},
+		&quizModel.QuizQuestionOption{},
+		&quizModel.QuizAttempt{},
+		&quizModel.QuizAttemptQuestion{},
 
 		// Highschool
 		&sequenceModel.HighschoolSequence{},

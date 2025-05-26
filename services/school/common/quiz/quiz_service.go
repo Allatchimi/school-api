@@ -5,6 +5,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
+	"api/services/school/common/quiz/data"
 	"api/services/school/common/quiz/model"
 	"api/services/user/user"
 )
@@ -24,22 +25,69 @@ func NewService(repository *Repository, userRepository *user.Repository) *Servic
 	}
 }
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Quiz) (result *model.Quiz, errCode int, err error) {
-	// Check unique
-	foundUnique, err := service.Repository.GetUniqueObject(item)
-	if err != nil {
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.QuizRequest) (result *model.Quiz, errCode int, err error) {
+	var canCreate = false
+
+	if !canCreate {
+		errCode = http.StatusForbidden
+		err = constants.Http403InvalidPermissionErrorMessage()
+		return
+	}
+	// Insert the quiz
+	createdQuiz, _ := service.Repository.Create(
+		&model.Quiz{
+			Title:          request.Title,
+			Description:    request.Description,
+			StartDate:      request.StartDate,
+			EndDate:        request.EndDate,
+			SchoolID:       request.SchoolID,
+			YearID:         request.SchoolID,
+			UnitID:         request.UnitID,
+			ClassSubjectID: request.ClassSubjectID,
+		},
+	)
+	if createdQuiz == nil || createdQuiz.ID <= 0 {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if service.Repository.AreSameUniqueObjects(foundUnique, item) {
-		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage(MODEL_NAME)
-		return
+	// Insert every question
+	if len(request.Questions) > 0 {
+		for _, question := range request.Questions {
+			// Insert question
+			createdQuestion, _ := service.Repository.CreateQuizQuestion(
+				&model.QuizQuestion{
+					Title:       question.Title,
+					Description: question.Description,
+					QuizID:      createdQuiz.ID,
+				},
+			)
+			if createdQuestion == nil || createdQuestion.ID <= 0 {
+				errCode = http.StatusInternalServerError
+				err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+				return
+			}
+			if len(question.Options) > 0 {
+				for _, option := range question.Options {
+					// Insert option
+					createdOption, _ := service.Repository.CreateQuizQuestionOption(
+						&model.QuizQuestionOption{
+							Title:          option.Title,
+							Description:    option.Description,
+							QuizQuestionID: createdQuestion.ID,
+						},
+					)
+					if createdOption == nil || createdOption.ID <= 0 {
+						errCode = http.StatusInternalServerError
+						err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+						return
+					}
+				}
+			}
+		}
 	}
 
-	// Insert
-	result, err = service.Repository.Create(item)
+	result, err = service.Repository.GetById(createdQuiz.ID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -48,7 +96,12 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Quiz) 
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.Quiz) (result *model.Quiz, errCode int, err error) {
+func (service *Service) CreateAttempt(inputJwtToken *types.JwtToken, request *data.QuizAttemptRequest) (result *model.QuizAttempt, errCode int, err error) {
+	// TODO
+	return
+}
+
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.QuizRequest) (result *model.Quiz, errCode int, err error) {
 	// Check if quiz exists
 	foundItem, err := service.Repository.GetById(id)
 	if err != nil {
@@ -56,22 +109,9 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem == nil || foundItem.UserID < 1 {
+	if foundItem == nil || foundItem.ID < 1 {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-
-	// Check unique
-	foundUnique, err := service.Repository.GetUniqueObject(item)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if service.Repository.AreSameUniqueObjects(foundUnique, item) && !service.Repository.AreSameUniqueObjects(foundUnique, foundItem) {
-		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
 	}
 
@@ -132,6 +172,15 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 
 func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination) (result []model.Quiz, errCode int, err error) {
 	result, err = service.Repository.GetAll(filter, pagination)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+	}
+	return
+}
+
+func (service *Service) GetAllAttempts(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, quizID int64) (result []model.QuizAttempt, errCode int, err error) {
+	result, err = service.Repository.GetAllAttempts(filter, pagination)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

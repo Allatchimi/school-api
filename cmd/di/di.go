@@ -10,6 +10,7 @@ import (
 	"api/services/school/common/exam"
 	"api/services/school/common/meeting"
 	"api/services/school/common/parent"
+	"api/services/school/common/quiz"
 	"api/services/school/common/school"
 	"api/services/school/common/student"
 	"api/services/school/common/teacher"
@@ -95,6 +96,7 @@ func InjectDependencies() {
 	var studentRepo = student.NewRepository(config.DB)
 	var parentRepo = parent.NewRepository(config.DB)
 	var meetingRepo = meeting.NewRepository(config.DB)
+	var quizRepo = quiz.NewRepository(config.DB)
 	api.AllControllers.SchoolController = school.NewController(
 		school.NewService(
 			schoolRepo,
@@ -135,6 +137,12 @@ func InjectDependencies() {
 			meetingRepo,
 			userRepo,
 			teacherRepo,
+		),
+	)
+	api.AllControllers.QuizController = quiz.NewController(
+		quiz.NewService(
+			quizRepo,
+			userRepo,
 		),
 	)
 

@@ -5,6 +5,7 @@ import (
 	"api/services/user/permission"
 	"api/services/user/role"
 	"net/http"
+	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
 
@@ -23,11 +24,11 @@ func PermissionMiddleware(api huma.API, roleRepo *role.Repository, permissionRep
 		}
 
 		// Retrieve feature permissions
-		var featureScope, tableName, tableOperation string
+		var featuresScope, tableName, tableOperation string
 		for _, opScheme := range ctx.Operation().Security {
 			if securityScheme, ok := opScheme[constants.SecurityAuthName]; ok {
 				if len(securityScheme) > 0 {
-					featureScope = securityScheme[0]
+					featuresScope = securityScheme[0]
 					if len(securityScheme) > 1 {
 						tableName = securityScheme[1]
 						if len(securityScheme) > 2 {
@@ -40,7 +41,7 @@ func PermissionMiddleware(api huma.API, roleRepo *role.Repository, permissionRep
 		}
 
 		// Check for required permissions
-		if len(featureScope) >= 1 {
+		if len(featuresScope) >= 1 {
 			// Retrieve role
 			foundRole, errFound := roleRepo.GetByID(jwtToken.RoleID)
 			if errFound != nil {
@@ -48,7 +49,18 @@ func PermissionMiddleware(api huma.API, roleRepo *role.Repository, permissionRep
 				_ = huma.WriteErr(api, ctx, http.StatusInternalServerError, tempErr.Error(), tempErr)
 				return
 			}
-			if foundRole == nil || foundRole.Feature != featureScope {
+			if foundRole == nil {
+				tempErr := constants.Http403InvalidPermissionErrorMessage()
+				_ = huma.WriteErr(api, ctx, http.StatusForbidden, tempErr.Error(), tempErr)
+				return
+			}
+			var haveFeature = false
+			for _, feat := range strings.Split(featuresScope, ",") {
+				if feat == foundRole.Feature {
+					haveFeature = true
+				}
+			}
+			if !haveFeature {
 				tempErr := constants.Http403InvalidPermissionErrorMessage()
 				_ = huma.WriteErr(api, ctx, http.StatusForbidden, tempErr.Error(), tempErr)
 				return
