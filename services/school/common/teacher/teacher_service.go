@@ -55,22 +55,22 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Teache
 	return
 }
 
-func (service *Service) CreateTeacherUnitSubject(inputJwtToken *types.JwtToken, item *model.TeacherUnitSubject) (result *model.TeacherUnitSubject, errCode int, err error) {
+func (service *Service) CreateTeacherClassSubjectUnit(inputJwtToken *types.JwtToken, item *model.TeacherClassSubjectUnit) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
 	// Check unique
-	foundUnique, err := service.Repository.GetUnitSubjectUniqueObject(item)
+	foundUnique, err := service.Repository.GetTeacherClassSubjectUnitUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if service.Repository.AreUnitSubjectSameUniqueObjects(foundUnique, item) {
+	if service.Repository.AreTeacherClassSubjectUnitSameUniqueObjects(foundUnique, item) {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
 	// Insert teacher unit/subject
-	result, err = service.Repository.CreateTeacherUnitSubject(item)
+	result, err = service.Repository.CreateTeacherClassSubjectUnit(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -119,7 +119,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	}
 
 	// Update teacher
-	result, err = service.Repository.Update(id, item)
+	result, err = service.Repository.UpdateByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -128,9 +128,9 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	return
 }
 
-func (service *Service) UpdateTeacherUnitSubject(inputJwtToken *types.JwtToken, id int64, item *model.TeacherUnitSubject) (result *model.TeacherUnitSubject, errCode int, err error) {
+func (service *Service) UpdateTeacherClassSubjectUnit(inputJwtToken *types.JwtToken, id int64, item *model.TeacherClassSubjectUnit) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
 	// Check if teacher unit/subject exists
-	foundItem, err := service.Repository.GetTeacherUnitSubjectByID(id)
+	foundItem, err := service.Repository.GetTeacherClassSubjectUnitByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -143,20 +143,20 @@ func (service *Service) UpdateTeacherUnitSubject(inputJwtToken *types.JwtToken, 
 	}
 
 	// Check unique
-	foundUnique, err := service.Repository.GetUnitSubjectUniqueObject(item)
+	foundUnique, err := service.Repository.GetTeacherClassSubjectUnitUniqueObject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if service.Repository.AreUnitSubjectSameUniqueObjects(foundUnique, item) && !service.Repository.AreUnitSubjectSameUniqueObjects(foundUnique, foundItem) {
+	if service.Repository.AreTeacherClassSubjectUnitSameUniqueObjects(foundUnique, item) && !service.Repository.AreTeacherClassSubjectUnitSameUniqueObjects(foundUnique, foundItem) {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
 	// Update teacher
-	result, err = service.Repository.UpdateTeacherUnitSubject(id, item)
+	result, err = service.Repository.UpdateTeacherClassSubjectUnitByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -166,7 +166,7 @@ func (service *Service) UpdateTeacherUnitSubject(inputJwtToken *types.JwtToken, 
 }
 
 func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(id)
+	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -180,8 +180,8 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteTeacherUnitSubject(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteTeacherUnitSubject(id)
+func (service *Service) DeleteTeacherClassSubjectUnit(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteTeacherClassSubjectUnitByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -210,8 +210,8 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetTeacherUnitSubject(inputJwtToken *types.JwtToken, id int64) (result *model.TeacherUnitSubject, errCode int, err error) {
-	result, err = service.Repository.GetTeacherUnitSubjectByID(id)
+func (service *Service) GetTeacherClassSubjectUnit(inputJwtToken *types.JwtToken, id int64) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
+	result, err = service.Repository.GetTeacherClassSubjectUnitByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -234,8 +234,8 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 	return
 }
 
-func (service *Service) GetAllTeacherUnitSubject(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64, teacherID int64) (result []model.TeacherUnitSubject, errCode int, err error) {
-	result, err = service.Repository.GetAllTeacherUnitSubject(filter, pagination, schoolID, teacherID)
+func (service *Service) GetAllTeacherClassSubjectUnit(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64, teacherID int64) (result []model.TeacherClassSubjectUnit, errCode int, err error) {
+	result, err = service.Repository.GetAllTeacherClassSubjectUnit(filter, pagination, schoolID, teacherID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

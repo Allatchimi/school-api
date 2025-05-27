@@ -24,21 +24,21 @@ type TeacherPublicResponse struct {
 	UID string `json:"uid" required:"false" doc:"Teacher UID"`
 }
 
-type TeacherUnitSubjectResponse struct {
+type TeacherClassSubjectUnitResponse struct {
 	types.BaseGormModelResponse
 	Teacher *TeacherPublicResponse `json:"teacher" required:"false" doc:"Teacher"`
 
 	Year         *dataYear.YearPublicResponse          `json:"year" required:"false" doc:"Year"`
-	Unit         *dataUnit.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
 	ClassSubject *dataClass.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Subject for specific class"`
+	Unit         *dataUnit.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
 }
 
-type TeacherUnitSubjectPublicResponse struct {
+type TeacherClassSubjectUnitPublicResponse struct {
 	Teacher *TeacherPublicResponse `json:"teacher" required:"false" doc:"Teacher"`
 
 	Year         *dataYear.YearPublicResponse          `json:"year" required:"false" doc:"Year"`
-	Unit         *dataUnit.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
 	ClassSubject *dataClass.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Subject for specific class"`
+	Unit         *dataUnit.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
 }
 
 type TeacherResponseList struct {
@@ -46,7 +46,7 @@ type TeacherResponseList struct {
 	Data []TeacherResponse `json:"data" required:"false" doc:"List of teachers" example:"[]"`
 }
 
-type TeacherUnitSubjectResponseList struct {
+type TeacherClassSubjectUnitResponseList struct {
 	types.PaginatedResponse
-	Data []TeacherUnitSubjectResponse `json:"data" required:"false" doc:"List of unit/subject for the specified teacher" example:"[]"`
+	Data []TeacherClassSubjectUnitResponse `json:"data" required:"false" doc:"List of unit/subject for the specified teacher" example:"[]"`
 }

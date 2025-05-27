@@ -3,6 +3,7 @@ package di
 import (
 	"api/cmd/api"
 	"api/config"
+	common_svc_permission "api/services/common"
 	"api/services/communication"
 	"api/services/contact"
 	"api/services/health"
@@ -232,5 +233,15 @@ func InjectDependencies() {
 			unitRepo,
 			schoolRepo,
 		),
+	)
+
+	// Helpers
+	common_svc_permission.InjectRepositories(
+		roleRepo,
+		schoolRepo,
+		directorRepo,
+		teacherRepo,
+		studentRepo,
+		parentRepo,
 	)
 }

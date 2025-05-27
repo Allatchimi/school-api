@@ -56,7 +56,7 @@ func Start() error {
 		&examModel.Exam{},
 		// Teacher
 		&teacherModel.Teacher{},
-		&teacherModel.TeacherUnitSubject{},
+		&teacherModel.TeacherClassSubjectUnit{},
 		// Student
 		&studentModel.Student{},
 		&studentModel.StudentEnroll{},

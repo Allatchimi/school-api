@@ -18,14 +18,16 @@ type StudentEnroll struct {
 	YearID int64           `gorm:"default:null"`
 	Year   *modelYear.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	LevelDomainID int64                             `gorm:"default:null"`
-	LevelDomain   *modelLevel.UniversityLevelDomain `gorm:"default:null;foreignKey:LevelID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-
 	ClassID int64                              `gorm:"default:null"`
 	Class   *modelClassSubject.HighschoolClass `gorm:"default:null;foreignKey:ClassID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Origin string `gorm:"default:null"`
-	Status string `gorm:"default:null"`
+	LevelDomainID int64                             `gorm:"default:null"`
+	LevelDomain   *modelLevel.UniversityLevelDomain `gorm:"default:null;foreignKey:LevelID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	Origin          string  `gorm:"default:null"`
+	IsAccepted      bool    `gorm:"default:null"`
+	Payment         float64 `gorm:"default:null"`
+	PaymentCurrency string  `gorm:"default:null"`
 
 	Email       string `gorm:"default:null"`
 	PhoneNumber uint64 `gorm:"default:null"`
@@ -49,13 +51,18 @@ func (item *StudentEnroll) ToStudentEnrollResponse() *data.StudentEnrollResponse
 	}
 	resp := &data.StudentEnrollResponse{}
 	resp.Origin = item.Origin
-	resp.Status = item.Status
+	resp.IsAccepted = item.IsAccepted
+	resp.Payment = item.Payment
+	resp.PaymentCurrency = item.PaymentCurrency
+
 	resp.Email = item.Email
 	resp.PhoneNumber = item.PhoneNumber
+
 	resp.Gender = item.Gender
 	resp.FirstName = item.FirstName
 	resp.Birthday = item.Birthday
 	resp.BirthLocation = item.BirthLocation
+
 	resp.Document1 = item.Document1
 	resp.Document2 = item.Document2
 	resp.Document3 = item.Document3
@@ -79,13 +86,18 @@ func (item *StudentEnroll) ToStudentEnrollPublicResponse() *data.StudentEnrollPu
 	}
 	resp := &data.StudentEnrollPublicResponse{}
 	resp.Origin = item.Origin
-	resp.Status = item.Status
+	resp.IsAccepted = item.IsAccepted
+	resp.Payment = item.Payment
+	resp.PaymentCurrency = item.PaymentCurrency
+
 	resp.Email = item.Email
 	resp.PhoneNumber = item.PhoneNumber
+
 	resp.Gender = item.Gender
 	resp.FirstName = item.FirstName
 	resp.Birthday = item.Birthday
 	resp.BirthLocation = item.BirthLocation
+
 	resp.Document1 = item.Document1
 	resp.Document2 = item.Document2
 	resp.Document3 = item.Document3

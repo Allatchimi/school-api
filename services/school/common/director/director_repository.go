@@ -54,9 +54,11 @@ func (repository *Repository) GetByID(id int64) (*model.Director, error) {
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetByUserID(userID int64) (*model.Director, error) {
+func (repository *Repository) GetByUserIDSchoolID(userID int64, schoolID int64) (*model.Director, error) {
 	result := &model.Director{}
-	return result, repository.Db.Preload(clause.Associations).Where("user_id = ?", userID).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("user_id = ?", userID).Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.Director) (*model.Director, error) {

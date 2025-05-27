@@ -8,7 +8,7 @@ import (
 	modelUnit "api/services/school/university/unit/model"
 )
 
-type TeacherUnitSubject struct {
+type TeacherClassSubjectUnit struct {
 	types.BaseGormModel
 
 	TeacherID int64    `gorm:"default:null"`
@@ -17,22 +17,22 @@ type TeacherUnitSubject struct {
 	YearID int64           `gorm:"default:null"`
 	Year   *modelYear.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	UnitID int64                     `gorm:"default:null"`
-	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-
 	ClassSubjectID int64                                     `gorm:"default:null"`
 	ClassSubject   *modelClassSubject.HighschoolClassSubject `gorm:"default:null;foreignKey:ClassSubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	UnitID int64                     `gorm:"default:null"`
+	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
-func (item *TeacherUnitSubject) ToTeacherUnitSubjectResponse() *data.TeacherUnitSubjectResponse {
+func (item *TeacherClassSubjectUnit) ToTeacherClassSubjectUnitResponse() *data.TeacherClassSubjectUnitResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.TeacherUnitSubjectResponse{}
+	resp := &data.TeacherClassSubjectUnitResponse{}
 	resp.Teacher = item.Teacher.ToTeacherPublicResponse()
 	resp.Year = item.Year.ToPublicResponse()
-	resp.Unit = item.Unit.ToPublicResponse()
 	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
+	resp.Unit = item.Unit.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -40,22 +40,22 @@ func (item *TeacherUnitSubject) ToTeacherUnitSubjectResponse() *data.TeacherUnit
 	return resp
 }
 
-func (item *TeacherUnitSubject) ToTeacherUnitSubjectPublicResponse() *data.TeacherUnitSubjectPublicResponse {
+func (item *TeacherClassSubjectUnit) ToTeacherClassSubjectUnitPublicResponse() *data.TeacherClassSubjectUnitPublicResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.TeacherUnitSubjectPublicResponse{}
+	resp := &data.TeacherClassSubjectUnitPublicResponse{}
 	resp.Teacher = item.Teacher.ToTeacherPublicResponse()
 	resp.Year = item.Year.ToPublicResponse()
-	resp.Unit = item.Unit.ToPublicResponse()
 	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
+	resp.Unit = item.Unit.ToPublicResponse()
 	return resp
 }
 
-func ToTeacherUnitSubjectResponseList(itemList []TeacherUnitSubject) []data.TeacherUnitSubjectResponse {
-	resp := make([]data.TeacherUnitSubjectResponse, len(itemList))
+func ToTeacherClassSubjectUnitResponseList(itemList []TeacherClassSubjectUnit) []data.TeacherClassSubjectUnitResponse {
+	resp := make([]data.TeacherClassSubjectUnitResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToTeacherUnitSubjectResponse()
+		resp[index] = *item.ToTeacherClassSubjectUnitResponse()
 	}
 	return resp
 }

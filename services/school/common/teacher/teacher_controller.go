@@ -34,15 +34,15 @@ func (controller *Controller) Create(
 	return
 }
 
-func (controller *Controller) CreateTeacherUnitSubject(
+func (controller *Controller) CreateTeacherClassSubjectUnit(
 	ctx *context.Context,
 	input *struct {
-		Body data.TeacherUnitSubjectRequest
+		Body data.TeacherClassSubjectUnitRequest
 	},
-) (result *model.TeacherUnitSubject, errCode int, err error) {
-	result, errCode, err = controller.Service.CreateTeacherUnitSubject(
+) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
+	result, errCode, err = controller.Service.CreateTeacherClassSubjectUnit(
 		helpers.GetJwtContext(ctx),
-		&model.TeacherUnitSubject{
+		&model.TeacherClassSubjectUnit{
 			TeacherID: input.Body.TeacherID,
 			YearID:    input.Body.YearID,
 
@@ -71,16 +71,16 @@ func (controller *Controller) Update(
 	return
 }
 
-func (controller *Controller) UpdateTeacherUnitSubject(
+func (controller *Controller) UpdateTeacherClassSubjectUnit(
 	ctx *context.Context,
 	input *struct {
 		data.UnitSubjectID
-		Body data.TeacherUnitSubjectRequest
+		Body data.TeacherClassSubjectUnitRequest
 	},
-) (result *model.TeacherUnitSubject, errCode int, err error) {
-	result, errCode, err = controller.Service.UpdateTeacherUnitSubject(
+) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateTeacherClassSubjectUnit(
 		helpers.GetJwtContext(ctx), input.ID,
-		&model.TeacherUnitSubject{
+		&model.TeacherClassSubjectUnit{
 			TeacherID: input.Body.TeacherID,
 			YearID:    input.Body.YearID,
 
@@ -105,13 +105,13 @@ func (controller *Controller) Delete(
 	return
 }
 
-func (controller *Controller) DeleteTeacherUnitSubject(
+func (controller *Controller) DeleteTeacherClassSubjectUnit(
 	ctx *context.Context,
 	input *struct {
 		data.UnitSubjectID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteTeacherUnitSubject(helpers.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.DeleteTeacherClassSubjectUnit(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -133,13 +133,13 @@ func (controller *Controller) Get(
 	return
 }
 
-func (controller *Controller) GetTeacherUnitSubject(
+func (controller *Controller) GetTeacherClassSubjectUnit(
 	ctx *context.Context,
 	input *struct {
 		data.UnitSubjectID
 	},
-) (result *model.TeacherUnitSubject, errCode int, err error) {
-	teacher, errCode, err := controller.Service.GetTeacherUnitSubject(helpers.GetJwtContext(ctx), input.ID)
+) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
+	teacher, errCode, err := controller.Service.GetTeacherClassSubjectUnit(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -168,21 +168,21 @@ func (controller *Controller) GetAll(
 	return
 }
 
-func (controller *Controller) GetAllTeacherUnitSubject(
+func (controller *Controller) GetAllTeacherClassSubjectUnit(
 	ctx *context.Context,
 	input *struct {
 		types.Filter
 		types.PaginationRequest
-		data.GetAllTeacherUnitSubjectRequest
+		data.GetAllTeacherClassSubjectUnitRequest
 	},
-) (result *data.TeacherUnitSubjectResponseList, errCode int, err error) {
+) (result *data.TeacherClassSubjectUnitResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	teacherList, errCode, err := controller.Service.GetAllTeacherUnitSubject(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllTeacherUnitSubjectRequest.SchoolID, input.GetAllTeacherUnitSubjectRequest.TeacherID)
+	teacherList, errCode, err := controller.Service.GetAllTeacherClassSubjectUnit(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllTeacherClassSubjectUnitRequest.SchoolID, input.GetAllTeacherClassSubjectUnitRequest.TeacherID)
 	if err != nil {
 		return
 	}
-	result = &data.TeacherUnitSubjectResponseList{
-		Data: model.ToTeacherUnitSubjectResponseList(teacherList),
+	result = &data.TeacherClassSubjectUnitResponseList{
+		Data: model.ToTeacherClassSubjectUnitResponseList(teacherList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

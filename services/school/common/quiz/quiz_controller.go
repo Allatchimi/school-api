@@ -32,11 +32,13 @@ func (controller *Controller) Create(
 func (controller *Controller) CreateAttempt(
 	ctx *context.Context,
 	input *struct {
+		data.QuizID
 		Body data.QuizAttemptRequest
 	},
 ) (result *model.QuizAttempt, errCode int, err error) {
 	result, errCode, err = controller.Service.CreateAttempt(
 		helpers.GetJwtContext(ctx),
+		input.QuizID.ID,
 		&input.Body,
 	)
 	return
@@ -104,10 +106,14 @@ func (controller *Controller) GetAll(
 	input *struct {
 		types.Filter
 		types.PaginationRequest
+		types.FilterlSchoolYearUnitClassSubjectRequest
 	},
 ) (result *data.QuizResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	quizList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination)
+	quizList, errCode, err := controller.Service.GetAll(
+		helpers.GetJwtContext(ctx), newFilter, newPagination,
+		&input.FilterlSchoolYearUnitClassSubjectRequest,
+	)
 	if err != nil {
 		return
 	}
@@ -119,16 +125,21 @@ func (controller *Controller) GetAll(
 	return
 }
 
-func (controller *Controller) GetAllAttempts(
+func (controller *Controller) GetAllQuizAttempt(
 	ctx *context.Context,
 	input *struct {
 		types.Filter
 		types.PaginationRequest
 		data.QuizID
+		types.FilterlSchoolYearUnitClassSubjectRequest
 	},
 ) (result *data.QuizAttemptResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	quizAttemptList, errCode, err := controller.Service.GetAllAttempts(helpers.GetJwtContext(ctx), newFilter, newPagination, input.QuizID.ID)
+	quizAttemptList, errCode, err := controller.Service.GetAllQuizAttempt(
+		helpers.GetJwtContext(ctx), newFilter, newPagination,
+		input.QuizID.ID,
+		&input.FilterlSchoolYearUnitClassSubjectRequest,
+	)
 	if err != nil {
 		return
 	}

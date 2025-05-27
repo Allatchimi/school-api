@@ -74,10 +74,7 @@ func (controller *Controller) GetAll(
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
 	documentList, errCode, err := controller.Service.GetAll(
 		helpers.GetJwtContext(ctx), newFilter, newPagination,
-		input.SchoolID,
-		input.YearID,
-		input.UnitID,
-		input.ClassSubjectID,
+		&input.FilterlSchoolYearUnitClassSubjectRequest,
 	)
 	if err != nil {
 		return

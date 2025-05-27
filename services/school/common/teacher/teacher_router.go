@@ -91,18 +91,18 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.TeacherUnitSubjectRequest
+				Body data.TeacherClassSubjectUnitRequest
 			},
 		) (*struct {
-			Body data.TeacherUnitSubjectResponse
+			Body data.TeacherClassSubjectUnitResponse
 		}, error) {
-			result, errCode, err := controller.CreateTeacherUnitSubject(&ctx, input)
+			result, errCode, err := controller.CreateTeacherClassSubjectUnit(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.TeacherUnitSubjectResponse
-			}{Body: *result.ToTeacherUnitSubjectResponse()}, nil
+				Body data.TeacherClassSubjectUnitResponse
+			}{Body: *result.ToTeacherClassSubjectUnitResponse()}, nil
 		},
 	)
 
@@ -177,18 +177,18 @@ func RegisterEndpoints(
 			ctx context.Context,
 			input *struct {
 				data.UnitSubjectID
-				Body data.TeacherUnitSubjectRequest
+				Body data.TeacherClassSubjectUnitRequest
 			},
 		) (*struct {
-			Body data.TeacherUnitSubjectResponse
+			Body data.TeacherClassSubjectUnitResponse
 		}, error) {
-			result, errCode, err := controller.UpdateTeacherUnitSubject(&ctx, input)
+			result, errCode, err := controller.UpdateTeacherClassSubjectUnit(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.TeacherUnitSubjectResponse
-			}{Body: *result.ToTeacherUnitSubjectResponse()}, nil
+				Body data.TeacherClassSubjectUnitResponse
+			}{Body: *result.ToTeacherClassSubjectUnitResponse()}, nil
 		},
 	)
 
@@ -264,7 +264,7 @@ func RegisterEndpoints(
 				data.UnitSubjectID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteTeacherUnitSubject(&ctx, input)
+			result, errCode, err := controller.DeleteTeacherClassSubjectUnit(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -350,15 +350,15 @@ func RegisterEndpoints(
 				data.UnitSubjectID
 			},
 		) (*struct {
-			Body data.TeacherUnitSubjectResponse
+			Body data.TeacherClassSubjectUnitResponse
 		}, error) {
-			result, errCode, err := controller.GetTeacherUnitSubject(&ctx, input)
+			result, errCode, err := controller.GetTeacherClassSubjectUnit(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.TeacherUnitSubjectResponse
-			}{Body: *result.ToTeacherUnitSubjectResponse()}, nil
+				Body data.TeacherClassSubjectUnitResponse
+			}{Body: *result.ToTeacherClassSubjectUnitResponse()}, nil
 		},
 	)
 
@@ -445,17 +445,17 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
-				data.GetAllTeacherUnitSubjectRequest
+				data.GetAllTeacherClassSubjectUnitRequest
 			},
 		) (*struct {
-			Body data.TeacherUnitSubjectResponseList
+			Body data.TeacherClassSubjectUnitResponseList
 		}, error) {
-			result, errCode, err := controller.GetAllTeacherUnitSubject(&ctx, input)
+			result, errCode, err := controller.GetAllTeacherClassSubjectUnit(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.TeacherUnitSubjectResponseList
+				Body data.TeacherClassSubjectUnitResponseList
 			}{Body: *result}, nil
 		},
 	)

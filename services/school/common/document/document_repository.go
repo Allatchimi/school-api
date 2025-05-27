@@ -60,12 +60,12 @@ func (repository *Repository) GetAll(
 		where = helpers.AppendWhereClause(where, fmt.Sprintf("documents.unit_id = %d", unitID))
 	}
 	if filter != nil && len(filter.Search) >= 1 {
-		tmpWhere := fmt.Sprintf(
+		tempWhere := fmt.Sprintf(
 			"(type ILIKE %s OR WHERE name ILIKE %s)",
 			filter.Search,
 			filter.Search,
 		)
-		where = helpers.AppendWhereClause(where, tmpWhere)
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
 	return result, repository.Db.Scopes(
 		helpers.PaginationScope(

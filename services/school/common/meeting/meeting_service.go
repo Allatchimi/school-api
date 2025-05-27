@@ -137,12 +137,12 @@ func (service *Service) Join(inputJwtToken *types.JwtToken, id int64) (result st
 	teacher, _ := service.TeacherRepository.GetByUserID(inputJwtToken.UserID)
 	if teacher != nil && teacher.ID > 0 {
 		if meetingRoom.School.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
-			teacherUnit, _ := service.TeacherRepository.GetTeacherUnitSubjectByUserIDUnitID(teacher.ID, meetingRoom.UnitID)
+			teacherUnit, _ := service.TeacherRepository.GetTeacherClassSubjectUnitByUserIDUnitID(teacher.ID, meetingRoom.UnitID)
 			if teacherUnit != nil && teacherUnit.ID > 0 {
 				isAdmin = true
 			}
 		} else {
-			teacherClassSubject, _ := service.TeacherRepository.GetTeacherUnitSubjectByUserIDClassSubjectID(teacher.ID, meetingRoom.ClassSubjectID)
+			teacherClassSubject, _ := service.TeacherRepository.GetTeacherClassSubjectUnitByUserIDClassSubjectID(teacher.ID, meetingRoom.ClassSubjectID)
 			if teacherClassSubject != nil && teacherClassSubject.ID > 0 {
 				isAdmin = true
 			}

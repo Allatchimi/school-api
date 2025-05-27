@@ -32,8 +32,10 @@ type StudentEnrollResponse struct {
 	LevelDomain *dataLevelDomain.LevelDomainPublicResponse `json:"levelDomain" required:"false" doc:"Level for domain"`
 	Class       *dataClass.ClassPublicResponse             `json:"class" required:"false" doc:"Class"`
 
-	Origin string `json:"Origin" required:"false" doc:"Origin"`
-	Status string `json:"Status" required:"false" doc:"Status"`
+	Origin          string  `json:"origin" required:"false" doc:"Origin"`
+	IsAccepted      bool    `json:"isAccepted" required:"false" doc:"Is accepted"`
+	Payment         float64 `json:"payment" required:"false" doc:"Payment"`
+	PaymentCurrency string  `json:"paymentCurrency" required:"false" doc:"Payment currency"`
 
 	Email       string `json:"email" required:"false" doc:"Email"`
 	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number"`
@@ -57,8 +59,10 @@ type StudentEnrollPublicResponse struct {
 	LevelDomain *dataLevelDomain.LevelDomainPublicResponse `json:"levelDomain" required:"false" doc:"Level for domain"`
 	Class       *dataClass.ClassPublicResponse             `json:"class" required:"false" doc:"Class"`
 
-	Origin string `json:"Origin" required:"false" doc:"Origin"`
-	Status string `json:"Status" required:"false" doc:"Status"`
+	Origin          string  `json:"origin" required:"false" doc:"Origin"`
+	IsAccepted      bool    `json:"isAccepted" required:"false" doc:"Is accepted"`
+	Payment         float64 `json:"payment" required:"false" doc:"Payment"`
+	PaymentCurrency string  `json:"paymentCurrency" required:"false" doc:"Payment currency"`
 
 	Email       string `json:"email" required:"false" doc:"Email"`
 	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number"`

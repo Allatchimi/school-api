@@ -35,7 +35,7 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s,%s,%s,%s,%s",
+						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
@@ -71,7 +71,7 @@ func RegisterEndpoints(
 			Summary:     "Create quiz attempt",
 			Description: "Create quiz attempt.",
 			Method:      http.MethodPost,
-			Path:        endpointConfig.Group,
+			Path:        fmt.Sprintf("%s/{id}/attempts", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -91,6 +91,7 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
+				data.QuizID
 				Body data.QuizAttemptRequest
 			},
 		) (*struct{ Body data.QuizAttemptResponse }, error) {
@@ -115,7 +116,7 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s,%s,%s,%s,%s",
+						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
@@ -157,7 +158,7 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s,%s,%s,%s,%s",
+						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
@@ -198,7 +199,7 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s,%s,%s,%s,%s",
+						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
@@ -269,13 +270,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all quizs
+	// Get all quizzes
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-quiz-list",
-			Summary:     "Get all quizs",
-			Description: "Get all quizs with support for search, filter and pagination",
+			Summary:     "Get all quizzes",
+			Description: "Get all quizzes with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -303,6 +304,7 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
+				types.FilterlSchoolYearUnitClassSubjectRequest
 			},
 		) (*struct {
 			Body data.QuizResponseList
@@ -325,7 +327,7 @@ func RegisterEndpoints(
 			Summary:     "Get all quiz attempts",
 			Description: "Get all quiz attempts with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        endpointConfig.Group,
+			Path:        fmt.Sprintf("%s/{id}/attempts", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -352,11 +354,12 @@ func RegisterEndpoints(
 				types.Filter
 				types.PaginationRequest
 				data.QuizID
+				types.FilterlSchoolYearUnitClassSubjectRequest
 			},
 		) (*struct {
 			Body data.QuizAttemptResponseList
 		}, error) {
-			result, errCode, err := controller.GetAllAttempts(&ctx, input)
+			result, errCode, err := controller.GetAllQuizAttempt(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}

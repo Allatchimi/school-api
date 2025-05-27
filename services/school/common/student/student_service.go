@@ -119,7 +119,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	}
 
 	// Update student
-	result, err = service.Repository.Update(id, item)
+	result, err = service.Repository.UpdateByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -130,7 +130,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 
 func (service *Service) UpdateStudentEnroll(inputJwtToken *types.JwtToken, id int64, item *model.StudentEnroll) (result *model.StudentEnroll, errCode int, err error) {
 	// Check if student level domain/class exists
-	foundItem, err := service.Repository.GetStudentEnrollById(id)
+	foundItem, err := service.Repository.GetStudentEnrollByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -156,7 +156,7 @@ func (service *Service) UpdateStudentEnroll(inputJwtToken *types.JwtToken, id in
 	}
 
 	// Update student
-	result, err = service.Repository.UpdateStudentEnroll(id, item)
+	result, err = service.Repository.UpdateStudentEnrollByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -166,7 +166,7 @@ func (service *Service) UpdateStudentEnroll(inputJwtToken *types.JwtToken, id in
 }
 
 func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(id)
+	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -181,7 +181,7 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 }
 
 func (service *Service) DeleteStudentEnroll(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteStudentEnroll(id)
+	affectedRows, err = service.Repository.DeleteStudentEnrollByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -211,7 +211,7 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 }
 
 func (service *Service) GetStudentEnroll(inputJwtToken *types.JwtToken, id int64) (result *model.StudentEnroll, errCode int, err error) {
-	result, err = service.Repository.GetStudentEnrollById(id)
+	result, err = service.Repository.GetStudentEnrollByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

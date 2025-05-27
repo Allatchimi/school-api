@@ -89,6 +89,16 @@ func (repository *Repository) GetParentStudentByID(id int64) (*model.ParentStude
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
+func (repository *Repository) GetByObject(item *model.Parent) (*model.Parent, error) {
+	result := &model.Parent{}
+	return result, repository.Db.Where(item).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetParentStudentByObject(item *model.ParentStudent) (*model.ParentStudent, error) {
+	result := &model.ParentStudent{}
+	return result, repository.Db.Where(item).Limit(1).Find(result).Error
+}
+
 func (repository *Repository) GetParentStudentByUserIDSchoolID(userID int64, schoolID int64) (*model.ParentStudent, error) {
 	result := &model.ParentStudent{}
 	where := fmt.Sprintf("WHERE parents.user_id = %d AND students.school_id = %d", userID, schoolID)
@@ -107,16 +117,6 @@ func (repository *Repository) GetParentStudentByUserIDSchoolID(userID int64, sch
 
 	err := tmpErr
 	return result, err
-}
-
-func (repository *Repository) GetByObject(item *model.Parent) (*model.Parent, error) {
-	result := &model.Parent{}
-	return result, repository.Db.Where(item).Limit(1).Find(result).Error
-}
-
-func (repository *Repository) GetParentStudentByObject(item *model.ParentStudent) (*model.ParentStudent, error) {
-	result := &model.ParentStudent{}
-	return result, repository.Db.Where(item).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.Parent, err error) {

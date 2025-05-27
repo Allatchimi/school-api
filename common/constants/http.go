@@ -22,6 +22,10 @@ var Http403InvalidPermissionErrorMessage = func() error {
 	return fmt.Errorf("%s", "You don't have permission to access this resource! Please enter valid information.")
 }
 
+var Http409ConflictErrorMessage = func() error {
+	return fmt.Errorf("%s", "Can't process this operation! Please enter valid information.")
+}
+
 var Http404ErrorMessage = func(message string) error {
 	return fmt.Errorf("%s", fmt.Sprintf("%s not found! Please enter valid information.", message))
 }
