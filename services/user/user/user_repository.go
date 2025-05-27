@@ -35,7 +35,7 @@ func (repository *Repository) AssignRole(userID int64, roleID int64) (*model.Use
 	).Error
 }
 
-func (repository *Repository) Update(userID int64, user *model.User) (*model.User, error) {
+func (repository *Repository) UpdateByID(userID int64, user *model.User) (*model.User, error) {
 	result := &model.User{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", userID).Updates(
 		map[string]any{
@@ -47,12 +47,12 @@ func (repository *Repository) Update(userID int64, user *model.User) (*model.Use
 	).Error
 }
 
-func (repository *Repository) Delete(userID int64) (int64, error) {
+func (repository *Repository) DeleteByID(userID int64) (int64, error) {
 	result := repository.Db.Where("id = ?", userID).Delete(&model.User{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteRole(userID int64, roleID int64) (int64, error) {
+func (repository *Repository) DeleteRoleByUserIDRoleID(userID int64, roleID int64) (int64, error) {
 	result := repository.Db.Model(&model.User{}).Where("id = ?", userID).Where("role_id = ?", roleID).Updates(
 		map[string]any{
 			"role_id": nil,
@@ -61,7 +61,7 @@ func (repository *Repository) DeleteRole(userID int64, roleID int64) (int64, err
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	tmpResult := repository.Db.Where(where).Delete(&model.User{})
 

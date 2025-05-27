@@ -5,3 +5,10 @@ type Filter struct {
 	OrderBy string `json:"orderBy" query:"orderBy" required:"false" doc:"Filter by field name(case sensitive)" example:"id"`
 	Sort    string `json:"sort" query:"sort" required:"false" enum:"asc,desc" doc:"Sort asc or desc" example:"desc"`
 }
+
+type FilterlSchoolYearUnitClassSubjectRequest struct {
+	SchoolID       int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
+	YearID         int64 `json:"yearID" query:"yearID" required:"false" doc:"Year id" example:"1"`
+	UnitID         int64 `json:"unitID" query:"unitID" required:"false" doc:"Unit id" example:"1"`
+	ClassSubjectID int64 `json:"classID" query:"classSubjectID" required:"false" doc:"Class subject id" example:"1"`
+}

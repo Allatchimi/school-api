@@ -49,7 +49,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Year) 
 
 func (service *Service) Update(inputJwtToken *types.JwtToken, yearID int64, item *model.Year) (result *model.Year, errCode int, err error) {
 	// Check if year exists
-	foundItem, err := service.Repository.GetById(yearID)
+	foundItem, err := service.Repository.GetByID(yearID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -118,7 +118,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 func (service *Service) Get(inputJwtToken *types.JwtToken, yearID int64) (result *model.Year, errCode int, err error) {
-	result, err = service.Repository.GetById(yearID)
+	result, err = service.Repository.GetByID(yearID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

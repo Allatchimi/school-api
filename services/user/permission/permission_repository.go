@@ -25,7 +25,7 @@ func (repository *Repository) Create(permission *model.Permission) (*model.Permi
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
-func (repository *Repository) Update(
+func (repository *Repository) UpdateByID(
 	roleID int64,
 	tableName string,
 	data *model.Permission,
@@ -45,7 +45,7 @@ func (repository *Repository) Update(
 	return
 }
 
-func (repository *Repository) Delete(permissionID int64) (result int64, err error) {
+func (repository *Repository) DeleteByID(permissionID int64) (result int64, err error) {
 	tmpResult := repository.Db.Where("id = ?", permissionID).Delete(&model.Permission{})
 
 	result = tmpResult.RowsAffected
@@ -53,7 +53,7 @@ func (repository *Repository) Delete(permissionID int64) (result int64, err erro
 	return
 }
 
-func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	tmpResult := repository.Db.Where(where).Delete(&model.Permission{})
 
@@ -70,7 +70,7 @@ func (repository *Repository) GetByRoleIDTableName(
 	return result, repository.Db.Preload(clause.Associations).Where("role_id = ?", roleID).Where("table_name = ?", tableName).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetByRoleIDTableNameAll(
+func (repository *Repository) GetByRoleIDTableNameMultiple(
 	roleID int64,
 	tableName1 string,
 	tableName2 string,

@@ -5,8 +5,8 @@ import (
 	"api/services/school/common/exam/data"
 	schoolModel "api/services/school/common/school/model"
 	yearModel "api/services/school/common/year/model"
+	classModel "api/services/school/highschool/class/model"
 	sequenceModel "api/services/school/highschool/sequence/model"
-	subjectModel "api/services/school/highschool/subject/model"
 	Unitmodel "api/services/school/university/unit/model"
 	"time"
 )
@@ -34,8 +34,9 @@ type Exam struct {
 	UnitID int64                     `gorm:"default:null"`
 	Unit   *Unitmodel.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	SubjectID  int64                             `gorm:"default:null"`
-	Subject    *subjectModel.HighschoolSubject   `gorm:"default:null;foreignKey:SubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	ClassSubjectID int64                              `gorm:"default:null"`
+	ClassSubject   *classModel.HighschoolClassSubject `gorm:"default:null;foreignKey:ClassSubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
 	SequenceID int64                             `gorm:"default:null"`
 	Sequence   *sequenceModel.HighschoolSequence `gorm:"default:null;foreignKey:SequenceID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
@@ -54,12 +55,12 @@ func (item *Exam) ToResponse() *data.ExamResponse {
 	resp.StartDate = item.StartDate
 	resp.EndDate = item.EndDate
 
-	resp.School = item.School.ToResponse()
-	resp.Year = item.Year.ToResponse()
-	resp.Type = item.Type.ToResponse()
-	resp.Unit = item.Unit.ToResponse()
-	resp.Subject = item.Subject.ToResponse()
-	resp.Sequence = item.Sequence.ToResponse()
+	resp.School = item.School.ToPublicResponse()
+	resp.Year = item.Year.ToPublicResponse()
+	resp.Type = item.Type.ToPublicResponse()
+	resp.Unit = item.Unit.ToPublicResponse()
+	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
+	resp.Sequence = item.Sequence.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -85,7 +86,7 @@ func (item *Exam) ToPublicResponse() *data.ExamPublicResponse {
 	resp.Year = item.Year.ToPublicResponse()
 	resp.Type = item.Type.ToPublicResponse()
 	resp.Unit = item.Unit.ToPublicResponse()
-	resp.Subject = item.Subject.ToPublicResponse()
+	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
 	resp.Sequence = item.Sequence.ToPublicResponse()
 	return resp
 }

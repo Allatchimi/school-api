@@ -26,7 +26,7 @@ const DEFAULT_ERROR_MESSAGE = "interact with class model"
 
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.HighschoolClass) (result *model.HighschoolClass, errCode int, err error) {
 	// Check if the school type is highschool
-	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -87,7 +87,7 @@ func (service *Service) CreateClassSubject(inputJwtToken *types.JwtToken, item *
 
 func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.HighschoolClass) (result *model.HighschoolClass, errCode int, err error) {
 	// Check if the school type is highschool
-	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -100,7 +100,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	}
 
 	// Check if class exists
-	foundItem, err := service.Repository.GetById(id)
+	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -187,7 +187,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.HighschoolClass, errCode int, err error) {
-	result, err = service.Repository.GetById(id)
+	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

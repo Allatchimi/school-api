@@ -14,7 +14,3 @@ type DocumentRequest struct {
 	Name        string `json:"name" required:"true" doc:"Name"`
 	Description string `json:"description" required:"false" doc:"Description"`
 }
-
-type GetAllRequest struct {
-	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
-}

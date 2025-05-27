@@ -91,7 +91,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.School
 
 func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.School) (result *model.School, errCode int, err error) {
 	// Check if school exists
-	foundItem, err := service.Repository.GetById(id)
+	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -117,7 +117,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	}
 
 	// Update school
-	result, err = service.Repository.Update(id, item)
+	result, err = service.Repository.UpdateByID(id, item)
 	if err != nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
 		if errPgState == nil {
@@ -159,7 +159,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 
 func (service *Service) UpdateInfo(inputJwtToken *types.JwtToken, id int64, item *model.SchoolInfo) (result *model.SchoolInfo, errCode int, err error) {
 	// Check if school info already exists
-	foundItem, err := service.Repository.GetInfoById(id)
+	foundItem, err := service.Repository.GetInfoByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -172,7 +172,7 @@ func (service *Service) UpdateInfo(inputJwtToken *types.JwtToken, id int64, item
 	}
 
 	// Update
-	result, err = service.Repository.UpdateInfo(id, item)
+	result, err = service.Repository.UpdateInfoByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -183,7 +183,7 @@ func (service *Service) UpdateInfo(inputJwtToken *types.JwtToken, id int64, item
 
 func (service *Service) UpdateConfig(inputJwtToken *types.JwtToken, id int64, item *model.SchoolConfig) (result *model.SchoolConfig, errCode int, err error) {
 	// Check if school config already exists
-	foundItem, err := service.Repository.GetConfigById(id)
+	foundItem, err := service.Repository.GetConfigByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -196,7 +196,7 @@ func (service *Service) UpdateConfig(inputJwtToken *types.JwtToken, id int64, it
 	}
 
 	// Update
-	result, err = service.Repository.UpdateConfig(id, item)
+	result, err = service.Repository.UpdateConfigByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -206,7 +206,7 @@ func (service *Service) UpdateConfig(inputJwtToken *types.JwtToken, id int64, it
 }
 
 func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(id)
+	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -221,7 +221,7 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 }
 
 func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteMultiple(list)
+	affectedRows, err = service.Repository.DeleteMultipleByID(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -236,7 +236,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.School, errCode int, err error) {
-	result, err = service.Repository.GetById(id)
+	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

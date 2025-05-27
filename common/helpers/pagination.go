@@ -27,13 +27,16 @@ func PaginationScope(db *gorm.DB, selection string, where string, pagination *ty
 	db.Raw(fmt.Sprintf("SELECT COUNT(*) FROM (%s %s) AS subquery;", selection, where)).Count(count)
 	pagination.UpdateFields(*count)
 
-	paginationFilter := fmt.Sprintf(
-		"ORDER BY %s %s LIMIT %d OFFSET %d",
-		filter.OrderBy,
-		filter.Sort,
-		pagination.Limit,
-		pagination.Offset,
-	)
+	var paginationFilter = ""
+	if pagination != nil && filter != nil {
+		paginationFilter = fmt.Sprintf(
+			"ORDER BY %s %s LIMIT %d OFFSET %d",
+			filter.OrderBy,
+			filter.Sort,
+			pagination.Limit,
+			pagination.Offset,
+		)
+	}
 	return func(db *gorm.DB) *gorm.DB {
 		return db.Raw(fmt.Sprintf("%s %s %s;",
 			selection,

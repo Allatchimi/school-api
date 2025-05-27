@@ -42,7 +42,7 @@ func (repository *Repository) DeleteMultiple(list []int64) (result int64, err er
 	return
 }
 
-func (repository *Repository) GetById(communicationID int64) (*model.Communication, error) {
+func (repository *Repository) GetByID(communicationID int64) (*model.Communication, error) {
 	result := &model.Communication{}
 	return result, repository.Db.Where("id = ?", communicationID).Limit(1).Find(result).Error
 }

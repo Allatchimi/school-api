@@ -35,7 +35,7 @@ func (repository *Repository) Create(role *model.Role) (result *model.Role, err 
 	return
 }
 
-func (repository *Repository) Update(roleID int64, role *model.Role) (result *model.Role, err error) {
+func (repository *Repository) UpdateByID(roleID int64, role *model.Role) (result *model.Role, err error) {
 	result = &model.Role{}
 	tmpErr := repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", roleID).Updates(
 		map[string]any{
@@ -49,7 +49,7 @@ func (repository *Repository) Update(roleID int64, role *model.Role) (result *mo
 	return
 }
 
-func (repository *Repository) Delete(roleID int64) (result int64, err error) {
+func (repository *Repository) DeleteByID(roleID int64) (result int64, err error) {
 	tmpResult := repository.Db.Where("id = ?", roleID).Delete(&model.Role{})
 
 	result = tmpResult.RowsAffected
@@ -57,7 +57,7 @@ func (repository *Repository) Delete(roleID int64) (result int64, err error) {
 	return
 }
 
-func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	tmpResult := repository.Db.Where(where).Delete(&model.Role{})
 

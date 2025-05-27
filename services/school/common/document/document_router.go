@@ -181,7 +181,7 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
-				data.GetAllRequest
+				types.FilterlSchoolYearUnitClassSubjectRequest
 			},
 		) (*struct {
 			Body data.DocumentResponseList

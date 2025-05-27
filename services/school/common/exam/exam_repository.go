@@ -47,7 +47,7 @@ func (repository *Repository) UpdateType(id int64, data *model.ExamType) (*model
 }
 
 func (repository *Repository) Update(id int64, data *model.Exam) (*model.Exam, error) {
-	tempExam, err := repository.GetById(id)
+	tempExam, err := repository.GetByID(id)
 	if err != nil || tempExam == nil || tempExam.ID != id {
 		return nil, err
 	}
@@ -55,12 +55,12 @@ func (repository *Repository) Update(id int64, data *model.Exam) (*model.Exam, e
 	result := &model.Exam{}
 	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
 		map[string]any{
-			"school_id":   data.SchoolID,
-			"year_id":     data.YearID,
-			"type_id":     data.TypeID,
-			"unit_id":     data.UnitID,
-			"subject_id":  data.SubjectID,
-			"sequence_id": data.SequenceID,
+			"school_id":        data.SchoolID,
+			"year_id":          data.YearID,
+			"type_id":          data.TypeID,
+			"unit_id":          data.UnitID,
+			"class_subject_id": data.ClassSubjectID,
+			"sequence_id":      data.SequenceID,
 
 			"percentage":       data.Percentage,
 			"description":      data.Description,
@@ -99,7 +99,7 @@ func (repository *Repository) GetTypeById(id int64) (*model.ExamType, error) {
 	return result, repository.Db.Model(&model.ExamType{}).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetById(id int64) (*model.Exam, error) {
+func (repository *Repository) GetByID(id int64) (*model.Exam, error) {
 	result := &model.Exam{}
 	return result, repository.Db.Model(&model.Exam{}).Where("id = ?", id).Limit(1).Find(result).Error
 }
@@ -107,12 +107,12 @@ func (repository *Repository) GetById(id int64) (*model.Exam, error) {
 func (repository *Repository) GetUniqueObject(item *model.Exam) (*model.Exam, error) {
 	result := &model.Exam{}
 	return result, repository.Db.Preload(clause.Associations).Where(&model.Exam{
-		SchoolID:   item.SchoolID,
-		YearID:     item.YearID,
-		TypeID:     item.TypeID,
-		UnitID:     item.UnitID,
-		SubjectID:  item.SubjectID,
-		SequenceID: item.SequenceID,
+		SchoolID:       item.SchoolID,
+		YearID:         item.YearID,
+		TypeID:         item.TypeID,
+		UnitID:         item.UnitID,
+		ClassSubjectID: item.ClassSubjectID,
+		SequenceID:     item.SequenceID,
 	}).Limit(1).Find(result).Error
 }
 
@@ -122,7 +122,7 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.Exam, item2 *mod
 			item1.YearID == item2.YearID &&
 			item1.TypeID == item2.TypeID &&
 			item1.UnitID == item2.UnitID &&
-			item1.SubjectID == item2.SubjectID &&
+			item1.ClassSubjectID == item2.ClassSubjectID &&
 			item1.SequenceID == item2.SequenceID) {
 		return true
 	}
@@ -191,9 +191,8 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(exams.id AS TEXT) = '%s' OR exams.description ILIKE '%s' OR schools.name ILIKE '%s' OR years.name ILIKE '%s' OR exam_types.name ILIKE '%s' OR university_units.name ILIKE '%s' OR highschool_subjects.name ILIKE '%s' OR highschool_sequences.name ILIKE '%s'",
+			"CAST(exams.id AS TEXT) = '%s' OR exams.description ILIKE '%s' OR schools.name ILIKE '%s' OR years.name ILIKE '%s' OR exam_types.name ILIKE '%s' OR university_units.name ILIKE '%s' OR highschool_sequences.name ILIKE '%s'",
 			filter.Search,
-			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -211,13 +210,13 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"SELECT exams.id, exams.school_id, exams.year_id, exams.type_id, exams.unit_id, exams.subject_id, exams.sequence_id"+
+			"SELECT exams.id, exams.school_id, exams.year_id, exams.type_id, exams.unit_id, exams.class_subject_id, exams.sequence_id"+
 				", exams.created_at, exams.updated_at FROM exams "+
 				"LEFT JOIN schools ON exams.school_id = schools.id "+
 				"LEFT JOIN years ON exams.year_id = years.id "+
 				"LEFT JOIN exam_types ON exams.type_id = exam_types.id "+
 				"LEFT JOIN university_units ON exams.unit_id = university_units.id "+
-				"LEFT JOIN highschool_subjects ON exams.subject_id = highschool_subjects.id "+
+				"LEFT JOIN highschool_class_subjects ON exams.class_subject_id = highschool_class_subjects.id "+
 				"LEFT JOIN highschool_sequences ON exams.sequence_id = highschool_sequences.id",
 			where,
 			pagination,

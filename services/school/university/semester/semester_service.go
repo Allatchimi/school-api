@@ -26,7 +26,7 @@ const DEFAULT_ERROR_MESSAGE = "interact with semester model"
 
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.UniversitySemester) (result *model.UniversitySemester, errCode int, err error) {
 	// Check if the school type is university
-	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -63,7 +63,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Univer
 
 func (service *Service) Update(inputJwtToken *types.JwtToken, semesterID int64, item *model.UniversitySemester) (result *model.UniversitySemester, errCode int, err error) {
 	// Check if the school type is university
-	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -76,7 +76,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, semesterID int64, 
 	}
 
 	// Check if semester exists
-	foundItem, err := service.Repository.GetById(semesterID)
+	foundItem, err := service.Repository.GetByID(semesterID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -148,7 +148,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 func (service *Service) Get(inputJwtToken *types.JwtToken, semesterID int64) (result *model.UniversitySemester, errCode int, err error) {
-	result, err = service.Repository.GetById(semesterID)
+	result, err = service.Repository.GetByID(semesterID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

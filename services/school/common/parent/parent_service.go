@@ -74,7 +74,7 @@ func (service *Service) CreateParentStudent(inputJwtToken *types.JwtToken, item 
 
 func (service *Service) Update(inputJwtToken *types.JwtToken, parentID int64, item *model.Parent) (result *model.Parent, errCode int, err error) {
 	// Check unique
-	foundParentByID, err := service.Repository.GetById(parentID)
+	foundParentByID, err := service.Repository.GetByID(parentID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -111,7 +111,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, parentID int64, it
 
 func (service *Service) UpdateParentStudent(inputJwtToken *types.JwtToken, parentParentStudentID int64, item *model.ParentStudent) (result *model.ParentStudent, errCode int, err error) {
 	// Check unique
-	foundParentByID, err := service.Repository.GetParentStudentById(parentParentStudentID)
+	foundParentByID, err := service.Repository.GetParentStudentByID(parentParentStudentID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -178,7 +178,7 @@ func (service *Service) DeleteParentStudent(inputJwtToken *types.JwtToken, paren
 }
 
 func (service *Service) Get(inputJwtToken *types.JwtToken, parentID int64) (result *model.Parent, errCode int, err error) {
-	result, err = service.Repository.GetById(parentID)
+	result, err = service.Repository.GetByID(parentID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -193,7 +193,7 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, parentID int64) (resu
 }
 
 func (service *Service) GetParentStudent(inputJwtToken *types.JwtToken, parentParentStudentID int64) (result *model.ParentStudent, errCode int, err error) {
-	result, err = service.Repository.GetParentStudentById(parentParentStudentID)
+	result, err = service.Repository.GetParentStudentByID(parentParentStudentID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

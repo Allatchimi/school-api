@@ -31,7 +31,7 @@ func (repository *Repository) CreateStudentEnroll(item *model.StudentEnroll) (*m
 }
 
 func (repository *Repository) Update(id int64, item *model.Student) (*model.Student, error) {
-	tempStudent, err := repository.GetById(id)
+	tempStudent, err := repository.GetByID(id)
 	if err != nil || tempStudent == nil || tempStudent.ID != id {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (repository *Repository) Update(id int64, item *model.Student) (*model.Stud
 }
 
 func (repository *Repository) UpdateStudentEnroll(id int64, item *model.StudentEnroll) (*model.StudentEnroll, error) {
-	tempStudent, err := repository.GetById(id)
+	tempStudent, err := repository.GetByID(id)
 	if err != nil || tempStudent == nil || tempStudent.ID != id {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (repository *Repository) UpdateStudentEnroll(id int64, item *model.StudentE
 }
 
 func (repository *Repository) Delete(id int64) (int64, error) {
-	foundItem, err := repository.GetById(id)
+	foundItem, err := repository.GetByID(id)
 	if err != nil || foundItem == nil || foundItem.ID != id {
 		return -1, err
 	}
@@ -83,9 +83,14 @@ func (repository *Repository) DeleteStudentEnroll(id int64) (int64, error) {
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) GetById(id int64) (*model.Student, error) {
+func (repository *Repository) GetByID(id int64) (*model.Student, error) {
 	result := &model.Student{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByUserID(userID int64) (*model.Student, error) {
+	result := &model.Student{}
+	return result, repository.Db.Preload(clause.Associations).Where("user_id = ?", userID).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetStudentEnrollById(id int64) (*model.StudentEnroll, error) {

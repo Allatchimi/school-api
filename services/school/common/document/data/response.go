@@ -10,7 +10,6 @@ type DocumentResponse struct {
 	YearID         int64  `json:"yearID" required:"false" doc:"Year id"`
 	ClassSubjectID int64  `json:"classSubjectID" required:"false" doc:"Subject class id"`
 	UnitID         int64  `json:"unitID" required:"false" doc:"Teaching unit id"`
-	Type           string `json:"type" required:"false" doc:"Type"`
 	URL            string `json:"url" required:"false" doc:"URL"`
 	Name           string `json:"name" required:"false" doc:"Name"`
 	Description    string `json:"description" required:"false" doc:"Description"`

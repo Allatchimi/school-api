@@ -31,7 +31,7 @@ func (repository *Repository) CreateParentStudent(item *model.ParentStudent) (*m
 }
 
 func (repository *Repository) Update(id int64, item *model.Parent) (*model.Parent, error) {
-	tempParent, err := repository.GetById(id)
+	tempParent, err := repository.GetByID(id)
 	if err != nil || tempParent == nil || tempParent.ID != id {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (repository *Repository) Update(id int64, item *model.Parent) (*model.Paren
 }
 
 func (repository *Repository) UpdateParentStudent(id int64, item *model.ParentStudent) (*model.ParentStudent, error) {
-	tempParent, err := repository.GetById(id)
+	tempParent, err := repository.GetByID(id)
 	if err != nil || tempParent == nil || tempParent.ID != id {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (repository *Repository) UpdateParentStudent(id int64, item *model.ParentSt
 }
 
 func (repository *Repository) Delete(id int64) (int64, error) {
-	foundItem, err := repository.GetById(id)
+	foundItem, err := repository.GetByID(id)
 	if err != nil || foundItem == nil || foundItem.ID != id {
 		return -1, err
 	}
@@ -70,7 +70,7 @@ func (repository *Repository) Delete(id int64) (int64, error) {
 }
 
 func (repository *Repository) DeleteParentStudent(id int64) (int64, error) {
-	foundItem, err := repository.GetParentStudentById(id)
+	foundItem, err := repository.GetParentStudentByID(id)
 	if err != nil || foundItem == nil || foundItem.ID != id {
 		return -1, err
 	}
@@ -79,14 +79,34 @@ func (repository *Repository) DeleteParentStudent(id int64) (int64, error) {
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) GetById(id int64) (*model.Parent, error) {
+func (repository *Repository) GetByID(id int64) (*model.Parent, error) {
 	result := &model.Parent{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetParentStudentById(id int64) (*model.ParentStudent, error) {
+func (repository *Repository) GetParentStudentByID(id int64) (*model.ParentStudent, error) {
 	result := &model.ParentStudent{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetParentStudentByUserIDSchoolID(userID int64, schoolID int64) (*model.ParentStudent, error) {
+	result := &model.ParentStudent{}
+	where := fmt.Sprintf("WHERE parents.user_id = %d AND students.school_id = %d", userID, schoolID)
+	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
+		helpers.PaginationScope(
+			repository.Db,
+			"SELECT parent_students.id, parent_students.parent_id, parent_students.student_id"+
+				", parent_students.created_at, parent_students.updated_at FROM parent_students "+
+				"LEFT JOIN parents ON parent_students.parent_id = parents.id "+
+				"LEFT JOIN students ON parent_students.student_id = students.id",
+			where,
+			nil,
+			nil,
+		),
+	).Limit(1).Find(&result).Error
+
+	err := tmpErr
+	return result, err
 }
 
 func (repository *Repository) GetByObject(item *model.Parent) (*model.Parent, error) {

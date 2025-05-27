@@ -87,7 +87,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Quiz
 		}
 	}
 
-	result, err = service.Repository.GetById(createdQuiz.ID)
+	result, err = service.Repository.GetByID(createdQuiz.ID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -103,7 +103,7 @@ func (service *Service) CreateAttempt(inputJwtToken *types.JwtToken, request *da
 
 func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.QuizRequest) (result *model.Quiz, errCode int, err error) {
 	// Check if quiz exists
-	foundItem, err := service.Repository.GetById(id)
+	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -156,7 +156,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Quiz, errCode int, err error) {
-	result, err = service.Repository.GetById(id)
+	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

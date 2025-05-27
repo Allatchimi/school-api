@@ -4,8 +4,8 @@ import (
 	"api/common/types"
 	schoolData "api/services/school/common/school/data"
 	yearData "api/services/school/common/year/data"
+	classData "api/services/school/highschool/class/data"
 	sequenceData "api/services/school/highschool/sequence/data"
-	subjectData "api/services/school/highschool/subject/data"
 	unitData "api/services/school/university/unit/data"
 	"time"
 )
@@ -21,13 +21,13 @@ type ExamResponse struct {
 	StartDate       *time.Time `json:"startDate" required:"false" doc:"Start date"`
 	EndDate         *time.Time `json:"endDate" required:"false" doc:"End date"`
 
-	School *schoolData.SchoolResponse `json:"school" required:"true" doc:"School"`
-	Year   *yearData.YearResponse     `json:"Year" required:"true" doc:"Year"`
-	Type   *ExamTypeResponse          `json:"type" required:"false" doc:"Type"`
+	School *schoolData.SchoolPublicResponse `json:"school" required:"true" doc:"School"`
+	Year   *yearData.YearPublicResponse     `json:"Year" required:"true" doc:"Year"`
+	Type   *ExamTypePublicResponse          `json:"type" required:"false" doc:"Type"`
 
-	Unit     *unitData.UnitResponse         `json:"unit" required:"false" doc:"Unit"`
-	Subject  *subjectData.SubjectResponse   `json:"subject" required:"false" doc:"Subject"`
-	Sequence *sequenceData.SequenceResponse `json:"semester" required:"false" doc:"Sequence"`
+	Unit         *unitData.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
+	ClassSubject *classData.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Class subject"`
+	Sequence     *sequenceData.SequencePublicResponse  `json:"semester" required:"false" doc:"Sequence"`
 }
 
 type ExamPublicResponse struct {
@@ -44,9 +44,9 @@ type ExamPublicResponse struct {
 	Year   *yearData.YearPublicResponse     `json:"Year" required:"true" doc:"Year"`
 	Type   *ExamTypePublicResponse          `json:"type" required:"false" doc:"Type"`
 
-	Unit     *unitData.UnitPublicResponse         `json:"unit" required:"false" doc:"Unit"`
-	Subject  *subjectData.SubjectPublicResponse   `json:"subject" required:"false" doc:"Subject"`
-	Sequence *sequenceData.SequencePublicResponse `json:"semester" required:"false" doc:"Sequence"`
+	Unit         *unitData.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
+	ClassSubject *classData.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Class subject"`
+	Sequence     *sequenceData.SequencePublicResponse  `json:"semester" required:"false" doc:"Sequence"`
 }
 
 type ExamTypeResponse struct {

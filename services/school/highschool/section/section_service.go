@@ -26,7 +26,7 @@ const DEFAULT_ERROR_MESSAGE = "interact with section model"
 
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.HighschoolSection) (result *model.HighschoolSection, errCode int, err error) {
 	// Check if the school type is highschool
-	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -63,7 +63,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Highsc
 
 func (service *Service) Update(inputJwtToken *types.JwtToken, sectionID int64, item *model.HighschoolSection) (result *model.HighschoolSection, errCode int, err error) {
 	// Check if the school type is highschool
-	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -76,7 +76,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, sectionID int64, i
 	}
 
 	// Check if section exists
-	foundItem, err := service.Repository.GetById(sectionID)
+	foundItem, err := service.Repository.GetByID(sectionID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -148,7 +148,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 func (service *Service) Get(inputJwtToken *types.JwtToken, sectionID int64) (result *model.HighschoolSection, errCode int, err error) {
-	result, err = service.Repository.GetById(sectionID)
+	result, err = service.Repository.GetByID(sectionID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

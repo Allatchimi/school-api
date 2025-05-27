@@ -106,7 +106,7 @@ func (service *Service) UpdateType(inputJwtToken *types.JwtToken, id int64, item
 
 func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.Exam) (result *model.Exam, errCode int, err error) {
 	// Check if exam already exists
-	foundItem, err := service.Repository.GetById(id)
+	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -187,7 +187,7 @@ func (service *Service) GetType(inputJwtToken *types.JwtToken, examID int64) (re
 }
 
 func (service *Service) Get(inputJwtToken *types.JwtToken, examID int64) (result *model.Exam, errCode int, err error) {
-	result, err = service.Repository.GetById(examID)
+	result, err = service.Repository.GetByID(examID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

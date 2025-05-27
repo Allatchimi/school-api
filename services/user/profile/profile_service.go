@@ -309,7 +309,7 @@ func (service *Service) UpdateProfileMfa(inputJwtToken *types.JwtToken, method s
 }
 
 func (service *Service) DeleteProfile(inputJwtToken *types.JwtToken) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(inputJwtToken.UserID)
+	affectedRows, err = service.Repository.DeleteByID(inputJwtToken.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

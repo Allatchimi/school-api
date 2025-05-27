@@ -130,7 +130,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 
 func (service *Service) UpdateTeacherUnitSubject(inputJwtToken *types.JwtToken, id int64, item *model.TeacherUnitSubject) (result *model.TeacherUnitSubject, errCode int, err error) {
 	// Check if teacher unit/subject exists
-	foundItem, err := service.Repository.GetTeacherUnitSubjectById(id)
+	foundItem, err := service.Repository.GetTeacherUnitSubjectByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -211,7 +211,7 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 }
 
 func (service *Service) GetTeacherUnitSubject(inputJwtToken *types.JwtToken, id int64) (result *model.TeacherUnitSubject, errCode int, err error) {
-	result, err = service.Repository.GetTeacherUnitSubjectById(id)
+	result, err = service.Repository.GetTeacherUnitSubjectByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

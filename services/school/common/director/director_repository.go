@@ -25,7 +25,7 @@ func (repository *Repository) Create(item *model.Director) (*model.Director, err
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, item *model.Director) (*model.Director, error) {
+func (repository *Repository) UpdateByID(id int64, item *model.Director) (*model.Director, error) {
 	result := &model.Director{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
@@ -35,12 +35,12 @@ func (repository *Repository) Update(id int64, item *model.Director) (*model.Dir
 	).Error
 }
 
-func (repository *Repository) Delete(id int64) (int64, error) {
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.Director{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	tmpResult := repository.Db.Where(where).Delete(&model.Director{})
 
@@ -49,9 +49,14 @@ func (repository *Repository) DeleteMultiple(list []int64) (result int64, err er
 	return
 }
 
-func (repository *Repository) GetById(id int64) (*model.Director, error) {
+func (repository *Repository) GetByID(id int64) (*model.Director, error) {
 	result := &model.Director{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByUserID(userID int64) (*model.Director, error) {
+	result := &model.Director{}
+	return result, repository.Db.Preload(clause.Associations).Where("user_id = ?", userID).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.Director) (*model.Director, error) {

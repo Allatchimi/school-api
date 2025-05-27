@@ -26,7 +26,7 @@ const DEFAULT_ERROR_MESSAGE = "interact with level model"
 
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.UniversityLevel) (result *model.UniversityLevel, errCode int, err error) {
 	// Check if the school type is university
-	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -86,7 +86,7 @@ func (service *Service) CreateLevelDomain(inputJwtToken *types.JwtToken, item *m
 
 func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.UniversityLevel) (result *model.UniversityLevel, errCode int, err error) {
 	// Check if the school type is university
-	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -99,7 +99,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	}
 
 	// Check if level exists
-	foundItem, err := service.Repository.GetById(id)
+	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -186,7 +186,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.UniversityLevel, errCode int, err error) {
-	result, err = service.Repository.GetById(id)
+	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

@@ -11,7 +11,6 @@ type Document struct {
 	YearID         int64  `gorm:"not null"`
 	ClassSubjectID int64  `gorm:"default:null"`
 	UnitID         int64  `gorm:"default:null"`
-	Type           string `gorm:"not null"`
 	URL            string `gorm:"default:null"`
 	Name           string `gorm:"not null"`
 	Description    string `gorm:"default:null"`
@@ -26,7 +25,6 @@ func (item *Document) ToResponse() *data.DocumentResponse {
 	resp.YearID = item.YearID
 	resp.ClassSubjectID = item.ClassSubjectID
 	resp.UnitID = item.UnitID
-	resp.Type = item.Type
 	resp.URL = item.URL
 	resp.Description = item.Description
 

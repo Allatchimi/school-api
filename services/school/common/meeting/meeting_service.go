@@ -92,7 +92,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.MeetingRoom, errCode int, err error) {
-	result, err = service.Repository.GetById(id)
+	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -137,12 +137,12 @@ func (service *Service) Join(inputJwtToken *types.JwtToken, id int64) (result st
 	teacher, _ := service.TeacherRepository.GetByUserID(inputJwtToken.UserID)
 	if teacher != nil && teacher.ID > 0 {
 		if meetingRoom.School.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
-			teacherUnit, _ := service.TeacherRepository.GetUnitSubjectByUserIDUnitID(teacher.ID, meetingRoom.UnitID)
+			teacherUnit, _ := service.TeacherRepository.GetTeacherUnitSubjectByUserIDUnitID(teacher.ID, meetingRoom.UnitID)
 			if teacherUnit != nil && teacherUnit.ID > 0 {
 				isAdmin = true
 			}
 		} else {
-			teacherClassSubject, _ := service.TeacherRepository.GetUnitSubjectByUserIDClassSubjectID(teacher.ID, meetingRoom.ClassSubjectID)
+			teacherClassSubject, _ := service.TeacherRepository.GetTeacherUnitSubjectByUserIDClassSubjectID(teacher.ID, meetingRoom.ClassSubjectID)
 			if teacherClassSubject != nil && teacherClassSubject.ID > 0 {
 				isAdmin = true
 			}

@@ -67,7 +67,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, roleID int64, item
 	}
 
 	// Update now
-	result, err = service.Repository.Update(roleID, item)
+	result, err = service.Repository.UpdateByID(roleID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -77,7 +77,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, roleID int64, item
 }
 
 func (service *Service) Delete(inputJwtToken *types.JwtToken, roleID int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(roleID)
+	affectedRows, err = service.Repository.DeleteByID(roleID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -92,7 +92,7 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, roleID int64) (aff
 }
 
 func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteMultiple(list)
+	affectedRows, err = service.Repository.DeleteMultipleByID(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

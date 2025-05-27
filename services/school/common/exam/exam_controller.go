@@ -43,12 +43,12 @@ func (controller *Controller) Create(
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
 		&model.Exam{
-			SchoolID:   input.Body.SchoolID,
-			YearID:     input.Body.YearID,
-			TypeID:     input.Body.TypeID,
-			UnitID:     input.Body.UnitID,
-			SubjectID:  input.Body.SubjectID,
-			SequenceID: input.Body.SequenceID,
+			SchoolID:       input.Body.SchoolID,
+			YearID:         input.Body.YearID,
+			TypeID:         input.Body.TypeID,
+			UnitID:         input.Body.UnitID,
+			ClassSubjectID: input.Body.ClassSubjectID,
+			SequenceID:     input.Body.SequenceID,
 
 			Percentage:      input.Body.Percentage,
 			Description:     input.Body.Description,
@@ -91,12 +91,12 @@ func (controller *Controller) Update(
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx), input.ID,
 		&model.Exam{
-			SchoolID:   input.Body.SchoolID,
-			YearID:     input.Body.YearID,
-			TypeID:     input.Body.TypeID,
-			UnitID:     input.Body.UnitID,
-			SubjectID:  input.Body.SubjectID,
-			SequenceID: input.Body.SequenceID,
+			SchoolID:       input.Body.SchoolID,
+			YearID:         input.Body.YearID,
+			TypeID:         input.Body.TypeID,
+			UnitID:         input.Body.UnitID,
+			ClassSubjectID: input.Body.ClassSubjectID,
+			SequenceID:     input.Body.SequenceID,
 
 			Percentage:      input.Body.Percentage,
 			Description:     input.Body.Description,

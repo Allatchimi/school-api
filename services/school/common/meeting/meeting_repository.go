@@ -129,7 +129,7 @@ func (repository *Repository) DeleteMultiple(list []int64) (result int64, err er
 	return
 }
 
-func (repository *Repository) GetById(id int64) (*model.MeetingRoom, error) {
+func (repository *Repository) GetByID(id int64) (*model.MeetingRoom, error) {
 	result := &model.MeetingRoom{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }

@@ -26,7 +26,7 @@ const DEFAULT_ERROR_MESSAGE = "interact with sequence model"
 
 func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.HighschoolSequence) (result *model.HighschoolSequence, errCode int, err error) {
 	// Check if the school type is highschool
-	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -63,7 +63,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Highsc
 
 func (service *Service) Update(inputJwtToken *types.JwtToken, sequenceID int64, item *model.HighschoolSequence) (result *model.HighschoolSequence, errCode int, err error) {
 	// Check if the school type is highschool
-	foundSchool, err := service.SchoolRepository.GetById(item.SchoolID)
+	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -76,7 +76,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, sequenceID int64, 
 	}
 
 	// Check if sequence exists
-	foundItem, err := service.Repository.GetById(sequenceID)
+	foundItem, err := service.Repository.GetByID(sequenceID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -148,7 +148,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 func (service *Service) Get(inputJwtToken *types.JwtToken, sequenceID int64) (result *model.HighschoolSequence, errCode int, err error) {
-	result, err = service.Repository.GetById(sequenceID)
+	result, err = service.Repository.GetByID(sequenceID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

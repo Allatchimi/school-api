@@ -26,7 +26,7 @@ func (repository *Repository) Create(item *model.UniversityUnit) (*model.Univers
 }
 
 func (repository *Repository) Update(id int64, item *model.UniversityUnit) (*model.UniversityUnit, error) {
-	tempUnit, err := repository.GetById(id)
+	tempUnit, err := repository.GetByID(id)
 	if err != nil || tempUnit == nil || tempUnit.ID != id {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (repository *Repository) Update(id int64, item *model.UniversityUnit) (*mod
 }
 
 func (repository *Repository) Delete(id int64) (int64, error) {
-	tempUnit, err := repository.GetById(id)
+	tempUnit, err := repository.GetByID(id)
 	if err != nil || tempUnit == nil || tempUnit.ID != id {
 		return -1, err
 	}
@@ -60,7 +60,7 @@ func (repository *Repository) Delete(id int64) (int64, error) {
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) GetById(id int64) (*model.UniversityUnit, error) {
+func (repository *Repository) GetByID(id int64) (*model.UniversityUnit, error) {
 	result := &model.UniversityUnit{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }

@@ -36,7 +36,7 @@ func (repository *Repository) CreateConfig(item *model.SchoolConfig) (*model.Sch
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, item *model.School) (*model.School, error) {
+func (repository *Repository) UpdateByID(id int64, item *model.School) (*model.School, error) {
 	result := &model.School{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
@@ -47,7 +47,7 @@ func (repository *Repository) Update(id int64, item *model.School) (*model.Schoo
 	).Error
 }
 
-func (repository *Repository) UpdateConfigInfoIds(id int64, configID int64, infoID int64) (*model.School, error) {
+func (repository *Repository) UpdateConfigInfoByID(id int64, configID int64, infoID int64) (*model.School, error) {
 	result := &model.School{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
@@ -57,7 +57,7 @@ func (repository *Repository) UpdateConfigInfoIds(id int64, configID int64, info
 	).Error
 }
 
-func (repository *Repository) UpdateInfo(id int64, item *model.SchoolInfo) (*model.SchoolInfo, error) {
+func (repository *Repository) UpdateInfoByID(id int64, item *model.SchoolInfo) (*model.SchoolInfo, error) {
 	result := &model.SchoolInfo{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
@@ -88,7 +88,7 @@ func (repository *Repository) UpdateInfo(id int64, item *model.SchoolInfo) (*mod
 	).Error
 }
 
-func (repository *Repository) UpdateConfig(id int64, item *model.SchoolConfig) (*model.SchoolConfig, error) {
+func (repository *Repository) UpdateConfigByID(id int64, item *model.SchoolConfig) (*model.SchoolConfig, error) {
 	result := &model.SchoolConfig{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
@@ -98,12 +98,12 @@ func (repository *Repository) UpdateConfig(id int64, item *model.SchoolConfig) (
 	).Error
 }
 
-func (repository *Repository) Delete(id int64) (int64, error) {
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.School{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	tmpResult := repository.Db.Where(where).Delete(&model.School{})
 
@@ -112,7 +112,7 @@ func (repository *Repository) DeleteMultiple(list []int64) (result int64, err er
 	return
 }
 
-func (repository *Repository) GetById(id int64) (*model.School, error) {
+func (repository *Repository) GetByID(id int64) (*model.School, error) {
 	result := &model.School{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
@@ -132,12 +132,12 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.School, item2 *m
 	return false
 }
 
-func (repository *Repository) GetInfoById(id int64) (*model.SchoolInfo, error) {
+func (repository *Repository) GetInfoByID(id int64) (*model.SchoolInfo, error) {
 	result := &model.SchoolInfo{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetConfigById(id int64) (*model.SchoolConfig, error) {
+func (repository *Repository) GetConfigByID(id int64) (*model.SchoolConfig, error) {
 	result := &model.SchoolConfig{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
