@@ -24,13 +24,12 @@ type StudentEnroll struct {
 	LevelDomainID int64                             `gorm:"default:null"`
 	LevelDomain   *modelLevel.UniversityLevelDomain `gorm:"default:null;foreignKey:LevelID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Origin          string  `gorm:"default:null"`
-	IsAccepted      bool    `gorm:"default:null"`
-	Payment         float64 `gorm:"default:null"`
-	PaymentCurrency string  `gorm:"default:null"`
-
 	Email       string `gorm:"default:null"`
 	PhoneNumber uint64 `gorm:"default:null"`
+
+	Message    string `gorm:"default:null"`
+	Origin     string `gorm:"default:null"`
+	IsAccepted bool   `gorm:"default:null"`
 
 	Gender        string     `gorm:"default:null"`
 	FirstName     string     `gorm:"default:null"`
@@ -50,13 +49,12 @@ func (item *StudentEnroll) ToStudentEnrollResponse() *data.StudentEnrollResponse
 		return nil
 	}
 	resp := &data.StudentEnrollResponse{}
-	resp.Origin = item.Origin
-	resp.IsAccepted = item.IsAccepted
-	resp.Payment = item.Payment
-	resp.PaymentCurrency = item.PaymentCurrency
-
 	resp.Email = item.Email
 	resp.PhoneNumber = item.PhoneNumber
+
+	resp.Message = item.Message
+	resp.Origin = item.Origin
+	resp.IsAccepted = item.IsAccepted
 
 	resp.Gender = item.Gender
 	resp.FirstName = item.FirstName
@@ -85,13 +83,12 @@ func (item *StudentEnroll) ToStudentEnrollPublicResponse() *data.StudentEnrollPu
 		return nil
 	}
 	resp := &data.StudentEnrollPublicResponse{}
-	resp.Origin = item.Origin
-	resp.IsAccepted = item.IsAccepted
-	resp.Payment = item.Payment
-	resp.PaymentCurrency = item.PaymentCurrency
-
 	resp.Email = item.Email
 	resp.PhoneNumber = item.PhoneNumber
+
+	resp.Message = item.Message
+	resp.Origin = item.Origin
+	resp.IsAccepted = item.IsAccepted
 
 	resp.Gender = item.Gender
 	resp.FirstName = item.FirstName

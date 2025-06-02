@@ -47,6 +47,22 @@ func (controller *Controller) CreateStudentEnroll(
 			YearID:        input.Body.YearID,
 			LevelDomainID: input.Body.LevelDomainID,
 			ClassID:       input.Body.ClassID,
+
+			Email:       input.Body.Email,
+			PhoneNumber: input.Body.PhoneNumber,
+
+			Message:       input.Body.Message,
+			Gender:        input.Body.Gender,
+			FirstName:     input.Body.FirstName,
+			LastName:      input.Body.LastName,
+			Birthday:      input.Body.Birthday,
+			BirthLocation: input.Body.BirthLocation,
+
+			Document1: input.Body.Document1,
+			Document2: input.Body.Document2,
+			Document3: input.Body.Document3,
+			Document4: input.Body.Document4,
+			Document5: input.Body.Document5,
 		},
 	)
 	return
@@ -84,6 +100,21 @@ func (controller *Controller) UpdateStudentEnroll(
 			YearID:        input.Body.YearID,
 			LevelDomainID: input.Body.LevelDomainID,
 			ClassID:       input.Body.ClassID,
+			Email:         input.Body.Email,
+			PhoneNumber:   input.Body.PhoneNumber,
+
+			Message:       input.Body.Message,
+			Gender:        input.Body.Gender,
+			FirstName:     input.Body.FirstName,
+			LastName:      input.Body.LastName,
+			Birthday:      input.Body.Birthday,
+			BirthLocation: input.Body.BirthLocation,
+
+			Document1: input.Body.Document1,
+			Document2: input.Body.Document2,
+			Document3: input.Body.Document3,
+			Document4: input.Body.Document4,
+			Document5: input.Body.Document5,
 		},
 	)
 	return

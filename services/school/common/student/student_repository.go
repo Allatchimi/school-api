@@ -57,13 +57,12 @@ func (repository *Repository) UpdateStudentEnrollByID(id int64, item *model.Stud
 			"class_id":        item.ClassID,
 			"level_domain_id": item.LevelDomainID,
 
-			"origin":           item.Origin,
-			"is_accepted":      item.IsAccepted,
-			"payment":          item.Payment,
-			"payment_currency": item.PaymentCurrency,
-
 			"email":        item.Email,
 			"phone_number": item.PhoneNumber,
+
+			"message":     item.Message,
+			"origin":      item.Origin,
+			"is_accepted": item.IsAccepted,
 
 			"gender":     item.Gender,
 			"first_name": item.FirstName,
