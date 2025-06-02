@@ -16,11 +16,11 @@ type MeetingRoom struct {
 	SchoolID int64               `gorm:"default:null"`
 	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	UnitID int64                     `gorm:"default:null"`
-	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-
 	ClassSubjectID int64                                     `gorm:"default:null"`
 	ClassSubject   *modelClassSubject.HighschoolClassSubject `gorm:"default:null;foreignKey:ClassSubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	UnitID int64                     `gorm:"default:null"`
+	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *MeetingRoom) ToResponse() *data.MeetingRoomResponse {
@@ -31,8 +31,8 @@ func (item *MeetingRoom) ToResponse() *data.MeetingRoomResponse {
 	resp.ApiRoomID = item.ApiRoomID
 
 	resp.School = item.School.ToPublicResponse()
-	resp.Unit = item.Unit.ToPublicResponse()
 	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
+	resp.Unit = item.Unit.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -48,8 +48,8 @@ func (item *MeetingRoom) ToPublicResponse() *data.MeetingRoomPublicResponse {
 	resp.ApiRoomID = item.ApiRoomID
 
 	resp.School = item.School.ToPublicResponse()
-	resp.Unit = item.Unit.ToPublicResponse()
 	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
+	resp.Unit = item.Unit.ToPublicResponse()
 	return resp
 }
 

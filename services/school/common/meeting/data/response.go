@@ -10,16 +10,16 @@ import (
 type MeetingRoomResponse struct {
 	types.BaseGormModelResponse
 	School       *dataSchool.SchoolPublicResponse      `json:"school" required:"false" doc:"School"`
-	Unit         *dataUnit.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
 	ClassSubject *dataClass.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Subject for specific class"`
+	Unit         *dataUnit.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
 
 	ApiRoomID string `json:"apiRoomID" required:"false" doc:"Room id for the API"`
 }
 
 type MeetingRoomPublicResponse struct {
 	School       *dataSchool.SchoolPublicResponse      `json:"school" required:"false" doc:"School"`
-	Unit         *dataUnit.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
 	ClassSubject *dataClass.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Subject for specific class"`
+	Unit         *dataUnit.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
 
 	ApiRoomID string `json:"apiRoomID" required:"false" doc:"Room id for the API"`
 }

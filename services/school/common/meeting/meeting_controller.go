@@ -27,8 +27,8 @@ func (controller *Controller) Create(
 		helpers.GetJwtContext(ctx),
 		&model.MeetingRoom{
 			SchoolID:       input.Body.SchoolID,
-			UnitID:         input.Body.UnitID,
 			ClassSubjectID: input.Body.ClassSubjectID,
+			UnitID:         input.Body.UnitID,
 		},
 	)
 	return
