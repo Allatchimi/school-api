@@ -1,12 +1,12 @@
-package document
+package course
 
 import (
 	"context"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/services/school/common/document/data"
-	"api/services/school/common/document/model"
+	"api/services/school/common/course/data"
+	"api/services/school/common/course/model"
 )
 
 type Controller struct {
@@ -20,12 +20,12 @@ func NewController(service *Service) *Controller {
 func (controller *Controller) Create(
 	ctx *context.Context,
 	input *struct {
-		Body data.DocumentRequest
+		Body data.CourseRequest
 	},
-) (result *model.Document, errCode int, err error) {
+) (result *model.Course, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.Document{
+		&model.Course{
 			SchoolID:       input.Body.SchoolID,
 			YearID:         input.Body.YearID,
 			ClassSubjectID: input.Body.ClassSubjectID,
@@ -38,7 +38,7 @@ func (controller *Controller) Create(
 func (controller *Controller) Delete(
 	ctx *context.Context,
 	input *struct {
-		data.DocumentID
+		data.CourseID
 	},
 ) (result int64, errCode int, err error) {
 	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
@@ -52,14 +52,14 @@ func (controller *Controller) Delete(
 func (controller *Controller) Get(
 	ctx *context.Context,
 	input *struct {
-		data.DocumentID
+		data.CourseID
 	},
-) (result *model.Document, errCode int, err error) {
-	document, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+) (result *model.Course, errCode int, err error) {
+	course, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
-	result = document
+	result = course
 	return
 }
 
@@ -68,19 +68,19 @@ func (controller *Controller) GetAll(
 	input *struct {
 		types.Filter
 		types.PaginationRequest
-		types.FilterlSchoolYearUnitClassSubjectRequest
+		data.GetAllRequest
 	},
-) (result *data.DocumentResponseList, errCode int, err error) {
+) (result *data.CourseResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	documentList, errCode, err := controller.Service.GetAll(
+	courseList, errCode, err := controller.Service.GetAll(
 		helpers.GetJwtContext(ctx), newFilter, newPagination,
-		&input.FilterlSchoolYearUnitClassSubjectRequest,
+		&input.GetAllRequest,
 	)
 	if err != nil {
 		return
 	}
-	result = &data.DocumentResponseList{
-		Data: model.ToResponseList(documentList),
+	result = &data.CourseResponseList{
+		Data: model.ToResponseList(courseList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

@@ -69,7 +69,7 @@ func (service *Service) CreateStudentEnroll(inputJwtToken *types.JwtToken, item 
 		return
 	}
 
-	// Insert student level domain/class
+	// Insert student class/level domain
 	result, err = service.Repository.CreateStudentEnroll(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -129,7 +129,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 }
 
 func (service *Service) UpdateStudentEnroll(inputJwtToken *types.JwtToken, id int64, item *model.StudentEnroll) (result *model.StudentEnroll, errCode int, err error) {
-	// Check if student level domain/class exists
+	// Check if student class/level domain exists
 	foundItem, err := service.Repository.GetStudentEnrollByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError

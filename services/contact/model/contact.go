@@ -8,8 +8,8 @@ import (
 type Contact struct {
 	types.BaseGormModel
 	Subject string `gorm:"default:null"`
-	Email   string `gorm:"not null"`
-	Message string `gorm:"not null"`
+	Email   string `gorm:"default:null"`
+	Message string `gorm:"default:null"`
 }
 
 func (item *Contact) ToResponse() *data.ContactResponse {

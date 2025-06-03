@@ -11,10 +11,7 @@ import (
 
 type TeacherResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
-
-	UID string `json:"uid" required:"false" doc:"Teacher UID"`
+	TeacherPublicResponse
 }
 
 type TeacherPublicResponse struct {
@@ -26,11 +23,7 @@ type TeacherPublicResponse struct {
 
 type TeacherClassSubjectUnitResponse struct {
 	types.BaseGormModelResponse
-	Teacher *TeacherPublicResponse `json:"teacher" required:"false" doc:"Teacher"`
-
-	Year         *dataYear.YearPublicResponse          `json:"year" required:"false" doc:"Year"`
-	ClassSubject *dataClass.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Subject for specific class"`
-	Unit         *dataUnit.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
+	TeacherClassSubjectUnitPublicResponse
 }
 
 type TeacherClassSubjectUnitPublicResponse struct {

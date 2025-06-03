@@ -9,10 +9,10 @@ import (
 
 type HighschoolClassSubject struct {
 	types.BaseGormModel
-	ClassID int64            `gorm:"not null"`
+	ClassID int64            `gorm:"default:null"`
 	Class   *HighschoolClass `gorm:"default:null;foreignKey:ClassID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	SubjectID int64                           `gorm:"not null"`
+	SubjectID int64                           `gorm:"default:null"`
 	Subject   *subjectModel.HighschoolSubject `gorm:"default:null;foreignKey:SubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Coefficient  int        `gorm:"default:1"`

@@ -1,4 +1,4 @@
-package document
+package course
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
-	"api/services/school/common/document/data"
+	"api/services/school/common/course/data"
 )
 
 func RegisterEndpoints(
@@ -17,18 +17,18 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/schools/documents",
-		Tag:   []string{"Documents"},
+		Group: "/schools/courses",
+		Tag:   []string{"Courses"},
 	}
-	const tableName = "documents"
+	const tableName = "courses"
 
-	// Create document
+	// Create course
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-document",
-			Summary:     "Create document",
-			Description: "Create new document by providing name and description and return created object. The name document should be unique.",
+			OperationID: "post-course",
+			Summary:     "Create course",
+			Description: "Create new course by providing name and description and return created object. The name course should be unique.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -52,24 +52,24 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.DocumentRequest
+				Body data.CourseRequest
 			},
-		) (*struct{ Body data.DocumentResponse }, error) {
+		) (*struct{ Body data.CourseResponse }, error) {
 			result, errCode, err := controller.Create(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.DocumentResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.CourseResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Delete document with id
+	// Delete course with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-document",
-			Summary:     "Delete document",
-			Description: "Delete existing document with matching id and return affected rows in database.",
+			OperationID: "delete-course",
+			Summary:     "Delete course",
+			Description: "Delete existing course with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -93,7 +93,7 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.DocumentID
+				data.CourseID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.Delete(&ctx, input)
@@ -104,13 +104,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get document by id
+	// Get course by id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-document-id",
-			Summary:     "Get document by id",
-			Description: "Return one document with matching id",
+			OperationID: "get-course-id",
+			Summary:     "Get course by id",
+			Description: "Return one course with matching id",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -136,24 +136,24 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.DocumentID
+				data.CourseID
 			},
-		) (*struct{ Body data.DocumentResponse }, error) {
+		) (*struct{ Body data.CourseResponse }, error) {
 			result, errCode, err := controller.Get(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.DocumentResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.CourseResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Get all documents
+	// Get all courses
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-document-list",
-			Summary:     "Get all documents",
-			Description: "Get all documents with support for search, filter and pagination",
+			OperationID: "get-course-list",
+			Summary:     "Get all courses",
+			Description: "Get all courses with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -181,17 +181,17 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
-				types.FilterlSchoolYearUnitClassSubjectRequest
+				data.GetAllRequest
 			},
 		) (*struct {
-			Body data.DocumentResponseList
+			Body data.CourseResponseList
 		}, error) {
 			result, errCode, err := controller.GetAll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.DocumentResponseList
+				Body data.CourseResponseList
 			}{Body: *result}, nil
 		},
 	)

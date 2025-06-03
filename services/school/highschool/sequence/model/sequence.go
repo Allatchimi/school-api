@@ -11,7 +11,7 @@ type HighschoolSequence struct {
 	SchoolID int64         `gorm:"default:null"`
 	School   *model.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Name        string `gorm:"not null"`
+	Name        string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
 }
 

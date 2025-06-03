@@ -45,14 +45,18 @@ func Start() error {
 		&userModel.UserMfa{},
 		&userModel.UserInfo{},
 
+		// Course
+		&courseModel.Course{},
+		&courseModel.CourseDocument{},
 		// Director
 		&directorModel.Director{},
-
 		// School
 		&schoolModel.School{},
 		&schoolModel.SchoolInfo{},
 		&schoolModel.SchoolConfig{},
+		// Year
 		&yearModel.Year{},
+		// Exam
 		&examModel.Exam{},
 		// Teacher
 		&teacherModel.Teacher{},
@@ -71,8 +75,10 @@ func Start() error {
 		&quizModel.Quiz{},
 		&quizModel.QuizQuestion{},
 		&quizModel.QuizQuestionOption{},
-		&quizModel.QuizAttempt{},
-		&quizModel.QuizAttemptQuestion{},
+		&quizModel.QuizAnswer{},
+		// Request
+		// Schedule
+		// Result
 
 		// Highschool
 		&sequenceModel.HighschoolSequence{},

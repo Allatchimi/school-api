@@ -15,7 +15,7 @@ type UniversityDepartment struct {
 	FacultyID int64                           `gorm:"default:null"`
 	Faculty   *facultyModel.UniversityFaculty `gorm:"default:null;foreignKey:FacultyID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Name        string `gorm:"not null"`
+	Name        string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
 }
 

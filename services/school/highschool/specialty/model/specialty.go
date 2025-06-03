@@ -15,7 +15,7 @@ type HighschoolSpecialty struct {
 	SectionID int64                           `gorm:"default:null"`
 	Section   *sectionModel.HighschoolSection `gorm:"default:null;foreignKey:SectionID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Name        string `gorm:"not null"`
+	Name        string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
 }
 

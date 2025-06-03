@@ -63,15 +63,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Create quiz attempt
+	// Create quiz answer
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-quiz-attempt",
-			Summary:     "Create quiz attempt",
-			Description: "Create quiz attempt.",
+			OperationID: "post-quiz-answer",
+			Summary:     "Create quiz answer",
+			Description: "Create quiz answer.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/{id}/attempts", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/{id}/questions/answers", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -92,18 +92,26 @@ func RegisterEndpoints(
 			ctx context.Context,
 			input *struct {
 				data.QuizID
-				Body data.QuizAttemptRequest
+				Body data.QuizAnswerRequest
 			},
-		) (*struct{ Body data.QuizAttemptResponse }, error) {
-			result, errCode, err := controller.CreateAttempt(&ctx, input)
+		) (*struct {
+			Body types.DefaultResponse
+		}, error) {
+			errCode, err := controller.CreateAnswer(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.QuizAttemptResponse }{Body: *result.ToResponse()}, nil
+			return &struct {
+				Body types.DefaultResponse
+			}{
+				Body: types.DefaultResponse{
+					Message: "Answer created successfully",
+				},
+			}, nil
 		},
 	)
 
-	// Update quiz with id
+	// Update quiz
 	huma.Register(
 		*humaApi,
 		huma.Operation{
@@ -138,6 +146,48 @@ func RegisterEndpoints(
 			},
 		) (*struct{ Body data.QuizResponse }, error) {
 			result, errCode, err := controller.Update(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.QuizResponse }{Body: *result.ToResponse()}, nil
+		},
+	)
+
+	// Update quiz solution
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "update-quiz-solution",
+			Summary:     "Update quiz solution",
+			Description: "Update solution for an existing quiz.",
+			Method:      http.MethodPut,
+			Path:        fmt.Sprintf("%s/{id}/questions/solutions", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+						), // Features scope
+						tableName,                  // Table name
+						constants.PermissionUpdate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.QuizID
+				Body data.QuizSolutionRequest
+			},
+		) (*struct{ Body data.QuizResponse }, error) {
+			result, errCode, err := controller.UpdateSolution(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -304,7 +354,7 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
-				types.FilterlSchoolYearUnitClassSubjectRequest
+				data.GetAllRequest
 			},
 		) (*struct {
 			Body data.QuizResponseList
@@ -319,15 +369,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all quiz attemps
+	// Get all quiz question options
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-quiz-attempt-list",
-			Summary:     "Get all quiz attempts",
-			Description: "Get all quiz attempts with support for search, filter and pagination",
+			OperationID: "get-quiz-question-option-list",
+			Summary:     "Get all quiz question options",
+			Description: "Get all quiz question options with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/{id}/attempts", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/questions/options", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -353,19 +403,68 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
-				data.QuizID
-				types.FilterlSchoolYearUnitClassSubjectRequest
+				data.GetAllQuizQuestionOptionRequest
 			},
 		) (*struct {
-			Body data.QuizAttemptResponseList
+			Body data.QuizQuestionOptionResponseList
 		}, error) {
-			result, errCode, err := controller.GetAllQuizAttempt(&ctx, input)
+			result, errCode, err := controller.GetAllQuizQuestionOption(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.QuizAttemptResponseList
+				Body data.QuizQuestionOptionResponseList
 			}{Body: *result}, nil
 		},
 	)
+
+	// Get all quiz answers
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-quiz-answer-list",
+			Summary:     "Get all answers for quiz",
+			Description: "Get all answers for quiz with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        endpointConfig.Group,
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Features scope
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllQuizAnswerRequest
+			},
+		) (*struct {
+			Body data.QuizAnswerResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllQuizAnswer(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct {
+				Body data.QuizAnswerResponseList
+			}{Body: *result}, nil
+		},
+	)
+
 }

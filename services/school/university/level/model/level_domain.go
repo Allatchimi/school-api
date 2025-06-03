@@ -9,10 +9,10 @@ import (
 
 type UniversityLevelDomain struct {
 	types.BaseGormModel
-	LevelID int64            `gorm:"not null"`
+	LevelID int64            `gorm:"default:null"`
 	Level   *UniversityLevel `gorm:"default:null;foreignKey:LevelID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	DomainID int64                         `gorm:"not null"`
+	DomainID int64                         `gorm:"default:null"`
 	Domain   *domainModel.UniversityDomain `gorm:"default:null;foreignKey:DomainID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Program      string     `gorm:"default null"`

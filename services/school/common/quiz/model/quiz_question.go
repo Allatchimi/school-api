@@ -7,11 +7,14 @@ import (
 
 type QuizQuestion struct {
 	types.BaseGormModel
+	QuizID int64 `gorm:"default:null"`
+	Quiz   *Quiz `gorm:"default:null;foreignKey:QuizID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	SolutionID int64               `gorm:"default:null"`
+	Solution   *QuizQuestionOption `gorm:"default:null;foreignKey:SolutionID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
 	Title       string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
-
-	QuizID       int64 `gorm:"default:null"`
-	CorrectionID int64 `gorm:"default:null"`
 
 	Options []QuizQuestionOption `gorm:"foreignKey:QuizQuestionID;references:ID"`
 }
@@ -23,9 +26,9 @@ func (item *QuizQuestion) ToResponse() *data.QuizQuestionResponse {
 	resp := &data.QuizQuestionResponse{}
 	resp.Title = item.Title
 	resp.Description = item.Description
-	resp.QuizID = item.QuizID
-	resp.CorrectionID = item.CorrectionID
-	resp.Options = ToQuizQuestionOptionResponseList(item.Options)
+
+	resp.Quiz = item.Quiz.ToResponse()
+	resp.Solution = item.Solution.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -37,6 +40,24 @@ func ToQuizQuestionResponseList(itemList []QuizQuestion) []data.QuizQuestionResp
 	resp := make([]data.QuizQuestionResponse, len(itemList))
 	for index, item := range itemList {
 		resp[index] = *item.ToResponse()
+	}
+	return resp
+}
+
+func (item *QuizQuestion) ToResponseV2() *data.QuizQuestionResponseV2 {
+	if item == nil {
+		return nil
+	}
+	resp := &data.QuizQuestionResponseV2{}
+	resp.Question = item.ToResponse()
+	resp.Options = ToQuizQuestionOptionResponseList(item.Options)
+	return resp
+}
+
+func ToQuizQuestionResponseListV2(itemList []QuizQuestion) []data.QuizQuestionResponseV2 {
+	resp := make([]data.QuizQuestionResponseV2, len(itemList))
+	for index, item := range itemList {
+		resp[index] = *item.ToResponseV2()
 	}
 	return resp
 }

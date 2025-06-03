@@ -2,11 +2,9 @@ package quiz
 
 import (
 	"net/http"
-	"time"
 
 	"api/common/constants"
 	"api/common/types"
-	"api/common/utils"
 	common_svc_permission "api/services/common"
 	"api/services/school/common/quiz/data"
 	"api/services/school/common/quiz/model"
@@ -47,14 +45,14 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Quiz
 	// Insert the quiz
 	createdQuiz, err := service.Repository.Create(
 		&model.Quiz{
-			Title:          request.Title,
-			Description:    request.Description,
-			StartDate:      request.StartDate,
-			EndDate:        request.EndDate,
 			SchoolID:       request.SchoolID,
 			YearID:         request.SchoolID,
-			UnitID:         request.UnitID,
 			ClassSubjectID: request.ClassSubjectID,
+			UnitID:         request.UnitID,
+
+			Title:       request.Title,
+			Description: request.Description,
+			Status:      request.Status,
 		},
 	)
 	if err != nil || createdQuiz == nil || createdQuiz.ID <= 0 {
@@ -107,8 +105,70 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Quiz
 	return
 }
 
-func (service *Service) CreateAttempt(inputJwtToken *types.JwtToken, quizID int64, request *data.QuizAttemptRequest) (result *model.QuizAttempt, errCode int, err error) {
-	// TODO
+func (service *Service) CreateAnswer(inputJwtToken *types.JwtToken, id int64, request *data.QuizAnswerRequest) (errCode int, err error) {
+	// Load the quiz
+	foundQuiz, err := service.Repository.GetByID(id)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundQuiz == nil || foundQuiz.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Check if the user can access
+	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
+		inputJwtToken.RoleID,
+		inputJwtToken.UserID,
+		foundQuiz.SchoolID,
+		foundQuiz.YearID,
+		foundQuiz.ClassSubjectID,
+		foundQuiz.UnitID,
+	)
+	if !canAccess {
+		errCode = http.StatusForbidden
+		err = constants.Http403InvalidPermissionErrorMessage()
+		return
+	}
+
+	// Check if the student have already submitted and answer
+	questionsIDs := make([]int64, len(request.Answers))
+	for i := range request.Answers {
+		questionsIDs[i] = request.Answers[i].QuestionID
+	}
+	foundAnswer, tempErrFoundAnswer := service.Repository.GetAllQuizAnswerByStudentIDQuizQuestionIDs(
+		request.StudentID,
+		questionsIDs,
+	)
+	if tempErrFoundAnswer != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundAnswer != nil && foundAnswer.ID > 0 {
+		errCode = http.StatusForbidden
+		err = constants.Http409ConflictErrorMessage()
+		return
+	}
+
+	// Add answers
+	for _, answer := range request.Answers {
+		_, tempAddErr := service.Repository.CreateQuizAnswer(
+			&model.QuizAnswer{
+				StudentID:            request.StudentID,
+				QuizQuestionID:       answer.QuestionID,
+				QuizQuestionOptionID: answer.OptionID,
+			},
+		)
+		if tempAddErr != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
+	}
 	return
 }
 
@@ -141,24 +201,16 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 		return
 	}
 
-	// Check if the quiz has'nt started
-	if utils.AreDateEquals((foundItem.StartDate).UTC(), time.Now().UTC()) {
-		errCode = http.StatusConflict
-		err = constants.Http409ConflictErrorMessage()
-		return
-	}
-
 	// Update the quiz
 	updatedItem, err := service.Repository.UpdateByID(id, &model.Quiz{
-		Title:       request.Title,
-		Description: request.Description,
-		StartDate:   request.StartDate,
-		EndDate:     request.EndDate,
-
 		SchoolID:       request.SchoolID,
 		YearID:         request.YearID,
 		ClassSubjectID: request.ClassSubjectID,
 		UnitID:         request.UnitID,
+
+		Title:       request.Title,
+		Description: request.Description,
+		Status:      request.Status,
 	})
 	if err != nil || updatedItem == nil || updatedItem.ID <= 0 {
 		errCode = http.StatusInternalServerError
@@ -169,17 +221,22 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	// Delete all quiz questions and options
 	var errDelete error
 	questionsIDs := make([]int64, len(foundItem.Questions))
-	for i := 0; i < len(questionsIDs); i++ {
+	for i := range questionsIDs {
 		questionsIDs[i] = foundItem.Questions[i].ID
 
 		// Delete options for this question
 		optionsIDs := make([]int64, len(foundItem.Questions[i].Options))
-		for j := 0; j < len(optionsIDs); j++ {
+		for j := range optionsIDs {
 			optionsIDs[i] = foundItem.Questions[i].Options[j].ID
 		}
-		_, errDeleteOpt := service.Repository.DeleteMultipleQuizQuestionOptionByID(optionsIDs)
-		errDelete = errDeleteOpt
+		_, errDelete = service.Repository.DeleteMultipleQuizQuestionOptionByID(optionsIDs)
 	}
+	if errDelete != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+
 	_, errDeleteQt := service.Repository.DeleteMultipleQuizQuestionByID(questionsIDs)
 	errDelete = errDeleteQt
 	if errDelete != nil {
@@ -226,6 +283,59 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	return
 }
 
+func (service *Service) UpdateSolution(inputJwtToken *types.JwtToken, id int64, request *data.QuizSolutionRequest) (result *model.Quiz, errCode int, err error) {
+	// Load the quiz
+	foundQuiz, err := service.Repository.GetByID(id)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundQuiz == nil || foundQuiz.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Check if the user can access
+	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
+		inputJwtToken.RoleID,
+		inputJwtToken.UserID,
+		foundQuiz.SchoolID,
+		foundQuiz.YearID,
+		foundQuiz.ClassSubjectID,
+		foundQuiz.UnitID,
+	)
+	if !canAccess {
+		errCode = http.StatusForbidden
+		err = constants.Http403InvalidPermissionErrorMessage()
+		return
+	}
+
+	// Update the quiz question solution
+	if len(request.Solutions) > 0 {
+		for _, solution := range request.Solutions {
+			// Update question solution
+			updatedQuestion, errUpdate := service.Repository.UpdateQuizQuestionSolutionByID(
+				solution.QuestionID,
+				&model.QuizQuestion{
+					SolutionID: solution.SolutionID,
+				},
+			)
+			if errUpdate != nil || updatedQuestion == nil || updatedQuestion.ID <= 0 {
+				errCode = http.StatusInternalServerError
+				err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+				return
+			}
+		}
+	}
+
+	// Reload the quiz
+	result, err = service.Repository.GetByID(id)
+
+	return
+}
+
 func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
 	// Check if the user can access
 	foundItem, err := service.Repository.GetByID(id)
@@ -268,10 +378,10 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, selection []int64) (affectedRows int64, errCode int, err error) {
 	// Check if the user can access
-	for i := 0; i < len(list); i++ {
-		foundItem, errCheck := service.Repository.GetByID(list[i])
+	for i := range selection {
+		foundItem, errCheck := service.Repository.GetByID(selection[i])
 		if errCheck != nil {
 			errCode = http.StatusInternalServerError
 			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -298,7 +408,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	}
 
 	// Delete
-	affectedRows, err = service.Repository.DeleteMultipleByID(list)
+	affectedRows, err = service.Repository.DeleteMultipleByID(selection)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -346,7 +456,7 @@ func (service *Service) GetAll(
 	inputJwtToken *types.JwtToken,
 	filter *types.Filter,
 	pagination *types.Pagination,
-	clause *types.FilterlSchoolYearUnitClassSubjectRequest,
+	clause *data.GetAllRequest,
 ) (result []model.Quiz, errCode int, err error) {
 	var schoolID, yearID, classSubjectID, unitID int64
 	if clause != nil {
@@ -363,21 +473,37 @@ func (service *Service) GetAll(
 	return
 }
 
-func (service *Service) GetAllQuizAttempt(
+func (service *Service) GetAllQuizAnswer(
 	inputJwtToken *types.JwtToken,
 	filter *types.Filter,
 	pagination *types.Pagination,
-	quizID int64,
-	clause *types.FilterlSchoolYearUnitClassSubjectRequest,
-) (result []model.QuizAttempt, errCode int, err error) {
-	var schoolID, yearID, classSubjectID, unitID int64
+	clause *data.GetAllQuizAnswerRequest,
+) (result []model.QuizAnswer, errCode int, err error) {
+	var quizID, quizQuestionID, studentID int64
 	if clause != nil {
-		schoolID = clause.SchoolID
-		yearID = clause.YearID
-		classSubjectID = clause.ClassSubjectID
-		unitID = clause.UnitID
+		quizID = clause.QuizID
+		quizQuestionID = clause.QuizQuestionID
+		studentID = clause.StudentID
 	}
-	result, err = service.Repository.GetAllQuizAttempt(filter, pagination, quizID, schoolID, yearID, classSubjectID, unitID)
+	result, err = service.Repository.GetAllQuizAnswer(filter, pagination, quizID, quizQuestionID, studentID)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+	}
+	return
+}
+
+func (service *Service) GetAllQuizQuestionOption(
+	inputJwtToken *types.JwtToken,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	clause *data.GetAllQuizQuestionOptionRequest,
+) (result []model.QuizQuestionOption, errCode int, err error) {
+	var quizQuestionID int64
+	if clause != nil {
+		quizQuestionID = clause.QuizQuestionID
+	}
+	result, err = service.Repository.GetAllQuizQuestionOption(filter, pagination, quizQuestionID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

@@ -8,7 +8,7 @@ import (
 
 type ParentResponse struct {
 	types.BaseGormModelResponse
-	User *dataUser.UserPublicResponse `json:"userID" required:"false" doc:"User id"`
+	ParentPublicResponse
 }
 
 type ParentPublicResponse struct {
@@ -17,8 +17,7 @@ type ParentPublicResponse struct {
 
 type ParentStudentResponse struct {
 	types.BaseGormModelResponse
-	Parent  *ParentPublicResponse              `json:"parent" required:"false" doc:"Parent"`
-	Student *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
+	ParentStudentPublicResponse
 }
 
 type ParentStudentPublicResponse struct {
@@ -28,15 +27,7 @@ type ParentStudentPublicResponse struct {
 
 type ParentAssignResponse struct {
 	types.BaseGormModelResponse
-	FirstName      string `json:"firstName" required:"false" doc:"First name"`
-	LastName       string `json:"lastName" required:"false" doc:"Last name"`
-	IDCard         string `json:"IDCard" required:"false" doc:"ID Card"`
-	Document1      string `json:"document1" required:"false" doc:"Document 1"`
-	Document2      string `json:"document2" required:"false" doc:"Document 2"`
-	Status         string `json:"status" required:"false" doc:"Status"`
-	StatusFeedback string `json:"statusFeedback" required:"false" doc:"Status feedback"`
-
-	Parent *ParentPublicResponse `json:"parent" required:"false" doc:"Parent"`
+	ParentAssignPublicResponse
 }
 
 type ParentAssignPublicResponse struct {
@@ -53,8 +44,7 @@ type ParentAssignPublicResponse struct {
 
 type ParentAssignStudentResponse struct {
 	types.BaseGormModelResponse
-	ParentAssign *ParentAssignPublicResponse        `json:"parentAssign" required:"false" doc:"Parent assign request"`
-	Student      *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
+	ParentAssignStudentPublicResponse
 }
 
 type ParentAssignStudentPublicResponse struct {

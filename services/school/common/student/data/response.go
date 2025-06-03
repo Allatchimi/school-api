@@ -12,10 +12,7 @@ import (
 
 type StudentResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
-
-	UID string `json:"uid" required:"false" doc:"Student UID"`
+	StudentPublicResponse
 }
 
 type StudentPublicResponse struct {
@@ -27,36 +24,14 @@ type StudentPublicResponse struct {
 
 type StudentEnrollResponse struct {
 	types.BaseGormModelResponse
-	Student     *StudentPublicResponse                     `json:"student" required:"false" doc:"Student"`
-	Year        *dataYear.YearPublicResponse               `json:"year" required:"false" doc:"Year"`
-	LevelDomain *dataLevelDomain.LevelDomainPublicResponse `json:"levelDomain" required:"false" doc:"Level for domain"`
-	Class       *dataClass.ClassPublicResponse             `json:"class" required:"false" doc:"Class"`
-
-	Email       string `json:"email" required:"false" doc:"Email"`
-	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number"`
-
-	Message    string `json:"Message" required:"false" doc:"Message"`
-	Origin     string `json:"origin" required:"false" doc:"Origin"`
-	IsAccepted bool   `json:"isAccepted" required:"false" doc:"Is accepted"`
-
-	Gender        string     `json:"gender" required:"false" doc:"Gender"`
-	FirstName     string     `json:"firstName" required:"false" doc:"First name"`
-	LastName      string     `json:"lastName" required:"false" doc:"Last name or family name"`
-	Birthday      *time.Time `json:"birthday" required:"false" doc:"Birthday date time"`
-	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
-
-	Document1 string `json:"file1" required:"false" doc:"Document1"`
-	Document2 string `json:"file2" required:"false" doc:"Document2"`
-	Document3 string `json:"file3" required:"false" doc:"Document3"`
-	Document4 string `json:"file4" required:"false" doc:"Document4"`
-	Document5 string `json:"file5" required:"false" doc:"Document5"`
+	StudentEnrollPublicResponse
 }
 
 type StudentEnrollPublicResponse struct {
 	Student     *StudentPublicResponse                     `json:"student" required:"false" doc:"Student"`
 	Year        *dataYear.YearPublicResponse               `json:"year" required:"false" doc:"Year"`
-	LevelDomain *dataLevelDomain.LevelDomainPublicResponse `json:"levelDomain" required:"false" doc:"Level for domain"`
 	Class       *dataClass.ClassPublicResponse             `json:"class" required:"false" doc:"Class"`
+	LevelDomain *dataLevelDomain.LevelDomainPublicResponse `json:"levelDomain" required:"false" doc:"Level for domain"`
 
 	Email       string `json:"email" required:"false" doc:"Email"`
 	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number"`

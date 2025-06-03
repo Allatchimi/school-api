@@ -1,6 +1,6 @@
 package data
 
-import "time"
+import "api/common/types"
 
 type QuizID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Quiz id" example:"1"`
@@ -9,34 +9,49 @@ type QuizID struct {
 type QuizRequest struct {
 	SchoolID       int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
 	YearID         int64 `json:"yearID" required:"true" doc:"Year id" example:"1"`
+	ClassSubjectID int64 `json:"classSubjectID" required:"false" doc:"Class subject id" example:"1"`
 	UnitID         int64 `json:"unitID" required:"false" doc:"Unit id" example:"1"`
-	ClassSubjectID int64 `json:"ClassSubjectID" required:"false" doc:"Class subject id" example:"1"`
 
-	Title       string     `json:"Title" required:"true" doc:"Title" example:"1"`
-	Description string     `json:"Description" required:"false" doc:"Description" example:"1"`
-	StartDate   *time.Time `json:"startDate" required:"false" doc:"Start date" example:""`
-	EndDate     *time.Time `json:"endDate" required:"false" doc:"End date" example:""`
+	Title       string `json:"title" required:"true" doc:"Title" example:""`
+	Description string `json:"description" required:"false" doc:"Description" example:""`
+	Status      string `json:"status" required:"false" enum:"default,active,closed"  doc:"Status" example:""`
 
-	Questions []QuizQuestionRequest `json:"questions" required:"false" doc:"Questions" example:"[]"`
+	Questions []struct {
+		Title       string `json:"title" required:"true" doc:"Title" example:""`
+		Description string `json:"description" required:"false" doc:"Description" example:""`
+
+		Options []struct {
+			Title       string `json:"title" required:"true" doc:"Title" example:""`
+			Description string `json:"description" required:"false" doc:"Description" example:""`
+		} `json:"options" required:"false" doc:"Options" example:"[]"`
+	} `json:"questions" required:"false" doc:"Questions" example:"[]"`
 }
 
-type QuizQuestionRequest struct {
-	Title       string                      `json:"Title" required:"true" doc:"Title" example:"1"`
-	Description string                      `json:"Description" required:"false" doc:"Description" example:"1"`
-	Options     []QuizQuestionOptionRequest `json:"options" required:"false" doc:"Options" example:"[]"`
+type QuizSolutionRequest struct {
+	Solutions []struct {
+		QuestionID int64 `json:"questionID" required:"true" doc:"Question id" example:"1"`
+		SolutionID int64 `json:"solutionID" required:"true" doc:"Solution id" example:"1"`
+	} `json:"solutions" required:"true" doc:"Solutions" example:"[]"`
 }
 
-type QuizQuestionOptionRequest struct {
-	Title       string `json:"Title" required:"true" doc:"Title" example:"1"`
-	Description string `json:"Description" required:"false" doc:"Description" example:"1"`
+type QuizAnswerRequest struct {
+	StudentID int64 `json:"studentID" required:"true" doc:"Student id" example:"1"`
+	Answers   []struct {
+		QuestionID int64 `json:"questionID" required:"true" doc:"Question id" example:"1"`
+		OptionID   int64 `json:"optionID" required:"true" doc:"Option id" example:"1"`
+	} `json:"Answers" required:"true" doc:"Answers" example:"[]"`
 }
 
-type QuizCorrectionRequest struct {
-	UserID   int64 `json:"userID" required:"true" doc:"User id" example:"1"`
-	SchoolID int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
+type GetAllRequest struct {
+	types.FilterSchoolYearClassSubjectUnitRequest
 }
 
-type QuizAttemptRequest struct {
-	UserID   int64 `json:"userID" required:"true" doc:"User id" example:"1"`
-	SchoolID int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
+type GetAllQuizQuestionOptionRequest struct {
+	QuizQuestionID int64 `json:"quizQuestionID" query:"quizQuestionID" required:"false" doc:"Quiz question id" example:"1"`
+}
+
+type GetAllQuizAnswerRequest struct {
+	QuizID         int64 `json:"quizID" query:"quizID" required:"false" doc:"Quiz id" example:"1"`
+	QuizQuestionID int64 `json:"quizQuestionID" query:"quizQuestionID" required:"false" doc:"Quiz question id" example:"1"`
+	StudentID      int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id" example:"1"`
 }

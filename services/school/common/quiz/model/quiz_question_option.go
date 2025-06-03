@@ -10,7 +10,8 @@ type QuizQuestionOption struct {
 	Title       string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
 
-	QuizQuestionID int64 `gorm:"default:null"`
+	QuizQuestionID int64         `gorm:"default:null"`
+	QuizQuestion   *QuizQuestion `gorm:"default:null;foreignKey:QuizQuestionID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *QuizQuestionOption) ToResponse() *data.QuizQuestionOptionResponse {
@@ -20,7 +21,7 @@ func (item *QuizQuestionOption) ToResponse() *data.QuizQuestionOptionResponse {
 	resp := &data.QuizQuestionOptionResponse{}
 	resp.Title = item.Title
 	resp.Description = item.Description
-	resp.QuizQuestionID = item.QuizQuestionID
+	resp.QuizQuestion = item.QuizQuestion.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

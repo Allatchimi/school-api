@@ -45,8 +45,8 @@ func (controller *Controller) CreateStudentEnroll(
 		&model.StudentEnroll{
 			StudentID:     input.Body.StudentID,
 			YearID:        input.Body.YearID,
-			LevelDomainID: input.Body.LevelDomainID,
 			ClassID:       input.Body.ClassID,
+			LevelDomainID: input.Body.LevelDomainID,
 
 			Email:       input.Body.Email,
 			PhoneNumber: input.Body.PhoneNumber,
@@ -98,10 +98,11 @@ func (controller *Controller) UpdateStudentEnroll(
 		&model.StudentEnroll{
 			StudentID:     input.Body.StudentID,
 			YearID:        input.Body.YearID,
-			LevelDomainID: input.Body.LevelDomainID,
 			ClassID:       input.Body.ClassID,
-			Email:         input.Body.Email,
-			PhoneNumber:   input.Body.PhoneNumber,
+			LevelDomainID: input.Body.LevelDomainID,
+
+			Email:       input.Body.Email,
+			PhoneNumber: input.Body.PhoneNumber,
 
 			Message:       input.Body.Message,
 			Gender:        input.Body.Gender,

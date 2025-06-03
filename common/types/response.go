@@ -1,12 +1,16 @@
 package types
 
+type DefaultResponse struct {
+	Message string `json:"message" required:"false" doc:"Message"`
+}
+
 type ErrorResponse struct {
-	Message string `json:"message" required:"false"`
+	Message string `json:"message" required:"false" doc:"Message"`
 }
 
 type PaginatedResponse struct {
-	Filter     *Filter     `json:"filter" required:"false"`
-	Pagination *Pagination `json:"pagination" required:"false"`
+	Filter     *Filter     `json:"filter" required:"false" doc:"Filter"`
+	Pagination *Pagination `json:"pagination" required:"false" doc:"Pagination"`
 }
 
 type DeletedResponse struct {

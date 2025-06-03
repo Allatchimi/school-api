@@ -19,8 +19,8 @@ type StudentRequest struct {
 type StudentEnrollRequest struct {
 	StudentID     int64 `json:"teacherID" required:"false" doc:"Student id" example:"1"`
 	YearID        int64 `json:"yearID" required:"true" doc:"Year id" example:"1"`
-	LevelDomainID int64 `json:"levelDomainID" required:"false" doc:"Level domain id" example:"1"`
 	ClassID       int64 `json:"classID" required:"false" doc:"Class id" example:"1"`
+	LevelDomainID int64 `json:"levelDomainID" required:"false" doc:"Level domain id" example:"1"`
 
 	Email       string `json:"email" required:"false" minLength:"3" max:"100" doc:"Email" example:"example@domain.com"`
 	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number" example:"237690909090"`

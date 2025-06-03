@@ -29,14 +29,14 @@ func (controller *Controller) Create(
 	return
 }
 
-func (controller *Controller) CreateAttempt(
+func (controller *Controller) CreateAnswer(
 	ctx *context.Context,
 	input *struct {
 		data.QuizID
-		Body data.QuizAttemptRequest
+		Body data.QuizAnswerRequest
 	},
-) (result *model.QuizAttempt, errCode int, err error) {
-	result, errCode, err = controller.Service.CreateAttempt(
+) (errCode int, err error) {
+	errCode, err = controller.Service.CreateAnswer(
 		helpers.GetJwtContext(ctx),
 		input.QuizID.ID,
 		&input.Body,
@@ -52,6 +52,21 @@ func (controller *Controller) Update(
 	},
 ) (result *model.Quiz, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
+		helpers.GetJwtContext(ctx),
+		input.ID,
+		&input.Body,
+	)
+	return
+}
+
+func (controller *Controller) UpdateSolution(
+	ctx *context.Context,
+	input *struct {
+		data.QuizID
+		Body data.QuizSolutionRequest
+	},
+) (result *model.Quiz, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateSolution(
 		helpers.GetJwtContext(ctx),
 		input.ID,
 		&input.Body,
@@ -106,13 +121,13 @@ func (controller *Controller) GetAll(
 	input *struct {
 		types.Filter
 		types.PaginationRequest
-		types.FilterlSchoolYearUnitClassSubjectRequest
+		data.GetAllRequest
 	},
 ) (result *data.QuizResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
 	quizList, errCode, err := controller.Service.GetAll(
 		helpers.GetJwtContext(ctx), newFilter, newPagination,
-		&input.FilterlSchoolYearUnitClassSubjectRequest,
+		&input.GetAllRequest,
 	)
 	if err != nil {
 		return
@@ -125,26 +140,48 @@ func (controller *Controller) GetAll(
 	return
 }
 
-func (controller *Controller) GetAllQuizAttempt(
+func (controller *Controller) GetAllQuizQuestionOption(
 	ctx *context.Context,
 	input *struct {
 		types.Filter
 		types.PaginationRequest
-		data.QuizID
-		types.FilterlSchoolYearUnitClassSubjectRequest
+		data.GetAllQuizQuestionOptionRequest
 	},
-) (result *data.QuizAttemptResponseList, errCode int, err error) {
+) (result *data.QuizQuestionOptionResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	quizAttemptList, errCode, err := controller.Service.GetAllQuizAttempt(
+	quizAnswerList, errCode, err := controller.Service.GetAllQuizQuestionOption(
 		helpers.GetJwtContext(ctx), newFilter, newPagination,
-		input.QuizID.ID,
-		&input.FilterlSchoolYearUnitClassSubjectRequest,
+		&input.GetAllQuizQuestionOptionRequest,
 	)
 	if err != nil {
 		return
 	}
-	result = &data.QuizAttemptResponseList{
-		Data: model.ToQuizAttemptResponseList(quizAttemptList),
+	result = &data.QuizQuestionOptionResponseList{
+		Data: model.ToQuizQuestionOptionResponseList(quizAnswerList),
+	}
+	result.Filter = newFilter
+	result.Pagination = newPagination
+	return
+}
+
+func (controller *Controller) GetAllQuizAnswer(
+	ctx *context.Context,
+	input *struct {
+		types.Filter
+		types.PaginationRequest
+		data.GetAllQuizAnswerRequest
+	},
+) (result *data.QuizAnswerResponseList, errCode int, err error) {
+	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
+	quizAnswerList, errCode, err := controller.Service.GetAllQuizAnswer(
+		helpers.GetJwtContext(ctx), newFilter, newPagination,
+		&input.GetAllQuizAnswerRequest,
+	)
+	if err != nil {
+		return
+	}
+	result = &data.QuizAnswerResponseList{
+		Data: model.ToQuizAnswerResponseList(quizAnswerList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

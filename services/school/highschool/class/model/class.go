@@ -15,7 +15,7 @@ type HighschoolClass struct {
 	SpecialtyID int64                               `gorm:"default:null"`
 	Specialty   *specialtyModel.HighschoolSpecialty `gorm:"default:null;foreignKey:SpecialtyID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Name        string `gorm:"not null"`
+	Name        string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
 	Fees        int64  `gorm:"default:null"`
 }

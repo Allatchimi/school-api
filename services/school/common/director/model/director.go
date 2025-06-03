@@ -3,7 +3,9 @@ package model
 import (
 	"api/common/types"
 	"api/services/school/common/director/data"
+	dataSchool "api/services/school/common/school/data"
 	schoolModel "api/services/school/common/school/model"
+	dataUser "api/services/user/user/data"
 	userModel "api/services/user/user/model"
 )
 
@@ -21,19 +23,18 @@ func (item *Director) ToResponse() *data.DirectorResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.DirectorResponse{}
-	if resp.User != nil {
-		resp.User.Role = nil
-		resp.User.Info = nil
-		resp.User.Mfa = nil
+	resp := &data.DirectorResponse{
+		DirectorPublicResponse: data.DirectorPublicResponse{
+			User:   &dataUser.UserPublicResponse{},
+			School: &dataSchool.SchoolPublicResponse{},
+		},
 	}
-	if resp.School != nil {
-		resp.School.Config = nil
-		resp.School.Info = nil
+	if item.User != nil {
+		resp.User = item.User.ToPublicResponse()
 	}
-
-	resp.User = item.User.ToResponse()
-	resp.School = item.School.ToResponse()
+	if item.School != nil {
+		resp.School = item.School.ToPublicResponse()
+	}
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -45,12 +46,15 @@ func (item *Director) ToPublicResponse() *data.DirectorPublicResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.DirectorPublicResponse{}
-	if resp.User != nil {
-		resp.User.Info = nil
+	resp := &data.DirectorPublicResponse{
+		User:   &dataUser.UserPublicResponse{},
+		School: &dataSchool.SchoolPublicResponse{},
 	}
-	if resp.School != nil {
-		resp.School.Info = nil
+	if item.User != nil {
+		resp.User = item.User.ToPublicResponse()
+	}
+	if item.School != nil {
+		resp.School = item.School.ToPublicResponse()
 	}
 	return resp
 }

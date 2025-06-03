@@ -8,9 +8,9 @@ import (
 type Communication struct {
 	types.BaseGormModel
 	Subject       string `gorm:"default:null"`
-	Message       string `gorm:"not null"`
-	AudienceType  string `gorm:"not null"`
-	AudienceValue string `gorm:"not null"`
+	Message       string `gorm:"default:null"`
+	AudienceType  string `gorm:"default:null"`
+	AudienceValue string `gorm:"default:null"`
 }
 
 func (item *Communication) ToResponse() *data.CommunicationResponse {
