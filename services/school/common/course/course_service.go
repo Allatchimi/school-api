@@ -5,7 +5,6 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
-	common_svc_permission "api/services/common"
 	"api/services/school/common/course/data"
 	"api/services/school/common/course/model"
 )
@@ -22,22 +21,8 @@ const MODEL_NAME = "course"
 const DEFAULT_ERROR_MESSAGE = "interact with course model"
 
 func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.CourseRequest) (result *model.Course, errCode int, err error) {
-	// Check if the user can access
-	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.UserID,
-		request.SchoolID,
-		request.YearID,
-		request.ClassSubjectID,
-		request.UnitID,
-	)
-	if !canAccess {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
-	}
-
-	// Insert the course
-	result, err = service.Repository.Create(&model.Course{
+	// Format request
+	item := &model.Course{
 		SchoolID:       request.SchoolID,
 		YearID:         request.YearID,
 		ClassSubjectID: request.ClassSubjectID,
@@ -46,7 +31,10 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Cour
 		Title:       request.Title,
 		Description: request.Description,
 		Content:     request.Content,
-	})
+	}
+
+	// Insert the course
+	result, err = service.Repository.Create(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -103,7 +91,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Cour
 	return
 }
 
-func (service *Service) CreateComment(inputJwtToken *types.JwtToken, id int64, item *model.CourseComment) (result *model.CourseComment, errCode int, err error) {
+func (service *Service) CreateComment(inputJwtToken *types.JwtToken, id int64, request *data.CourseCommentRequest) (result *model.CourseComment, errCode int, err error) {
 	// Check if the course exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -117,18 +105,12 @@ func (service *Service) CreateComment(inputJwtToken *types.JwtToken, id int64, i
 		return
 	}
 
-	// Check if the user can access
-	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.UserID,
-		foundItem.SchoolID,
-		foundItem.YearID,
-		foundItem.ClassSubjectID,
-		foundItem.UnitID,
-	)
-	if !canAccess {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
+	// Format request
+	item := &model.CourseComment{
+		CourseID: id,
+		UserID:   inputJwtToken.UserID,
+		Message:  request.Message,
+		Rate:     request.Rate,
 	}
 
 	// Insert course
@@ -142,20 +124,6 @@ func (service *Service) CreateComment(inputJwtToken *types.JwtToken, id int64, i
 }
 
 func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.CourseRequest) (result *model.Course, errCode int, err error) {
-	// Check if the user can access
-	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.UserID,
-		request.SchoolID,
-		request.YearID,
-		request.ClassSubjectID,
-		request.UnitID,
-	)
-	if !canAccess {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
-	}
-
 	// Check if course exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -236,7 +204,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	return
 }
 
-func (service *Service) UpdateComment(inputJwtToken *types.JwtToken, id int64, item *model.CourseComment) (result *model.CourseComment, errCode int, err error) {
+func (service *Service) UpdateComment(inputJwtToken *types.JwtToken, id int64, request *data.CourseCommentRequest) (result *model.CourseComment, errCode int, err error) {
 	// Get the course comment
 	foundItem, err := service.Repository.GetCourseCommentByID(id)
 	if err != nil {
@@ -256,24 +224,12 @@ func (service *Service) UpdateComment(inputJwtToken *types.JwtToken, id int64, i
 		return
 	}
 
-	// Check if the user can access
-	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.UserID,
-		foundItem.Course.SchoolID,
-		foundItem.Course.YearID,
-		foundItem.Course.ClassSubjectID,
-		foundItem.Course.UnitID,
-	)
-	if !canAccess {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
-	}
-	if foundItem.UserID != inputJwtToken.UserID {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
-
+	// Format request
+	item := &model.CourseComment{
+		CourseID: id,
+		UserID:   inputJwtToken.UserID,
+		Message:  request.Message,
+		Rate:     request.Rate,
 	}
 
 	// Update
@@ -297,20 +253,6 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	if foundItem == nil || foundItem.ID < 0 {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-
-	// Check if the user can access
-	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.UserID,
-		foundItem.SchoolID,
-		foundItem.YearID,
-		foundItem.ClassSubjectID,
-		foundItem.UnitID,
-	)
-	if !canAccess {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
 		return
 	}
 
@@ -343,25 +285,6 @@ func (service *Service) DeleteComment(inputJwtToken *types.JwtToken, id int64) (
 		return
 	}
 
-	// Check if the user can access
-	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.UserID,
-		foundItem.Course.SchoolID,
-		foundItem.Course.YearID,
-		foundItem.Course.ClassSubjectID,
-		foundItem.Course.UnitID,
-	)
-	if !canAccess {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
-	}
-	if foundItem.UserID != inputJwtToken.UserID {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
-	}
-
 	// Perform soft delete
 	_, err = service.Repository.UpdateCourseCommentByID(
 		id,
@@ -391,20 +314,6 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	if result == nil {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-
-	// Check if the user can access
-	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.UserID,
-		result.SchoolID,
-		result.YearID,
-		result.ClassSubjectID,
-		result.UnitID,
-	)
-	if !canAccess {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
 		return
 	}
 	return

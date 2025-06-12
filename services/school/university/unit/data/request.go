@@ -1,7 +1,5 @@
 package data
 
-import "time"
-
 type UnitID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Unit id" example:"1"`
 }
@@ -17,8 +15,7 @@ type UnitRequest struct {
 	Program      string `json:"program" required:"false" doc:"Program" example:""`
 	Requirements string `json:"requirements" required:"false" doc:"Requirements" example:""`
 
-	IsValid     bool       `json:"isValid" required:"false" doc:"Is valid" example:"true"`
-	InvalidDate *time.Time `json:"invalidDate" required:"false" doc:"Invalid date" example:""`
+	IsValid bool `json:"isValid" required:"false" doc:"Is valid" example:"true"`
 }
 
 type GetAllRequest struct {

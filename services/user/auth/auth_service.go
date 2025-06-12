@@ -22,12 +22,12 @@ import (
 )
 
 type Service struct {
-	Repository     *user.Repository
-	RoleRepository *role.Repository
+	UserService *user.Service
+	RoleService *role.Service
 }
 
-func NewAuthService(repository *user.Repository, roleRepository *role.Repository) *Service {
-	return &Service{Repository: repository, RoleRepository: roleRepository}
+func NewAuthService(userService *user.Service, roleService *role.Service) *Service {
+	return &Service{UserService: userService, RoleService: roleService}
 }
 
 const MODEL_NAME = "user"
@@ -38,11 +38,11 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	var userFound *model.User
 	var errMsg string
 	if utils.IsEmailValid(input.Email) {
-		userFound, err = service.Repository.GetByEmail(input.Email)
+		userFound, err = service.UserService.Repository.GetByEmail(input.Email)
 		errMsg = "Invalid email or password! Please enter valid information."
 	} else {
 		errMsg = "Invalid phone number or password! Please enter valid information."
-		userFound, err = service.Repository.GetByPhoneNumber(input.PhoneNumber)
+		userFound, err = service.UserService.Repository.GetByPhoneNumber(input.PhoneNumber)
 	}
 	if err != nil || userFound == nil || userFound.Email != input.Email {
 		errCode = http.StatusNotFound
@@ -184,7 +184,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 	}
 
 	// Save user if it's not in database
-	userFound, err := service.Repository.GetByProvider(input.Provider, newUser.ProviderUserID)
+	userFound, err := service.UserService.Repository.GetByProvider(input.Provider, newUser.ProviderUserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -193,7 +193,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 	if userFound == nil || userFound.ID < 1 {
 		// Add info
 		var userInfo *model.UserInfo
-		userInfo, err = service.Repository.CreateUserInfo(newUser.Info)
+		userInfo, err = service.UserService.Repository.CreateUserInfo(newUser.Info)
 		if err != nil {
 			errCode = http.StatusInternalServerError
 			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -201,7 +201,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 		}
 		// Add mfa
 		var userMfa *model.UserMfa
-		userMfa, err = service.Repository.CreateUserMfa(newUser.Mfa)
+		userMfa, err = service.UserService.Repository.CreateUserMfa(newUser.Mfa)
 		if err != nil {
 			errCode = http.StatusInternalServerError
 			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -210,7 +210,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 
 		// Get the default role
 		var defaultRole *modelRole.Role
-		defaultRole, err = service.RoleRepository.GetByName(config.Env.RoleDefault)
+		defaultRole, err = service.RoleService.Repository.GetByName(config.Env.RoleDefault)
 		if err != nil {
 			errCode = http.StatusInternalServerError
 			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -219,7 +219,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 
 		// Create user
 		tmpActivatedAt := time.Now()
-		userFound, err = service.Repository.Create(
+		userFound, err = service.UserService.Repository.Create(
 			&model.User{
 				Email:          newUser.Email,
 				Provider:       input.Provider,
@@ -267,11 +267,11 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	var userFound *model.User
 	var errMsg string
 	if utils.IsEmailValid(input.Email) {
-		userFound, err = service.Repository.GetByEmail(input.Email)
+		userFound, err = service.UserService.Repository.GetByEmail(input.Email)
 		errMsg = "user email"
 	} else {
 		errMsg = "user phone number"
-		userFound, err = service.Repository.GetByPhoneNumber(input.PhoneNumber)
+		userFound, err = service.UserService.Repository.GetByPhoneNumber(input.PhoneNumber)
 	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -286,7 +286,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 
 	// Get the default role
 	var defaultRole *modelRole.Role
-	defaultRole, err = service.RoleRepository.GetByName(config.Env.RoleDefault)
+	defaultRole, err = service.RoleService.Repository.GetByName(config.Env.RoleDefault)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -298,7 +298,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	userFound.Password = input.Password
 	userFound.LoginMethod = constants.AuthLoginMethodDefault
 	userFound.RoleID = defaultRole.ID
-	createdUser, err := service.Repository.Create(userFound)
+	createdUser, err := service.UserService.Repository.Create(userFound)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -390,7 +390,7 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	}
 
 	// Check if account is activated
-	userFound, err := service.Repository.GetByID(jwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(jwtToken.UserID)
 	if err != nil || userFound == nil {
 		errCode = http.StatusForbidden
 		err = fmt.Errorf("%s", "User not found! Please enter valid information.")
@@ -403,13 +403,13 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	}
 
 	// Create user info and MFA
-	newUserInfo, err := service.Repository.CreateUserInfo(&model.UserInfo{})
+	newUserInfo, err := service.UserService.Repository.CreateUserInfo(&model.UserInfo{})
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	newUserMfa, err := service.Repository.CreateUserMfa(&model.UserMfa{})
+	newUserMfa, err := service.UserService.Repository.CreateUserMfa(&model.UserMfa{})
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -422,7 +422,7 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	userFound.UserMfaID = newUserMfa.ID
 	userFound.ActivatedAt = &tmpActivatedAt
 	userFound.IsActivated = true
-	updatedUser, err := service.Repository.UpdateUserActivation(userFound.ID, userFound)
+	updatedUser, err := service.UserService.Repository.UpdateUserActivation(userFound.ID, userFound)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -471,10 +471,10 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 	var userFound *model.User
 	if utils.IsEmailValid(input.Email) {
 		errMsg = "User with this email"
-		userFound, err = service.Repository.GetByEmail(input.Email)
+		userFound, err = service.UserService.Repository.GetByEmail(input.Email)
 	} else {
 		errMsg = "User with this phone number"
-		userFound, err = service.Repository.GetByPhoneNumber(input.PhoneNumber)
+		userFound, err = service.UserService.Repository.GetByPhoneNumber(input.PhoneNumber)
 	}
 	if err != nil || userFound.ID <= 0 {
 		errCode = http.StatusNotFound
@@ -582,7 +582,7 @@ func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest
 	}
 
 	// Check if user exists
-	userFound, err := service.Repository.GetByID(jwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(jwtToken.UserID)
 	if err != nil || userFound == nil {
 		errCode = http.StatusForbidden
 		err = fmt.Errorf("%s", "User not found! Please enter valid information.")
@@ -659,7 +659,7 @@ func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewP
 	}
 
 	// Check if user exists
-	userFound, err := service.Repository.GetByID(jwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(jwtToken.UserID)
 	if err != nil || userFound == nil {
 		errCode = http.StatusForbidden
 		err = fmt.Errorf("%s", "User not found! Please enter valid information.")
@@ -667,7 +667,7 @@ func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewP
 	}
 
 	// Update user password
-	userUpdated, err := service.Repository.UpdateUserPassword(jwtToken.UserID, input.NewPassword)
+	userUpdated, err := service.UserService.Repository.UpdateUserPassword(jwtToken.UserID, input.NewPassword)
 	if err != nil || userUpdated == nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

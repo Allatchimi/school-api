@@ -2,7 +2,6 @@ package faculty
 
 import (
 	"fmt"
-	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -10,6 +9,7 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
+	"api/services/school/university/faculty/data"
 	"api/services/school/university/faculty/model"
 )
 
@@ -73,38 +73,38 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.UniversityFacult
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.UniversityFaculty, err error) {
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.UniversityFaculty, err error) {
 	result = make([]model.UniversityFaculty, 0)
 	var where string = ""
-	if schoolID > 0 {
-		where = fmt.Sprintf("WHERE faculties.school_id = %d", schoolID)
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("faculties.school_id = %d", request.SchoolID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(faculties.id AS TEXT) = '%s' OR faculties.name ILIKE '%s' OR faculties.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s'",
+			"(CAST(faculties.id AS TEXT) = '%s' OR faculties.name ILIKE '%s' OR faculties.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
-		if strings.HasPrefix(where, "WHERE") {
-			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
-		} else {
-			where = fmt.Sprintf("WHERE %s", tempWhere)
-		}
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT faculties.id, faculties.name, faculties.description, faculties.school_id"+
-				", faculties.created_at, faculties.updated_at FROM university_faculties faculties "+
-				"LEFT JOIN schools ON faculties.school_id = schools.id",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT faculties.* "+
+					"FROM university_faculties faculties "+
+					"LEFT JOIN schools ON faculties.school_id = schools.id",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

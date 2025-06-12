@@ -133,23 +133,41 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("courses.unit_id = %d", request.UnitID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
-			"(title ILIKE %s OR WHERE description ILIKE %s)",
+			"(CAST(courses.id AS TEXT) = '%s' OR courses.title ILIKE '%s' OR courses.description ILIKE '%s' OR schools.name ILIKE '%s' OR years.name ILIKE '%s' OR highschool_subjects.program ILIKE '%s' OR university_units.name ILIKE '%s')",
 			filter.Search,
-			filter.Search,
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
 		)
 		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	return result, repository.Db.Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"courses",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.Domain").
+		Preload("Unit.Level").
+		Preload("Unit.Semester").
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT courses.* "+
+					"FROM courses "+
+					"LEFT JOIN schools ON courses.school_id = schools.id "+
+					"LEFT JOIN years ON courses.year_id = years.id "+
+					"LEFT JOIN highschool_class_subjects ON courses.class_subject_id = highschool_class_subjects.id "+
+					"LEFT JOIN university_units ON courses.unit_id = university_units.id "+
+					"LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 }
 
 func (repository *Repository) GetAllCourseComment(
@@ -161,23 +179,45 @@ func (repository *Repository) GetAllCourseComment(
 	var where string = ""
 	if request != nil {
 		if request.CourseID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("courses.course_id = %d", request.CourseID))
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("course_comments.course_id = %d", request.CourseID))
+		}
+		if request.UserID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("course_comments.user_id = %d", request.UserID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
-			"(message ILIKE %s)",
+			"(CAST(course_comments.id AS TEXT) = '%s' OR course_comments.message ILIKE '%s' OR courses.title ILIKE '%s' OR courses.description ILIKE '%s' OR schools.name ILIKE '%s' OR years.name ILIKE '%s' OR highschool_subjects.program ILIKE '%s' OR university_units.name ILIKE '%s')",
 			filter.Search,
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
 		)
 		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	return result, repository.Db.Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"course_comments",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("Course.User").
+		Preload("Course.User.Info").
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT course_comments.* "+
+					"FROM course_comments "+
+					"LEFT JOIN courses ON course_comments.course_id = courses.id "+
+					"LEFT JOIN schools ON courses.school_id = schools.id "+
+					"LEFT JOIN years ON courses.year_id = years.id "+
+					"LEFT JOIN highschool_class_subjects ON courses.class_subject_id = highschool_class_subjects.id "+
+					"LEFT JOIN university_units ON courses.unit_id = university_units.id "+
+					"LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id "+
+					"LEFT JOIN users ON course_comments.user_id = users.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 }

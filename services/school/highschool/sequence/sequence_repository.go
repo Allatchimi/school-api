@@ -10,6 +10,7 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
+	"api/services/school/highschool/sequence/data"
 	"api/services/school/highschool/sequence/model"
 )
 
@@ -73,15 +74,17 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.HighschoolSequen
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.HighschoolSequence, err error) {
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.HighschoolSequence, err error) {
 	result = make([]model.HighschoolSequence, 0)
 	var where string = ""
-	if schoolID > 0 {
-		where = fmt.Sprintf("WHERE sequences.school_id = %d", schoolID)
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("sequences.school_id = %d", request.SchoolID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(sequences.id AS TEXT) = '%s' OR sequences.name ILIKE '%s' OR sequences.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s'",
+			"(CAST(sequences.id AS TEXT) = '%s' OR sequences.name ILIKE '%s' OR sequences.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -94,17 +97,19 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 			where = fmt.Sprintf("WHERE %s", tempWhere)
 		}
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT sequences.id, sequences.name, sequences.description, sequences.school_id"+
-				", sequences.created_at, sequences.updated_at FROM highschool_sequences sequences "+
-				"LEFT JOIN schools ON sequences.school_id = schools.id",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT sequences.* "+
+					"FROM highschool_sequences sequences "+
+					"LEFT JOIN schools ON sequences.school_id = schools.id",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

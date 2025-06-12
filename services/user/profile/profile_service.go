@@ -16,11 +16,11 @@ import (
 )
 
 type Service struct {
-	Repository *user.Repository
+	UserService *user.Service
 }
 
-func NewService(repository *user.Repository) *Service {
-	return &Service{Repository: repository}
+func NewService(userService *user.Service) *Service {
+	return &Service{UserService: userService}
 }
 
 const MODEL_NAME = "user"
@@ -28,7 +28,7 @@ const DEFAULT_ERROR_MESSAGE = "interact with user model"
 
 func (service *Service) UpdateProfileEmail(inputJwtToken *types.JwtToken, email string) (result *model.User, errCode int, err error) { // Check if user exists
 	// Check if this email is already taken
-	foundUser, err := service.Repository.GetByEmail(email)
+	foundUser, err := service.UserService.Repository.GetByEmail(email)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -41,7 +41,7 @@ func (service *Service) UpdateProfileEmail(inputJwtToken *types.JwtToken, email 
 	}
 
 	// Update
-	result, err = service.Repository.UpdateUserEmail(inputJwtToken.UserID, email)
+	result, err = service.UserService.Repository.UpdateUserEmail(inputJwtToken.UserID, email)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -51,7 +51,7 @@ func (service *Service) UpdateProfileEmail(inputJwtToken *types.JwtToken, email 
 
 func (service *Service) UpdateProfilePhoneNumber(inputJwtToken *types.JwtToken, phoneNumber uint64) (result *model.User, errCode int, err error) { // Check if user exists
 	// Check if this phone number is already taken
-	foundUser, err := service.Repository.GetByPhoneNumber(phoneNumber)
+	foundUser, err := service.UserService.Repository.GetByPhoneNumber(phoneNumber)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -64,7 +64,7 @@ func (service *Service) UpdateProfilePhoneNumber(inputJwtToken *types.JwtToken, 
 	}
 
 	// Update
-	result, err = service.Repository.UpdateUserPhoneNumber(inputJwtToken.UserID, phoneNumber)
+	result, err = service.UserService.Repository.UpdateUserPhoneNumber(inputJwtToken.UserID, phoneNumber)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -75,7 +75,7 @@ func (service *Service) UpdateProfilePhoneNumber(inputJwtToken *types.JwtToken, 
 func (service *Service) UpdateProfilePasswordInit(inputJwtToken *types.JwtToken) (token string, errCode int, err error) {
 	// Check if user exists
 	var userFound *model.User
-	userFound, err = service.Repository.GetByID(inputJwtToken.UserID)
+	userFound, err = service.UserService.Repository.GetByID(inputJwtToken.UserID)
 	if err != nil || userFound.ID <= 0 {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
@@ -182,7 +182,7 @@ func (service *Service) UpdateProfilePasswordCheckCode(inputJwtToken *types.JwtT
 	}
 
 	// Check if user exists
-	userFound, err := service.Repository.GetByID(jwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(jwtToken.UserID)
 	if err != nil || userFound == nil {
 		errCode = http.StatusForbidden
 		err = fmt.Errorf("%s", "User not found! Please enter valid information.")
@@ -261,7 +261,7 @@ func (service *Service) UpdateProfilePasswordNewPassword(inputJwtToken *types.Jw
 	}
 
 	// Check if user exists
-	userFound, err := service.Repository.GetByID(jwtTokenDecoded.UserID)
+	userFound, err := service.UserService.Repository.GetByID(jwtTokenDecoded.UserID)
 	if err != nil || userFound == nil {
 		errCode = http.StatusForbidden
 		err = fmt.Errorf("%s", "User not found! Please enter valid information.")
@@ -269,7 +269,7 @@ func (service *Service) UpdateProfilePasswordNewPassword(inputJwtToken *types.Jw
 	}
 
 	// Update user password
-	userUpdated, err := service.Repository.UpdateUserPassword(jwtTokenDecoded.UserID, password)
+	userUpdated, err := service.UserService.Repository.UpdateUserPassword(jwtTokenDecoded.UserID, password)
 	if err != nil || userUpdated == nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -282,7 +282,7 @@ func (service *Service) UpdateProfilePasswordNewPassword(inputJwtToken *types.Jw
 }
 
 func (service *Service) UpdateProfileInfo(inputJwtToken *types.JwtToken, userInfo *model.UserInfo) (result *model.UserInfo, errCode int, err error) {
-	result, err = service.Repository.UpdateProfileInfo(inputJwtToken.UserID, userInfo)
+	result, err = service.UserService.Repository.UpdateProfileInfo(inputJwtToken.UserID, userInfo)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -296,7 +296,7 @@ func (service *Service) UpdateProfileMfa(inputJwtToken *types.JwtToken, method s
 		err = fmt.Errorf("%s", "Invalid MFA method! Please enter valid method.")
 		return
 	}
-	result, err = service.Repository.UpdateProfileMfa(inputJwtToken.UserID, method, value)
+	result, err = service.UserService.Repository.UpdateProfileMfa(inputJwtToken.UserID, method, value)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -305,7 +305,7 @@ func (service *Service) UpdateProfileMfa(inputJwtToken *types.JwtToken, method s
 }
 
 func (service *Service) DeleteProfile(inputJwtToken *types.JwtToken) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteByID(inputJwtToken.UserID)
+	affectedRows, err = service.UserService.Repository.DeleteByID(inputJwtToken.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -320,7 +320,7 @@ func (service *Service) DeleteProfile(inputJwtToken *types.JwtToken) (affectedRo
 }
 
 func (service *Service) GetProfile(inputJwtToken *types.JwtToken) (result *model.User, errCode int, err error) {
-	result, err = service.Repository.GetByID(inputJwtToken.UserID)
+	result, err = service.UserService.Repository.GetByID(inputJwtToken.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

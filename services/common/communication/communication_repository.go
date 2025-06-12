@@ -26,8 +26,8 @@ func (repository *Repository) Create(communication *model.Communication) (*model
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) Delete(roleID int64) (result int64, err error) {
-	tmpResult := repository.Db.Where("id = ?", roleID).Delete(&model.Communication{})
+func (repository *Repository) Delete(id int64) (result int64, err error) {
+	tmpResult := repository.Db.Where("id = ?", id).Delete(&model.Communication{})
 
 	result = tmpResult.RowsAffected
 	err = tmpResult.Error
@@ -43,9 +43,9 @@ func (repository *Repository) DeleteMultiple(list []int64) (result int64, err er
 	return
 }
 
-func (repository *Repository) GetByID(communicationID int64) (*model.Communication, error) {
+func (repository *Repository) GetByID(id int64) (*model.Communication, error) {
 	result := &model.Communication{}
-	return result, repository.Db.Where("id = ?", communicationID).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Communication, err error) {
@@ -58,21 +58,24 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"(subject ILIKE '%s' OR message ILIKE '%s')",
+			"(communications.subject ILIKE '%s' OR communications.message ILIKE '%s')",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
 		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT * FROM communications",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT communications.* "+
+					"FROM communications ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

@@ -7,7 +7,6 @@ import (
 	"api/common/types"
 	"api/services/school/common/teacher/data"
 	"api/services/school/common/teacher/model"
-	modelUser "api/services/user/user/model"
 )
 
 type Controller struct {
@@ -26,23 +25,7 @@ func (controller *Controller) Create(
 ) (result *model.Teacher, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		input.Body.SchoolID,
-		input.Body.UID,
-		&modelUser.User{
-			Email:       input.Body.Email,
-			PhoneNumber: input.Body.PhoneNumber,
-			Info: &modelUser.UserInfo{
-				Gender:        input.Body.Info.Gender,
-				Username:      input.Body.Info.Username,
-				FirstName:     input.Body.Info.FirstName,
-				LastName:      input.Body.Info.LastName,
-				Birthday:      input.Body.Info.Birthday,
-				BirthLocation: input.Body.Info.BirthLocation,
-				Address:       input.Body.Info.Address,
-				Language:      input.Body.Info.Language,
-				Image:         input.Body.Info.Image,
-			},
-		},
+		&input.Body,
 	)
 	return
 }
@@ -55,13 +38,7 @@ func (controller *Controller) CreateTeacherClassSubjectUnit(
 ) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
 	result, errCode, err = controller.Service.CreateTeacherClassSubjectUnit(
 		helpers.GetJwtContext(ctx),
-		&model.TeacherClassSubjectUnit{
-			TeacherID: input.Body.TeacherID,
-			YearID:    input.Body.YearID,
-
-			UnitID:         input.Body.UnitID,
-			ClassSubjectID: input.Body.ClassSubjectID,
-		},
+		&input.Body,
 	)
 	return
 }
@@ -74,23 +51,9 @@ func (controller *Controller) Update(
 	},
 ) (result *model.Teacher, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		helpers.GetJwtContext(ctx), input.ID,
-		input.Body.UID,
-		&modelUser.User{
-			Email:       input.Body.Email,
-			PhoneNumber: input.Body.PhoneNumber,
-			Info: &modelUser.UserInfo{
-				Gender:        input.Body.Info.Gender,
-				Username:      input.Body.Info.Username,
-				FirstName:     input.Body.Info.FirstName,
-				LastName:      input.Body.Info.LastName,
-				Birthday:      input.Body.Info.Birthday,
-				BirthLocation: input.Body.Info.BirthLocation,
-				Address:       input.Body.Info.Address,
-				Language:      input.Body.Info.Language,
-				Image:         input.Body.Info.Image,
-			},
-		},
+		helpers.GetJwtContext(ctx),
+		input.ID,
+		&input.Body,
 	)
 	return
 }
@@ -104,13 +67,7 @@ func (controller *Controller) UpdateTeacherClassSubjectUnit(
 ) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateTeacherClassSubjectUnit(
 		helpers.GetJwtContext(ctx), input.ID,
-		&model.TeacherClassSubjectUnit{
-			TeacherID: input.Body.TeacherID,
-			YearID:    input.Body.YearID,
-
-			UnitID:         input.Body.UnitID,
-			ClassSubjectID: input.Body.ClassSubjectID,
-		},
+		&input.Body,
 	)
 	return
 }

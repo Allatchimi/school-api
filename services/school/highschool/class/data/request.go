@@ -28,7 +28,8 @@ type ClassSubjectRequest struct {
 	InvalidDate *time.Time `json:"invalidDate" required:"false" doc:"Invalid date" example:""`
 }
 type GetAllRequest struct {
-	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
+	SchoolID    int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
+	SpecialtyID int64 `json:"specialtyID" query:"specialtyID" required:"false" doc:"Specialty id" example:"1"`
 }
 
 type GetAllClassSubjectRequest struct {

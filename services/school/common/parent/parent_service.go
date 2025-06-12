@@ -9,10 +9,11 @@ import (
 	"api/common/constants"
 	"api/common/types"
 	"api/config"
+	"api/services/school/common/parent/data"
 	"api/services/school/common/parent/model"
 	"api/services/user/role"
 	"api/services/user/user"
-	modelUser "api/services/user/user/model"
+	userData "api/services/user/user/data"
 )
 
 type Service struct {
@@ -32,7 +33,7 @@ func NewService(repository *Repository, roleService *role.Service, userService *
 const MODEL_NAME = "parent"
 const DEFAULT_ERROR_MESSAGE = "interact with parent model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, schoolID int64, user *modelUser.User) (result *model.Parent, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.ParentRequest) (result *model.Parent, errCode int, err error) {
 	// Get parent role
 	parentRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleParent)
 	if errRole != nil || parentRole == nil || parentRole.ID < 1 {
@@ -41,28 +42,51 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, schoolID int64, us
 		return
 	}
 
-	// Create user
-	var password string = ""
-	if user != nil && user.Info != nil {
-		var firstName, lastName string
-		var birthYear = time.Now().Year()
-		firstNameParts := strings.Split(user.Info.FirstName, " ")
-		if len(firstNameParts) > 0 {
-			firstName = firstNameParts[0]
-		}
-		lastNameParts := strings.Split(user.Info.LastName, " ")
-		if len(lastNameParts) > 0 {
-			lastName = lastNameParts[0]
-		}
-		if user.Info.Birthday != nil {
-			birthYear = user.Info.Birthday.Year()
-		}
-		if len(firstName) > 0 && len(lastName) > 0 && birthYear > 0 {
-			password = fmt.Sprintf("%s%s%d", firstName, lastName, birthYear)
-		}
+	// Format request
+	if request == nil || request.Info == nil {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessage()
+		return
 	}
-	user.RoleID = parentRole.ID
-	createdUser, errCodeCreate, errCreate := service.UserService.Create(nil, user, &password)
+	var item = &userData.UserRequest{
+		RoleID:      parentRole.ID,
+		Email:       request.Email,
+		PhoneNumber: request.PhoneNumber,
+		IsActivated: true,
+		Info: &userData.UserInfoRequest{
+			Gender:        request.Info.Gender,
+			Username:      request.Info.Username,
+			FirstName:     request.Info.FirstName,
+			LastName:      request.Info.LastName,
+			Birthday:      request.Info.Birthday,
+			BirthLocation: request.Info.BirthLocation,
+			Address:       request.Info.Address,
+			Language:      request.Info.Language,
+			Image:         request.Info.Image,
+		},
+	}
+
+	// Generate password
+	var firstName, lastName string
+	var birthYear = time.Now().Year()
+	firstNameParts := strings.Split(request.Info.FirstName, " ")
+	if len(firstNameParts) > 0 {
+		firstName = firstNameParts[0]
+	}
+	lastNameParts := strings.Split(request.Info.LastName, " ")
+	if len(lastNameParts) > 0 {
+		lastName = lastNameParts[0]
+	}
+	if request.Info.Birthday != nil {
+		birthYear = request.Info.Birthday.Year()
+	}
+	var password string = ""
+	if len(firstName) > 0 && len(lastName) > 0 && birthYear > 0 {
+		password = fmt.Sprintf("%s%s%d", firstName, lastName, birthYear)
+	}
+
+	// Create user
+	createdUser, errCodeCreate, errCreate := service.UserService.Create(nil, item, &password)
 	if errCreate != nil {
 		errCode = errCodeCreate
 		err = errCreate
@@ -76,7 +100,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, schoolID int64, us
 
 	// Insert parent
 	result, err = service.Repository.Create(&model.Parent{
-		SchoolID: schoolID,
+		SchoolID: request.SchoolID,
 		UserID:   createdUser.ID,
 	})
 	if err != nil {
@@ -87,7 +111,13 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, schoolID int64, us
 	return
 }
 
-func (service *Service) CreateParentStudent(inputJwtToken *types.JwtToken, item *model.ParentStudent) (result *model.ParentStudent, errCode int, err error) {
+func (service *Service) CreateParentStudent(inputJwtToken *types.JwtToken, request *data.ParentStudentRequest) (result *model.ParentStudent, errCode int, err error) {
+	// Format request
+	item := &model.ParentStudent{
+		ParentID:  request.ParentID,
+		StudentID: request.StudentID,
+	}
+
 	// Check if parent level/class already exists
 	foundItem, err := service.Repository.GetParentStudentByObject(&model.ParentStudent{
 		ParentID:  item.ParentID,
@@ -104,7 +134,7 @@ func (service *Service) CreateParentStudent(inputJwtToken *types.JwtToken, item 
 		return
 	}
 
-	// Insert parent level/class
+	// Create parent level/class
 	result, err = service.Repository.CreateParentStudent(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -114,7 +144,7 @@ func (service *Service) CreateParentStudent(inputJwtToken *types.JwtToken, item 
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, user *modelUser.User) (result *model.Parent, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.ParentRequest) (result *model.Parent, errCode int, err error) {
 	// Check if parent exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -137,18 +167,50 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, user *mo
 	}
 
 	// Update user
-	newUser := *user
-	newUser.RoleID = parentRole.ID
-	_, errCodeUser, errUser := service.UserService.Update(nil, foundItem.UserID, &newUser)
+	userRequest := userData.UserRequest{
+		RoleID:      parentRole.ID,
+		Email:       request.Email,
+		PhoneNumber: request.PhoneNumber,
+		IsActivated: true,
+		Info: &userData.UserInfoRequest{
+			Gender:        request.Info.Gender,
+			Username:      request.Info.Username,
+			FirstName:     request.Info.FirstName,
+			LastName:      request.Info.LastName,
+			Birthday:      request.Info.Birthday,
+			BirthLocation: request.Info.BirthLocation,
+			Address:       request.Info.Address,
+			Language:      request.Info.Language,
+			Image:         request.Info.Image,
+		},
+	}
+	_, errCodeUser, errUser := service.UserService.Update(nil, foundItem.UserID, &userRequest)
 	if errUser != nil {
 		errCode = errCodeUser
 		err = errUser
 		return
 	}
+
+	// Update parent
+	result, err = service.Repository.UpdateByID(id, &model.Parent{
+		SchoolID: foundItem.SchoolID,
+		UserID:   foundItem.UserID,
+	})
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
 	return
 }
 
-func (service *Service) UpdateParentStudent(inputJwtToken *types.JwtToken, parentParentStudentID int64, item *model.ParentStudent) (result *model.ParentStudent, errCode int, err error) {
+func (service *Service) UpdateParentStudent(inputJwtToken *types.JwtToken, parentParentStudentID int64, request *data.ParentStudentRequest) (result *model.ParentStudent, errCode int, err error) {
+	// Format request
+	item := &model.ParentStudent{
+		ParentID:  request.ParentID,
+		StudentID: request.StudentID,
+	}
+
 	// Check unique
 	foundParentByID, err := service.Repository.GetParentStudentByID(parentParentStudentID)
 	if err != nil {

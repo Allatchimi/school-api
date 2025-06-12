@@ -26,16 +26,8 @@ func (controller *Controller) Update(
 ) (result *data.PermissionResponse, errCode int, err error) {
 	tmpResult, errCode, err := controller.Service.Update(
 		helpers.GetJwtContext(ctx),
-		input.RoleID,
-		input.Body.TableName,
-		&model.Permission{
-			RoleID:    input.RoleID,
-			TableName: input.Body.TableName,
-			Create:    input.Body.Create,
-			Read:      input.Body.Read,
-			Update:    input.Body.Update,
-			Delete:    input.Body.Delete,
-		},
+		input.PermissionPathRequest.RoleID,
+		&input.Body,
 	)
 	result = tmpResult.ToResponse()
 	return

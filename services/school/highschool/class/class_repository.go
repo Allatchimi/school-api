@@ -2,7 +2,6 @@ package class
 
 import (
 	"fmt"
-	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -10,6 +9,7 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
+	"api/services/school/highschool/class/data"
 	"api/services/school/highschool/class/model"
 )
 
@@ -112,15 +112,20 @@ func (repository *Repository) AreSameClassSubjectUniqueObjects(item1 *model.High
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.HighschoolClass, err error) {
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.HighschoolClass, err error) {
 	result = make([]model.HighschoolClass, 0)
 	var where string = ""
-	if schoolID > 0 {
-		where = fmt.Sprintf("WHERE classes.school_id = %d", schoolID)
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("classes.school_id = %d", request.SchoolID))
+		}
+		if request.SpecialtyID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("classes.specialty_id = %d", request.SpecialtyID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(classes.id AS TEXT) = '%s' OR classes.name ILIKE '%s' OR classes.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR specialties.name ILIKE '%s' OR specialties.description ILIKE '%s'",
+			"(CAST(classes.id AS TEXT) = '%s' OR classes.name ILIKE '%s' OR classes.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR specialties.name ILIKE '%s' OR specialties.description ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -129,18 +134,13 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
-
-		if strings.HasPrefix(where, "WHERE") {
-			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
-		} else {
-			where = fmt.Sprintf("WHERE %s", tempWhere)
-		}
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"SELECT classes.id, classes.name, classes.description, classes.school_id, classes.specialty_id"+
-				", classes.created_at, classes.updated_at FROM highschool_classes classes "+
+			"SELECT classes.* "+
+				"FROM highschool_classes classes "+
 				"LEFT JOIN schools ON classes.school_id = schools.id "+
 				"LEFT JOIN highschool_specialties AS specialties ON classes.specialty_id = specialties.id",
 			where,
@@ -153,41 +153,33 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	return
 }
 
-func (repository *Repository) GetAllClassSubject(filter *types.Filter, pagination *types.Pagination, schoolID int64, classID int64) (result []model.HighschoolClassSubject, err error) {
+func (repository *Repository) GetAllClassSubject(filter *types.Filter, pagination *types.Pagination, request *data.GetAllClassSubjectRequest) (result []model.HighschoolClassSubject, err error) {
 	result = make([]model.HighschoolClassSubject, 0)
 	var where string = ""
-	if schoolID > 0 {
-		where = fmt.Sprintf("WHERE highschool_classes.school_id = %d", schoolID)
-	}
-	if classID > 0 {
-		tempWhere := fmt.Sprintf("cs.class_id = %d", classID)
-		if strings.HasPrefix(where, "WHERE") {
-			where = fmt.Sprintf("%s AND %s", where, tempWhere)
-		} else {
-			where = fmt.Sprintf("WHERE %s", tempWhere)
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("highschool_classes.school_id = %d", request.SchoolID))
+		}
+		if request.ClassID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("cs.class_id = %d", request.ClassID))
 		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(cs.id AS TEXT) = '%s' OR highschool_classes.name ILIKE '%s' OR highschool_classes.description ILIKE '%s'"+
-				" OR highschool_subjects.name ILIKE '%s' OR highschool_subjects.description ILIKE '%s'",
+			"(CAST(cs.id AS TEXT) = '%s' OR highschool_classes.name ILIKE '%s' OR highschool_classes.description ILIKE '%s' OR highschool_subjects.name ILIKE '%s' OR highschool_subjects.description ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
-		if strings.HasPrefix(where, "WHERE") {
-			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
-		} else {
-			where = fmt.Sprintf("WHERE %s", tempWhere)
-		}
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"SELECT cs.id, cs.class_id, cs.subject_id, cs.coefficient, cs.program, cs.requirements, cs.is_valid, cs.invalid_date"+
-				", cs.created_at, cs.updated_at FROM highschool_class_subjects AS cs "+
+			"SELECT cs.* "+
+				"FROM highschool_class_subjects AS cs "+
 				"LEFT JOIN highschool_classes ON cs.class_id = highschool_classes.id "+
 				"LEFT JOIN highschool_subjects ON cs.subject_id = highschool_subjects.id ",
 			where,

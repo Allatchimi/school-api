@@ -7,7 +7,6 @@ import (
 	"api/common/types"
 	"api/services/school/common/director/data"
 	"api/services/school/common/director/model"
-	modelUser "api/services/user/user/model"
 )
 
 type Controller struct {
@@ -26,22 +25,7 @@ func (controller *Controller) Create(
 ) (result *model.Director, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		input.Body.SchoolID,
-		&modelUser.User{
-			Email:       input.Body.Email,
-			PhoneNumber: input.Body.PhoneNumber,
-			Info: &modelUser.UserInfo{
-				Gender:        input.Body.Info.Gender,
-				Username:      input.Body.Info.Username,
-				FirstName:     input.Body.Info.FirstName,
-				LastName:      input.Body.Info.LastName,
-				Birthday:      input.Body.Info.Birthday,
-				BirthLocation: input.Body.Info.BirthLocation,
-				Address:       input.Body.Info.Address,
-				Language:      input.Body.Info.Language,
-				Image:         input.Body.Info.Image,
-			},
-		},
+		&input.Body,
 	)
 	return
 }
@@ -54,22 +38,9 @@ func (controller *Controller) Update(
 	},
 ) (result *model.Director, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		helpers.GetJwtContext(ctx), input.ID,
-		&modelUser.User{
-			Email:       input.Body.Email,
-			PhoneNumber: input.Body.PhoneNumber,
-			Info: &modelUser.UserInfo{
-				Gender:        input.Body.Info.Gender,
-				Username:      input.Body.Info.Username,
-				FirstName:     input.Body.Info.FirstName,
-				LastName:      input.Body.Info.LastName,
-				Birthday:      input.Body.Info.Birthday,
-				BirthLocation: input.Body.Info.BirthLocation,
-				Address:       input.Body.Info.Address,
-				Language:      input.Body.Info.Language,
-				Image:         input.Body.Info.Image,
-			},
-		},
+		helpers.GetJwtContext(ctx),
+		input.ID,
+		&input.Body,
 	)
 	return
 }

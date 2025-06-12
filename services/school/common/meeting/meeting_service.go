@@ -12,23 +12,30 @@ import (
 )
 
 type Service struct {
-	Repository        *Repository
-	UserRepository    *user.Repository
-	TeacherRepository *teacher.Repository
+	Repository     *Repository
+	UserService    *user.Service
+	TeacherService *teacher.Service
 }
 
 const MODEL_NAME = "meeting"
 const DEFAULT_ERROR_MESSAGE = "interact with meeting service"
 
-func NewService(repository *Repository, userRepository *user.Repository, teacherRepository *teacher.Repository) *Service {
+func NewService(repository *Repository, userService *user.Service, teacherService *teacher.Service) *Service {
 	return &Service{
-		Repository:        repository,
-		UserRepository:    userRepository,
-		TeacherRepository: teacherRepository,
+		Repository:     repository,
+		UserService:    userService,
+		TeacherService: teacherService,
 	}
 }
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.MeetingRoom) (result *model.MeetingRoom, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.MeetingRoomRequest) (result *model.MeetingRoom, errCode int, err error) {
+	// Format request
+	item := &model.MeetingRoom{
+		SchoolID:       request.SchoolID,
+		ClassSubjectID: request.ClassSubjectID,
+		UnitID:         request.UnitID,
+	}
+
 	// Check unique
 	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
@@ -126,7 +133,7 @@ func (service *Service) Join(inputJwtToken *types.JwtToken, id int64) (result st
 	}
 
 	// Get the user
-	user, err := service.UserRepository.GetByID(inputJwtToken.UserID)
+	user, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
 	if err != nil || user == nil || user.ID <= 0 {
 		errCode = http.StatusForbidden
 		err = constants.Http403InvalidPermissionErrorMessage()
@@ -135,15 +142,15 @@ func (service *Service) Join(inputJwtToken *types.JwtToken, id int64) (result st
 
 	// Get the teacher and check if it's the teacher for this room(room is associated to unit/class subject)
 	var isAdmin bool = false
-	teacher, _ := service.TeacherRepository.GetByUserID(inputJwtToken.UserID)
+	teacher, _ := service.TeacherService.Repository.GetByUserID(inputJwtToken.UserID)
 	if teacher != nil && teacher.ID > 0 {
 		if meetingRoom.School.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
-			teacherClassSubject, _ := service.TeacherRepository.GetTeacherClassSubjectUnitByUserIDClassSubjectID(teacher.ID, meetingRoom.ClassSubjectID)
+			teacherClassSubject, _ := service.TeacherService.Repository.GetTeacherClassSubjectUnitByUserIDClassSubjectID(teacher.ID, meetingRoom.ClassSubjectID)
 			if teacherClassSubject != nil && teacherClassSubject.ID > 0 {
 				isAdmin = true
 			}
 		} else {
-			teacherUnit, _ := service.TeacherRepository.GetTeacherClassSubjectUnitByUserIDUnitID(teacher.ID, meetingRoom.UnitID)
+			teacherUnit, _ := service.TeacherService.Repository.GetTeacherClassSubjectUnitByUserIDUnitID(teacher.ID, meetingRoom.UnitID)
 			if teacherUnit != nil && teacherUnit.ID > 0 {
 				isAdmin = true
 			}

@@ -156,7 +156,7 @@ func (repository *Repository) GetAllExamType(filter *types.Filter, pagination *t
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(exam_types.id AS TEXT) = '%s' OR exam_types.name ILIKE '%s' OR exam_types.description ILIKE '%s' OR schools.name ILIKE '%s'",
+			"(CAST(exam_types.id AS TEXT) = '%s' OR exam_types.name ILIKE '%s' OR exam_types.description ILIKE '%s' OR schools.name ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -164,17 +164,19 @@ func (repository *Repository) GetAllExamType(filter *types.Filter, pagination *t
 		)
 		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT exam_types.id, exam_types.school_id, exam_types.name, exam_types.description"+
-				", exam_types.created_at, exam_types.updated_at FROM exam_types "+
-				"LEFT JOIN schools ON exam_types.school_id = schools.id",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT exam_types.* "+
+					"FROM exam_types "+
+					"LEFT JOIN schools ON exam_types.school_id = schools.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return
@@ -205,7 +207,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(exams.id AS TEXT) = '%s' OR exams.description ILIKE '%s' OR schools.name ILIKE '%s' OR years.name ILIKE '%s' OR exam_types.name ILIKE '%s' OR university_units.name ILIKE '%s' OR highschool_sequences.name ILIKE '%s'",
+			"(CAST(exams.id AS TEXT) = '%s' OR exams.description ILIKE '%s' OR schools.name ILIKE '%s' OR years.name ILIKE '%s' OR exam_types.name ILIKE '%s' OR university_units.name ILIKE '%s' OR highschool_sequences.name ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -216,22 +218,29 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 		)
 		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT exams.id, exams.school_id, exams.year_id, exams.type_id, exams.unit_id, exams.class_subject_id, exams.sequence_id"+
-				", exams.created_at, exams.updated_at FROM exams "+
-				"LEFT JOIN schools ON exams.school_id = schools.id "+
-				"LEFT JOIN years ON exams.year_id = years.id "+
-				"LEFT JOIN exam_types ON exams.type_id = exam_types.id "+
-				"LEFT JOIN university_units ON exams.unit_id = university_units.id "+
-				"LEFT JOIN highschool_class_subjects ON exams.class_subject_id = highschool_class_subjects.id "+
-				"LEFT JOIN highschool_sequences ON exams.sequence_id = highschool_sequences.id",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.Domain").
+		Preload("Unit.Level").
+		Preload("Unit.Semester").
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT exams.* "+
+					"FROM exams "+
+					"LEFT JOIN schools ON exams.school_id = schools.id "+
+					"LEFT JOIN years ON exams.year_id = years.id "+
+					"LEFT JOIN exam_types ON exams.type_id = exam_types.id "+
+					"LEFT JOIN highschool_class_subjects ON exams.class_subject_id = highschool_class_subjects.id "+
+					"LEFT JOIN highschool_sequences ON exams.sequence_id = highschool_sequences.id "+
+					"LEFT JOIN university_units ON exams.unit_id = university_units.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

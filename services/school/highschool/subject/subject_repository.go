@@ -2,7 +2,6 @@ package subject
 
 import (
 	"fmt"
-	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -10,6 +9,7 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
+	"api/services/school/highschool/subject/data"
 	"api/services/school/highschool/subject/model"
 )
 
@@ -74,38 +74,38 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.HighschoolSubjec
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.HighschoolSubject, err error) {
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.HighschoolSubject, err error) {
 	result = make([]model.HighschoolSubject, 0)
 	var where string = ""
-	if schoolID > 0 {
-		where = fmt.Sprintf("WHERE subjects.school_id = %d", schoolID)
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("subjects.school_id = %d", request.SchoolID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(subjects.id AS TEXT) = '%s' OR subjects.name ILIKE '%s' OR subjects.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s'",
+			"(CAST(subjects.id AS TEXT) = '%s' OR subjects.name ILIKE '%s' OR subjects.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
-		if strings.HasPrefix(where, "WHERE") {
-			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
-		} else {
-			where = fmt.Sprintf("WHERE %s", tempWhere)
-		}
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT subjects.id, subjects.school_id, subjects.name, subjects.description"+
-				", subjects.created_at, subjects.updated_at FROM highschool_subjects subjects "+
-				"LEFT JOIN schools ON subjects.school_id = schools.id",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT subjects.* "+
+					"FROM highschool_subjects subjects "+
+					"LEFT JOIN schools ON subjects.school_id = schools.id",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

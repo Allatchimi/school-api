@@ -25,13 +25,12 @@ type ExamPublicResponse struct {
 	StartDate       *time.Time `json:"startDate" required:"false" doc:"Start date"`
 	EndDate         *time.Time `json:"endDate" required:"false" doc:"End date"`
 
-	School *schoolData.SchoolPublicResponse `json:"school" required:"true" doc:"School"`
-	Year   *yearData.YearPublicResponse     `json:"Year" required:"true" doc:"Year"`
-	Type   *ExamTypePublicResponse          `json:"type" required:"false" doc:"Type"`
-
-	Unit         *unitData.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
+	School       *schoolData.SchoolPublicResponse      `json:"school" required:"false" doc:"School"`
+	Year         *yearData.YearPublicResponse          `json:"Year" required:"false" doc:"Year"`
+	Type         *ExamTypePublicResponse               `json:"type" required:"false" doc:"Type"`
 	ClassSubject *classData.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Class subject"`
 	Sequence     *sequenceData.SequencePublicResponse  `json:"semester" required:"false" doc:"Sequence"`
+	Unit         *unitData.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
 }
 
 type ExamTypeResponse struct {
@@ -43,7 +42,7 @@ type ExamTypePublicResponse struct {
 	Name        string `json:"name" required:"false" doc:"Name"`
 	Description string `json:"description" required:"false" doc:"Description"`
 
-	School *schoolData.SchoolPublicResponse `json:"school" required:"true" doc:"School"`
+	School *schoolData.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
 }
 
 type ExamResponseList struct {

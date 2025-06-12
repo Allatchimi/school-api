@@ -17,9 +17,9 @@ type ExamRequest struct {
 	SchoolID       int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
 	YearID         int64 `json:"yearID" required:"true" doc:"Year id" example:"1"`
 	TypeID         int64 `json:"typeID" required:"true" doc:"Type id" example:"1"`
-	UnitID         int64 `json:"unitID" required:"true" doc:"Unit id" example:"1"`
 	ClassSubjectID int64 `json:"classSubjectID" required:"true" doc:"Class subject id" example:"1"`
 	SequenceID     int64 `json:"sequenceID" required:"true" doc:"Sequence id" example:"1"`
+	UnitID         int64 `json:"unitID" required:"true" doc:"Unit id" example:"1"`
 
 	Percentage      int        `json:"percentage" required:"true" min:"&" max:"100" doc:"Percentage" example:"100"`
 	Description     string     `json:"description" required:"false" doc:"Description" example:""`

@@ -5,10 +5,11 @@ type ContactID struct {
 }
 
 type ContactRequest struct {
-	SchoolID int64  `json:"schoolID" required:"false" doc:"School id" example:"1"`
-	Subject  string `json:"subject" required:"true" doc:"Subject" example:""`
-	Email    string `json:"email" required:"true" doc:"Email" example:""`
-	Message  string `json:"message" required:"true" doc:"Message" example:""`
+	SchoolID int64 `json:"schoolID" required:"false" doc:"School id" example:"1"`
+
+	Subject string `json:"subject" required:"true" doc:"Subject" example:""`
+	Email   string `json:"email" required:"true" doc:"Email" example:""`
+	Message string `json:"message" required:"true" doc:"Message" example:""`
 }
 
 type GetAllRequest struct {

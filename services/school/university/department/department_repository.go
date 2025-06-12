@@ -2,7 +2,6 @@ package department
 
 import (
 	"fmt"
-	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -10,6 +9,7 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
+	"api/services/school/university/department/data"
 	"api/services/school/university/department/model"
 )
 
@@ -75,15 +75,17 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.UniversityDepart
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.UniversityDepartment, err error) {
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.UniversityDepartment, err error) {
 	result = make([]model.UniversityDepartment, 0)
 	var where string = ""
-	if schoolID > 0 {
-		where = fmt.Sprintf("WHERE departments.school_id = %d", schoolID)
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("departments.school_id = %d", request.SchoolID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(departments.id AS TEXT) = '%s' OR departments.name ILIKE '%s' OR departments.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR faculties.name ILIKE '%s' OR faculties.description ILIKE '%s'",
+			"(CAST(departments.id AS TEXT) = '%s' OR departments.name ILIKE '%s' OR departments.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR faculties.name ILIKE '%s' OR faculties.description ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -92,25 +94,22 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
-
-		if strings.HasPrefix(where, "WHERE") {
-			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
-		} else {
-			where = fmt.Sprintf("WHERE %s", tempWhere)
-		}
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT departments.id, departments.name, departments.description, departments.school_id, departments.faculty_id"+
-				", departments.created_at, departments.updated_at FROM university_departments departments "+
-				"LEFT JOIN schools ON departments.school_id = schools.id "+
-				"LEFT JOIN university_faculties AS faculties ON departments.faculty_id = faculties.id",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT departments.* "+
+					"FROM university_departments departments "+
+					"LEFT JOIN schools ON departments.school_id = schools.id "+
+					"LEFT JOIN university_faculties AS faculties ON departments.faculty_id = faculties.id",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

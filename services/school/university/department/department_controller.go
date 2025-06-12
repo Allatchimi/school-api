@@ -25,12 +25,7 @@ func (controller *Controller) Create(
 ) (result *model.UniversityDepartment, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.UniversityDepartment{
-			SchoolID:    input.Body.SchoolID,
-			FacultyID:   input.Body.FacultyID,
-			Name:        input.Body.Name,
-			Description: input.Body.Description,
-		},
+		&input.Body,
 	)
 	return
 }
@@ -43,13 +38,9 @@ func (controller *Controller) Update(
 	},
 ) (result *model.UniversityDepartment, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		helpers.GetJwtContext(ctx), input.ID,
-		&model.UniversityDepartment{
-			SchoolID:    input.Body.SchoolID,
-			FacultyID:   input.Body.FacultyID,
-			Name:        input.Body.Name,
-			Description: input.Body.Description,
-		},
+		helpers.GetJwtContext(ctx),
+		input.ID,
+		&input.Body,
 	)
 	return
 }
@@ -105,7 +96,7 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.DepartmentResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	departmentList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllRequest.SchoolID)
+	departmentList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}

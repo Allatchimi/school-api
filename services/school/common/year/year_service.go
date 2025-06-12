@@ -6,6 +6,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
+	"api/services/school/common/year/data"
 	"api/services/school/common/year/model"
 )
 
@@ -20,9 +21,14 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "year"
 const DEFAULT_ERROR_MESSAGE = "interact with year model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Year) (result *model.Year, errCode int, err error) {
-	yearName := fmt.Sprintf("%d-%d", item.StartDate.Year(), item.EndDate.Year())
-	item.Name = yearName
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.YearRequest) (result *model.Year, errCode int, err error) {
+	// Format request
+	item := &model.Year{
+		SchoolID:  request.SchoolID,
+		Name:      fmt.Sprintf("%d-%d", request.StartDate.Year(), request.EndDate.Year()),
+		StartDate: request.StartDate,
+		EndDate:   request.EndDate,
+	}
 
 	// Check unique
 	foundUnique, err := service.Repository.GetUniqueObject(item)
@@ -47,9 +53,9 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Year) 
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, yearID int64, item *model.Year) (result *model.Year, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.YearRequest) (result *model.Year, errCode int, err error) {
 	// Check if year exists
-	foundItem, err := service.Repository.GetByID(yearID)
+	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -61,8 +67,13 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, yearID int64, item
 		return
 	}
 
-	yearName := fmt.Sprintf("%d-%d", item.StartDate.Year(), item.EndDate.Year())
-	item.Name = yearName
+	// Format request
+	item := &model.Year{
+		SchoolID:  request.SchoolID,
+		Name:      fmt.Sprintf("%d-%d", request.StartDate.Year(), request.EndDate.Year()),
+		StartDate: request.StartDate,
+		EndDate:   request.EndDate,
+	}
 
 	// Check unique
 	foundUnique, err := service.Repository.GetUniqueObject(item)
@@ -78,7 +89,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, yearID int64, item
 	}
 
 	// Update year
-	result, err = service.Repository.Update(yearID, item)
+	result, err = service.Repository.Update(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -87,8 +98,8 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, yearID int64, item
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, yearID int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(yearID)
+func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.Delete(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -117,8 +128,8 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, yearID int64) (result *model.Year, errCode int, err error) {
-	result, err = service.Repository.GetByID(yearID)
+func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Year, errCode int, err error) {
+	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

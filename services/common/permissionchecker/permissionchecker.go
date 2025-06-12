@@ -1,4 +1,4 @@
-package common_svc_permission
+package permissionchecker
 
 import (
 	"api/common/constants"
@@ -11,27 +11,27 @@ import (
 	"api/services/user/user"
 )
 
-var userRepo *user.Repository
-var schoolRepo *school.Repository
-var directorRepo *director.Repository
-var teacherRepo *teacher.Repository
-var studentRepo *student.Repository
-var parentRepo *parent.Repository
+var userSvc *user.Service
+var schoolSvc *school.Service
+var directorSvc *director.Service
+var teacherSvc *teacher.Service
+var studentSvc *student.Service
+var parentSvc *parent.Service
 
-func InjectRepositories(
-	userRepository *user.Repository,
-	schoolRepository *school.Repository,
-	directorRepository *director.Repository,
-	teacherRepository *teacher.Repository,
-	studentRepository *student.Repository,
-	parentRepository *parent.Repository,
+func InjectServices(
+	userService *user.Service,
+	schoolService *school.Service,
+	directorService *director.Service,
+	teacherService *teacher.Service,
+	studentService *student.Service,
+	parentService *parent.Service,
 ) {
-	userRepo = userRepository
-	schoolRepo = schoolRepository
-	directorRepo = directorRepository
-	teacherRepo = teacherRepository
-	studentRepo = studentRepository
-	parentRepo = parentRepository
+	userSvc = userService
+	schoolSvc = schoolService
+	directorSvc = directorService
+	teacherSvc = teacherService
+	studentSvc = studentService
+	parentSvc = parentService
 }
 
 func CanAccessBySchool(
@@ -39,7 +39,7 @@ func CanAccessBySchool(
 	schoolID int64,
 ) bool {
 	// Get role
-	foundUser, err := userRepo.GetByID(userID)
+	foundUser, err := userSvc.Repository.GetByID(userID)
 	if err != nil || foundUser == nil || foundUser.ID < 1 {
 		return false
 	}
@@ -50,28 +50,28 @@ func CanAccessBySchool(
 	}
 	// For directors, check if the user is a director of the provided school id
 	if foundUser.Role.Feature == constants.FeatureDirector {
-		foundItem, _ := directorRepo.GetByUserIDSchoolID(userID, schoolID)
+		foundItem, _ := directorSvc.Repository.GetByUserIDSchoolID(userID, schoolID)
 		if foundItem != nil && foundItem.ID > 0 {
 			return true
 		}
 	}
 	// For teacher, check if the user is a teacher of the provided school id
 	if foundUser.Role.Feature == constants.FeatureTeacher {
-		foundItem, _ := teacherRepo.GetByUserIDSchoolID(userID, schoolID)
+		foundItem, _ := teacherSvc.Repository.GetByUserIDSchoolID(userID, schoolID)
 		if foundItem != nil && foundItem.ID > 0 {
 			return true
 		}
 	}
 	// For student, check if the user is a student of the provided school id
 	if foundUser.Role.Feature == constants.FeatureStudent {
-		foundItem, _ := studentRepo.GetByUserIDSchoolID(userID, schoolID)
+		foundItem, _ := studentSvc.Repository.GetByUserIDSchoolID(userID, schoolID)
 		if foundItem != nil && foundItem.ID > 0 {
 			return true
 		}
 	}
 	// For parent, check if the user is a parent of any student of the provided school id
 	if foundUser.Role.Feature == constants.FeatureStudent {
-		foundItem, _ := parentRepo.GetParentStudentByUserIDSchoolID(userID, schoolID)
+		foundItem, _ := parentSvc.Repository.GetParentStudentByUserIDSchoolID(userID, schoolID)
 		if foundItem != nil && foundItem.ID > 0 && foundItem.Parent.UserID == userID {
 			if foundItem.Student.SchoolID == schoolID {
 				return true
@@ -90,7 +90,7 @@ func CanAccessBySchoolYearClassSubjectUnit(
 	unitID int64,
 ) bool {
 	// Get role
-	foundUser, err := userRepo.GetByID(userID)
+	foundUser, err := userSvc.Repository.GetByID(userID)
 	if err != nil || foundUser == nil || foundUser.Role.ID <= 0 {
 		return false
 	}
@@ -101,14 +101,14 @@ func CanAccessBySchoolYearClassSubjectUnit(
 	}
 	// For directors, check if the user is a director of the provided school id
 	if foundUser.Role.Feature == constants.FeatureDirector {
-		foundItem, _ := directorRepo.GetByUserIDSchoolID(userID, schoolID)
+		foundItem, _ := directorSvc.Repository.GetByUserIDSchoolID(userID, schoolID)
 		if foundItem != nil && foundItem.ID > 0 {
 			return true
 		}
 	}
 
 	// Retrieve school information
-	foundSchool, err := schoolRepo.GetByID(schoolID)
+	foundSchool, err := schoolSvc.Repository.GetByID(schoolID)
 	if err != nil || foundSchool == nil || foundSchool.ID <= 0 {
 		return false
 	}
@@ -116,13 +116,13 @@ func CanAccessBySchoolYearClassSubjectUnit(
 	// For teacher, check if the user is a teacher of the provided school id, year id and class subject/unit id
 	if foundUser.Role.Feature == constants.FeatureTeacher {
 		if foundSchool.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
-			foundItem, _ := teacherRepo.GetTeacherClassSubjectUnitByUserIDSchoolIDYearIDClassSubjectID(
+			foundItem, _ := teacherSvc.Repository.GetTeacherClassSubjectUnitByUserIDSchoolIDYearIDClassSubjectID(
 				userID, schoolID, yearID, classSubjectID)
 			if foundItem != nil && foundItem.ID > 0 {
 				return true
 			}
 		} else {
-			foundItem, _ := teacherRepo.GetTeacherClassSubjectUnitByUserIDSchoolIDYearIDUnitID(
+			foundItem, _ := teacherSvc.Repository.GetTeacherClassSubjectUnitByUserIDSchoolIDYearIDUnitID(
 				userID, schoolID, yearID, unitID)
 			if foundItem != nil && foundItem.ID > 0 {
 				return true
@@ -132,13 +132,13 @@ func CanAccessBySchoolYearClassSubjectUnit(
 	// For student, check if the user is a student of the provided school id year id and class subject/unit id
 	if foundUser.Role.Feature == constants.FeatureStudent {
 		if foundSchool.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
-			foundItem, _ := studentRepo.GetStudentEnrollByUserIDSchoolIDYearIDClassSubjectID(
+			foundItem, _ := studentSvc.Repository.GetStudentEnrollByUserIDSchoolIDYearIDClassSubjectID(
 				userID, schoolID, yearID, classSubjectID)
 			if foundItem != nil && foundItem.ID > 0 {
 				return true
 			}
 		} else {
-			foundItem, _ := studentRepo.GetStudentEnrollByUserIDSchoolIDYearIDUnitID(
+			foundItem, _ := studentSvc.Repository.GetStudentEnrollByUserIDSchoolIDYearIDUnitID(
 				userID, schoolID, yearID, unitID)
 			if foundItem != nil && foundItem.ID > 0 {
 				return true
@@ -149,9 +149,9 @@ func CanAccessBySchoolYearClassSubjectUnit(
 	if foundUser.Role.Feature == constants.FeatureStudent {
 		var foundItem *model.ParentStudent
 		if foundSchool.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
-			foundItem, err = parentRepo.GetParentStudentByUserIDSchoolID(userID, schoolID)
+			foundItem, err = parentSvc.Repository.GetParentStudentByUserIDSchoolID(userID, schoolID)
 		} else {
-			foundItem, err = parentRepo.GetParentStudentByUserIDSchoolID(userID, schoolID)
+			foundItem, err = parentSvc.Repository.GetParentStudentByUserIDSchoolID(userID, schoolID)
 		}
 		if foundItem != nil && foundItem.ID > 0 && foundItem.Parent.UserID == userID {
 			if foundItem.Student.SchoolID == schoolID {
@@ -170,7 +170,7 @@ func CanAccessBySchoolYearClassLevelDomain(
 	levelDomainID int64,
 ) bool {
 	// Get role
-	foundUser, err := userRepo.GetByID(userID)
+	foundUser, err := userSvc.Repository.GetByID(userID)
 	if err != nil || foundUser == nil || foundUser.Role.ID <= 0 {
 		return false
 	}
@@ -181,14 +181,14 @@ func CanAccessBySchoolYearClassLevelDomain(
 	}
 	// For directors, check if the user is a director of the provided school id
 	if foundUser.Role.Feature == constants.FeatureDirector {
-		foundItem, _ := directorRepo.GetByUserIDSchoolID(userID, schoolID)
+		foundItem, _ := directorSvc.Repository.GetByUserIDSchoolID(userID, schoolID)
 		if foundItem != nil && foundItem.ID > 0 {
 			return true
 		}
 	}
 
 	// Retrieve school information
-	foundSchool, err := schoolRepo.GetByID(schoolID)
+	foundSchool, err := schoolSvc.Repository.GetByID(schoolID)
 	if err != nil || foundSchool == nil || foundSchool.ID <= 0 {
 		return false
 	}
@@ -196,13 +196,13 @@ func CanAccessBySchoolYearClassLevelDomain(
 	// For teacher, check if the user is a teacher of the provided school id year id and clas/level domain
 	if foundUser.Role.Feature == constants.FeatureTeacher {
 		if foundSchool.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
-			foundItem, _ := teacherRepo.GetTeacherClassSubjectUnitByUserIDSchoolIDYearIDClassID(
+			foundItem, _ := teacherSvc.Repository.GetTeacherClassSubjectUnitByUserIDSchoolIDYearIDClassID(
 				userID, schoolID, yearID, classID)
 			if foundItem != nil && foundItem.ID > 0 {
 				return true
 			}
 		} else {
-			foundItem, _ := teacherRepo.GetTeacherClassSubjectUnitByUserIDSchoolIDYearIDLevelDomainID(
+			foundItem, _ := teacherSvc.Repository.GetTeacherClassSubjectUnitByUserIDSchoolIDYearIDLevelDomainID(
 				userID, schoolID, yearID, levelDomainID)
 			if foundItem != nil && foundItem.ID > 0 && foundItem.Teacher.UserID == userID && foundItem.Teacher.SchoolID == schoolID {
 				if foundItem.YearID == yearID && foundItem.Unit.LevelDomainID == levelDomainID {
@@ -214,13 +214,13 @@ func CanAccessBySchoolYearClassLevelDomain(
 	// For student, check if the user is a student of the provided school id year id and clas/level domain
 	if foundUser.Role.Feature == constants.FeatureStudent {
 		if foundSchool.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
-			foundItem, _ := studentRepo.GetStudentEnrollByUserIDSchoolIDYearIDClassID(
+			foundItem, _ := studentSvc.Repository.GetStudentEnrollByUserIDSchoolIDYearIDClassID(
 				userID, schoolID, yearID, classID)
 			if foundItem != nil && foundItem.ID > 0 {
 				return true
 			}
 		} else {
-			foundItem, _ := studentRepo.GetStudentEnrollByUserIDSchoolIDYearIDLevelDomainID(
+			foundItem, _ := studentSvc.Repository.GetStudentEnrollByUserIDSchoolIDYearIDLevelDomainID(
 				userID, schoolID, yearID, levelDomainID)
 			if foundItem != nil && foundItem.ID > 0 {
 				return true
@@ -229,7 +229,7 @@ func CanAccessBySchoolYearClassLevelDomain(
 	}
 	// For parent, check if the user is a parent of any student of the provided school id year id and clas/level domain
 	if foundUser.Role.Feature == constants.FeatureStudent {
-		foundItem, _ := parentRepo.GetParentStudentByUserIDSchoolID(userID, schoolID)
+		foundItem, _ := parentSvc.Repository.GetParentStudentByUserIDSchoolID(userID, schoolID)
 		if foundItem != nil && foundItem.ID > 0 && foundItem.Parent.UserID == userID {
 			if foundItem.Student.SchoolID == schoolID {
 				return true

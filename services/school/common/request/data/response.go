@@ -1,0 +1,41 @@
+package data
+
+import (
+	"api/common/types"
+	schoolData "api/services/school/common/school/data"
+	studentData "api/services/school/common/student/data"
+	yearData "api/services/school/common/year/data"
+	classData "api/services/school/highschool/class/data"
+	sequenceData "api/services/school/highschool/sequence/data"
+	unitData "api/services/school/university/unit/data"
+)
+
+type RequestResponse struct {
+	types.BaseGormModelResponse
+	RequestPublicResponse
+}
+
+type RequestPublicResponse struct {
+	Status  string `json:"status" required:"false" doc:"Status"`
+	Type    string `json:"type" required:"false" doc:"Type"`
+	Title   string `json:"title" required:"false" doc:"Title"`
+	Message string `json:"message" required:"false" doc:"Message"`
+
+	Document1 string `json:"document1" required:"false" doc:"Document1"`
+	Document2 string `json:"document2" required:"false" doc:"Document2"`
+	Document3 string `json:"document3" required:"false" doc:"Document3"`
+	Document4 string `json:"document4" required:"false" doc:"Document4"`
+	Document5 string `json:"document5" required:"false" doc:"Document5"`
+
+	School       *schoolData.SchoolPublicResponse      `json:"school" required:"false" doc:"School"`
+	Year         *yearData.YearPublicResponse          `json:"Year" required:"false" doc:"Year"`
+	ClassSubject *classData.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Class subject"`
+	Sequence     *sequenceData.SequencePublicResponse  `json:"semester" required:"false" doc:"Sequence"`
+	Unit         *unitData.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
+	Student      *studentData.StudentPublicResponse    `json:"student" required:"false" doc:"Student"`
+}
+
+type RequestResponseList struct {
+	types.PaginatedResponse
+	Data []RequestResponse `json:"data" required:"false" doc:"List of requests" example:"[]"`
+}

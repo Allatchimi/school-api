@@ -2,7 +2,6 @@ package year
 
 import (
 	"fmt"
-	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -78,32 +77,32 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	result = make([]model.Year, 0)
 	var where string = ""
 	if schoolID > 0 {
-		where = fmt.Sprintf("WHERE years.school_id = %d", schoolID)
+		where = helpers.AppendWhereClause(where, fmt.Sprintf("years.school_id = %d", schoolID))
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(id AS TEXT) = '%s' OR name ILIKE '%s' OR start_date ILIKE '%s' OR end_date ILIKE '%s'",
+			"CAST(years.id AS TEXT) = '%s' OR years.name ILIKE '%s' OR years.start_date ILIKE '%s' OR years.end_date ILIKE '%s' OR schools.name ILIKE '%s'",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
 		)
-
-		if strings.HasPrefix(where, "WHERE") {
-			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
-		} else {
-			where = fmt.Sprintf("WHERE %s", tempWhere)
-		}
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT * FROM years",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT years.* "+
+					"FROM years "+
+					"LEFT JOIN schools ON years.school_id = schools.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

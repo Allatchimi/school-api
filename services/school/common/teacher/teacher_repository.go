@@ -80,12 +80,18 @@ func (repository *Repository) DeleteTeacherClassSubjectUnitByID(id int64) (int64
 
 func (repository *Repository) GetByID(id int64) (*model.Teacher, error) {
 	result := &model.Teacher{}
-	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("User.Info").
+		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByUserID(userID int64) (*model.Teacher, error) {
 	result := &model.Teacher{}
-	return result, repository.Db.Preload(clause.Associations).Where("user_id = ?", userID).Limit(1).Find(result).Error
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("User.Info").
+		Where("user_id = ?", userID).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetTeacherClassSubjectUnitByID(id int64) (*model.TeacherClassSubjectUnit, error) {
@@ -148,7 +154,9 @@ func (repository *Repository) AreTeacherClassSubjectUnitSameUniqueObjects(item1 
 
 func (repository *Repository) GetByUserIDSchoolID(userID int64, schoolID int64) (*model.Teacher, error) {
 	result := &model.Teacher{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("User.Info").
 		Where("user_id = ?", userID).Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
 }
@@ -169,13 +177,15 @@ func (repository *Repository) GetTeacherClassSubjectUnitByUserIDUnitID(userID in
 
 func (repository *Repository) GetTeacherClassSubjectUnitByUserIDSchoolIDYearIDClassSubjectID(userID int64, schoolID int64, yearID int64, classSubjectID int64) (*model.TeacherClassSubjectUnit, error) {
 	result := &model.TeacherClassSubjectUnit{}
-	where := fmt.Sprintf("WHERE teachers.user_id = %d AND teachers.school_id = %d AND teacher_unit_subjects.year_id = %d AND teacher_unit_subjects.class_subject_id = %d", userID, schoolID, yearID, classSubjectID)
+
+	where := helpers.AppendWhereClause("", fmt.Sprintf("teachers.user_id = %d AND teachers.school_id = %d AND teacher_unit_subjects.year_id = %d AND teacher_unit_subjects.class_subject_id = %d", userID, schoolID, yearID, classSubjectID))
+
 	tmpErr := repository.Db.Preload(clause.Associations).
 		Scopes(
 			helpers.PaginationScope(
 				repository.Db,
-				"SELECT teacher_unit_subjects.id, teacher_unit_subjects.teacher_id, teacher_unit_subjects.year_id, teacher_unit_subjects.class_subject_id, teacher_unit_subjects.unit_id"+
-					", teacher_unit_subjects.created_at, teacher_unit_subjects.updated_at FROM teacher_unit_subjects "+
+				"SELECT teacher_unit_subjects.* "+
+					"FROM teacher_unit_subjects "+
 					"LEFT JOIN teachers ON teacher_unit_subjects.teacher_id = teachers.id ",
 				where,
 				nil,
@@ -189,13 +199,15 @@ func (repository *Repository) GetTeacherClassSubjectUnitByUserIDSchoolIDYearIDCl
 
 func (repository *Repository) GetTeacherClassSubjectUnitByUserIDSchoolIDYearIDUnitID(userID int64, schoolID int64, yearID int64, unitID int64) (*model.TeacherClassSubjectUnit, error) {
 	result := &model.TeacherClassSubjectUnit{}
-	where := fmt.Sprintf("WHERE teachers.user_id = %d AND teachers.school_id = %d AND teacher_unit_subjects.year_id = %d AND teacher_unit_subjects.unit_id = %d", userID, schoolID, yearID, unitID)
+
+	where := helpers.AppendWhereClause("", fmt.Sprintf("teachers.user_id = %d AND teachers.school_id = %d AND teacher_unit_subjects.year_id = %d AND teacher_unit_subjects.unit_id = %d", userID, schoolID, yearID, unitID))
+
 	tmpErr := repository.Db.Preload(clause.Associations).
 		Scopes(
 			helpers.PaginationScope(
 				repository.Db,
-				"SELECT teacher_unit_subjects.id, teacher_unit_subjects.teacher_id, teacher_unit_subjects.year_id, teacher_unit_subjects.class_subject_id, teacher_unit_subjects.unit_id"+
-					", teacher_unit_subjects.created_at, teacher_unit_subjects.updated_at FROM teacher_unit_subjects "+
+				"SELECT teacher_unit_subjects.* "+
+					"FROM teacher_unit_subjects "+
 					"LEFT JOIN teachers ON teacher_unit_subjects.teacher_id = teachers.id ",
 				where,
 				nil,
@@ -209,16 +221,18 @@ func (repository *Repository) GetTeacherClassSubjectUnitByUserIDSchoolIDYearIDUn
 
 func (repository *Repository) GetTeacherClassSubjectUnitByUserIDSchoolIDYearIDClassID(userID int64, schoolID int64, yearID int64, classID int64) (*model.TeacherClassSubjectUnit, error) {
 	result := &model.TeacherClassSubjectUnit{}
-	where := fmt.Sprintf("WHERE teachers.user_id = %d AND teachers.school_id = %d AND teacher_unit_subjects.year_id = %d AND highschool_class_subjects.class_id = %d", userID, schoolID, yearID, classID)
+
+	where := helpers.AppendWhereClause("", fmt.Sprintf("teachers.user_id = %d AND teachers.school_id = %d AND teacher_unit_subjects.year_id = %d AND highschool_class_subjects.class_id = %d", userID, schoolID, yearID, classID))
+
 	tmpErr := repository.Db.Preload(clause.Associations).
 		Preload("Unit.LevelDomain").
 		Scopes(
 			helpers.PaginationScope(
 				repository.Db,
-				"SELECT teacher_unit_subjects.id, teacher_unit_subjects.teacher_id, teacher_unit_subjects.year_id, teacher_unit_subjects.class_subject_id, teacher_unit_subjects.unit_id"+
-					", teacher_unit_subjects.created_at, teacher_unit_subjects.updated_at FROM teacher_unit_subjects "+
+				"SELECT teacher_unit_subjects.* "+
+					"FROM teacher_unit_subjects "+
 					"LEFT JOIN teachers ON teacher_unit_subjects.teacher_id = teachers.id "+
-					"LEFT JOIN highschool_class_subjects ON teacher_unit_subjects.class_subject_id = highschool_class_subjects.id",
+					"LEFT JOIN highschool_class_subjects ON teacher_unit_subjects.class_subject_id = highschool_class_subjects.id ",
 				where,
 				nil,
 				nil,
@@ -231,16 +245,18 @@ func (repository *Repository) GetTeacherClassSubjectUnitByUserIDSchoolIDYearIDCl
 
 func (repository *Repository) GetTeacherClassSubjectUnitByUserIDSchoolIDYearIDLevelDomainID(userID int64, schoolID int64, yearID int64, levelDomainID int64) (*model.TeacherClassSubjectUnit, error) {
 	result := &model.TeacherClassSubjectUnit{}
-	where := fmt.Sprintf("WHERE teachers.user_id = %d AND teachers.school_id = %d AND teacher_unit_subjects.year_id = %d AND university_units.level_domain_id = %d", userID, schoolID, yearID, levelDomainID)
+
+	where := helpers.AppendWhereClause("", fmt.Sprintf("teachers.user_id = %d AND teachers.school_id = %d AND teacher_unit_subjects.year_id = %d AND university_units.level_domain_id = %d", userID, schoolID, yearID, levelDomainID))
+
 	tmpErr := repository.Db.Preload(clause.Associations).
 		Preload("Unit.LevelDomain").
 		Scopes(
 			helpers.PaginationScope(
 				repository.Db,
-				"SELECT teacher_unit_subjects.id, teacher_unit_subjects.teacher_id, teacher_unit_subjects.year_id, teacher_unit_subjects.class_subject_id, teacher_unit_subjects.unit_id"+
-					", teacher_unit_subjects.created_at, teacher_unit_subjects.updated_at FROM teacher_unit_subjects "+
+				"SELECT teacher_unit_subjects.* "+
+					"FROM teacher_unit_subjects "+
 					"LEFT JOIN teachers ON teacher_unit_subjects.teacher_id = teachers.id "+
-					"LEFT JOIN university_units ON teacher_unit_subjects.unit_id = university_units.id",
+					"LEFT JOIN university_units ON teacher_unit_subjects.unit_id = university_units.id ",
 				where,
 				nil,
 				nil,
@@ -255,11 +271,11 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	result = make([]model.Teacher, 0)
 	var where string = ""
 	if schoolID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("WHERE teachers.school_id = %d", schoolID))
+		where = helpers.AppendWhereClause(where, fmt.Sprintf("teachers.school_id = %d", schoolID))
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(teachers.id AS TEXT) = '%s' OR teachers.uid ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR users.email ILIKE '%s'",
+			"(CAST(teachers.id AS TEXT) = '%s' OR teachers.uid ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR users.email ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -268,18 +284,20 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 		)
 		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT teachers.id, teachers.school_id, teachers.user_id, teachers.uid"+
-				", teachers.created_at, teachers.updated_at FROM teachers "+
-				"LEFT JOIN schools ON teachers.school_id = schools.id "+
-				"LEFT JOIN users ON teachers.user_id = users.id",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT teachers.* "+
+					"FROM teachers "+
+					"LEFT JOIN schools ON teachers.school_id = schools.id "+
+					"LEFT JOIN users ON teachers.user_id = users.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return
@@ -289,21 +307,20 @@ func (repository *Repository) GetAllTeacherClassSubjectUnit(filter *types.Filter
 	result = make([]model.TeacherClassSubjectUnit, 0)
 	var where string = ""
 	if schoolID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("WHERE teachers.school_id = %d", schoolID))
+		where = helpers.AppendWhereClause(where, fmt.Sprintf("teachers.school_id = %d", schoolID))
 	}
 	if teacherID > 0 {
 		where = helpers.AppendWhereClause(where, fmt.Sprintf("tcsu.teacher_id = %d", teacherID))
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(tcsu.id AS TEXT) = '%s' OR years.name ILIKE '%s'"+
-				" OR university_units.name ILIKE '%s' OR university_units.description ILIKE '%s'"+
-				filter.Search,
+			"(CAST(tcsu.id AS TEXT) = '%s' OR years.name ILIKE '%s' OR university_units.name ILIKE '%s' OR university_units.description ILIKE '%s')",
+			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
-		where = fmt.Sprintf("WHERE %s", tempWhere)
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
 	tmpErr := repository.Db.Preload(clause.Associations).
 		Preload("Teacher.School").
@@ -316,12 +333,12 @@ func (repository *Repository) GetAllTeacherClassSubjectUnit(filter *types.Filter
 		Scopes(
 			helpers.PaginationScope(
 				repository.Db,
-				"SELECT tcsu.id, tcsu.teacher_id, tcsu.year_id, tcsu.class_subject_id, tcsu.unit_id"+
-					", tcsu.created_at, tcsu.updated_at FROM teacher_class_subject_units AS tcsu "+
+				"SELECT tcsu.* "+
+					"FROM teacher_class_subject_units AS tcsu "+
 					"LEFT JOIN teachers ON tcsu.teacher_id = teachers.id "+
 					"LEFT JOIN years ON tcsu.year_id = years.id "+
 					"LEFT JOIN highschool_class_subjects ON tcsu.class_subject_id = highschool_class_subjects.id "+
-					"LEFT JOIN university_units ON tcsu.unit_id = university_units.id",
+					"LEFT JOIN university_units ON tcsu.unit_id = university_units.id ",
 				where,
 				pagination,
 				filter,

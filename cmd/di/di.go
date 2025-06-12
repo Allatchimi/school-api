@@ -3,15 +3,19 @@ package di
 import (
 	"api/cmd/api"
 	"api/config"
-	common_svc_permission "api/services/common"
 	"api/services/common/communication"
 	"api/services/common/contact"
 	"api/services/common/health"
+	"api/services/common/permissionchecker"
+	"api/services/school/common/course"
 	"api/services/school/common/director"
 	"api/services/school/common/exam"
 	"api/services/school/common/meeting"
 	"api/services/school/common/parent"
 	"api/services/school/common/quiz"
+	"api/services/school/common/request"
+	"api/services/school/common/result"
+	"api/services/school/common/schedule"
 	"api/services/school/common/school"
 	"api/services/school/common/student"
 	"api/services/school/common/teacher"
@@ -63,8 +67,13 @@ func InjectDependencies() {
 	var permissionRepo = permission.NewRepository(config.DB)
 	api.AllControllers.AuthController = auth.NewAuthController(
 		auth.NewAuthService(
+			api.AllControllers.UserController.Service,
+			api.AllControllers.RoleController.Service,
+		),
+	)
+	api.AllControllers.UserController = user.NewController(
+		user.NewService(
 			userRepo,
-			roleRepo,
 		),
 	)
 	api.AllControllers.RoleController = role.NewController(
@@ -77,30 +86,57 @@ func InjectDependencies() {
 			permissionRepo,
 		),
 	)
-	api.AllControllers.UserController = user.NewController(
-		user.NewService(
-			userRepo,
-		),
-	)
 	api.AllControllers.ProfileController = profile.NewController(
 		profile.NewService(
-			userRepo,
+			api.AllControllers.UserController.Service,
 		),
 	)
 
 	// School
 	var schoolRepo = school.NewRepository(config.DB)
-	var yearRepo = year.NewRepository(config.DB)
-	var examRepo = exam.NewRepository(config.DB)
 	var directorRepo = director.NewRepository(config.DB)
 	var teacherRepo = teacher.NewRepository(config.DB)
 	var studentRepo = student.NewRepository(config.DB)
 	var parentRepo = parent.NewRepository(config.DB)
+	var yearRepo = year.NewRepository(config.DB)
+	var courseRepo = course.NewRepository(config.DB)
+	var examRepo = exam.NewRepository(config.DB)
 	var meetingRepo = meeting.NewRepository(config.DB)
 	var quizRepo = quiz.NewRepository(config.DB)
+	var requestRepo = request.NewRepository(config.DB)
+	var resultRepo = result.NewRepository(config.DB)
+	var scheduleRepo = schedule.NewRepository(config.DB)
 	api.AllControllers.SchoolController = school.NewController(
 		school.NewService(
 			schoolRepo,
+		),
+	)
+	api.AllControllers.DirectorController = director.NewController(
+		director.NewService(
+			directorRepo,
+			api.AllControllers.RoleController.Service,
+			api.AllControllers.UserController.Service,
+		),
+	)
+	api.AllControllers.TeacherController = teacher.NewController(
+		teacher.NewService(
+			teacherRepo,
+			api.AllControllers.RoleController.Service,
+			api.AllControllers.UserController.Service,
+		),
+	)
+	api.AllControllers.StudentController = student.NewController(
+		student.NewService(
+			studentRepo,
+			api.AllControllers.RoleController.Service,
+			api.AllControllers.UserController.Service,
+		),
+	)
+	api.AllControllers.ParentController = parent.NewController(
+		parent.NewService(
+			parentRepo,
+			api.AllControllers.RoleController.Service,
+			api.AllControllers.UserController.Service,
 		),
 	)
 	api.AllControllers.YearController = year.NewController(
@@ -108,42 +144,41 @@ func InjectDependencies() {
 			yearRepo,
 		),
 	)
+	api.AllControllers.CourseController = course.NewController(
+		course.NewService(
+			courseRepo,
+		),
+	)
 	api.AllControllers.ExamController = exam.NewController(
 		exam.NewService(
 			examRepo,
 		),
 	)
-	api.AllControllers.DirectorController = director.NewController(
-		director.NewService(
-			directorRepo, userRepo,
-		),
-	)
-	api.AllControllers.TeacherController = teacher.NewController(
-		teacher.NewService(
-			teacherRepo,
-		),
-	)
-	api.AllControllers.StudentController = student.NewController(
-		student.NewService(
-			studentRepo,
-		),
-	)
-	api.AllControllers.ParentController = parent.NewController(
-		parent.NewService(
-			parentRepo,
-		),
-	)
 	api.AllControllers.MeetingController = meeting.NewController(
 		meeting.NewService(
 			meetingRepo,
-			userRepo,
-			teacherRepo,
+			api.AllControllers.UserController.Service,
+			api.AllControllers.TeacherController.Service,
 		),
 	)
 	api.AllControllers.QuizController = quiz.NewController(
 		quiz.NewService(
 			quizRepo,
-			userRepo,
+		),
+	)
+	api.AllControllers.RequestController = request.NewController(
+		request.NewService(
+			requestRepo,
+		),
+	)
+	api.AllControllers.ResultController = result.NewController(
+		result.NewService(
+			resultRepo,
+		),
+	)
+	api.AllControllers.ScheduleController = schedule.NewController(
+		schedule.NewService(
+			scheduleRepo,
 		),
 	)
 
@@ -157,37 +192,37 @@ func InjectDependencies() {
 	api.AllControllers.SequenceController = sequence.NewController(
 		sequence.NewService(
 			sequenceRepo,
-			schoolRepo,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 	api.AllControllers.QuarterController = quarter.NewController(
 		quarter.NewService(
 			quarterRepo,
-			schoolRepo,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 	api.AllControllers.SectionController = section.NewController(
 		section.NewService(
 			sectionRepo,
-			schoolRepo,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 	api.AllControllers.SpecialtyController = specialty.NewController(
 		specialty.NewService(
 			specialtyRepo,
-			schoolRepo,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 	api.AllControllers.ClassController = class.NewController(
 		class.NewService(
 			classRepo,
-			schoolRepo,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 	api.AllControllers.SubjectController = subject.NewController(
 		subject.NewService(
 			subjectRepo,
-			schoolRepo,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 
@@ -201,47 +236,47 @@ func InjectDependencies() {
 	api.AllControllers.SemesterController = semester.NewController(
 		semester.NewService(
 			semesterRepo,
-			schoolRepo,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 	api.AllControllers.FacultyController = faculty.NewController(
 		faculty.NewService(
 			facultyRepo,
-			schoolRepo,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 	api.AllControllers.DepartmentController = department.NewController(
 		department.NewService(
 			departmentRepo,
-			schoolRepo,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 	api.AllControllers.DomainController = domain.NewController(
 		domain.NewService(
 			domainRepo,
-			schoolRepo,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 	api.AllControllers.LevelController = level.NewController(
 		level.NewService(
 			levelRepo,
-			schoolRepo,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
-	api.AllControllers.TUController = unit.NewController(
+	api.AllControllers.UnitController = unit.NewController(
 		unit.NewService(
 			unitRepo,
-			schoolRepo,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 
 	// Helpers
-	common_svc_permission.InjectRepositories(
-		roleRepo,
-		schoolRepo,
-		directorRepo,
-		teacherRepo,
-		studentRepo,
-		parentRepo,
+	permissionchecker.InjectServices(
+		api.AllControllers.UserController.Service,
+		api.AllControllers.SchoolController.Service,
+		api.AllControllers.DirectorController.Service,
+		api.AllControllers.TeacherController.Service,
+		api.AllControllers.StudentController.Service,
+		api.AllControllers.ParentController.Service,
 	)
 }

@@ -20,9 +20,14 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "communication"
 const DEFAULT_ERROR_MESSAGE = "interact with communication model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Communication) (result *model.Communication, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.CommunicationRequest) (result *model.Communication, errCode int, err error) {
 	// Insert communication
-	result, err = service.Repository.Create(item)
+	result, err = service.Repository.Create(&model.Communication{
+		SchoolID: request.SchoolID,
+		Audience: request.Audience,
+		Subject:  request.Subject,
+		Message:  request.Message,
+	})
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

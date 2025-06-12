@@ -2,7 +2,6 @@ package section
 
 import (
 	"fmt"
-	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -77,28 +76,24 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	result = make([]model.HighschoolSection, 0)
 	var where string = ""
 	if schoolID > 0 {
-		where = fmt.Sprintf("WHERE sections.school_id = %d", schoolID)
+		where = helpers.AppendWhereClause(where, fmt.Sprintf("sections.school_id = %d", schoolID))
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(sections.id AS TEXT) = '%s' OR sections.name ILIKE '%s' OR sections.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s'",
+			"(CAST(sections.id AS TEXT) = '%s' OR sections.name ILIKE '%s' OR sections.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
-		if strings.HasPrefix(where, "WHERE") {
-			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
-		} else {
-			where = fmt.Sprintf("WHERE %s", tempWhere)
-		}
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"SELECT sections.id, sections.name, sections.description, sections.school_id"+
-				", sections.created_at, sections.updated_at FROM highschool_sections sections "+
+			"SELECT sections.* "+
+				"FROM highschool_sections sections "+
 				"LEFT JOIN schools ON sections.school_id = schools.id",
 			where,
 			pagination,

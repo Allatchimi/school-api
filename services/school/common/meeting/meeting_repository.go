@@ -158,33 +158,45 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	var where string = ""
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("meeting_rooms.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("schools.id = %d", request.SchoolID))
 		}
-		if request.UnitID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("meeting_rooms.unit_id = %d", request.UnitID))
+		if request.ClassID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("highschool_class_subjects.class_id = %d", request.ClassID))
 		}
-		if request.ClassSubjectID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("meeting_rooms.class_subject_id = %d", request.ClassSubjectID))
+		if request.LevelDomainID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("university_units.level_domain_id = %d", request.LevelDomainID))
 		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
-		where = fmt.Sprintf(
-			"WHERE CAST(id AS TEXT) = '%s' OR name ILIKE '%s' OR start_date ILIKE '%s' OR end_date ILIKE '%s'",
+		tempWhere := fmt.Sprintf(
+			"(CAST(meeting_rooms.id AS TEXT) = '%s' OR schools.name ILIKE '%s' OR highschool_class_subjects.name ILIKE '%s' OR university_units.name ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT * FROM meeting_rooms",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.Domain").
+		Preload("Unit.Level").
+		Preload("Unit.Semester").
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT meeting_rooms.* "+
+					"FROM meeting_rooms "+
+					"LEFT JOIN schools ON meeting_rooms.school_id = schools.id "+
+					"LEFT JOIN highschool_class_subjects ON meeting_rooms.class_subject_id = highschool_class_subjects.id "+
+					"LEFT JOIN university_units ON meeting_rooms.unit_id = university_units.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

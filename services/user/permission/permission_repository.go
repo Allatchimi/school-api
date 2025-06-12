@@ -46,8 +46,8 @@ func (repository *Repository) UpdateByID(
 	return
 }
 
-func (repository *Repository) DeleteByID(permissionID int64) (result int64, err error) {
-	tmpResult := repository.Db.Where("id = ?", permissionID).Delete(&model.Permission{})
+func (repository *Repository) DeleteByID(id int64) (result int64, err error) {
+	tmpResult := repository.Db.Where("id = ?", id).Delete(&model.Permission{})
 
 	result = tmpResult.RowsAffected
 	err = tmpResult.Error
@@ -94,22 +94,25 @@ func (repository *Repository) GetAll(
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"(CAST(id AS TEXT) = '%s' OR CAST(role_id AS TEXT) ILIKE '%s' OR table_name ILIKE '%s')",
+			"(CAST(permissions.id AS TEXT) = '%s' OR CAST(permissions.role_id AS TEXT) ILIKE '%s' OR permissions.table_name ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
 		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT * FROM permissions",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT permissions.* "+
+					"FROM permissions ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

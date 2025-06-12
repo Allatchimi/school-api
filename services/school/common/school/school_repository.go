@@ -40,9 +40,10 @@ func (repository *Repository) UpdateByID(id int64, item *model.School) (*model.S
 	result := &model.School{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
-			"name": item.Name,
-			"type": item.Type,
-			"logo": item.Logo,
+			"name":     item.Name,
+			"type":     item.Type,
+			"logo":     item.Logo,
+			"currency": item.Currency,
 		},
 	).Error
 }
@@ -77,6 +78,7 @@ func (repository *Repository) UpdateInfoByID(id int64, item *model.SchoolInfo) (
 			"founded_at": item.FoundedAt,
 
 			"address":            item.Address,
+			"po_box":             item.PoBox,
 			"location_longitude": item.LocationLongitude,
 			"location_latitude":  item.LocationLatitude,
 
@@ -84,6 +86,7 @@ func (repository *Repository) UpdateInfoByID(id int64, item *model.SchoolInfo) (
 			"image2": item.Image2,
 			"image3": item.Image3,
 			"image4": item.Image4,
+			"image5": item.Image5,
 		},
 	).Error
 }
@@ -92,7 +95,25 @@ func (repository *Repository) UpdateConfigByID(id int64, item *model.SchoolConfi
 	result := &model.SchoolConfig{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
-			"email_domain":  item.EmailDomain,
+			"protocol": item.Protocol,
+
+			"domain_name": item.DomainName,
+			"domain_cert": item.DomainCert,
+			"domain_key":  item.DomainKey,
+
+			"smtp_host":     item.SmtpHost,
+			"smtp_port":     item.SmtpPort,
+			"smtp_username": item.SmtpUsername,
+			"smtp_password": item.SmtpPassword,
+			"smtp_sender":   item.SmtpSender,
+
+			"email_domain":   item.EmailDomain,
+			"no_reply_email": item.NoReplyEmail,
+			"support_email":  item.SupportEmail,
+
+			"website_title":       item.WebsiteTitle,
+			"website_description": item.WebsiteDescription,
+
 			"color_primary": item.ColorPrimary,
 		},
 	).Error
@@ -147,12 +168,12 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	var where string = ""
 	if request != nil {
 		if len(request.Type) > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("schools.type = %d", request.Type))
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("schools.type = %s", request.Type))
 		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(schools.id AS TEXT) = '%s' OR schools.name ILIKE '%s' OR CAST(schools.type AS TEXT) ILIKE '%s' OR infos.full_name ILIKE '%s' OR infos.slogan ILIKE '%s' OR infos.founder ILIKE '%s'",
+			"(CAST(schools.id AS TEXT) = '%s' OR schools.name ILIKE '%s' OR CAST(schools.type AS TEXT) ILIKE '%s' OR infos.full_name ILIKE '%s' OR infos.slogan ILIKE '%s' OR infos.founder ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -164,17 +185,19 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	}
 	newFilter := filter
 	newFilter.OrderBy = "schools." + newFilter.OrderBy
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT schools.id, schools.name, schools.type, schools.logo, schools.currency, schools.school_config_id, schools.school_info_id"+
-				", schools.created_at, schools.updated_at FROM schools "+
-				"LEFT JOIN school_infos as infos ON schools.school_info_id = infos.id",
-			where,
-			pagination,
-			newFilter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT schools.* "+
+					"LEFT JOIN school_infos as infos ON schools.info_id = infos.id "+
+					"LEFT JOIN school_configs as configs ON schools.config_id = configs.id ",
+				where,
+				pagination,
+				newFilter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

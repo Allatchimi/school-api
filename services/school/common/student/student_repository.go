@@ -98,19 +98,28 @@ func (repository *Repository) DeleteStudentEnrollByID(id int64) (int64, error) {
 
 func (repository *Repository) GetByID(id int64) (*model.Student, error) {
 	result := &model.Student{}
-	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("User.Info").
+		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByUserIDSchoolID(userID int64, schoolID int64) (*model.Student, error) {
 	result := &model.Student{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("User.Info").
 		Where("user_id = ?", userID).Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetStudentEnrollByID(id int64) (*model.StudentEnroll, error) {
 	result := &model.StudentEnroll{}
-	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("Student.User").
+		Preload("Student.User.Info").
+		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObjectByUserID(item *model.Student) (*model.Student, error) {
@@ -170,13 +179,16 @@ func (repository *Repository) GetStudentEnrollByUserIDSchoolIDYearIDClassSubject
 	userID int64, schoolID int64, yearID int64, classSubjectID int64,
 ) (*model.StudentEnroll, error) {
 	result := &model.StudentEnroll{}
-	where := fmt.Sprintf("WHERE students.user_id = %d AND students.school_id = %d AND student_enrolls.year_id = %d AND highschool_class_subjects.id = %d", userID, schoolID, yearID, classSubjectID)
-	tmpErr := repository.Db.Preload(clause.Associations).
+
+	where := helpers.AppendWhereClause("", fmt.Sprintf("(students.user_id = %d AND students.school_id = %d AND student_enrolls.year_id = %d AND highschool_class_subjects.id = %d)", userID, schoolID, yearID, classSubjectID))
+
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
 		Scopes(
 			helpers.PaginationScope(
 				repository.Db,
-				"SELECT student_enrolls.id, student_enrolls.student_id, student_enrolls.year_id, student_enrolls.class_id, student_enrolls.level_domain_id"+
-					", student_enrolls.created_at, student_enrolls.updated_at FROM student_enrolls "+
+				"SELECT student_enrolls.* "+
+					"FROM student_enrolls "+
 					"LEFT JOIN students ON student_enrolls.student_id = students.id "+
 					"LEFT JOIN highschool_class_subjects ON student_enrolls.class_id = highschool_class_subjects.class_id ",
 				where,
@@ -191,13 +203,16 @@ func (repository *Repository) GetStudentEnrollByUserIDSchoolIDYearIDClassSubject
 
 func (repository *Repository) GetStudentEnrollByUserIDSchoolIDYearIDUnitID(userID int64, schoolID int64, yearID int64, unitID int64) (*model.StudentEnroll, error) {
 	result := &model.StudentEnroll{}
-	where := fmt.Sprintf("WHERE students.user_id = %d AND students.school_id = %d AND student_enrolls.year_id = %d AND university_units.id = %d", userID, schoolID, yearID, unitID)
-	tmpErr := repository.Db.Preload(clause.Associations).
+
+	where := helpers.AppendWhereClause("", fmt.Sprintf("(students.user_id = %d AND students.school_id = %d AND student_enrolls.year_id = %d AND university_units.id = %d)", userID, schoolID, yearID, unitID))
+
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
 		Scopes(
 			helpers.PaginationScope(
 				repository.Db,
-				"SELECT student_enrolls.id, student_enrolls.student_id, student_enrolls.year_id, student_enrolls.class_id, student_enrolls.level_domain_id"+
-					", student_enrolls.created_at, student_enrolls.updated_at FROM student_enrolls "+
+				"SELECT student_enrolls.* "+
+					"FROM student_enrolls "+
 					"LEFT JOIN students ON student_enrolls.student_id = students.id "+
 					"LEFT JOIN university_units ON student_enrolls.level_domain_id = university_units.level_domain_id ",
 				where,
@@ -214,13 +229,16 @@ func (repository *Repository) GetStudentEnrollByUserIDSchoolIDYearIDClassID(
 	userID int64, schoolID int64, yearID int64, classID int64,
 ) (*model.StudentEnroll, error) {
 	result := &model.StudentEnroll{}
-	where := fmt.Sprintf("WHERE students.user_id = %d AND students.school_id = %d AND student_enrolls.year_id = %d AND student_enrolls.class_id = %d", userID, schoolID, yearID, classID)
-	tmpErr := repository.Db.Preload(clause.Associations).
+
+	where := helpers.AppendWhereClause("", fmt.Sprintf("(students.user_id = %d AND students.school_id = %d AND student_enrolls.year_id = %d AND student_enrolls.class_id = %d)", userID, schoolID, yearID, classID))
+
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
 		Scopes(
 			helpers.PaginationScope(
 				repository.Db,
-				"SELECT student_enrolls.id, student_enrolls.student_id, student_enrolls.year_id, student_enrolls.class_id, student_enrolls.level_domain_id"+
-					", student_enrolls.created_at, student_enrolls.updated_at FROM student_enrolls "+
+				"SELECT student_enrolls.* "+
+					"FROM student_enrolls "+
 					"LEFT JOIN students ON student_enrolls.student_id = students.id ",
 				where,
 				nil,
@@ -234,13 +252,16 @@ func (repository *Repository) GetStudentEnrollByUserIDSchoolIDYearIDClassID(
 
 func (repository *Repository) GetStudentEnrollByUserIDSchoolIDYearIDLevelDomainID(userID int64, schoolID int64, yearID int64, levelDomainID int64) (*model.StudentEnroll, error) {
 	result := &model.StudentEnroll{}
-	where := fmt.Sprintf("WHERE students.user_id = %d AND students.school_id = %d AND student_enrolls.year_id = %d AND student_enrolls.level_domain_id = %d", userID, schoolID, yearID, levelDomainID)
-	tmpErr := repository.Db.Preload(clause.Associations).
+
+	where := helpers.AppendWhereClause("", fmt.Sprintf("(students.user_id = %d AND students.school_id = %d AND student_enrolls.year_id = %d AND student_enrolls.level_domain_id = %d)", userID, schoolID, yearID, levelDomainID))
+
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
 		Scopes(
 			helpers.PaginationScope(
 				repository.Db,
-				"SELECT student_enrolls.id, student_enrolls.student_id, student_enrolls.year_id, student_enrolls.class_id, student_enrolls.level_domain_id"+
-					", student_enrolls.created_at, student_enrolls.updated_at FROM student_enrolls "+
+				"SELECT student_enrolls.* "+
+					"FROM student_enrolls "+
 					"LEFT JOIN students ON student_enrolls.student_id = students.id ",
 				where,
 				nil,
@@ -256,11 +277,11 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	result = make([]model.Student, 0)
 	var where string = ""
 	if schoolID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("WHERE students.school_id = %d", schoolID))
+		where = helpers.AppendWhereClause(where, fmt.Sprintf("students.school_id = %d", schoolID))
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(students.id AS TEXT) = '%s' OR students.uid ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR users.email ILIKE '%s'",
+			"(CAST(students.id AS TEXT) = '%s' OR students.uid ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR users.email ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -269,18 +290,21 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 		)
 		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT students.id, students.school_id, students.user_id, students.uid"+
-				", students.created_at, students.updated_at FROM students "+
-				"LEFT JOIN schools ON students.school_id = schools.id "+
-				"LEFT JOIN users ON students.user_id = users.id",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Preload("User.Info").
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT students.* "+
+					"FROM students "+
+					"LEFT JOIN schools ON students.school_id = schools.id "+
+					"LEFT JOIN users ON students.user_id = users.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return
@@ -297,31 +321,33 @@ func (repository *Repository) GetAllStudentEnroll(filter *types.Filter, paginati
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(student_enrolls.id AS TEXT) = '%s' OR years.name ILIKE '%s'"+
-				" OR highschool_classes.name ILIKE '%s' OR highschool_classes.description ILIKE '%s'"+
-				" OR university_level_domains.program ILIKE '%s' OR university_level_domains.requirements ILIKE '%s'"+
-				filter.Search,
+			"(CAST(student_enrolls.id AS TEXT) = '%s' OR years.name ILIKE '%s' OR highschool_classes.name ILIKE '%s' OR highschool_classes.description ILIKE '%s' OR university_level_domains.program ILIKE '%s' OR university_level_domains.requirements ILIKE '%s')",
+			filter.Search,
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
-		where = fmt.Sprintf("WHERE %s", tempWhere)
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
 		Preload("Student.School").
 		Preload("Student.User").
+		Preload("Student.User.Info").
 		Preload("Class.Specialty").
 		Preload("LevelDomain.Domain").
 		Preload("LevelDomain.Level").
 		Scopes(
 			helpers.PaginationScope(
 				repository.Db,
-				"SELECT student_enrolls.id, student_enrolls.student_id, student_enrolls.year_id, student_enrolls.class_id, student_enrolls.level_domain_id"+
-					", student_enrolls.created_at, student_enrolls.updated_at FROM student_enrolls AS student_enrolls "+
+				"SELECT student_enrolls.* "+
+					"FROM student_enrolls "+
 					"LEFT JOIN students ON student_enrolls.student_id = students.id "+
 					"LEFT JOIN years ON student_enrolls.year_id = years.id "+
 					"LEFT JOIN highschool_classes ON student_enrolls.class_id = highschool_classes.id "+
-					"LEFT JOIN university_level_domains ON student_enrolls.level_domain_id = university_level_domains.id",
+					"LEFT JOIN university_level_domains ON student_enrolls.level_domain_id = university_level_domains.id ",
 				where,
 				pagination,
 				filter,

@@ -23,17 +23,26 @@ const DEFAULT_ERROR_MESSAGE = "interact with permission model"
 func (service *Service) Update(
 	inputJwtToken *types.JwtToken,
 	roleID int64,
-	tableName string,
-	item *model.Permission,
+	request *data.UpdatePermissionRequest,
 ) (result *model.Permission, errCode int, err error) {
+	// Format item
+	item := &model.Permission{
+		RoleID:    roleID,
+		TableName: request.TableName,
+		Create:    request.Create,
+		Read:      request.Read,
+		Update:    request.Update,
+		Delete:    request.Delete,
+	}
+
 	// Check unique
-	foundPermission, err := service.Repository.GetByRoleIDTableName(roleID, tableName)
+	foundPermission, err := service.Repository.GetByRoleIDTableName(item.RoleID, item.TableName)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundPermission == nil || foundPermission.RoleID != roleID {
+	if foundPermission == nil || foundPermission.RoleID != item.RoleID {
 		// Create new ones
 		result, err = service.Repository.Create(item)
 		if err != nil {
@@ -45,7 +54,7 @@ func (service *Service) Update(
 
 	// Update now
 	result, err = service.Repository.UpdateByID(
-		roleID, tableName, item,
+		item.RoleID, item.TableName, item,
 	)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -54,8 +63,8 @@ func (service *Service) Update(
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, roleID int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteByID(roleID)
+func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

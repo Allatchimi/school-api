@@ -20,7 +20,14 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "exam/type"
 const DEFAULT_ERROR_MESSAGE = "interact with exam/type model"
 
-func (service *Service) CreateType(inputJwtToken *types.JwtToken, item *model.ExamType) (result *model.ExamType, errCode int, err error) {
+func (service *Service) CreateType(inputJwtToken *types.JwtToken, request *data.ExamTypeRequest) (result *model.ExamType, errCode int, err error) {
+	// Format request
+	item := &model.ExamType{
+		SchoolID:    request.SchoolID,
+		Name:        request.Name,
+		Description: request.Description,
+	}
+
 	// Check unique
 	foundUnique, err := service.Repository.GetExamTypeUniqueObject(item)
 	if err != nil {
@@ -44,7 +51,26 @@ func (service *Service) CreateType(inputJwtToken *types.JwtToken, item *model.Ex
 	return
 }
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Exam) (result *model.Exam, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.ExamRequest) (result *model.Exam, errCode int, err error) {
+	// Format request
+	item := &model.Exam{
+		SchoolID:       request.SchoolID,
+		YearID:         request.YearID,
+		TypeID:         request.TypeID,
+		UnitID:         request.UnitID,
+		ClassSubjectID: request.ClassSubjectID,
+		SequenceID:     request.SequenceID,
+
+		Percentage:      request.Percentage,
+		Description:     request.Description,
+		LocationType:    request.LocationType,
+		LocationDetails: request.LocationDetails,
+		Requirements:    request.Requirements,
+		AllowedItems:    request.AllowedItems,
+		StartDate:       request.StartDate,
+		EndDate:         request.EndDate,
+	}
+
 	// Check unique
 	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
@@ -68,7 +94,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Exam) 
 	return
 }
 
-func (service *Service) UpdateType(inputJwtToken *types.JwtToken, id int64, item *model.ExamType) (result *model.ExamType, errCode int, err error) {
+func (service *Service) UpdateType(inputJwtToken *types.JwtToken, id int64, request *data.ExamTypeRequest) (result *model.ExamType, errCode int, err error) {
 	// Check if exam already exists
 	foundItem, err := service.Repository.GetTypeById(id)
 	if err != nil {
@@ -80,6 +106,13 @@ func (service *Service) UpdateType(inputJwtToken *types.JwtToken, id int64, item
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
+	}
+
+	// Format request
+	item := &model.ExamType{
+		SchoolID:    request.SchoolID,
+		Name:        request.Name,
+		Description: request.Description,
 	}
 
 	// Check unique
@@ -105,7 +138,7 @@ func (service *Service) UpdateType(inputJwtToken *types.JwtToken, id int64, item
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.Exam) (result *model.Exam, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.ExamRequest) (result *model.Exam, errCode int, err error) {
 	// Check if exam already exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -117,6 +150,25 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
+	}
+
+	// Format request
+	item := &model.Exam{
+		SchoolID:       request.SchoolID,
+		YearID:         request.YearID,
+		TypeID:         request.TypeID,
+		UnitID:         request.UnitID,
+		ClassSubjectID: request.ClassSubjectID,
+		SequenceID:     request.SequenceID,
+
+		Percentage:      request.Percentage,
+		Description:     request.Description,
+		LocationType:    request.LocationType,
+		LocationDetails: request.LocationDetails,
+		Requirements:    request.Requirements,
+		AllowedItems:    request.AllowedItems,
+		StartDate:       request.StartDate,
+		EndDate:         request.EndDate,
 	}
 
 	// Check unique

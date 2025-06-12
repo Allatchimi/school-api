@@ -25,11 +25,7 @@ func (controller *Controller) Create(
 ) (result *model.UniversityLevel, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.UniversityLevel{
-			SchoolID:    input.Body.SchoolID,
-			Name:        input.Body.Name,
-			Description: input.Body.Description,
-		},
+		&input.Body,
 	)
 	return
 }
@@ -42,14 +38,7 @@ func (controller *Controller) CreateLevelDomain(
 ) (result *model.UniversityLevelDomain, errCode int, err error) {
 	result, errCode, err = controller.Service.CreateLevelDomain(
 		helpers.GetJwtContext(ctx),
-		&model.UniversityLevelDomain{
-			LevelID:  input.Body.LevelID,
-			DomainID: input.Body.DomainID,
-
-			Program:      input.Body.Program,
-			Requirements: input.Body.Requirements,
-			IsValid:      input.Body.IsValid,
-		},
+		&input.Body,
 	)
 	return
 }
@@ -62,12 +51,9 @@ func (controller *Controller) Update(
 	},
 ) (result *model.UniversityLevel, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		helpers.GetJwtContext(ctx), input.ID,
-		&model.UniversityLevel{
-			SchoolID:    input.Body.SchoolID,
-			Name:        input.Body.Name,
-			Description: input.Body.Description,
-		},
+		helpers.GetJwtContext(ctx),
+		input.ID,
+		&input.Body,
 	)
 	return
 }
@@ -158,7 +144,7 @@ func (controller *Controller) GetAllLevelDomain(
 	},
 ) (result *data.LevelDomainResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	levelList, errCode, err := controller.Service.GetAllLevelDomain(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllLevelDomainRequest.SchoolID, input.GetAllLevelDomainRequest.LevelID)
+	levelList, errCode, err := controller.Service.GetAllLevelDomain(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllLevelDomainRequest)
 	if err != nil {
 		return
 	}

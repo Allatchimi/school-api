@@ -25,11 +25,7 @@ func (controller *Controller) Create(
 ) (result *model.Role, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.Role{
-			Name:        input.Body.Name,
-			Feature:     input.Body.Feature,
-			Description: input.Body.Description,
-		},
+		&input.Body,
 	)
 	return
 }
@@ -43,11 +39,7 @@ func (controller *Controller) Update(
 ) (result *model.Role, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx), input.ID,
-		&model.Role{
-			Name:        input.Body.Name,
-			Feature:     input.Body.Feature,
-			Description: input.Body.Description,
-		},
+		&input.Body,
 	)
 	return
 }

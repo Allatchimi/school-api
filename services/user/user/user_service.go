@@ -22,7 +22,26 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "user"
 const DEFAULT_ERROR_MESSAGE = "interact with user model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.User, password *string) (result *model.User, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.UserRequest, password *string) (result *model.User, errCode int, err error) {
+	// Format item
+	item := &model.User{
+		RoleID:      request.RoleID,
+		Email:       request.Email,
+		PhoneNumber: request.PhoneNumber,
+		IsActivated: request.IsActivated,
+		Info: &model.UserInfo{
+			Gender:        request.Info.Gender,
+			Username:      request.Info.Username,
+			FirstName:     request.Info.FirstName,
+			LastName:      request.Info.LastName,
+			Birthday:      request.Info.Birthday,
+			BirthLocation: request.Info.BirthLocation,
+			Address:       request.Info.Address,
+			Language:      request.Info.Language,
+			Image:         request.Info.Image,
+		},
+	}
+
 	// Check if user exists
 	var foundItem *model.User
 	var isEmailValid = utils.IsEmailValid(item.Email)
@@ -97,7 +116,26 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.User, 
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.User) (result *model.User, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.UserRequest) (result *model.User, errCode int, err error) {
+	// Format item
+	item := &model.User{
+		RoleID:      request.RoleID,
+		Email:       request.Email,
+		PhoneNumber: request.PhoneNumber,
+		IsActivated: request.IsActivated,
+		Info: &model.UserInfo{
+			Gender:        request.Info.Gender,
+			Username:      request.Info.Username,
+			FirstName:     request.Info.FirstName,
+			LastName:      request.Info.LastName,
+			Birthday:      request.Info.Birthday,
+			BirthLocation: request.Info.BirthLocation,
+			Address:       request.Info.Address,
+			Language:      request.Info.Language,
+			Image:         request.Info.Image,
+		},
+	}
+
 	// Check if user exists
 	var foundItem *model.User
 	var isEmailValid = utils.IsEmailValid(item.Email)

@@ -10,10 +10,11 @@ import (
 	"api/common/types"
 	"api/common/utils"
 	"api/config"
+	"api/services/school/common/teacher/data"
 	"api/services/school/common/teacher/model"
 	"api/services/user/role"
 	"api/services/user/user"
-	modelUser "api/services/user/user/model"
+	userData "api/services/user/user/data"
 )
 
 type Service struct {
@@ -32,8 +33,9 @@ func NewService(repository *Repository, roleService *role.Service, userService *
 
 const MODEL_NAME = "teacher"
 const DEFAULT_ERROR_MESSAGE = "interact with teacher model"
+const teacherUIDSeparator = "T"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, schoolID int64, uid string, user *modelUser.User) (result *model.Teacher, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.TeacherRequest) (result *model.Teacher, errCode int, err error) {
 	// Get teacher role
 	teacherRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleTeacher)
 	if errRole != nil || teacherRole == nil || teacherRole.ID < 1 {
@@ -42,28 +44,51 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, schoolID int64, ui
 		return
 	}
 
-	// Create user
-	var password string = ""
-	if user != nil && user.Info != nil {
-		var firstName, lastName string
-		var birthYear = time.Now().Year()
-		firstNameParts := strings.Split(user.Info.FirstName, " ")
-		if len(firstNameParts) > 0 {
-			firstName = firstNameParts[0]
-		}
-		lastNameParts := strings.Split(user.Info.LastName, " ")
-		if len(lastNameParts) > 0 {
-			lastName = lastNameParts[0]
-		}
-		if user.Info.Birthday != nil {
-			birthYear = user.Info.Birthday.Year()
-		}
-		if len(firstName) > 0 && len(lastName) > 0 && birthYear > 0 {
-			password = fmt.Sprintf("%s%s%d", firstName, lastName, birthYear)
-		}
+	// Format request
+	if request == nil || request.Info == nil {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessage()
+		return
 	}
-	user.RoleID = teacherRole.ID
-	createdUser, errCodeCreate, errCreate := service.UserService.Create(nil, user, &password)
+	var item = &userData.UserRequest{
+		RoleID:      teacherRole.ID,
+		Email:       request.Email,
+		PhoneNumber: request.PhoneNumber,
+		IsActivated: true,
+		Info: &userData.UserInfoRequest{
+			Gender:        request.Info.Gender,
+			Username:      request.Info.Username,
+			FirstName:     request.Info.FirstName,
+			LastName:      request.Info.LastName,
+			Birthday:      request.Info.Birthday,
+			BirthLocation: request.Info.BirthLocation,
+			Address:       request.Info.Address,
+			Language:      request.Info.Language,
+			Image:         request.Info.Image,
+		},
+	}
+
+	// Generate password
+	var firstName, lastName string
+	var birthYear = time.Now().Year()
+	firstNameParts := strings.Split(request.Info.FirstName, " ")
+	if len(firstNameParts) > 0 {
+		firstName = firstNameParts[0]
+	}
+	lastNameParts := strings.Split(request.Info.LastName, " ")
+	if len(lastNameParts) > 0 {
+		lastName = lastNameParts[0]
+	}
+	if request.Info.Birthday != nil {
+		birthYear = request.Info.Birthday.Year()
+	}
+	var password string = ""
+	if len(firstName) > 0 && len(lastName) > 0 && birthYear > 0 {
+		password = fmt.Sprintf("%s%s%d", firstName, lastName, birthYear)
+	}
+
+	// Create user
+	createdUser, errCodeCreate, errCreate := service.UserService.Create(nil, item, &password)
 	if errCreate != nil {
 		errCode = errCodeCreate
 		err = errCreate
@@ -75,15 +100,15 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, schoolID int64, ui
 		return
 	}
 
-	// Check the uid
-	var newUID = uid
+	// Generate the uid if it is empty
+	var newUID = request.UID
 	if len(newUID) < 1 {
 		prefix := fmt.Sprintf("%02dT", time.Now().Year())
 		newUID = utils.GenerateRandomUID(4, prefix, "")
 	}
 	// Insert teacher
 	result, err = service.Repository.Create(&model.Teacher{
-		SchoolID: schoolID,
+		SchoolID: request.SchoolID,
 		UserID:   createdUser.ID,
 		UID:      newUID,
 	})
@@ -95,7 +120,15 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, schoolID int64, ui
 	return
 }
 
-func (service *Service) CreateTeacherClassSubjectUnit(inputJwtToken *types.JwtToken, item *model.TeacherClassSubjectUnit) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
+func (service *Service) CreateTeacherClassSubjectUnit(inputJwtToken *types.JwtToken, request *data.TeacherClassSubjectUnitRequest) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
+	// Retrieve item
+	item := &model.TeacherClassSubjectUnit{
+		TeacherID:      request.TeacherID,
+		YearID:         request.YearID,
+		ClassSubjectID: request.ClassSubjectID,
+		UnitID:         request.UnitID,
+	}
+
 	// Check unique
 	foundUnique, err := service.Repository.GetTeacherClassSubjectUnitUniqueObject(item)
 	if err != nil {
@@ -119,7 +152,7 @@ func (service *Service) CreateTeacherClassSubjectUnit(inputJwtToken *types.JwtTo
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, uid string, user *modelUser.User) (result *model.Teacher, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.TeacherRequest) (result *model.Teacher, errCode int, err error) {
 	// Check if teacher exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -134,9 +167,9 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, uid stri
 	}
 
 	// Check the uid
-	var newUID = uid
+	var newUID = request.UID
 	if len(newUID) < 1 {
-		prefix := fmt.Sprintf("%02dS", time.Now().Year())
+		prefix := fmt.Sprintf("%02d%s", time.Now().Year(), teacherUIDSeparator)
 		newUID = utils.GenerateRandomUID(4, prefix, "")
 	}
 	// Check unique by uid
@@ -173,9 +206,24 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, uid stri
 	}
 
 	// Update user
-	newUser := *user
-	newUser.RoleID = teacherRole.ID
-	_, errCodeUser, errUser := service.UserService.Update(nil, foundItem.UserID, &newUser)
+	userRequest := userData.UserRequest{
+		RoleID:      teacherRole.ID,
+		Email:       request.Email,
+		PhoneNumber: request.PhoneNumber,
+		IsActivated: true,
+		Info: &userData.UserInfoRequest{
+			Gender:        request.Info.Gender,
+			Username:      request.Info.Username,
+			FirstName:     request.Info.FirstName,
+			LastName:      request.Info.LastName,
+			Birthday:      request.Info.Birthday,
+			BirthLocation: request.Info.BirthLocation,
+			Address:       request.Info.Address,
+			Language:      request.Info.Language,
+			Image:         request.Info.Image,
+		},
+	}
+	_, errCodeUser, errUser := service.UserService.Update(nil, foundItem.UserID, &userRequest)
 	if errUser != nil {
 		errCode = errCodeUser
 		err = errUser
@@ -196,7 +244,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, uid stri
 	return
 }
 
-func (service *Service) UpdateTeacherClassSubjectUnit(inputJwtToken *types.JwtToken, id int64, item *model.TeacherClassSubjectUnit) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
+func (service *Service) UpdateTeacherClassSubjectUnit(inputJwtToken *types.JwtToken, id int64, request *data.TeacherClassSubjectUnitRequest) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
 	// Check if teacher unit/subject exists
 	foundItem, err := service.Repository.GetTeacherClassSubjectUnitByID(id)
 	if err != nil {
@@ -208,6 +256,14 @@ func (service *Service) UpdateTeacherClassSubjectUnit(inputJwtToken *types.JwtTo
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
+	}
+
+	// Retrieve item
+	item := &model.TeacherClassSubjectUnit{
+		TeacherID:      request.TeacherID,
+		YearID:         request.YearID,
+		ClassSubjectID: request.ClassSubjectID,
+		UnitID:         request.UnitID,
 	}
 
 	// Check unique
@@ -223,7 +279,7 @@ func (service *Service) UpdateTeacherClassSubjectUnit(inputJwtToken *types.JwtTo
 		return
 	}
 
-	// Update teacher
+	// Update teacher class subject/unit
 	result, err = service.Repository.UpdateTeacherClassSubjectUnitByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError

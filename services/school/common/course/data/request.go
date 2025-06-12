@@ -58,4 +58,5 @@ type GetAllCourseDocumentRequest struct {
 
 type GetAllCourseCommentRequest struct {
 	CourseID int64 `json:"courseID" required:"false" doc:"Course id"`
+	UserID   int64 `json:"userID" required:"false" doc:"User id"`
 }

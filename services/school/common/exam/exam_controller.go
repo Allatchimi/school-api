@@ -25,11 +25,7 @@ func (controller *Controller) CreateType(
 ) (result *model.ExamType, errCode int, err error) {
 	result, errCode, err = controller.Service.CreateType(
 		helpers.GetJwtContext(ctx),
-		&model.ExamType{
-			SchoolID:    input.Body.SchoolID,
-			Name:        input.Body.Name,
-			Description: input.Body.Description,
-		},
+		&input.Body,
 	)
 	return
 }
@@ -42,23 +38,7 @@ func (controller *Controller) Create(
 ) (result *model.Exam, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.Exam{
-			SchoolID:       input.Body.SchoolID,
-			YearID:         input.Body.YearID,
-			TypeID:         input.Body.TypeID,
-			UnitID:         input.Body.UnitID,
-			ClassSubjectID: input.Body.ClassSubjectID,
-			SequenceID:     input.Body.SequenceID,
-
-			Percentage:      input.Body.Percentage,
-			Description:     input.Body.Description,
-			LocationType:    input.Body.LocationType,
-			LocationDetails: input.Body.LocationDetails,
-			Requirements:    input.Body.Requirements,
-			AllowedItems:    input.Body.AllowedItems,
-			StartDate:       input.Body.StartDate,
-			EndDate:         input.Body.EndDate,
-		},
+		&input.Body,
 	)
 	return
 }
@@ -72,11 +52,7 @@ func (controller *Controller) UpdateType(
 ) (result *model.ExamType, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateType(
 		helpers.GetJwtContext(ctx), input.ID,
-		&model.ExamType{
-			SchoolID:    input.Body.SchoolID,
-			Name:        input.Body.Name,
-			Description: input.Body.Description,
-		},
+		&input.Body,
 	)
 	return
 }
@@ -90,23 +66,7 @@ func (controller *Controller) Update(
 ) (result *model.Exam, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx), input.ID,
-		&model.Exam{
-			SchoolID:       input.Body.SchoolID,
-			YearID:         input.Body.YearID,
-			TypeID:         input.Body.TypeID,
-			UnitID:         input.Body.UnitID,
-			ClassSubjectID: input.Body.ClassSubjectID,
-			SequenceID:     input.Body.SequenceID,
-
-			Percentage:      input.Body.Percentage,
-			Description:     input.Body.Description,
-			LocationType:    input.Body.LocationType,
-			LocationDetails: input.Body.LocationDetails,
-			Requirements:    input.Body.Requirements,
-			AllowedItems:    input.Body.AllowedItems,
-			StartDate:       input.Body.StartDate,
-			EndDate:         input.Body.EndDate,
-		},
+		&input.Body,
 	)
 	return
 }

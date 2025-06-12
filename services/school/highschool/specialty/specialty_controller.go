@@ -25,12 +25,7 @@ func (controller *Controller) Create(
 ) (result *model.HighschoolSpecialty, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.HighschoolSpecialty{
-			SchoolID:    input.Body.SchoolID,
-			SectionID:   input.Body.SectionID,
-			Name:        input.Body.Name,
-			Description: input.Body.Description,
-		},
+		&input.Body,
 	)
 	return
 }
@@ -43,13 +38,9 @@ func (controller *Controller) Update(
 	},
 ) (result *model.HighschoolSpecialty, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		helpers.GetJwtContext(ctx), input.ID,
-		&model.HighschoolSpecialty{
-			SchoolID:    input.Body.SchoolID,
-			SectionID:   input.Body.SectionID,
-			Name:        input.Body.Name,
-			Description: input.Body.Description,
-		},
+		helpers.GetJwtContext(ctx),
+		input.ID,
+		&input.Body,
 	)
 	return
 }
@@ -105,7 +96,7 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.SpecialtyResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	specialtyList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllRequest.SchoolID)
+	specialtyList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}

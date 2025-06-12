@@ -26,23 +26,7 @@ func (controller *Controller) Create(
 
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.User{
-			RoleID:      input.Body.RoleID,
-			Email:       input.Body.Email,
-			PhoneNumber: input.Body.PhoneNumber,
-			IsActivated: input.Body.IsActivated,
-			Info: &model.UserInfo{
-				Gender:        input.Body.Info.Gender,
-				Username:      input.Body.Info.Username,
-				FirstName:     input.Body.Info.FirstName,
-				LastName:      input.Body.Info.LastName,
-				Birthday:      input.Body.Info.Birthday,
-				BirthLocation: input.Body.Info.BirthLocation,
-				Address:       input.Body.Info.Address,
-				Language:      input.Body.Info.Language,
-				Image:         input.Body.Info.Image,
-			},
-		},
+		&input.Body,
 		nil,
 	)
 	return
@@ -58,23 +42,7 @@ func (controller *Controller) Update(
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx),
 		input.UserID.ID,
-		&model.User{
-			RoleID:      input.Body.RoleID,
-			Email:       input.Body.Email,
-			PhoneNumber: input.Body.PhoneNumber,
-			IsActivated: input.Body.IsActivated,
-			Info: &model.UserInfo{
-				Gender:        input.Body.Info.Gender,
-				Username:      input.Body.Info.Username,
-				FirstName:     input.Body.Info.FirstName,
-				LastName:      input.Body.Info.LastName,
-				Birthday:      input.Body.Info.Birthday,
-				BirthLocation: input.Body.Info.BirthLocation,
-				Address:       input.Body.Info.Address,
-				Language:      input.Body.Info.Language,
-				Image:         input.Body.Info.Image,
-			},
-		},
+		&input.Body,
 	)
 	return
 }

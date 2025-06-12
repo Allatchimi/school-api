@@ -25,12 +25,7 @@ func (controller *Controller) Create(
 ) (result *model.HighschoolClass, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.HighschoolClass{
-			SchoolID:    input.Body.SchoolID,
-			SpecialtyID: input.Body.SpecialtyID,
-			Name:        input.Body.Name,
-			Description: input.Body.Description,
-		},
+		&input.Body,
 	)
 	return
 }
@@ -43,15 +38,7 @@ func (controller *Controller) CreateClassSubject(
 ) (result *model.HighschoolClassSubject, errCode int, err error) {
 	result, errCode, err = controller.Service.CreateClassSubject(
 		helpers.GetJwtContext(ctx),
-		&model.HighschoolClassSubject{
-			ClassID:   input.Body.ClassID,
-			SubjectID: input.Body.SubjectID,
-
-			Coefficient:  input.Body.Coefficient,
-			Program:      input.Body.Program,
-			Requirements: input.Body.Requirements,
-			IsValid:      input.Body.IsValid,
-		},
+		&input.Body,
 	)
 	return
 }
@@ -64,13 +51,9 @@ func (controller *Controller) Update(
 	},
 ) (result *model.HighschoolClass, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		helpers.GetJwtContext(ctx), input.ID,
-		&model.HighschoolClass{
-			SchoolID:    input.Body.SchoolID,
-			SpecialtyID: input.Body.SpecialtyID,
-			Name:        input.Body.Name,
-			Description: input.Body.Description,
-		},
+		helpers.GetJwtContext(ctx),
+		input.ID,
+		&input.Body,
 	)
 	return
 }
@@ -140,7 +123,7 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.ClassResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	classList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllRequest.SchoolID)
+	classList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}
@@ -161,7 +144,7 @@ func (controller *Controller) GetAllClassSubject(
 	},
 ) (result *data.ClassSubjectResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	classList, errCode, err := controller.Service.GetAllClassSubject(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllClassSubjectRequest.SchoolID, input.GetAllClassSubjectRequest.ClassID)
+	classList, errCode, err := controller.Service.GetAllClassSubject(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllClassSubjectRequest)
 	if err != nil {
 		return
 	}

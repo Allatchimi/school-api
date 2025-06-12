@@ -20,7 +20,15 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "result"
 const DEFAULT_ERROR_MESSAGE = "interact with result model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Result) (result *model.Result, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.ResultRequest) (result *model.Result, errCode int, err error) {
+	// Format request
+	item := &model.Result{
+		StudentID: request.StudentID,
+		ExamID:    request.ExamID,
+
+		Value: request.Value,
+	}
+
 	// Check unique
 	foundUnique, err := service.Repository.GetUniqueObject(item)
 	if err != nil {
@@ -44,7 +52,15 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Result
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.Result) (result *model.Result, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.ResultRequest) (result *model.Result, errCode int, err error) {
+	// Format request
+	item := &model.Result{
+		StudentID: request.StudentID,
+		ExamID:    request.ExamID,
+
+		Value: request.Value,
+	}
+
 	// Check if result already exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {

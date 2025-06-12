@@ -25,12 +25,7 @@ func (controller *Controller) Create(
 ) (result *model.Result, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.Result{
-			StudentID: input.Body.StudentID,
-			ExamID:    input.Body.ExamID,
-
-			Value: input.Body.Value,
-		},
+		&input.Body,
 	)
 	return
 }
@@ -43,13 +38,9 @@ func (controller *Controller) Update(
 	},
 ) (result *model.Result, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		helpers.GetJwtContext(ctx), input.ID,
-		&model.Result{
-			StudentID: input.Body.StudentID,
-			ExamID:    input.Body.ExamID,
-
-			Value: input.Body.Value,
-		},
+		helpers.GetJwtContext(ctx),
+		input.ID,
+		&input.Body,
 	)
 	return
 }

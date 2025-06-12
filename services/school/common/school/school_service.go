@@ -21,7 +21,17 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "school"
 const DEFAULT_ERROR_MESSAGE = "interact with school model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.School) (result *model.School, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.SchoolRequest) (result *model.School, errCode int, err error) {
+	// Format request
+	item := &model.School{
+		Name:     request.Name,
+		Type:     request.Type,
+		Logo:     request.Logo,
+		Currency: request.Currency,
+		Info:     model.FromInfoRequest(request.Info),
+		Config:   model.FromConfigRequest(request.Config),
+	}
+
 	// Create info
 	newInfo, err := service.Repository.CreateInfo(&model.SchoolInfo{
 		FullName:    item.Info.FullName,
@@ -56,7 +66,25 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.School
 
 	// Create config
 	newConfig, err := service.Repository.CreateConfig(&model.SchoolConfig{
+		Protocol: item.Config.Protocol,
+
+		DomainName: item.Config.DomainName,
+		DomainCert: item.Config.DomainCert,
+		DomainKey:  item.Config.DomainKey,
+
+		SmtpHost:     item.Config.SmtpHost,
+		SmtpPort:     item.Config.SmtpPort,
+		SmtpUsername: item.Config.SmtpUsername,
+		SmtpPassword: item.Config.SmtpPassword,
+		SmtpSender:   item.Config.SmtpSender,
+
 		EmailDomain:  item.Config.EmailDomain,
+		NoReplyEmail: item.Config.NoReplyEmail,
+		SupportEmail: item.Config.SupportEmail,
+
+		WebsiteTitle:       item.Config.WebsiteTitle,
+		WebsiteDescription: item.Config.WebsiteDescription,
+
 		ColorPrimary: item.Config.ColorPrimary,
 	})
 	if err != nil {
@@ -67,12 +95,13 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.School
 
 	// Create school
 	result, err = service.Repository.Create(&model.School{
-		Name: item.Name,
-		Type: item.Type,
-		Logo: item.Logo,
+		Name:     item.Name,
+		Type:     item.Type,
+		Logo:     item.Logo,
+		Currency: item.Currency,
 
-		SchoolConfigID: newConfig.ID,
-		SchoolInfoID:   newInfo.ID,
+		ConfigID: newConfig.ID,
+		InfoID:   newInfo.ID,
 	})
 	if err != nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
@@ -90,7 +119,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.School
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.School) (result *model.School, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.SchoolRequest) (result *model.School, errCode int, err error) {
 	// Check if school exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -102,6 +131,16 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
+	}
+
+	// Format request
+	item := &model.School{
+		Name:     request.Name,
+		Type:     request.Type,
+		Logo:     request.Logo,
+		Currency: request.Currency,
+		Info:     model.FromInfoRequest(request.Info),
+		Config:   model.FromConfigRequest(request.Config),
 	}
 
 	// Check unique
@@ -139,7 +178,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	}
 
 	// Update config
-	newConfig, _, err := service.UpdateConfig(inputJwtToken, foundItem.SchoolConfigID, item.Config)
+	newConfig, _, err := service.UpdateConfig(inputJwtToken, foundItem.ConfigID, item.Config)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -148,7 +187,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	result.Config = newConfig
 
 	// Update info
-	newInfo, errCode, err := service.UpdateInfo(inputJwtToken, foundItem.SchoolInfoID, item.Info)
+	newInfo, errCode, err := service.UpdateInfo(inputJwtToken, foundItem.InfoID, item.Info)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

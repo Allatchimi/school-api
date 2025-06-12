@@ -12,11 +12,11 @@ type School struct {
 	Logo     string `gorm:"default:null"`
 	Currency string `gorm:"default:null"`
 
-	SchoolConfigID int64         `gorm:"default:null"`
-	Config         *SchoolConfig `gorm:"default:null;foreignKey:SchoolConfigID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	ConfigID int64         `gorm:"default:null"`
+	Config   *SchoolConfig `gorm:"default:null;foreignKey:ConfigID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	SchoolInfoID int64       `gorm:"default:null"`
-	Info         *SchoolInfo `gorm:"default:null;foreignKey:SchoolInfoID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	InfoID int64       `gorm:"default:null"`
+	Info   *SchoolInfo `gorm:"default:null;foreignKey:InfoID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *School) ToResponse() *data.SchoolResponse {

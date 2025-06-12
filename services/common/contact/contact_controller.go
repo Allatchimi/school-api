@@ -25,12 +25,7 @@ func (controller *Controller) Create(
 ) (result *model.Contact, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.Contact{
-			SchoolID: input.Body.SchoolID,
-			Subject:  input.Body.Subject,
-			Email:    input.Body.Email,
-			Message:  input.Body.Message,
-		},
+		&input.Body,
 	)
 	return
 }

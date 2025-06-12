@@ -6,27 +6,36 @@ import (
 	"api/common/constants"
 	"api/common/types"
 	"api/services/school/common/school"
+	"api/services/school/highschool/specialty/data"
 	"api/services/school/highschool/specialty/model"
 )
 
 type Service struct {
-	Repository       *Repository
-	SchoolRepository *school.Repository
+	Repository    *Repository
+	SchoolService *school.Service
 }
 
-func NewService(repository *Repository, SchoolRepository *school.Repository) *Service {
+func NewService(repository *Repository, schoolService *school.Service) *Service {
 	return &Service{
-		Repository:       repository,
-		SchoolRepository: SchoolRepository,
+		Repository:    repository,
+		SchoolService: schoolService,
 	}
 }
 
 const MODEL_NAME = "specialty"
 const DEFAULT_ERROR_MESSAGE = "interact with specialty model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.HighschoolSpecialty) (result *model.HighschoolSpecialty, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.SpecialtyRequest) (result *model.HighschoolSpecialty, errCode int, err error) {
+	// Format request
+	item := &model.HighschoolSpecialty{
+		SchoolID:    request.SchoolID,
+		SectionID:   request.SectionID,
+		Name:        request.Name,
+		Description: request.Description,
+	}
+
 	// Check if the school type is highschool
-	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
+	foundSchool, err := service.SchoolService.Repository.GetByID(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -61,9 +70,17 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Highsc
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, specialtyID int64, item *model.HighschoolSpecialty) (result *model.HighschoolSpecialty, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.SpecialtyRequest) (result *model.HighschoolSpecialty, errCode int, err error) {
+	// Format request
+	item := &model.HighschoolSpecialty{
+		SchoolID:    request.SchoolID,
+		SectionID:   request.SectionID,
+		Name:        request.Name,
+		Description: request.Description,
+	}
+
 	// Check if the school type is highschool
-	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
+	foundSchool, err := service.SchoolService.Repository.GetByID(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -76,13 +93,13 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, specialtyID int64,
 	}
 
 	// Check if specialty exists
-	foundItem, err := service.Repository.GetByID(specialtyID)
+	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem == nil || foundItem.ID != specialtyID {
+	if foundItem == nil || foundItem.ID != id {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
@@ -108,7 +125,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, specialtyID int64,
 	}
 
 	// Update specialty
-	result, err = service.Repository.Update(specialtyID, item)
+	result, err = service.Repository.Update(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -117,8 +134,8 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, specialtyID int64,
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, specialtyID int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(specialtyID)
+func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.Delete(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -147,8 +164,8 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, specialtyID int64) (result *model.HighschoolSpecialty, errCode int, err error) {
-	result, err = service.Repository.GetByID(specialtyID)
+func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.HighschoolSpecialty, errCode int, err error) {
+	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -162,8 +179,8 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, specialtyID int64) (r
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.HighschoolSpecialty, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, schoolID)
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.HighschoolSpecialty, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

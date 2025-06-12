@@ -1,47 +1,27 @@
 package quiz
 
 import (
-	"net/http"
-
 	"api/common/constants"
 	"api/common/types"
-	common_svc_permission "api/services/common"
 	"api/services/school/common/quiz/data"
 	"api/services/school/common/quiz/model"
-	"api/services/user/user"
+	"net/http"
 )
 
 type Service struct {
-	Repository     *Repository
-	UserRepository *user.Repository
+	Repository *Repository
 }
 
 const MODEL_NAME = "quiz"
 const DEFAULT_ERROR_MESSAGE = "interact with quiz model"
 
-func NewService(repository *Repository, userRepository *user.Repository) *Service {
+func NewService(repository *Repository) *Service {
 	return &Service{
-		Repository:     repository,
-		UserRepository: userRepository,
+		Repository: repository,
 	}
 }
 
 func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.QuizRequest) (result *model.Quiz, errCode int, err error) {
-	// Check if the user can access
-	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.RoleID,
-		inputJwtToken.UserID,
-		request.SchoolID,
-		request.YearID,
-		request.ClassSubjectID,
-		request.UnitID,
-	)
-	if !canAccess {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
-	}
-
 	// Insert the quiz
 	createdQuiz, err := service.Repository.Create(
 		&model.Quiz{
@@ -119,21 +99,6 @@ func (service *Service) CreateAnswer(inputJwtToken *types.JwtToken, id int64, re
 		return
 	}
 
-	// Check if the user can access
-	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.RoleID,
-		inputJwtToken.UserID,
-		foundQuiz.SchoolID,
-		foundQuiz.YearID,
-		foundQuiz.ClassSubjectID,
-		foundQuiz.UnitID,
-	)
-	if !canAccess {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
-	}
-
 	// Check if the student have already submitted and answer
 	questionsIDs := make([]int64, len(request.Answers))
 	for i := range request.Answers {
@@ -173,21 +138,6 @@ func (service *Service) CreateAnswer(inputJwtToken *types.JwtToken, id int64, re
 }
 
 func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.QuizRequest) (result *model.Quiz, errCode int, err error) {
-	// Check if the user can access
-	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.RoleID,
-		inputJwtToken.UserID,
-		request.SchoolID,
-		request.YearID,
-		request.ClassSubjectID,
-		request.UnitID,
-	)
-	if !canAccess {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
-	}
-
 	// Check if quiz exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -297,21 +247,6 @@ func (service *Service) UpdateSolution(inputJwtToken *types.JwtToken, id int64, 
 		return
 	}
 
-	// Check if the user can access
-	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.RoleID,
-		inputJwtToken.UserID,
-		foundQuiz.SchoolID,
-		foundQuiz.YearID,
-		foundQuiz.ClassSubjectID,
-		foundQuiz.UnitID,
-	)
-	if !canAccess {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
-	}
-
 	// Update the quiz question solution
 	if len(request.Solutions) > 0 {
 		for _, solution := range request.Solutions {
@@ -337,32 +272,6 @@ func (service *Service) UpdateSolution(inputJwtToken *types.JwtToken, id int64, 
 }
 
 func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	// Check if the user can access
-	foundItem, err := service.Repository.GetByID(id)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundItem == nil || foundItem.ID < 0 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.RoleID,
-		inputJwtToken.UserID,
-		foundItem.SchoolID,
-		foundItem.YearID,
-		foundItem.ClassSubjectID,
-		foundItem.UnitID,
-	)
-	if !canAccess {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
-	}
-
 	// Delete
 	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
@@ -379,34 +288,6 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 }
 
 func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, selection []int64) (affectedRows int64, errCode int, err error) {
-	// Check if the user can access
-	for i := range selection {
-		foundItem, errCheck := service.Repository.GetByID(selection[i])
-		if errCheck != nil {
-			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			return
-		}
-		if foundItem == nil || foundItem.ID < 0 {
-			errCode = http.StatusNotFound
-			err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			return
-		}
-		canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-			inputJwtToken.RoleID,
-			inputJwtToken.UserID,
-			foundItem.SchoolID,
-			foundItem.YearID,
-			foundItem.ClassSubjectID,
-			foundItem.UnitID,
-		)
-		if !canAccess {
-			errCode = http.StatusForbidden
-			err = constants.Http403InvalidPermissionErrorMessage()
-			return
-		}
-	}
-
 	// Delete
 	affectedRows, err = service.Repository.DeleteMultipleByID(selection)
 	if err != nil {
@@ -432,21 +313,6 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	if result == nil {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-
-	// Check if the user can access
-	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.RoleID,
-		inputJwtToken.UserID,
-		result.SchoolID,
-		result.YearID,
-		result.ClassSubjectID,
-		result.UnitID,
-	)
-	if !canAccess {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
 		return
 	}
 	return

@@ -2,7 +2,6 @@ package parent
 
 import (
 	"fmt"
-	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -30,7 +29,7 @@ func (repository *Repository) CreateParentStudent(item *model.ParentStudent) (*m
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, item *model.Parent) (*model.Parent, error) {
+func (repository *Repository) UpdateByID(id int64, item *model.Parent) (*model.Parent, error) {
 	tempParent, err := repository.GetByID(id)
 	if err != nil || tempParent == nil || tempParent.ID != id {
 		return nil, err
@@ -101,19 +100,23 @@ func (repository *Repository) GetParentStudentByObject(item *model.ParentStudent
 
 func (repository *Repository) GetParentStudentByUserIDSchoolID(userID int64, schoolID int64) (*model.ParentStudent, error) {
 	result := &model.ParentStudent{}
-	where := fmt.Sprintf("WHERE parents.user_id = %d AND students.school_id = %d", userID, schoolID)
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT parent_students.id, parent_students.parent_id, parent_students.student_id"+
-				", parent_students.created_at, parent_students.updated_at FROM parent_students "+
-				"LEFT JOIN parents ON parent_students.parent_id = parents.id "+
-				"LEFT JOIN students ON parent_students.student_id = students.id",
-			where,
-			nil,
-			nil,
-		),
-	).Limit(1).Find(&result).Error
+
+	where := helpers.AppendWhereClause("", fmt.Sprintf("parents.user_id = %d AND students.school_id = %d", userID, schoolID))
+
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT parent_students.* "+
+					"FROM parent_students "+
+					"LEFT JOIN parents ON parent_students.parent_id = parents.id "+
+					"LEFT JOIN students ON parent_students.student_id = students.id ",
+				where,
+				nil,
+				nil,
+			),
+		).Limit(1).Find(&result).Error
 
 	err := tmpErr
 	return result, err
@@ -123,36 +126,34 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	result = make([]model.Parent, 0)
 	var where string = ""
 	if schoolID > 0 {
-		where = fmt.Sprintf("WHERE parents.school_id = %d", schoolID)
+		where = helpers.AppendWhereClause(where, fmt.Sprintf("parents.school_id = %d", schoolID))
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(parents.id AS TEXT) = '%s' OR parents.uid ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR users.email ILIKE '%s' OR users.phone_number ILIKE '%s'",
+			"CAST(parents.id AS TEXT) = '%s' OR parents.uid ILIKE '%s' OR schools.name ILIKE '%s' OR users.email ILIKE '%s' OR users.phone_number ILIKE '%s'",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
 		)
-
-		if strings.HasPrefix(where, "WHERE") {
-			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
-		} else {
-			where = fmt.Sprintf("WHERE %s", tempWhere)
-		}
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT parents.id, parents.school_id, parents.user_id, parents.uid"+
-				", parents.created_at, parents.updated_at FROM parents "+
-				"LEFT JOIN users ON parents.user_id = users.id",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Preload("User.Info").
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT parents.* "+
+					"FROM parents "+
+					"LEFT JOIN schools ON parents.school_id = schools.id "+
+					"LEFT JOIN users ON parents.user_id = users.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return
@@ -162,27 +163,34 @@ func (repository *Repository) GetAllParentStudent(filter *types.Filter, paginati
 	result = make([]model.ParentStudent, 0)
 	var where string = ""
 	if parentID > 0 {
-		where = fmt.Sprintf("WHERE parent_lc.parent_id = %d", parentID)
+		where = helpers.AppendWhereClause(where, fmt.Sprintf("parent_students.parent_id = %d", parentID))
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(parent_lc.id AS TEXT) = '%s' OR students.uid ILIKE '%s'",
+			"CAST(parent_students.id AS TEXT) = '%s' OR students.uid ILIKE '%s'",
 			filter.Search,
 			"%"+filter.Search+"%",
 		)
-		where = fmt.Sprintf("WHERE %s", tempWhere)
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT parent_lc.id, parent_lc.parent_id, parent_lc.student_id"+
-				", parent_lc.created_at, parent_lc.updated_at FROM parent_level_classes AS parent_lc "+
-				"LEFT JOIN students ON parent_lc.student_id = students.id ",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Preload("Parent.User").
+		Preload("Parent.User.Info").
+		Preload("Student.User").
+		Preload("Student.User.Info").
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT parent_students.* "+
+					"FROM parent_students "+
+					"LEFT JOIN parents ON parent_students.parent_id = parents.id "+
+					"LEFT JOIN students ON parent_students.student_id = students.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

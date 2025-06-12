@@ -6,27 +6,35 @@ import (
 	"api/common/constants"
 	"api/common/types"
 	"api/services/school/common/school"
+	"api/services/school/university/level/data"
 	"api/services/school/university/level/model"
 )
 
 type Service struct {
-	Repository       *Repository
-	SchoolRepository *school.Repository
+	Repository    *Repository
+	SchoolService *school.Service
 }
 
-func NewService(repository *Repository, SchoolRepository *school.Repository) *Service {
+func NewService(repository *Repository, schoolService *school.Service) *Service {
 	return &Service{
-		Repository:       repository,
-		SchoolRepository: SchoolRepository,
+		Repository:    repository,
+		SchoolService: schoolService,
 	}
 }
 
 const MODEL_NAME = "level"
 const DEFAULT_ERROR_MESSAGE = "interact with level model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.UniversityLevel) (result *model.UniversityLevel, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.LevelRequest) (result *model.UniversityLevel, errCode int, err error) {
+	// Format request
+	item := &model.UniversityLevel{
+		SchoolID:    request.SchoolID,
+		Name:        request.Name,
+		Description: request.Description,
+	}
+
 	// Check if the school type is university
-	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
+	foundSchool, err := service.SchoolService.Repository.GetByID(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -60,7 +68,17 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Univer
 	}
 	return
 }
-func (service *Service) CreateLevelDomain(inputJwtToken *types.JwtToken, item *model.UniversityLevelDomain) (result *model.UniversityLevelDomain, errCode int, err error) {
+func (service *Service) CreateLevelDomain(inputJwtToken *types.JwtToken, request *data.LevelDomainRequest) (result *model.UniversityLevelDomain, errCode int, err error) {
+	// Format request
+	item := &model.UniversityLevelDomain{
+		LevelID:  request.LevelID,
+		DomainID: request.DomainID,
+
+		Program:      request.Program,
+		Requirements: request.Requirements,
+		IsValid:      request.IsValid,
+	}
+
 	// Check unique
 	foundUnique, err := service.Repository.GetLevelDomainUniqueObject(item)
 	if err != nil {
@@ -84,9 +102,16 @@ func (service *Service) CreateLevelDomain(inputJwtToken *types.JwtToken, item *m
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.UniversityLevel) (result *model.UniversityLevel, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.LevelRequest) (result *model.UniversityLevel, errCode int, err error) {
+	// Format request
+	item := &model.UniversityLevel{
+		SchoolID:    request.SchoolID,
+		Name:        request.Name,
+		Description: request.Description,
+	}
+
 	// Check if the school type is university
-	foundSchool, err := service.SchoolRepository.GetByID(item.SchoolID)
+	foundSchool, err := service.SchoolService.Repository.GetByID(item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -209,8 +234,8 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 	return
 }
 
-func (service *Service) GetAllLevelDomain(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64, levelID int64) (result []model.UniversityLevelDomain, errCode int, err error) {
-	result, err = service.Repository.GetAllLevelDomain(filter, pagination, schoolID, levelID)
+func (service *Service) GetAllLevelDomain(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllLevelDomainRequest) (result []model.UniversityLevelDomain, errCode int, err error) {
+	result, err = service.Repository.GetAllLevelDomain(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

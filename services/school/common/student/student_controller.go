@@ -7,7 +7,6 @@ import (
 	"api/common/types"
 	"api/services/school/common/student/data"
 	"api/services/school/common/student/model"
-	modelUser "api/services/user/user/model"
 )
 
 type Controller struct {
@@ -26,23 +25,7 @@ func (controller *Controller) Create(
 ) (result *model.Student, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		input.Body.SchoolID,
-		input.Body.UID,
-		&modelUser.User{
-			Email:       input.Body.Email,
-			PhoneNumber: input.Body.PhoneNumber,
-			Info: &modelUser.UserInfo{
-				Gender:        input.Body.Info.Gender,
-				Username:      input.Body.Info.Username,
-				FirstName:     input.Body.Info.FirstName,
-				LastName:      input.Body.Info.LastName,
-				Birthday:      input.Body.Info.Birthday,
-				BirthLocation: input.Body.Info.BirthLocation,
-				Address:       input.Body.Info.Address,
-				Language:      input.Body.Info.Language,
-				Image:         input.Body.Info.Image,
-			},
-		},
+		&input.Body,
 	)
 	return
 }
@@ -55,28 +38,7 @@ func (controller *Controller) CreateStudentEnroll(
 ) (result *model.StudentEnroll, errCode int, err error) {
 	result, errCode, err = controller.Service.CreateStudentEnroll(
 		helpers.GetJwtContext(ctx),
-		&model.StudentEnroll{
-			StudentID:     input.Body.StudentID,
-			YearID:        input.Body.YearID,
-			ClassID:       input.Body.ClassID,
-			LevelDomainID: input.Body.LevelDomainID,
-
-			Email:       input.Body.Email,
-			PhoneNumber: input.Body.PhoneNumber,
-
-			Message:       input.Body.Message,
-			Gender:        input.Body.Gender,
-			FirstName:     input.Body.FirstName,
-			LastName:      input.Body.LastName,
-			Birthday:      input.Body.Birthday,
-			BirthLocation: input.Body.BirthLocation,
-
-			Document1: input.Body.Document1,
-			Document2: input.Body.Document2,
-			Document3: input.Body.Document3,
-			Document4: input.Body.Document4,
-			Document5: input.Body.Document5,
-		},
+		&input.Body,
 	)
 	return
 }
@@ -89,23 +51,9 @@ func (controller *Controller) Update(
 	},
 ) (result *model.Student, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		helpers.GetJwtContext(ctx), input.ID,
-		input.Body.UID,
-		&modelUser.User{
-			Email:       input.Body.Email,
-			PhoneNumber: input.Body.PhoneNumber,
-			Info: &modelUser.UserInfo{
-				Gender:        input.Body.Info.Gender,
-				Username:      input.Body.Info.Username,
-				FirstName:     input.Body.Info.FirstName,
-				LastName:      input.Body.Info.LastName,
-				Birthday:      input.Body.Info.Birthday,
-				BirthLocation: input.Body.Info.BirthLocation,
-				Address:       input.Body.Info.Address,
-				Language:      input.Body.Info.Language,
-				Image:         input.Body.Info.Image,
-			},
-		},
+		helpers.GetJwtContext(ctx),
+		input.ID,
+		&input.Body,
 	)
 	return
 }
@@ -118,29 +66,9 @@ func (controller *Controller) UpdateStudentEnroll(
 	},
 ) (result *model.StudentEnroll, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateStudentEnroll(
-		helpers.GetJwtContext(ctx), input.ID,
-		&model.StudentEnroll{
-			StudentID:     input.Body.StudentID,
-			YearID:        input.Body.YearID,
-			ClassID:       input.Body.ClassID,
-			LevelDomainID: input.Body.LevelDomainID,
-
-			Email:       input.Body.Email,
-			PhoneNumber: input.Body.PhoneNumber,
-
-			Message:       input.Body.Message,
-			Gender:        input.Body.Gender,
-			FirstName:     input.Body.FirstName,
-			LastName:      input.Body.LastName,
-			Birthday:      input.Body.Birthday,
-			BirthLocation: input.Body.BirthLocation,
-
-			Document1: input.Body.Document1,
-			Document2: input.Body.Document2,
-			Document3: input.Body.Document3,
-			Document4: input.Body.Document4,
-			Document5: input.Body.Document5,
-		},
+		helpers.GetJwtContext(ctx),
+		input.ID,
+		&input.Body,
 	)
 	return
 }

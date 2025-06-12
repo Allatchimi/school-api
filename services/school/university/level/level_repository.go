@@ -10,6 +10,7 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
+	"api/services/school/university/level/data"
 	"api/services/school/university/level/model"
 )
 
@@ -137,47 +138,43 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	return
 }
 
-func (repository *Repository) GetAllLevelDomain(filter *types.Filter, pagination *types.Pagination, schoolID int64, levelID int64) (result []model.UniversityLevelDomain, err error) {
+func (repository *Repository) GetAllLevelDomain(filter *types.Filter, pagination *types.Pagination, request *data.GetAllLevelDomainRequest) (result []model.UniversityLevelDomain, err error) {
 	result = make([]model.UniversityLevelDomain, 0)
 	var where string = ""
-	if schoolID > 0 {
-		where = fmt.Sprintf("WHERE university_levels.school_id = %d", schoolID)
-	}
-	if levelID > 0 {
-		tempWhere := fmt.Sprintf("ld.level_id = %d", levelID)
-		if strings.HasPrefix(where, "WHERE") {
-			where = fmt.Sprintf("%s AND %s", where, tempWhere)
-		} else {
-			where = fmt.Sprintf("WHERE %s", tempWhere)
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("university_levels.school_id = %d", request.SchoolID))
+		}
+		if request.LevelID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("ld.level_id = %d", request.LevelID))
 		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(ld.id AS TEXT) = '%s' OR ld.name ILIKE '%s' OR ld.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s'",
+			"(CAST(ld.id AS TEXT) = '%s' OR ld.name ILIKE '%s' OR ld.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
-		if strings.HasPrefix(where, "WHERE") {
-			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
-		} else {
-			where = fmt.Sprintf("WHERE %s", tempWhere)
-		}
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT ld.id, ld.level_id, ld.domain_id, ld.program, ld.requirements, ld.is_valid, ld.invalid_date"+
-				", ld.created_at, ld.updated_at FROM university_level_domains ld "+
-				"LEFT JOIN university_levels ON cs.level_id = university_levels.id "+
-				"LEFT JOIN university_domains ON cs.domain_id = university_domains.id ",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT ld.* "+
+					"FROM university_level_domains ld "+
+					"LEFT JOIN university_levels ON ld.level_id = university_levels.id "+
+					"LEFT JOIN university_domains ON ld.domain_id = university_domains.id "+
+					"LEFT JOIN schools ON university_levels.school_id = schools.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

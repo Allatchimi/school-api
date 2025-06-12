@@ -5,7 +5,8 @@ type CommunicationID struct {
 }
 
 type CommunicationRequest struct {
-	SchoolID int64  `json:"schoolID" required:"false" doc:"School id" example:"1"`
+	SchoolID int64 `json:"schoolID" required:"false" doc:"School id" example:"1"`
+
 	Subject  string `json:"subject" required:"true" doc:"Subject" example:""`
 	Message  string `json:"message" required:"true" doc:"Message" example:""`
 	Audience string `json:"audience" required:"true" doc:"Audience" example:""`

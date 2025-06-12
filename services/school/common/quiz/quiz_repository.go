@@ -145,8 +145,10 @@ func (repository *Repository) GetAll(
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"WHERE CAST(quizzes.id AS TEXT) = '%s' OR quizzes.title ILIKE '%s' OR quizzes.description ILIKE '%s' OR quizzes.start_date ILIKE '%s' OR quizzes.end_date ILIKE '%s'",
+			"WHERE CAST(quizzes.id AS TEXT) = '%s' OR quizzes.title ILIKE '%s' OR quizzes.description ILIKE '%s' OR schools.name ILIKE '%s' OR years.name ILIKE '%s' OR highschool_class_subjects.name ILIKE '%s' OR university_units.name ILIKE '%s'",
 			filter.Search,
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -156,10 +158,20 @@ func (repository *Repository) GetAll(
 	}
 	tmpErr := repository.Db.Preload(clause.Associations).
 		Preload("Questions.Options").
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.Domain").
+		Preload("Unit.Level").
+		Preload("Unit.Semester").
 		Scopes(
 			helpers.PaginationScope(
 				repository.Db,
-				"SELECT * FROM quizzes",
+				"SELECT * "+
+					"FROM quizzes "+
+					"LEFT JOIN schools ON quizzes.school_id = schools.id "+
+					"LEFT JOIN years ON quizzes.year_id = years.id "+
+					"LEFT JOIN highschool_highschool_class_subjects ON quizzes.class_subject_id = highschool_highschool_class_subjects.id "+
+					"LEFT JOIN university_units ON quizzes.unit_id = university_units.id ",
 				where,
 				pagination,
 				filter,
@@ -201,27 +213,39 @@ func (repository *Repository) GetAllQuizAnswer(
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(quiz_answers.id AS TEXT) = '%s' OR quizzes.title ILIKE '%s' OR quizzes.description ILIKE '%s' OR students.uid ILIKE '%s'",
+			"CAST(quiz_answers.id AS TEXT) = '%s' OR quizzes.title ILIKE '%s' OR quizzes.description ILIKE '%s' OR students.uid ILIKE '%s' OR years.name ILIKE '%s' OR highschool_class_subjects.name ILIKE '%s' OR university_units.name ILIKE '%s'",
 			filter.Search,
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
 		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT quiz_answers.id, quiz_answers.student_id, quiz_answers.quiz_question_id, quiz_answers.quiz_question_option_id"+
-				", quiz_answers.created_at, quiz_answers.updated_at FROM quiz_answers "+
-				"LEFT JOIN students ON quiz_answers.student_id = students.id "+
-				"LEFT JOIN quiz_questions ON quiz_answers.quiz_question_id = quiz_questions.id "+
-				"LEFT JOIN quiz_question_options ON quiz_answers.quiz_question_option_id = quiz_question_options.id ",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Preload("Student.User").
+		Preload("Student.User.Info").
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT quiz_answers.* "+
+					"FROM quiz_answers "+
+					"LEFT JOIN students ON quiz_answers.student_id = students.id "+
+					"LEFT JOIN quiz_questions ON quiz_answers.quiz_question_id = quiz_questions.id "+
+					"LEFT JOIN quiz_question_options ON quiz_answers.quiz_question_option_id = quiz_question_options.id "+
+					"LEFT JOIN quizzes ON quiz_questions.quiz_id = quizzes.id "+
+					"LEFT JOIN schools ON quizzes.school_id = schools.id "+
+					"LEFT JOIN years ON quizzes.year_id = years.id "+
+					"LEFT JOIN highschool_class_subjects ON quizzes.class_subject_id = highschool_class_subjects.id "+
+					"LEFT JOIN university_units ON quizzes.unit_id = university_units.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

@@ -136,19 +136,19 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	}
 	newFilter := filter
 	newFilter.OrderBy = "users." + newFilter.OrderBy
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT users.id, users.email, users.phone_number, users.login_method, users.provider, users.provider_user_id"+
-				", users.is_activated, users.activated_at, users.role_id, users.user_info_id, users.user_mfa_id"+
-				", users.created_at, users.updated_at FROM users "+
-				"LEFT JOIN user_infos AS infos ON users.user_info_id = infos.id "+
-				"LEFT JOIN roles ON users.role_id = roles.id",
-			where,
-			pagination,
-			newFilter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT users.* "+
+					"LEFT JOIN user_infos AS infos ON users.user_info_id = infos.id "+
+					"LEFT JOIN roles ON users.role_id = roles.id",
+				where,
+				pagination,
+				newFilter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

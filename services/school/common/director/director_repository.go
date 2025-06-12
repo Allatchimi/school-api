@@ -89,23 +89,28 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"(CAST(id AS TEXT) = '%s' OR name ILIKE '%s' OR start_date ILIKE '%s' OR end_date ILIKE '%s')",
+			"(CAST(directors.id AS TEXT) = '%s' OR users.email ILIKE '%s' OR schools.name ILIKE '%s')",
 			filter.Search,
-			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
 		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT * FROM directors",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Preload("User.Info").
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT directors.* "+
+					"FROM directors "+
+					"LEFT JOIN schools ON directors.school_id = schools.id "+
+					"LEFT JOIN users ON directors.user_id = users.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

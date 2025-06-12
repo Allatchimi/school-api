@@ -22,14 +22,14 @@ type Exam struct {
 	TypeID int64     `gorm:"default:null"`
 	Type   *ExamType `gorm:"default:null;foreignKey:TypeID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	UnitID int64                     `gorm:"default:null"`
-	Unit   *Unitmodel.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-
 	ClassSubjectID int64                              `gorm:"default:null"`
 	ClassSubject   *classModel.HighschoolClassSubject `gorm:"default:null;foreignKey:ClassSubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	SequenceID int64                             `gorm:"default:null"`
 	Sequence   *sequenceModel.HighschoolSequence `gorm:"default:null;foreignKey:SequenceID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	UnitID int64                     `gorm:"default:null"`
+	Unit   *Unitmodel.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Percentage      int        `gorm:"default:null"`
 	Description     string     `gorm:"default:null"`
@@ -58,9 +58,9 @@ func (item *Exam) ToResponse() *data.ExamResponse {
 	resp.School = item.School.ToPublicResponse()
 	resp.Year = item.Year.ToPublicResponse()
 	resp.Type = item.Type.ToPublicResponse()
-	resp.Unit = item.Unit.ToPublicResponse()
 	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
 	resp.Sequence = item.Sequence.ToPublicResponse()
+	resp.Unit = item.Unit.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -85,9 +85,9 @@ func (item *Exam) ToPublicResponse() *data.ExamPublicResponse {
 	resp.School = item.School.ToPublicResponse()
 	resp.Year = item.Year.ToPublicResponse()
 	resp.Type = item.Type.ToPublicResponse()
-	resp.Unit = item.Unit.ToPublicResponse()
 	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
 	resp.Sequence = item.Sequence.ToPublicResponse()
+	resp.Unit = item.Unit.ToPublicResponse()
 	return resp
 }
 

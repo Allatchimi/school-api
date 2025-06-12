@@ -108,32 +108,39 @@ func (repository *Repository) GetAll(
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"(title ILIKE %s OR WHERE description ILIKE %s)",
-			filter.Search,
-			filter.Search,
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
-	}
-	if filter != nil && len(filter.Search) >= 1 {
-		tempWhere := fmt.Sprintf(
 			"(CAST(results.id AS TEXT) = '%s' OR exams.description ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 		)
 		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT results.id, results.student_id, results.exam_id, results.value"+
-				", results.created_at, results.updated_at FROM results "+
-				"LEFT JOIN students ON results.student_id = students.id "+
-				"LEFT JOIN exams ON results.exam_id = exams.id ",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Preload("Student.User").
+		Preload("Student.User.Info").
+		Preload("Exam.School").
+		Preload("Exam.Year").
+		Preload("Exam.Type").
+		Preload("Exam.ClassSubject").
+		Preload("Exam.ClassSubject.Class").
+		Preload("Exam.ClassSubject.Subject").
+		Preload("Exam.Sequence").
+		Preload("Exam.Unit").
+		Preload("Exam.Unit.Level").
+		Preload("Exam.Unit.Domain").
+		Preload("Exam.Unit.Semester").
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT results.* "+
+					"FROM results "+
+					"LEFT JOIN students ON results.student_id = students.id "+
+					"LEFT JOIN exams ON results.exam_id = exams.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

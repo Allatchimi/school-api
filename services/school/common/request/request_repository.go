@@ -1,0 +1,160 @@
+package request
+
+import (
+	"fmt"
+
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+
+	"api/common/helpers"
+	"api/common/types"
+	"api/services/school/common/request/data"
+	"api/services/school/common/request/model"
+)
+
+type Repository struct {
+	Db *gorm.DB
+}
+
+func NewRepository(db *gorm.DB) *Repository {
+	return &Repository{Db: db}
+}
+
+func (repository *Repository) Create(data *model.Request) (*model.Request, error) {
+	result := *data
+	return &result, repository.Db.Create(&result).Error
+}
+
+func (repository *Repository) Update(id int64, data *model.Request) (*model.Request, error) {
+	tempResult, err := repository.GetByID(id)
+	if err != nil || tempResult == nil || tempResult.ID != id {
+		return nil, err
+	}
+
+	result := &model.Request{}
+	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
+		map[string]any{
+			"school_id":        data.SchoolID,
+			"year_id":          data.YearID,
+			"class_subject_id": data.ClassSubjectID,
+			"sequence_id":      data.SequenceID,
+			"unit_id":          data.UnitID,
+			"student_id":       data.StudentID,
+
+			"status":  data.Status,
+			"type":    data.Type,
+			"title":   data.Title,
+			"message": data.Message,
+
+			"document1": data.Document1,
+			"document2": data.Document2,
+			"document3": data.Document3,
+			"document4": data.Document4,
+			"document5": data.Document5,
+		},
+	).Error
+}
+
+func (repository *Repository) Delete(id int64) (int64, error) {
+	tempResult, err := repository.GetByID(id)
+	if err != nil || tempResult == nil || tempResult.ID != id {
+		return -1, err
+	}
+
+	result := repository.Db.Where("id = ?", id).Delete(&model.Request{})
+	return result.RowsAffected, result.Error
+}
+
+func (repository *Repository) GetByID(id int64) (*model.Request, error) {
+	result := &model.Request{}
+	return result, repository.Db.Model(&model.Request{}).Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetUniqueObject(item *model.Request) (*model.Request, error) {
+	result := &model.Request{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.Request{
+		SchoolID:       item.SchoolID,
+		YearID:         item.YearID,
+		ClassSubjectID: item.ClassSubjectID,
+		SequenceID:     item.SequenceID,
+		UnitID:         item.UnitID,
+	}).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) AreSameUniqueObjects(item1 *model.Request, item2 *model.Request) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID &&
+			item1.YearID == item2.YearID &&
+			item1.ClassSubjectID == item2.ClassSubjectID &&
+			item1.SequenceID == item2.SequenceID &&
+			item1.UnitID == item2.UnitID) {
+		return true
+	}
+	return false
+}
+
+func (repository *Repository) GetAll(
+	filter *types.Filter, pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.Request, err error) {
+	result = make([]model.Request, 0)
+	var where string = ""
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("requests.school_id = %d", request.SchoolID))
+		}
+		if request.YearID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("requests.year_id = %d", request.YearID))
+		}
+		if request.ClassSubjectID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("requests.class_subject_id = %d", request.ClassSubjectID))
+		}
+		if request.SequenceID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("requests.sequence_id = %d", request.SequenceID))
+		}
+		if request.UnitID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("requests.unit_id = %d", request.UnitID))
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("requests.student_id = %d", request.StudentID))
+		}
+	}
+	if filter != nil && len(filter.Search) >= 1 {
+		tempWhere := fmt.Sprintf(
+			"(CAST(requests.id AS TEXT) = '%s' OR requests.type ILIKE '%s' OR requests.status ILIKE '%s' OR requests.title ILIKE '%s')",
+			filter.Search,
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+			"%"+filter.Search+"%",
+		)
+		where = helpers.AppendWhereClause(where, tempWhere)
+	}
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.Domain").
+		Preload("Unit.Level").
+		Preload("Unit.Semester").
+		Preload("Student.User").
+		Preload("Student.User.Info").
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT requests.* "+
+					"FROM requests "+
+					"LEFT JOIN schools ON requests.school_id = schools.id "+
+					"LEFT JOIN years ON requests.year_id = years.id "+
+					"LEFT JOIN highschool_class_subjects ON requests.class_subject_id = highschool_class_subjects.id "+
+					"LEFT JOIN highschool_sequences ON requests.sequence_id = highschool_sequences.id "+
+					"LEFT JOIN university_units ON requests.unit_id = university_units.id "+
+					"LEFT JOIN students ON requests.student_id = students.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
+
+	err = tmpErr
+	return
+}

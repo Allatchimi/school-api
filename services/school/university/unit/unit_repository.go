@@ -2,13 +2,13 @@ package unit
 
 import (
 	"fmt"
-	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
 	"api/common/helpers"
 	"api/common/types"
+	"api/services/school/university/unit/data"
 	"api/services/school/university/unit/model"
 )
 
@@ -87,15 +87,17 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.UniversityUnit, 
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.UniversityUnit, err error) {
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.UniversityUnit, err error) {
 	result = make([]model.UniversityUnit, 0)
 	var where string = ""
-	if schoolID > 0 {
-		where = fmt.Sprintf("WHERE units.school_id = %d", schoolID)
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("units.school_id = %d", request.SchoolID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(units.id AS TEXT) = '%s' OR units.name ILIKE '%s' OR units.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR university_semesters.name ILIKE '%s'",
+			"(CAST(units.id AS TEXT) = '%s' OR units.name ILIKE '%s' OR units.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR university_semesters.name ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
@@ -103,25 +105,23 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
-		if strings.HasPrefix(where, "WHERE") {
-			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
-		} else {
-			where = fmt.Sprintf("WHERE %s", tempWhere)
-		}
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT units.id, units.school_id, units.level_domain_id, units.semester_id, units.name, units.description, units.credit, units.program, units.requirements, units.is_valid, units.invalid_date"+
-				", units.created_at, units.updated_at FROM university_units units "+
-				"LEFT JOIN schools ON units.school_id = schools.id "+
-				"LEFT JOIN university_level_domains ON units.level_domain_id = university_level_domains.id "+
-				"LEFT JOIN university_semesters ON units.semester_id = university_semesters.id ",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT units.* "+
+					"FROM university_units units "+
+					"LEFT JOIN schools ON units.school_id = schools.id "+
+					"LEFT JOIN university_level_domains ON units.level_domain_id = university_level_domains.id "+
+					"LEFT JOIN university_semesters ON units.semester_id = university_semesters.id ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

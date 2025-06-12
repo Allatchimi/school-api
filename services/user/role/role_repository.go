@@ -36,9 +36,9 @@ func (repository *Repository) Create(role *model.Role) (result *model.Role, err 
 	return
 }
 
-func (repository *Repository) UpdateByID(roleID int64, role *model.Role) (result *model.Role, err error) {
+func (repository *Repository) UpdateByID(id int64, role *model.Role) (result *model.Role, err error) {
 	result = &model.Role{}
-	tmpErr := repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", roleID).Updates(
+	tmpErr := repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
 			"name":        role.Name,
 			"feature":     role.Feature,
@@ -50,8 +50,8 @@ func (repository *Repository) UpdateByID(roleID int64, role *model.Role) (result
 	return
 }
 
-func (repository *Repository) DeleteByID(roleID int64) (result int64, err error) {
-	tmpResult := repository.Db.Where("id = ?", roleID).Delete(&model.Role{})
+func (repository *Repository) DeleteByID(id int64) (result int64, err error) {
+	tmpResult := repository.Db.Where("id = ?", id).Delete(&model.Role{})
 
 	result = tmpResult.RowsAffected
 	err = tmpResult.Error
@@ -67,9 +67,9 @@ func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, er
 	return
 }
 
-func (repository *Repository) GetByID(roleID int64) (result *model.Role, err error) {
+func (repository *Repository) GetByID(id int64) (result *model.Role, err error) {
 	result = &model.Role{}
-	tmpErr := repository.Db.Preload(clause.Associations).Where("id = ?", roleID).Limit(1).Find(result).Error
+	tmpErr := repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 
 	err = tmpErr
 	return
@@ -87,23 +87,27 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	result = make([]model.Role, 0)
 	var where string = ""
 	if filter != nil && len(filter.Search) >= 1 {
-		where = fmt.Sprintf(
-			"WHERE CAST(id AS TEXT) = '%s' OR name ILIKE '%s' OR feature ILIKE '%s' OR description ILIKE '%s'",
+		tempWhere := fmt.Sprintf(
+			"(CAST(roles.id AS TEXT) = '%s' OR roles.name ILIKE '%s' OR roles.feature ILIKE '%s' OR roles.description ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT * FROM roles",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScope(
+				repository.Db,
+				"SELECT roles.* "+
+					"FROM roles ",
+				where,
+				pagination,
+				filter,
+			),
+		).Find(&result).Error
 
 	err = tmpErr
 	return

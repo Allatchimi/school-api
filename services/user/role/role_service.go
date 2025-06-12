@@ -21,7 +21,15 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "role"
 const DEFAULT_ERROR_MESSAGE = "interact with role model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Role) (result *model.Role, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.RoleRequest) (result *model.Role, errCode int, err error) {
+	// Format item
+	item := &model.Role{
+		Name:        request.Name,
+		Feature:     request.Feature,
+		Description: request.Description,
+	}
+
+	// Create
 	result, err = service.Repository.Create(item)
 	if err != nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
@@ -40,18 +48,25 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Role) 
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, roleID int64, item *model.Role) (result *model.Role, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.RoleRequest) (result *model.Role, errCode int, err error) {
 	// Check unique
-	foundRole, err := service.Repository.GetByID(roleID)
+	foundRole, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundRole == nil || foundRole.ID != roleID {
+	if foundRole == nil || foundRole.ID != id {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
+	}
+
+	// Format item
+	item := &model.Role{
+		Name:        request.Name,
+		Feature:     request.Feature,
+		Description: request.Description,
 	}
 
 	// Check if there is some role with the same name
@@ -67,8 +82,8 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, roleID int64, item
 		return
 	}
 
-	// Update now
-	result, err = service.Repository.UpdateByID(roleID, item)
+	// Update
+	result, err = service.Repository.UpdateByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -77,8 +92,8 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, roleID int64, item
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, roleID int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteByID(roleID)
+func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -107,8 +122,8 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) GetByID(inputJwtToken *types.JwtToken, roleID int64) (result *model.Role, errCode int, err error) {
-	result, err = service.Repository.GetByID(roleID)
+func (service *Service) GetByID(inputJwtToken *types.JwtToken, id int64) (result *model.Role, errCode int, err error) {
+	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
