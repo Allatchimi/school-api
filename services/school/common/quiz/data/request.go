@@ -6,6 +6,10 @@ type QuizID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Quiz id" example:"1"`
 }
 
+type QuizQuestionID struct {
+	ID int64 `json:"id" path:"id" required:"true" doc:"Quiz question id" example:"1"`
+}
+
 type QuizRequest struct {
 	SchoolID       int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
 	YearID         int64 `json:"yearID" required:"true" doc:"Year id" example:"1"`
@@ -47,11 +51,11 @@ type GetAllRequest struct {
 }
 
 type GetAllQuizQuestionOptionRequest struct {
-	QuizQuestionID int64 `json:"quizQuestionID" query:"quizQuestionID" required:"false" doc:"Quiz question id" example:"1"`
+	QuizQuestionID
 }
 
 type GetAllQuizAnswerRequest struct {
-	QuizID         int64 `json:"quizID" query:"quizID" required:"false" doc:"Quiz id" example:"1"`
+	QuizID
 	QuizQuestionID int64 `json:"quizQuestionID" query:"quizQuestionID" required:"false" doc:"Quiz question id" example:"1"`
 	StudentID      int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id" example:"1"`
 }

@@ -377,7 +377,7 @@ func RegisterEndpoints(
 			Summary:     "Get all quiz question options",
 			Description: "Get all quiz question options with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/questions/options", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/questions/{id}/options", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -426,7 +426,7 @@ func RegisterEndpoints(
 			Summary:     "Get all answers for quiz",
 			Description: "Get all answers for quiz with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        endpointConfig.Group,
+			Path:        fmt.Sprintf("%s/{id}/answers", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -452,6 +452,7 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
+				data.QuizID
 				data.GetAllQuizAnswerRequest
 			},
 		) (*struct {

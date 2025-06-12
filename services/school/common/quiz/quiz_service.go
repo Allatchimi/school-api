@@ -322,14 +322,14 @@ func (service *Service) GetAll(
 	inputJwtToken *types.JwtToken,
 	filter *types.Filter,
 	pagination *types.Pagination,
-	clause *data.GetAllRequest,
+	request *data.GetAllRequest,
 ) (result []model.Quiz, errCode int, err error) {
 	var schoolID, yearID, classSubjectID, unitID int64
-	if clause != nil {
-		schoolID = clause.SchoolID
-		yearID = clause.YearID
-		classSubjectID = clause.ClassSubjectID
-		unitID = clause.UnitID
+	if request != nil {
+		schoolID = request.SchoolID
+		yearID = request.YearID
+		classSubjectID = request.ClassSubjectID
+		unitID = request.UnitID
 	}
 	result, err = service.Repository.GetAll(filter, pagination, schoolID, yearID, classSubjectID, unitID)
 	if err != nil {
@@ -343,13 +343,13 @@ func (service *Service) GetAllQuizAnswer(
 	inputJwtToken *types.JwtToken,
 	filter *types.Filter,
 	pagination *types.Pagination,
-	clause *data.GetAllQuizAnswerRequest,
+	quizID int64,
+	request *data.GetAllQuizAnswerRequest,
 ) (result []model.QuizAnswer, errCode int, err error) {
-	var quizID, quizQuestionID, studentID int64
-	if clause != nil {
-		quizID = clause.QuizID
-		quizQuestionID = clause.QuizQuestionID
-		studentID = clause.StudentID
+	var quizQuestionID, studentID int64
+	if request != nil {
+		quizQuestionID = request.QuizQuestionID
+		studentID = request.StudentID
 	}
 	result, err = service.Repository.GetAllQuizAnswer(filter, pagination, quizID, quizQuestionID, studentID)
 	if err != nil {
@@ -363,13 +363,9 @@ func (service *Service) GetAllQuizQuestionOption(
 	inputJwtToken *types.JwtToken,
 	filter *types.Filter,
 	pagination *types.Pagination,
-	clause *data.GetAllQuizQuestionOptionRequest,
+	request *data.GetAllQuizQuestionOptionRequest,
 ) (result []model.QuizQuestionOption, errCode int, err error) {
-	var quizQuestionID int64
-	if clause != nil {
-		quizQuestionID = clause.QuizQuestionID
-	}
-	result, err = service.Repository.GetAllQuizQuestionOption(filter, pagination, quizQuestionID)
+	result, err = service.Repository.GetAllQuizQuestionOption(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
