@@ -15,12 +15,11 @@ type QuizResponse struct {
 	Year         *dataYear.YearPublicResponse          `json:"year" required:"false" doc:"Year"`
 	ClassSubject *dataClass.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Subject for specific class"`
 	Unit         *dataUnit.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
+	Questions    []QuizQuestionResponseV2              `json:"questions" required:"false" doc:"Questions"`
 
 	Title       string `json:"title" required:"false" doc:"Title"`
 	Description string `json:"description" required:"false" doc:"Description"`
 	Status      string `json:"status" required:"false" doc:"Status" example:""`
-
-	Questions []QuizQuestionResponseV2 `json:"questions" required:"false" doc:"Questions"`
 }
 
 type QuizQuestionResponseV2 struct {

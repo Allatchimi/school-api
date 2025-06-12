@@ -23,7 +23,11 @@ var Http403InvalidPermissionErrorMessage = func() error {
 }
 
 var Http409ConflictErrorMessage = func() error {
-	return fmt.Errorf("%s", "Can't process this operation! Please enter valid information.")
+	return fmt.Errorf("%s", "Can't process conflict inputs! Please enter valid information.")
+}
+
+var Http406ErrorMessage = func() error {
+	return fmt.Errorf("%s", "The inputs are not acceptable! Please enter valid information.")
 }
 
 var Http404ErrorMessage = func(message string) error {

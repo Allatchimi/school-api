@@ -25,12 +25,7 @@ func (controller *Controller) Create(
 ) (result *model.Course, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.Course{
-			SchoolID:       input.Body.SchoolID,
-			YearID:         input.Body.YearID,
-			ClassSubjectID: input.Body.ClassSubjectID,
-			UnitID:         input.Body.UnitID,
-		},
+		&input.Body,
 	)
 	return
 }

@@ -2,6 +2,7 @@ package data
 
 import (
 	"api/common/types"
+	dataSchool "api/services/school/common/school/data"
 	dataStudent "api/services/school/common/student/data"
 	dataUser "api/services/user/user/data"
 )
@@ -12,7 +13,8 @@ type ParentResponse struct {
 }
 
 type ParentPublicResponse struct {
-	User *dataUser.UserPublicResponse `json:"userID" required:"false" doc:"User id"`
+	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
 }
 
 type ParentStudentResponse struct {
@@ -39,7 +41,8 @@ type ParentAssignPublicResponse struct {
 	Status         string `json:"status" required:"false" doc:"Status"`
 	StatusFeedback string `json:"statusFeedback" required:"false" doc:"Status feedback"`
 
-	Parent *ParentPublicResponse `json:"parent" required:"false" doc:"Parent"`
+	Parent               *ParentPublicResponse               `json:"parent" required:"false" doc:"Parent"`
+	ParentAssignStudents []ParentAssignStudentPublicResponse `json:"parentAssignStudents" required:"false" doc:"Parent assign students"`
 }
 
 type ParentAssignStudentResponse struct {

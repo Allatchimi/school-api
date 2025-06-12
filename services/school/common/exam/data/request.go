@@ -1,6 +1,9 @@
 package data
 
-import "time"
+import (
+	"api/common/types"
+	"time"
+)
 
 type ExamID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Exam id" example:"1"`
@@ -35,7 +38,9 @@ type ExamTypeRequest struct {
 }
 
 type GetAllRequest struct {
-	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
+	types.FilterSchoolYearClassSubjectUnitRequest
+	TypeID     int64 `json:"typeID" query:"typeID" required:"false" doc:"Type id" example:"1"`
+	SequenceID int64 `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id" example:"1"`
 }
 
 type GetAllExamTypeRequest struct {

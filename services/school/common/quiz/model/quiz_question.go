@@ -13,10 +13,10 @@ type QuizQuestion struct {
 	SolutionID int64               `gorm:"default:null"`
 	Solution   *QuizQuestionOption `gorm:"default:null;foreignKey:SolutionID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
+	Options []QuizQuestionOption `gorm:"foreignKey:QuizQuestionID;references:ID"`
+
 	Title       string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
-
-	Options []QuizQuestionOption `gorm:"foreignKey:QuizQuestionID;references:ID"`
 }
 
 func (item *QuizQuestion) ToResponse() *data.QuizQuestionResponse {

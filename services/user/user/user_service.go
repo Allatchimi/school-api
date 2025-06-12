@@ -7,6 +7,7 @@ import (
 	"api/common/constants"
 	"api/common/types"
 	"api/common/utils"
+	"api/services/user/user/data"
 	"api/services/user/user/model"
 )
 
@@ -21,21 +22,26 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "user"
 const DEFAULT_ERROR_MESSAGE = "interact with user model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.User) (result *model.User, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.User, password *string) (result *model.User, errCode int, err error) {
 	// Check if user exists
 	var foundItem *model.User
 	var isEmailValid = utils.IsEmailValid(item.Email)
+	var isPhoneNumberValid = utils.IsPhoneNumberValid(item.PhoneNumber)
 	if isEmailValid {
 		foundItem, err = service.Repository.GetByEmail(item.Email)
-	} else {
+	} else if isPhoneNumberValid {
 		foundItem, err = service.Repository.GetByPhoneNumber(item.PhoneNumber)
+	} else {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessage()
+		return
 	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem != nil {
+	if foundItem != nil && foundItem.ID > 0 {
 		if (isEmailValid && foundItem.Email == item.Email) || (!isEmailValid && foundItem.PhoneNumber == item.PhoneNumber) {
 			errCode = http.StatusFound
 			err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -43,33 +49,46 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.User) 
 		}
 	}
 
-	// Create new user
-	randomPassword := utils.GenerateRandomPassword(8)
+	// Create user info
+	tempInfo, err := service.Repository.CreateUserInfo(&model.UserInfo{
+		Gender:        item.Info.Gender,
+		Username:      item.Info.Username,
+		FirstName:     item.Info.FirstName,
+		LastName:      item.Info.LastName,
+		Birthday:      item.Info.Birthday,
+		BirthLocation: item.Info.BirthLocation,
+		Address:       item.Info.Address,
+		Language:      item.Info.Language,
+		Image:         item.Info.Image,
+	})
+	if err != nil || tempInfo == nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+
+	// Create user
+	var randomPassword string = ""
+	if password == nil || len(*password) < 1 {
+		randomPassword = utils.GenerateRandomPassword(8)
+	} else {
+		randomPassword = *password
+	}
 	var activatedAt *time.Time = nil
 	if item.IsActivated {
 		tmpTime := time.Now()
 		activatedAt = &tmpTime
 	}
-	newUser := &model.User{
+	result, err = service.Repository.Create(&model.User{
+		RoleID:      item.RoleID,
 		Email:       item.Email,
 		PhoneNumber: item.PhoneNumber,
-		RoleID:      item.RoleID,
 		IsActivated: item.IsActivated,
 		ActivatedAt: activatedAt,
 		LoginMethod: constants.AuthLoginMethodDefault,
 		Password:    randomPassword,
-	}
-	result, err = service.Repository.Create(newUser)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	return
-}
-
-func (service *Service) AssignRole(inputJwtToken *types.JwtToken, userID int64, roleID int64) (result *model.User, errCode int, err error) {
-	result, err = service.Repository.AssignRole(userID, roleID)
+		UserInfoID:  tempInfo.ID,
+	})
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -80,35 +99,37 @@ func (service *Service) AssignRole(inputJwtToken *types.JwtToken, userID int64, 
 
 func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *model.User) (result *model.User, errCode int, err error) {
 	// Check if user exists
-	foundItem, err := service.Repository.GetByEmail(item.Email)
+	var foundItem *model.User
+	var isEmailValid = utils.IsEmailValid(item.Email)
+	var isPhoneNumberValid = utils.IsPhoneNumberValid(item.PhoneNumber)
+	if isEmailValid {
+		foundItem, err = service.Repository.GetByEmail(item.Email)
+	} else if isPhoneNumberValid {
+		foundItem, err = service.Repository.GetByPhoneNumber(item.PhoneNumber)
+	} else {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessage()
+		return
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem != nil {
-		if foundItem.Email != item.Email {
-			errCode = http.StatusFound
-			err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			return
-		}
+	if foundItem == nil || foundItem.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
 	}
 
-	foundItem, err = service.Repository.GetByPhoneNumber(item.PhoneNumber)
+	// Update user info
+	_, err = service.Repository.UpdateUserInfoByID(foundItem.UserInfoID, item.Info)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem != nil {
-		if foundItem.PhoneNumber != item.PhoneNumber {
-			errCode = http.StatusFound
-			err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			return
-		}
-	}
-
-	// Update
+	// Update user
 	if !item.IsActivated {
 		item.ActivatedAt = nil
 	} else if item.IsActivated && !foundItem.IsActivated {
@@ -119,27 +140,13 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, item *mo
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
 	}
 	return
 }
 
 func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteByID(id)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if affectedRows <= 0 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-	return
-}
-
-func (service *Service) DeleteRole(inputJwtToken *types.JwtToken, userID int64, roleID int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteRoleByUserIDRoleID(userID, roleID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -183,8 +190,8 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, roleName string) (result []model.User, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, roleName)
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.User, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

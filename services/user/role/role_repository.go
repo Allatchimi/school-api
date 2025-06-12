@@ -9,6 +9,7 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
+	"api/services/user/role/data"
 	"api/services/user/role/model"
 )
 
@@ -82,7 +83,7 @@ func (repository *Repository) GetByName(name string) (result *model.Role, err er
 	return
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination) (result []model.Role, err error) {
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Role, err error) {
 	result = make([]model.Role, 0)
 	var where string = ""
 	if filter != nil && len(filter.Search) >= 1 {

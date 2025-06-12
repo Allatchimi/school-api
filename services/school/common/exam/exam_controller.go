@@ -176,7 +176,7 @@ func (controller *Controller) GetAllExamType(
 	},
 ) (result *data.ExamTypeResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	examList, errCode, err := controller.Service.GetAllExamType(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllExamTypeRequest.SchoolID)
+	examList, errCode, err := controller.Service.GetAllExamType(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllExamTypeRequest)
 	if err != nil {
 		return
 	}
@@ -197,7 +197,7 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.ExamResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	examList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllRequest.SchoolID)
+	examList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}

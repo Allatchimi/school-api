@@ -8,10 +8,7 @@ import (
 
 type DomainResponse struct {
 	types.BaseGormModelResponse
-	School      *schoolData.SchoolPublicResponse         `json:"school" doc:"School"`
-	Department  *departmentData.DepartmentPublicResponse `json:"department" doc:"Department"`
-	Name        string                                   `json:"name" required:"false" doc:"Department name"`
-	Description string                                   `json:"description" required:"false" doc:"Department description"`
+	DomainPublicResponse
 }
 
 type DomainPublicResponse struct {

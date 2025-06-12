@@ -9,7 +9,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
-	"api/services/health/data"
+	"api/services/common/health/data"
 )
 
 func RegisterEndpoints(

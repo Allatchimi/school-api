@@ -43,10 +43,29 @@ type SchoolInfoRequest struct {
 	Image2 string `json:"image2" required:"false" doc:"Image 2" example:""`
 	Image3 string `json:"image3" required:"false" doc:"Image 3" example:""`
 	Image4 string `json:"image4" required:"false" doc:"Image 4" example:""`
+	Image5 string `json:"image5" required:"false" doc:"Image 5" example:""`
 }
 
 type SchoolConfigRequest struct {
-	EmailDomain  string `json:"emailDomain" required:"false" minLength:"3" maxLength:"150" doc:"Email domain" example:"google.com"`
+	Protocol string `json:"protocol" required:"true" enum:"http,https" doc:"Protocol" example:"http"`
+
+	DomainName string `json:"domainName" required:"true" minLength:"3" maxLength:"150" doc:"Domain name" example:"google.com"`
+	DomainCert string `json:"domainCert" required:"false" minLength:"3" maxLength:"150" doc:"Domain cert" example:""`
+	DomainKey  string `json:"domainKey" required:"false" minLength:"3" maxLength:"150" doc:"Domain key" example:""`
+
+	SmtpHost     string `json:"smtpHost" required:"true" minLength:"3" maxLength:"150" doc:"SMTP host" example:"smtp.google.com"`
+	SmtpPort     int    `json:"smtpPort" required:"true" min:"1" max:"65535" doc:"SMTP port" example:"587"`
+	SmtpUsername string `json:"smtpUsername" required:"true" minLength:"3" maxLength:"150" doc:"SMTP username" example:"user@gmail.com"`
+	SmtpPassword string `json:"smtpPassword" required:"true" minLength:"3" maxLength:"150" doc:"SMTP password" example:"password"`
+	SmtpSender   string `json:"smtpSender" required:"true" minLength:"3" maxLength:"150" doc:"SMTP sender" example:"user@gmail.com"`
+
+	EmailDomain  string `json:"emailDomain" required:"true" minLength:"3" maxLength:"150" doc:"Email domain" example:"google.com"`
+	NoReplyEmail string `json:"noReplyEmail" required:"true" minLength:"3" maxLength:"150" doc:"No reply email" example:"noreply@gmail.com"`
+	SupportEmail string `json:"supportEmail" required:"true" minLength:"3" maxLength:"150" doc:"Support email" example:"support@gmail.com"`
+
+	WebsiteTitle       string `json:"websiteTitle" required:"true" minLength:"3" maxLength:"150" doc:"Website title" example:"School"`
+	WebsiteDescription string `json:"websiteDescription" required:"true" minLength:"3" maxLength:"500" doc:"Website description" example:"School description"`
+
 	ColorPrimary string `json:"colorPrimary" required:"true" minLength:"4" maxLength:"7" doc:"Primary color in HEX" example:"#FFFFFF"`
 }
 

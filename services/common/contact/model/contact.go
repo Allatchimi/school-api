@@ -2,11 +2,16 @@ package model
 
 import (
 	"api/common/types"
-	"api/services/contact/data"
+	"api/services/common/contact/data"
+	schoolModel "api/services/school/common/school/model"
 )
 
 type Contact struct {
 	types.BaseGormModel
+
+	SchoolID int64               `gorm:"default:null"`
+	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
 	Subject string `gorm:"default:null"`
 	Email   string `gorm:"default:null"`
 	Message string `gorm:"default:null"`
@@ -20,6 +25,8 @@ func (item *Contact) ToResponse() *data.ContactResponse {
 	resp.Subject = item.Subject
 	resp.Email = item.Email
 	resp.Message = item.Message
+
+	resp.School = item.School.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

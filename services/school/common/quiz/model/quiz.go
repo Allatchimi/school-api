@@ -23,11 +23,11 @@ type Quiz struct {
 	UnitID int64                     `gorm:"default:null"`
 	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
+	Questions []QuizQuestion `gorm:"foreignKey:QuizID;references:ID"`
+
 	Title       string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
 	Status      string `gorm:"default:null"`
-
-	Questions []QuizQuestion `gorm:"foreignKey:QuizID;references:ID"`
 }
 
 func (item *Quiz) ToResponse() *data.QuizResponse {

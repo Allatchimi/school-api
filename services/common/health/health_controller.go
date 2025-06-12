@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"api/common/helpers"
-	"api/services/health/data"
+	"api/services/common/health/data"
 )
 
 type Controller struct {

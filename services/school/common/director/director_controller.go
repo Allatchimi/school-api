@@ -7,6 +7,7 @@ import (
 	"api/common/types"
 	"api/services/school/common/director/data"
 	"api/services/school/common/director/model"
+	modelUser "api/services/user/user/model"
 )
 
 type Controller struct {
@@ -25,9 +26,21 @@ func (controller *Controller) Create(
 ) (result *model.Director, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
-		&model.Director{
-			UserID:   input.Body.UserID,
-			SchoolID: input.Body.SchoolID,
+		input.Body.SchoolID,
+		&modelUser.User{
+			Email:       input.Body.Email,
+			PhoneNumber: input.Body.PhoneNumber,
+			Info: &modelUser.UserInfo{
+				Gender:        input.Body.Info.Gender,
+				Username:      input.Body.Info.Username,
+				FirstName:     input.Body.Info.FirstName,
+				LastName:      input.Body.Info.LastName,
+				Birthday:      input.Body.Info.Birthday,
+				BirthLocation: input.Body.Info.BirthLocation,
+				Address:       input.Body.Info.Address,
+				Language:      input.Body.Info.Language,
+				Image:         input.Body.Info.Image,
+			},
 		},
 	)
 	return
@@ -42,9 +55,20 @@ func (controller *Controller) Update(
 ) (result *model.Director, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx), input.ID,
-		&model.Director{
-			UserID:   input.Body.UserID,
-			SchoolID: input.Body.SchoolID,
+		&modelUser.User{
+			Email:       input.Body.Email,
+			PhoneNumber: input.Body.PhoneNumber,
+			Info: &modelUser.UserInfo{
+				Gender:        input.Body.Info.Gender,
+				Username:      input.Body.Info.Username,
+				FirstName:     input.Body.Info.FirstName,
+				LastName:      input.Body.Info.LastName,
+				Birthday:      input.Body.Info.Birthday,
+				BirthLocation: input.Body.Info.BirthLocation,
+				Address:       input.Body.Info.Address,
+				Language:      input.Body.Info.Language,
+				Image:         input.Body.Info.Image,
+			},
 		},
 	)
 	return
@@ -97,10 +121,11 @@ func (controller *Controller) GetAll(
 	input *struct {
 		types.Filter
 		types.PaginationRequest
+		data.GetAllRequest
 	},
 ) (result *data.DirectorResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	directorList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination)
+	directorList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}

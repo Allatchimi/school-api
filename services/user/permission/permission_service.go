@@ -5,6 +5,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
+	"api/services/user/permission/data"
 	"api/services/user/permission/model"
 )
 
@@ -87,8 +88,9 @@ func (service *Service) GetAll(
 	inputJwtToken *types.JwtToken,
 	filter *types.Filter,
 	pagination *types.Pagination,
+	request *data.GetAllRequest,
 ) (result []model.Permission, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination)
+	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

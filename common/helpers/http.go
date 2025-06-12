@@ -13,7 +13,6 @@ const (
 	tokenKey  = "bearer"
 	userIDKey = "userID"
 	issuerKey = "issuer"
-	roleIDKey = "roleID"
 )
 
 // ExtractBearerTokenHeader Retrieves the bearer token from the current request context.
@@ -27,8 +26,7 @@ func SetAuthContext(ctx *huma.Context, token string, jwtToken *types.JwtToken) *
 	ctxToken := huma.WithValue(*ctx, tokenKey, token)
 	ctxUserID := huma.WithValue(ctxToken, userIDKey, jwtToken.UserID)
 	ctxIssuer := huma.WithValue(ctxUserID, issuerKey, jwtToken.Issuer)
-	ctxRoleID := huma.WithValue(ctxIssuer, roleIDKey, jwtToken.RoleID)
-	return &ctxRoleID
+	return &ctxIssuer
 }
 
 // GetJwtContext Returns JWT token from context
@@ -39,9 +37,6 @@ func GetJwtContext(ctx *context.Context) *types.JwtToken {
 	}
 	if iss, okIss := (*ctx).Value(issuerKey).(string); okIss {
 		result.Issuer = iss
-	}
-	if role, okRole := (*ctx).Value(roleIDKey).(int64); okRole {
-		result.RoleID = role
 	}
 	return result
 }

@@ -9,7 +9,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
-	"api/services/communication/data"
+	"api/services/common/communication/data"
 )
 
 func RegisterEndpoints(
@@ -133,6 +133,7 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
+				data.GetAllRequest
 			},
 		) (*struct {
 			Body data.CommunicationResponseList

@@ -46,3 +46,11 @@ func ToParentAssignStudentResponseList(itemList []ParentAssignStudent) []data.Pa
 	}
 	return resp
 }
+
+func ToParentAssignStudentPublicResponseList(itemList []ParentAssignStudent) []data.ParentAssignStudentPublicResponse {
+	resp := make([]data.ParentAssignStudentPublicResponse, len(itemList))
+	for index, item := range itemList {
+		resp[index] = *item.ToPublicResponse()
+	}
+	return resp
+}

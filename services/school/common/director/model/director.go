@@ -12,11 +12,11 @@ import (
 type Director struct {
 	types.BaseGormModel
 
-	UserID int64           `gorm:"default:null"`
-	User   *userModel.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-
 	SchoolID int64               `gorm:"default:null"`
 	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	UserID int64           `gorm:"default:null"`
+	User   *userModel.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *Director) ToResponse() *data.DirectorResponse {
@@ -25,15 +25,15 @@ func (item *Director) ToResponse() *data.DirectorResponse {
 	}
 	resp := &data.DirectorResponse{
 		DirectorPublicResponse: data.DirectorPublicResponse{
-			User:   &dataUser.UserPublicResponse{},
 			School: &dataSchool.SchoolPublicResponse{},
+			User:   &dataUser.UserPublicResponse{},
 		},
-	}
-	if item.User != nil {
-		resp.User = item.User.ToPublicResponse()
 	}
 	if item.School != nil {
 		resp.School = item.School.ToPublicResponse()
+	}
+	if item.User != nil {
+		resp.User = item.User.ToPublicResponse()
 	}
 
 	resp.ID = item.ID
@@ -47,14 +47,14 @@ func (item *Director) ToPublicResponse() *data.DirectorPublicResponse {
 		return nil
 	}
 	resp := &data.DirectorPublicResponse{
-		User:   &dataUser.UserPublicResponse{},
 		School: &dataSchool.SchoolPublicResponse{},
-	}
-	if item.User != nil {
-		resp.User = item.User.ToPublicResponse()
+		User:   &dataUser.UserPublicResponse{},
 	}
 	if item.School != nil {
 		resp.School = item.School.ToPublicResponse()
+	}
+	if item.User != nil {
+		resp.User = item.User.ToPublicResponse()
 	}
 	return resp
 }

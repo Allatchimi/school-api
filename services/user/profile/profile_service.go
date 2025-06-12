@@ -41,7 +41,7 @@ func (service *Service) UpdateProfileEmail(inputJwtToken *types.JwtToken, email 
 	}
 
 	// Update
-	result, err = service.Repository.UpdateEmail(inputJwtToken.UserID, email)
+	result, err = service.Repository.UpdateUserEmail(inputJwtToken.UserID, email)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -64,7 +64,7 @@ func (service *Service) UpdateProfilePhoneNumber(inputJwtToken *types.JwtToken, 
 	}
 
 	// Update
-	result, err = service.Repository.UpdatePhoneNumber(inputJwtToken.UserID, phoneNumber)
+	result, err = service.Repository.UpdateUserPhoneNumber(inputJwtToken.UserID, phoneNumber)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -90,11 +90,9 @@ func (service *Service) UpdateProfilePasswordInit(inputJwtToken *types.JwtToken)
 		return
 	}
 	expires := security.NewExpiresDateDefault()
-	var tempRoleID int64 = userFound.RoleID
 	newJwtToken, newToken, err := security.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
-			RoleID:   tempRoleID,
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -195,11 +193,9 @@ func (service *Service) UpdateProfilePasswordCheckCode(inputJwtToken *types.JwtT
 	_, _ = config.DeleteRedisString(security.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
 
 	// Generate new token
-	var tempRoleID int64 = userFound.RoleID
 	newJwtToken, newToken, err := security.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
-			RoleID:   tempRoleID,
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -252,7 +248,7 @@ func (service *Service) UpdateProfilePasswordNewPassword(inputJwtToken *types.Jw
 	}
 	if jwtTokenDecoded == nil || jwtTokenDecoded.UserID <= 0 ||
 		jwtTokenDecoded.Issuer != constants.JwtIssuerProfileUpdatePasswordNewPassword ||
-		jwtTokenDecoded.UserID != inputJwtToken.UserID || jwtTokenDecoded.RoleID != inputJwtToken.RoleID {
+		jwtTokenDecoded.UserID != inputJwtToken.UserID {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", errMsg)
 		return

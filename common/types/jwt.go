@@ -7,7 +7,6 @@ import (
 type JwtToken struct {
 	jwt.RegisteredClaims
 	UserID   int64  `json:"userID"`
-	RoleID   int64  `json:"roleID"`
 	Platform string `json:"platform"`
 	Device   string `json:"device"`
 	App      string `json:"app"`

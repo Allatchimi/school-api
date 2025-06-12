@@ -24,7 +24,6 @@ const DEFAULT_ERROR_MESSAGE = "interact with course model"
 func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.CourseRequest) (result *model.Course, errCode int, err error) {
 	// Check if the user can access
 	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.RoleID,
 		inputJwtToken.UserID,
 		request.SchoolID,
 		request.YearID,
@@ -88,7 +87,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Cour
 		}
 	}
 
-	// Get the course
+	// Refetch the course
 	foundItem, err := service.Repository.GetByID(result.ID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -105,7 +104,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Cour
 }
 
 func (service *Service) CreateComment(inputJwtToken *types.JwtToken, id int64, item *model.CourseComment) (result *model.CourseComment, errCode int, err error) {
-	// Get the course
+	// Check if the course exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -120,7 +119,6 @@ func (service *Service) CreateComment(inputJwtToken *types.JwtToken, id int64, i
 
 	// Check if the user can access
 	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.RoleID,
 		inputJwtToken.UserID,
 		foundItem.SchoolID,
 		foundItem.YearID,
@@ -146,7 +144,6 @@ func (service *Service) CreateComment(inputJwtToken *types.JwtToken, id int64, i
 func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.CourseRequest) (result *model.Course, errCode int, err error) {
 	// Check if the user can access
 	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.RoleID,
 		inputJwtToken.UserID,
 		request.SchoolID,
 		request.YearID,
@@ -261,7 +258,6 @@ func (service *Service) UpdateComment(inputJwtToken *types.JwtToken, id int64, i
 
 	// Check if the user can access
 	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.RoleID,
 		inputJwtToken.UserID,
 		foundItem.Course.SchoolID,
 		foundItem.Course.YearID,
@@ -306,7 +302,6 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 
 	// Check if the user can access
 	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.RoleID,
 		inputJwtToken.UserID,
 		foundItem.SchoolID,
 		foundItem.YearID,
@@ -350,7 +345,6 @@ func (service *Service) DeleteComment(inputJwtToken *types.JwtToken, id int64) (
 
 	// Check if the user can access
 	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.RoleID,
 		inputJwtToken.UserID,
 		foundItem.Course.SchoolID,
 		foundItem.Course.YearID,
@@ -402,7 +396,6 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 
 	// Check if the user can access
 	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.RoleID,
 		inputJwtToken.UserID,
 		result.SchoolID,
 		result.YearID,
@@ -421,36 +414,12 @@ func (service *Service) GetAll(
 	inputJwtToken *types.JwtToken,
 	filter *types.Filter,
 	pagination *types.Pagination,
-	clause *data.GetAllRequest,
+	request *data.GetAllRequest,
 ) (result []model.Course, errCode int, err error) {
-	if clause == nil {
-		errCode = http.StatusBadRequest
-		err = constants.Http400BadRequestErrorMessage()
-		return
-	}
-	// Check if the user can access
-	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.RoleID,
-		inputJwtToken.UserID,
-		clause.SchoolID,
-		clause.YearID,
-		clause.ClassSubjectID,
-		clause.UnitID,
-	)
-	if !canAccess {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
-	}
-
-	// Get items
 	result, err = service.Repository.GetAll(
 		filter,
 		pagination,
-		clause.SchoolID,
-		clause.YearID,
-		clause.ClassSubjectID,
-		clause.UnitID,
+		request,
 	)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -463,46 +432,12 @@ func (service *Service) GetAllComment(
 	inputJwtToken *types.JwtToken,
 	filter *types.Filter,
 	pagination *types.Pagination,
-	clause *data.GetAllCourseCommentRequest,
+	request *data.GetAllCourseCommentRequest,
 ) (result []model.CourseComment, errCode int, err error) {
-	if clause == nil {
-		errCode = http.StatusBadRequest
-		err = constants.Http400BadRequestErrorMessage()
-		return
-	}
-	// Get the course
-	foundCourse, err := service.Repository.GetByID(clause.CourseID)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundCourse == nil {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-
-	// Check if the user can access
-	canAccess := common_svc_permission.CanAccessBySchoolYearClassSubjectUnit(
-		inputJwtToken.RoleID,
-		inputJwtToken.UserID,
-		foundCourse.SchoolID,
-		foundCourse.YearID,
-		foundCourse.ClassSubjectID,
-		foundCourse.UnitID,
-	)
-	if !canAccess {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
-	}
-
-	// Get items
 	result, err = service.Repository.GetAllCourseComment(
 		filter,
 		pagination,
-		clause.CourseID,
+		request,
 	)
 	if err != nil {
 		errCode = http.StatusInternalServerError

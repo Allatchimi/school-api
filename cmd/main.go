@@ -26,7 +26,7 @@ func main() {
 	}
 
 	// Migrate
-	err := migrate.Start()
+	err := migrate.Apply()
 	if err != nil {
 		panic(err)
 	}

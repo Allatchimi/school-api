@@ -15,6 +15,7 @@ type UniversityLevelDomain struct {
 	DomainID int64                         `gorm:"default:null"`
 	Domain   *domainModel.UniversityDomain `gorm:"default:null;foreignKey:DomainID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
+	Fees         int64      `gorm:"default null"`
 	Program      string     `gorm:"default null"`
 	Requirements string     `gorm:"default null"`
 	IsValid      bool       `gorm:"default:true"`
@@ -26,6 +27,7 @@ func (item *UniversityLevelDomain) ToLevelDomainResponse() *data.LevelDomainResp
 		return nil
 	}
 	resp := &data.LevelDomainResponse{}
+	resp.Fees = item.Fees
 	resp.Program = item.Program
 	resp.Requirements = item.Requirements
 	resp.IsValid = item.IsValid
@@ -45,6 +47,7 @@ func (item *UniversityLevelDomain) ToLevelDomainPublicResponse() *data.LevelDoma
 		return nil
 	}
 	resp := &data.LevelDomainPublicResponse{}
+	resp.Fees = item.Fees
 	resp.Program = item.Program
 	resp.Requirements = item.Requirements
 	resp.IsValid = item.IsValid

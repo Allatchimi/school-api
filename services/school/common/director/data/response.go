@@ -12,8 +12,8 @@ type DirectorResponse struct {
 }
 
 type DirectorPublicResponse struct {
-	User   *dataUser.UserPublicResponse     `json:"user" doc:"User"`
-	School *dataSchool.SchoolPublicResponse `json:"school" doc:"School"`
+	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
 }
 
 type DirectorResponseList struct {

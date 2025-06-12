@@ -48,7 +48,7 @@ func GenerateRandomAlphaNumeric(length int) string {
 	return generateRandomValue(letterAlphaNumeric, safeLength)
 }
 
-// Returns a random string of specified length, using provided characters.
+// generateRandomValue Returns a random string of specified length, using provided characters.
 // It's useful to generate passwords, OTP code and various other things
 func generateRandomValue(letters string, length int) string {
 	sb := strings.Builder{}
@@ -65,6 +65,27 @@ func generateRandomValue(letters string, length int) string {
 		cache >>= letterIdxBits
 		remain--
 	}
+
+	return sb.String()
+}
+
+// GenerateRandomValue Returns a unique identifier string.
+// It combines a prefix, a random value of a given length, and a suffix.
+func GenerateRandomUID(length int, prefix string, suffix string) string {
+	// Generate the random part of the UID
+	safeLength := length
+	if safeLength <= 0 {
+		safeLength = 1
+	}
+	randomPart := generateRandomValue(letterNumeric, safeLength)
+
+	// Use strings.Builder for efficient string concatenation
+	var sb strings.Builder
+	sb.Grow(len(prefix) + length + len(suffix)) // Pre-allocate memory for efficiency
+
+	sb.WriteString(prefix)     // Add the prefix
+	sb.WriteString(randomPart) // Add the random part
+	sb.WriteString(suffix)     // Add the suffix
 
 	return sb.String()
 }

@@ -9,7 +9,8 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
-	"api/services/contact/model"
+	"api/services/common/contact/data"
+	"api/services/common/contact/model"
 )
 
 type Repository struct {
@@ -47,16 +48,22 @@ func (repository *Repository) GetByID(contactID int64) (*model.Contact, error) {
 	return result, repository.Db.Where("id = ?", contactID).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination) (result []model.Contact, err error) {
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Contact, err error) {
 	result = make([]model.Contact, 0)
 	var where string = ""
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("contacts.school_id = %d", request.SchoolID))
+		}
+	}
 	if filter != nil && len(filter.Search) >= 1 {
-		where = fmt.Sprintf(
-			"WHERE subject ILIKE '%s' OR email ILIKE '%s' OR message ILIKE '%s'",
+		tempWhere := fmt.Sprintf(
+			"(subject ILIKE '%s' OR email ILIKE '%s' OR message ILIKE '%s')",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(

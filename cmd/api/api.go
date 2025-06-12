@@ -11,9 +11,9 @@ import (
 	"api/common/constants"
 	"api/config"
 	"api/middlewares"
-	"api/services/communication"
-	"api/services/contact"
-	"api/services/health"
+	"api/services/common/communication"
+	"api/services/common/contact"
+	"api/services/common/health"
 	"api/services/school/common/director"
 	"api/services/school/common/exam"
 	"api/services/school/common/meeting"
@@ -171,7 +171,7 @@ func Start() {
 		middlewares.AuthMiddleware(humaApi),
 		middlewares.PermissionMiddleware(
 			humaApi,
-			AllControllers.RoleController.Service.Repository,
+			AllControllers.UserController.Service.Repository,
 			AllControllers.PermissionController.Service.Repository,
 		),
 	)

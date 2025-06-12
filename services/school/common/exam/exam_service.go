@@ -5,6 +5,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
+	"api/services/school/common/exam/data"
 	"api/services/school/common/exam/model"
 )
 
@@ -201,8 +202,8 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, examID int64) (result
 	return
 }
 
-func (service *Service) GetAllExamType(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.ExamType, errCode int, err error) {
-	result, err = service.Repository.GetAllExamType(filter, pagination, schoolID)
+func (service *Service) GetAllExamType(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllExamTypeRequest) (result []model.ExamType, errCode int, err error) {
+	result, err = service.Repository.GetAllExamType(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -210,8 +211,8 @@ func (service *Service) GetAllExamType(inputJwtToken *types.JwtToken, filter *ty
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.Exam, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, schoolID)
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Exam, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

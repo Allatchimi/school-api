@@ -17,51 +17,33 @@ func NewController(service *Service) *Controller {
 	return &Controller{Service: service}
 }
 
-func (controller *Controller) CreateWithEmail(
+func (controller *Controller) Create(
 	ctx *context.Context,
 	input *struct {
-		Body data.CreateUserWithEmailRequest
+		Body data.UserRequest
 	},
 ) (result *model.User, errCode int, err error) {
+
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
 		&model.User{
+			RoleID:      input.Body.RoleID,
 			Email:       input.Body.Email,
-			RoleID:      input.Body.RoleID,
-			IsActivated: input.Body.IsActivated,
-		},
-	)
-	return
-}
-
-func (controller *Controller) CreateWithPhoneNumber(
-	ctx *context.Context,
-	input *struct {
-		Body data.CreateUserWithPhoneNumberRequest
-	},
-) (result *model.User, errCode int, err error) {
-	result, errCode, err = controller.Service.Create(
-		helpers.GetJwtContext(ctx),
-		&model.User{
 			PhoneNumber: input.Body.PhoneNumber,
-			RoleID:      input.Body.RoleID,
 			IsActivated: input.Body.IsActivated,
+			Info: &model.UserInfo{
+				Gender:        input.Body.Info.Gender,
+				Username:      input.Body.Info.Username,
+				FirstName:     input.Body.Info.FirstName,
+				LastName:      input.Body.Info.LastName,
+				Birthday:      input.Body.Info.Birthday,
+				BirthLocation: input.Body.Info.BirthLocation,
+				Address:       input.Body.Info.Address,
+				Language:      input.Body.Info.Language,
+				Image:         input.Body.Info.Image,
+			},
 		},
-	)
-	return
-}
-
-func (controller *Controller) AssignRole(
-	ctx *context.Context,
-	input *struct {
-		data.UserID
-		Body data.UserRoleRequest
-	},
-) (result *model.User, errCode int, err error) {
-	result, errCode, err = controller.Service.AssignRole(
-		helpers.GetJwtContext(ctx),
-		input.ID,
-		input.Body.RoleID,
+		nil,
 	)
 	return
 }
@@ -70,17 +52,28 @@ func (controller *Controller) Update(
 	ctx *context.Context,
 	input *struct {
 		data.UserID
-		Body data.UpdateUserRequest
+		Body data.UserRequest
 	},
 ) (result *model.User, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx),
 		input.UserID.ID,
 		&model.User{
+			RoleID:      input.Body.RoleID,
 			Email:       input.Body.Email,
 			PhoneNumber: input.Body.PhoneNumber,
-			RoleID:      input.Body.RoleID,
 			IsActivated: input.Body.IsActivated,
+			Info: &model.UserInfo{
+				Gender:        input.Body.Info.Gender,
+				Username:      input.Body.Info.Username,
+				FirstName:     input.Body.Info.FirstName,
+				LastName:      input.Body.Info.LastName,
+				Birthday:      input.Body.Info.Birthday,
+				BirthLocation: input.Body.Info.BirthLocation,
+				Address:       input.Body.Info.Address,
+				Language:      input.Body.Info.Language,
+				Image:         input.Body.Info.Image,
+			},
 		},
 	)
 	return
@@ -95,21 +88,6 @@ func (controller *Controller) Delete(
 	result, errCode, err = controller.Service.Delete(
 		helpers.GetJwtContext(ctx),
 		input.ID,
-	)
-	return
-}
-
-func (controller *Controller) DeleteRole(
-	ctx *context.Context,
-	input *struct {
-		data.UserID
-		Body data.UserRoleRequest
-	},
-) (result int64, errCode int, err error) {
-	result, errCode, err = controller.Service.DeleteRole(
-		helpers.GetJwtContext(ctx),
-		input.ID,
-		input.Body.RoleID,
 	)
 	return
 }
@@ -154,7 +132,7 @@ func (controller *Controller) GetAll(
 		helpers.GetJwtContext(ctx),
 		newFilter,
 		newPagination,
-		input.GetAllRequest.Role,
+		&input.GetAllRequest,
 	)
 	if err != nil {
 		return

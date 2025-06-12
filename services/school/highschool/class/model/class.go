@@ -15,9 +15,9 @@ type HighschoolClass struct {
 	SpecialtyID int64                               `gorm:"default:null"`
 	Specialty   *specialtyModel.HighschoolSpecialty `gorm:"default:null;foreignKey:SpecialtyID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
+	Fees        int64  `gorm:"default:null"`
 	Name        string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
-	Fees        int64  `gorm:"default:null"`
 }
 
 func (item *HighschoolClass) ToResponse() *data.ClassResponse {
@@ -25,6 +25,7 @@ func (item *HighschoolClass) ToResponse() *data.ClassResponse {
 		return nil
 	}
 	resp := &data.ClassResponse{}
+	resp.Fees = item.Fees
 	resp.Name = item.Name
 	resp.Description = item.Description
 
@@ -42,6 +43,7 @@ func (item *HighschoolClass) ToPublicResponse() *data.ClassPublicResponse {
 		return nil
 	}
 	resp := &data.ClassPublicResponse{}
+	resp.Fees = item.Fees
 	resp.Name = item.Name
 	resp.Description = item.Description
 

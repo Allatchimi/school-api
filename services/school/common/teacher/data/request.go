@@ -1,5 +1,7 @@
 package data
 
+import dataUser "api/services/user/user/data"
+
 type TeacherID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Teacher id" example:"1"`
 }
@@ -9,9 +11,12 @@ type UnitSubjectID struct {
 }
 
 type TeacherRequest struct {
-	SchoolID int64  `json:"schoolID" required:"true" doc:"School id" example:"1"`
-	UserID   int64  `json:"userID" required:"true" doc:"User id" example:"1"`
-	UID      string `json:"uid" required:"false" doc:"Teacher UID" example:"1"`
+	SchoolID int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
+
+	UID         string                    `json:"uid" required:"false" doc:"Teacher UID" example:"1"`
+	Email       string                    `json:"email" required:"true" minLength:"3" max:"100" doc:"Email" example:"example@domain.com"`
+	PhoneNumber uint64                    `json:"phoneNumber" required:"false" doc:"Phone number" example:"237690909090"`
+	Info        *dataUser.UserInfoRequest `json:"info" required:"true" doc:"Information" example:""`
 }
 
 type TeacherClassSubjectUnitRequest struct {

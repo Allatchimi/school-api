@@ -22,15 +22,15 @@ func RegisterEndpoints(
 	}
 	const tableName = "users"
 
-	// Create user with email
+	// Create user
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-user-email",
-			Summary:     "Create user with email",
-			Description: "Create new user by providing email and user and return created object.",
+			OperationID: "post-user",
+			Summary:     "Create user",
+			Description: "Create new user by providing information and return created object.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/email", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -50,89 +50,10 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.CreateUserWithEmailRequest
+				Body data.UserRequest
 			},
 		) (*struct{ Body data.UserResponse }, error) {
-			result, errCode, err := controller.CreateWithEmail(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct{ Body data.UserResponse }{Body: *result.ToResponse()}, nil
-		},
-	)
-
-	// Create user with phone number
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "create-user-phone",
-			Summary:     "Create user with phone",
-			Description: "Create new user by providing phone number and role and return created object.",
-			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/phone", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s",
-							constants.FeatureAdmin,
-						), // Features scope
-						tableName,                  // Table name
-						constants.PermissionCreate, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				Body data.CreateUserWithPhoneNumberRequest
-			},
-		) (*struct{ Body data.UserResponse }, error) {
-			result, errCode, err := controller.CreateWithPhoneNumber(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct{ Body data.UserResponse }{Body: *result.ToResponse()}, nil
-		},
-	)
-
-	// Assign user role
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "assign-user-role",
-			Summary:     "Assign user role",
-			Description: "Assign new role to the user.",
-			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/{id}/role", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s",
-							constants.FeatureAdmin,
-						), // Features scope
-						tableName,                  // Table name
-						constants.PermissionCreate, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				data.UserID
-				Body data.UserRoleRequest
-			},
-		) (*struct{ Body data.UserResponse }, error) {
-			result, errCode, err := controller.AssignRole(&ctx, input)
+			result, errCode, err := controller.Create(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -169,7 +90,7 @@ func RegisterEndpoints(
 			ctx context.Context,
 			input *struct {
 				data.UserID
-				Body data.UpdateUserRequest
+				Body data.UserRequest
 			},
 		) (*struct{ Body data.UserResponse }, error) {
 			result, errCode, err := controller.Update(&ctx, input)
@@ -212,46 +133,6 @@ func RegisterEndpoints(
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.Delete(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
-		},
-	)
-
-	// Delete user role
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "delete-user-role",
-			Summary:     "Delete user role",
-			Description: "Delete existing user role and return affected rows in database.",
-			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/{id}/role", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s",
-							constants.FeatureAdmin,
-						), // Features scope
-						tableName,                  // Table name
-						constants.PermissionDelete, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				data.UserID
-				Body data.UserRoleRequest
-			},
-		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteRole(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}

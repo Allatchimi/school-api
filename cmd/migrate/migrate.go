@@ -3,13 +3,18 @@ package migrate
 import (
 	"api/common/helpers"
 	"api/config"
-	communicationModel "api/services/communication/model"
-	contactModel "api/services/contact/model"
+	communicationModel "api/services/common/communication/model"
+	contactModel "api/services/common/contact/model"
+	notificationModel "api/services/common/notification/model"
+	courseModel "api/services/school/common/course/model"
 	directorModel "api/services/school/common/director/model"
 	examModel "api/services/school/common/exam/model"
 	meetingModel "api/services/school/common/meeting/model"
 	parentModel "api/services/school/common/parent/model"
 	quizModel "api/services/school/common/quiz/model"
+	requestModel "api/services/school/common/request/model"
+	resultModel "api/services/school/common/result/model"
+	scheduleModel "api/services/school/common/schedule/model"
 	schoolModel "api/services/school/common/school/model"
 	studentModel "api/services/school/common/student/model"
 	teacherModel "api/services/school/common/teacher/model"
@@ -31,23 +36,28 @@ import (
 	userModel "api/services/user/user/model"
 )
 
-// Start Loads and applies all migrations.
-func Start() error {
+// Apply applies all models with default migration rule.
+func Apply() error {
 	err := config.DB.AutoMigrate(
-		// Others
+		// ----------- Others models -----------
+		// Notification
+		&notificationModel.Notification{},
+		// Communication
 		&communicationModel.Communication{},
+		// Contact
 		&contactModel.Contact{},
 
-		// User
+		// ----------- User models -----------
+		// Permission
 		&permissionModel.Permission{},
+		// User
 		&userModel.User{},
-		&roleModel.Role{},
 		&userModel.UserMfa{},
 		&userModel.UserInfo{},
+		// Role
+		&roleModel.Role{},
 
-		// Course
-		&courseModel.Course{},
-		&courseModel.CourseDocument{},
+		// ----------- Common school models -----------
 		// Director
 		&directorModel.Director{},
 		// School
@@ -56,8 +66,6 @@ func Start() error {
 		&schoolModel.SchoolConfig{},
 		// Year
 		&yearModel.Year{},
-		// Exam
-		&examModel.Exam{},
 		// Teacher
 		&teacherModel.Teacher{},
 		&teacherModel.TeacherClassSubjectUnit{},
@@ -69,6 +77,14 @@ func Start() error {
 		&parentModel.ParentStudent{},
 		&parentModel.ParentAssign{},
 		&parentModel.ParentAssignStudent{},
+		// Course
+		&courseModel.Course{},
+		&courseModel.CourseDocument{},
+		&courseModel.CourseVideo{},
+		&courseModel.CourseComment{},
+		// Exam
+		&examModel.Exam{},
+		&examModel.ExamType{},
 		// Meeting
 		&meetingModel.MeetingRoom{},
 		// Quiz
@@ -77,25 +93,40 @@ func Start() error {
 		&quizModel.QuizQuestionOption{},
 		&quizModel.QuizAnswer{},
 		// Request
+		&requestModel.Request{},
 		// Schedule
+		&scheduleModel.Schedule{},
 		// Result
+		&resultModel.Result{},
 
-		// Highschool
-		&sequenceModel.HighschoolSequence{},
-		&quarterModel.HighschoolQuarter{},
+		// ----------- Highschool models -----------
+		// Section
 		&sectionModel.HighschoolSection{},
+		// Specialty
 		&specialtyModel.HighschoolSpecialty{},
-		&subjectModel.HighschoolSubject{},
+		// Class
 		&classModel.HighschoolClass{},
 		&classModel.HighschoolClassSubject{},
+		// Quarter
+		&quarterModel.HighschoolQuarter{},
+		// Sequence
+		&sequenceModel.HighschoolSequence{},
+		// Subject
+		&subjectModel.HighschoolSubject{},
 
-		// University
-		&semesterModel.UniversitySemester{},
+		// ----------- University models -----------
+		// Faculty
 		&facultyModel.UniversityFaculty{},
+		// Department
 		&departmentModel.UniversityDepartment{},
+		// Domain
 		&domainModel.UniversityDomain{},
+		// Level
 		&levelModel.UniversityLevel{},
 		&levelModel.UniversityLevelDomain{},
+		// Semester
+		&semesterModel.UniversitySemester{},
+		// Unit
 		&tuModel.UniversityUnit{},
 	)
 	helpers.LogMigrations(

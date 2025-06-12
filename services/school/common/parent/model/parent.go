@@ -3,22 +3,37 @@ package model
 import (
 	"api/common/types"
 	"api/services/school/common/parent/data"
-	modelUser "api/services/user/user/model"
+	dataSchool "api/services/school/common/school/data"
+	schoolModel "api/services/school/common/school/model"
+	dataUser "api/services/user/user/data"
+	userModel "api/services/user/user/model"
 )
 
 type Parent struct {
 	types.BaseGormModel
+	SchoolID int64               `gorm:"default:null"`
+	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
 	UserID int64           `gorm:"default:null"`
-	User   *modelUser.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	User   *userModel.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *Parent) ToParentResponse() *data.ParentResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.ParentResponse{}
-
-	resp.User = item.User.ToPublicResponse()
+	resp := &data.ParentResponse{
+		ParentPublicResponse: data.ParentPublicResponse{
+			School: &dataSchool.SchoolPublicResponse{},
+			User:   &dataUser.UserPublicResponse{},
+		},
+	}
+	if item.School != nil {
+		resp.School = item.School.ToPublicResponse()
+	}
+	if item.User != nil {
+		resp.User = item.User.ToPublicResponse()
+	}
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -30,8 +45,16 @@ func (item *Parent) ToParentPublicResponse() *data.ParentPublicResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.ParentPublicResponse{}
-	resp.User = item.User.ToPublicResponse()
+	resp := &data.ParentPublicResponse{
+		School: &dataSchool.SchoolPublicResponse{},
+		User:   &dataUser.UserPublicResponse{},
+	}
+	if item.School != nil {
+		resp.School = item.School.ToPublicResponse()
+	}
+	if item.User != nil {
+		resp.User = item.User.ToPublicResponse()
+	}
 	return resp
 }
 

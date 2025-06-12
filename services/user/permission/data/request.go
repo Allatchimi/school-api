@@ -15,3 +15,7 @@ type UpdatePermissionRequest struct {
 	Update    bool   `json:"update" required:"true" doc:"Update permission" example:"false"`
 	Delete    bool   `json:"delete" required:"true" doc:"Delete permission" example:"false"`
 }
+
+type GetAllRequest struct {
+	RoleID int64 `json:"roleID" path:"roleID" required:"true" doc:"Role id" example:"1"`
+}

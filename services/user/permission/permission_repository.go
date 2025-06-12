@@ -9,6 +9,7 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
+	"api/services/user/permission/data"
 	"api/services/user/permission/model"
 )
 
@@ -82,16 +83,23 @@ func (repository *Repository) GetByRoleIDTableNameMultiple(
 func (repository *Repository) GetAll(
 	filter *types.Filter,
 	pagination *types.Pagination,
+	request *data.GetAllRequest,
 ) (result []model.Permission, err error) {
 	result = make([]model.Permission, 0)
 	var where string = ""
+	if request != nil {
+		if request.RoleID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("permissions.role_id = %d", request.RoleID))
+		}
+	}
 	if filter != nil && len(filter.Search) >= 1 {
-		where = fmt.Sprintf(
-			"WHERE CAST(id AS TEXT) = '%s' OR CAST(role_id AS TEXT) ILIKE '%s' OR table_name ILIKE '%s'",
+		tempWhere := fmt.Sprintf(
+			"(CAST(id AS TEXT) = '%s' OR CAST(role_id AS TEXT) ILIKE '%s' OR table_name ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(

@@ -63,7 +63,6 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 		accessJwtToken, accessToken, err = security.EncodeJWTToken(
 			&types.JwtToken{
 				UserID:   userFound.ID,
-				RoleID:   userFound.RoleID,
 				Platform: device.Platform,
 				Device:   device.DeviceName,
 				App:      device.App,
@@ -98,7 +97,6 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	activateAccountJwtToken, activateAccountToken, err = security.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
-			RoleID:   userFound.RoleID,
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -246,7 +244,6 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 	jwtToken, accessToken, err := security.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
-			RoleID:   userFound.RoleID,
 			Platform: device.Platform,
 			Device:   device.DeviceName,
 			App:      device.App,
@@ -323,7 +320,6 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	activateAccountJwtToken, activateAccountToken, err = security.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   createdUser.ID,
-			RoleID:   userFound.RoleID,
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -497,7 +493,6 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 	newJwtToken, newToken, err := security.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
-			RoleID:   userFound.RoleID,
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -601,7 +596,6 @@ func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest
 	newJwtToken, newToken, err := security.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
-			RoleID:   userFound.RoleID,
 			Platform: "*",
 			Device:   "*",
 			App:      "*",

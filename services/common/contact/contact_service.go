@@ -1,11 +1,12 @@
-package communication
+package contact
 
 import (
 	"net/http"
 
 	"api/common/constants"
 	"api/common/types"
-	"api/services/communication/model"
+	"api/services/common/contact/data"
+	"api/services/common/contact/model"
 )
 
 type Service struct {
@@ -16,11 +17,11 @@ func NewService(repository *Repository) *Service {
 	return &Service{Repository: repository}
 }
 
-const MODEL_NAME = "communication"
-const DEFAULT_ERROR_MESSAGE = "interact with communication model"
+const MODEL_NAME = "contact"
+const DEFAULT_ERROR_MESSAGE = "interact with contact model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Communication) (result *model.Communication, errCode int, err error) {
-	// Insert communication
+func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Contact) (result *model.Contact, errCode int, err error) {
+	// Insert contact
 	result, err = service.Repository.Create(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -30,7 +31,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, item *model.Commun
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Communication, errCode int, err error) {
+func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Contact, errCode int, err error) {
 	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -45,8 +46,8 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination) (result []model.Communication, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination)
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Contact, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

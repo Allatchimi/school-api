@@ -9,12 +9,12 @@ import (
 
 type Year struct {
 	types.BaseGormModel
+	SchoolID int64               `gorm:"default:null"`
+	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
 	Name      string     `gorm:"default:null"`
 	StartDate *time.Time `gorm:"default:null"`
 	EndDate   *time.Time `gorm:"default:null"`
-
-	SchoolID int64               `gorm:"default:null"`
-	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *Year) ToResponse() *data.YearResponse {

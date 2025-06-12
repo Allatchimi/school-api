@@ -2,7 +2,6 @@ package school
 
 import (
 	"fmt"
-	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -10,6 +9,7 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
+	"api/services/school/common/school/data"
 	"api/services/school/common/school/model"
 )
 
@@ -142,11 +142,13 @@ func (repository *Repository) GetConfigByID(id int64) (*model.SchoolConfig, erro
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, typeName string) (result []model.School, err error) {
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.School, err error) {
 	result = make([]model.School, 0)
 	var where string = ""
-	if len(typeName) > 0 {
-		where = fmt.Sprintf("WHERE schools.type = '%s'", typeName)
+	if request != nil {
+		if len(request.Type) > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("schools.type = %d", request.Type))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
@@ -158,11 +160,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
-		if strings.HasPrefix(where, "WHERE") {
-			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
-		} else {
-			where = fmt.Sprintf("WHERE %s", tempWhere)
-		}
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
 	newFilter := filter
 	newFilter.OrderBy = "schools." + newFilter.OrderBy

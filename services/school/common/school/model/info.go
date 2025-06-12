@@ -33,6 +33,7 @@ type SchoolInfo struct {
 	Image2 string `gorm:"default:null"`
 	Image3 string `gorm:"default:null"`
 	Image4 string `gorm:"default:null"`
+	Image5 string `gorm:"default:null"`
 }
 
 func (item *SchoolInfo) ToResponse() *data.SchoolInfoResponse {
@@ -64,6 +65,7 @@ func (item *SchoolInfo) ToResponse() *data.SchoolInfoResponse {
 	resp.Image2 = item.Image2
 	resp.Image3 = item.Image3
 	resp.Image4 = item.Image4
+	resp.Image5 = item.Image5
 	return resp
 }
 
@@ -96,6 +98,7 @@ func FromInfoRequest(item *data.SchoolInfoRequest) *SchoolInfo {
 	resp.Image2 = item.Image2
 	resp.Image3 = item.Image3
 	resp.Image4 = item.Image4
+	resp.Image5 = item.Image5
 
 	return resp
 }

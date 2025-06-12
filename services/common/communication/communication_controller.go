@@ -5,8 +5,8 @@ import (
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/services/communication/data"
-	"api/services/communication/model"
+	"api/services/common/communication/data"
+	"api/services/common/communication/model"
 )
 
 type Controller struct {
@@ -26,10 +26,10 @@ func (controller *Controller) Create(
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
 		&model.Communication{
-			Subject:       input.Body.Subject,
-			Message:       input.Body.Message,
-			AudienceType:  input.Body.AudienceType,
-			AudienceValue: input.Body.AudienceValue,
+			SchoolID: input.Body.SchoolID,
+			Audience: input.Body.Audience,
+			Subject:  input.Body.Subject,
+			Message:  input.Body.Message,
 		},
 	)
 	return
@@ -54,10 +54,11 @@ func (controller *Controller) GetAll(
 	input *struct {
 		types.Filter
 		types.PaginationRequest
+		data.GetAllRequest
 	},
 ) (result *data.CommunicationResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	communicationList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination)
+	communicationList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}

@@ -153,9 +153,20 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.MeetingRoom, ite
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination) (result []model.MeetingRoom, err error) {
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.MeetingRoom, err error) {
 	result = make([]model.MeetingRoom, 0)
 	var where string = ""
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("meeting_rooms.school_id = %d", request.SchoolID))
+		}
+		if request.UnitID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("meeting_rooms.unit_id = %d", request.UnitID))
+		}
+		if request.ClassSubjectID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("meeting_rooms.class_subject_id = %d", request.ClassSubjectID))
+		}
+	}
 	if filter != nil && len(filter.Search) >= 1 {
 		where = fmt.Sprintf(
 			"WHERE CAST(id AS TEXT) = '%s' OR name ILIKE '%s' OR start_date ILIKE '%s' OR end_date ILIKE '%s'",
@@ -168,7 +179,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
 			repository.Db,
-			"SELECT * FROM meetings",
+			"SELECT * FROM meeting_rooms",
 			where,
 			pagination,
 			filter,

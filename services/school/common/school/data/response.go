@@ -24,6 +24,7 @@ type SchoolInfoResponse struct {
 	FullName    string `json:"fullName" required:"false" doc:"School name"`
 	Description string `json:"description" required:"false" doc:"Description"`
 	Slogan      string `json:"slogan" required:"false" doc:"Slogan"`
+	Currency    string `json:"currency" required:"false" doc:"Currency"`
 
 	PhoneNumber1 int64 `json:"phoneNumber1" required:"false" doc:"Phone number 1"`
 	PhoneNumber2 int64 `json:"phoneNumber2" required:"false" doc:"Phone number 2"`
@@ -45,10 +46,29 @@ type SchoolInfoResponse struct {
 	Image2 string `json:"image2" required:"false" doc:"Image 2"`
 	Image3 string `json:"image3" required:"false" doc:"Image 3"`
 	Image4 string `json:"image4" required:"false" doc:"Image 4"`
+	Image5 string `json:"image5" required:"false" doc:"Image 5"`
 }
 
 type SchoolConfigResponse struct {
+	Protocol string `json:"protocol" required:"false" doc:"Protocol"`
+
+	DomainName string `json:"domainName" required:"false" doc:"Domain name"`
+	DomainCert string `json:"domainCert" required:"false" doc:"Domain cert"`
+	DomainKey  string `json:"domainKey" required:"false" doc:"Domain key"`
+
+	SmtpHost     string `json:"smtpHost" required:"false" doc:"SMTP host"`
+	SmtpPort     int    `json:"smtpPort" required:"false" doc:"SMTP port"`
+	SmtpUsername string `json:"smtpUsername" required:"false" doc:"SMTP username"`
+	SmtpPassword string `json:"smtpPassword" required:"false" doc:"SMTP password"`
+	SmtpSender   string `json:"smtpSender" required:"false" doc:"SMTP sender"`
+
 	EmailDomain  string `json:"emailDomain" required:"false" doc:"Email domain"`
+	NoReplyEmail string `json:"noReplyEmail" required:"false" doc:"No reply email"`
+	SupportEmail string `json:"supportEmail" required:"false" doc:"Support email"`
+
+	WebsiteTitle       string `json:"websiteTitle" required:"false" doc:"Website title"`
+	WebsiteDescription string `json:"websiteDescription" required:"false" doc:"Website description"`
+
 	ColorPrimary string `json:"colorPrimary" required:"false" doc:"Color primary"`
 }
 

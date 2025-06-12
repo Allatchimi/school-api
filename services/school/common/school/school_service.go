@@ -6,6 +6,7 @@ import (
 	"api/common/constants"
 	"api/common/types"
 	"api/common/utils"
+	"api/services/school/common/school/data"
 	"api/services/school/common/school/model"
 )
 
@@ -250,8 +251,8 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, typeName string) (result []model.School, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, typeName)
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.School, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

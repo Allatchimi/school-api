@@ -13,15 +13,6 @@ import (
 
 type Exam struct {
 	types.BaseGormModel
-	Percentage      int        `gorm:"default:null"`
-	Description     string     `gorm:"default:null"`
-	LocationType    string     `gorm:"default:null"`
-	LocationDetails string     `gorm:"default:null"`
-	Requirements    string     `gorm:"default:null"`
-	AllowedItems    string     `gorm:"default:null"`
-	StartDate       *time.Time `gorm:"default:null"`
-	EndDate         *time.Time `gorm:"default:null"`
-
 	SchoolID int64               `gorm:"default:null"`
 	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
@@ -39,6 +30,15 @@ type Exam struct {
 
 	SequenceID int64                             `gorm:"default:null"`
 	Sequence   *sequenceModel.HighschoolSequence `gorm:"default:null;foreignKey:SequenceID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	Percentage      int        `gorm:"default:null"`
+	Description     string     `gorm:"default:null"`
+	LocationType    string     `gorm:"default:null"`
+	LocationDetails string     `gorm:"default:null"`
+	Requirements    string     `gorm:"default:null"`
+	AllowedItems    string     `gorm:"default:null"`
+	StartDate       *time.Time `gorm:"default:null"`
+	EndDate         *time.Time `gorm:"default:null"`
 }
 
 func (item *Exam) ToResponse() *data.ExamResponse {

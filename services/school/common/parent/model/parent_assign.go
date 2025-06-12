@@ -7,6 +7,11 @@ import (
 
 type ParentAssign struct {
 	types.BaseGormModel
+	ParentID int64   `gorm:"default:null"`
+	Parent   *Parent `gorm:"default:null;foreignKey:ParentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	ParentAssignStudents []ParentAssignStudent `gorm:"default:null;foreignKey:ParentAssignID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
 	FirstName string `gorm:"default:null"`
 	LastName  string `gorm:"default:null"`
 	IDCard    string `gorm:"default:null"`
@@ -15,9 +20,6 @@ type ParentAssign struct {
 
 	Status         string `gorm:"default:null"`
 	StatusFeedback string `gorm:"default:null"`
-
-	ParentID int64   `gorm:"default:null"`
-	Parent   *Parent `gorm:"default:null;foreignKey:ParentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *ParentAssign) ToResponse() *data.ParentAssignResponse {
@@ -34,6 +36,7 @@ func (item *ParentAssign) ToResponse() *data.ParentAssignResponse {
 	resp.StatusFeedback = item.StatusFeedback
 
 	resp.Parent = item.Parent.ToParentPublicResponse()
+	resp.ParentAssignStudents = ToParentAssignStudentPublicResponseList(item.ParentAssignStudents)
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -55,6 +58,7 @@ func (item *ParentAssign) ToPublicResponse() *data.ParentAssignPublicResponse {
 	resp.StatusFeedback = item.StatusFeedback
 
 	resp.Parent = item.Parent.ToParentPublicResponse()
+	resp.ParentAssignStudents = ToParentAssignStudentPublicResponseList(item.ParentAssignStudents)
 	return resp
 }
 

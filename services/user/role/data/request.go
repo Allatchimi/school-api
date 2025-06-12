@@ -9,3 +9,6 @@ type RoleRequest struct {
 	Feature     string `json:"feature" required:"true" enum:"feature-admin,feature-director,feature-teacher,feature-student,feature-parent,feature-default" doc:"Feature name" example:"feature-admin"`
 	Description string `json:"description" required:"false" doc:"Role description" example:"Client role used to allow users to access your services"`
 }
+
+type GetAllRequest struct {
+}

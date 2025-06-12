@@ -8,9 +8,7 @@ import (
 
 type QuarterResponse struct {
 	types.BaseGormModelResponse
-	School      *schoolData.SchoolPublicResponse `json:"school" doc:"School"`
-	Name        string                           `json:"name" required:"false" doc:"Quarter name"`
-	Description string                           `json:"description" required:"false" doc:"Quarter description"`
+	QuarterPublicResponse
 }
 
 type QuarterPublicResponse struct {
@@ -21,8 +19,7 @@ type QuarterPublicResponse struct {
 
 type QuarterSequenceResponse struct {
 	types.BaseGormModelResponse
-	Quarter  *QuarterPublicResponse               `json:"Quarter" doc:"Quarter"`
-	Sequence *sequenceData.SequencePublicResponse `json:"Sequence" doc:"Sequence"`
+	QuarterSequencePublicResponse
 }
 
 type QuarterSequencePublicResponse struct {

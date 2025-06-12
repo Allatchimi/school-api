@@ -9,6 +9,7 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
+	"api/services/school/common/course/data"
 	"api/services/school/common/course/model"
 )
 
@@ -114,24 +115,23 @@ func (repository *Repository) GetCourseCommentByID(
 func (repository *Repository) GetAll(
 	filter *types.Filter,
 	pagination *types.Pagination,
-	schoolID int64,
-	yearID int64,
-	classSubjectID int64,
-	unitID int64,
+	request *data.GetAllRequest,
 ) ([]model.Course, error) {
 	var result []model.Course
 	var where string = ""
-	if schoolID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("courses.school_id = %d", schoolID))
-	}
-	if yearID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("courses.year_id = %d", yearID))
-	}
-	if classSubjectID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("courses.class_subject_id = %d", classSubjectID))
-	}
-	if unitID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("courses.unit_id = %d", unitID))
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("courses.school_id = %d", request.SchoolID))
+		}
+		if request.YearID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("courses.year_id = %d", request.YearID))
+		}
+		if request.ClassSubjectID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("courses.class_subject_id = %d", request.ClassSubjectID))
+		}
+		if request.UnitID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("courses.unit_id = %d", request.UnitID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
@@ -155,11 +155,15 @@ func (repository *Repository) GetAll(
 func (repository *Repository) GetAllCourseComment(
 	filter *types.Filter,
 	pagination *types.Pagination,
-	courseID int64,
+	request *data.GetAllCourseCommentRequest,
 ) ([]model.CourseComment, error) {
 	var result []model.CourseComment
 	var where string = ""
-	where = helpers.AppendWhereClause(where, fmt.Sprintf("courses.course_id = %d", courseID))
+	if request != nil {
+		if request.CourseID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("courses.course_id = %d", request.CourseID))
+		}
+	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
 			"(message ILIKE %s)",
