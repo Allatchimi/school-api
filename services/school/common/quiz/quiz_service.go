@@ -254,7 +254,7 @@ func (service *Service) UpdateSolution(inputJwtToken *types.JwtToken, id int64, 
 			updatedQuestion, errUpdate := service.Repository.UpdateQuizQuestionSolutionByID(
 				solution.QuestionID,
 				&model.QuizQuestion{
-					SolutionID: solution.SolutionID,
+					SolutionID: solution.OptionID,
 				},
 			)
 			if errUpdate != nil || updatedQuestion == nil || updatedQuestion.ID <= 0 {
