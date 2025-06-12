@@ -65,12 +65,6 @@ func InjectDependencies() {
 	var userRepo = user.NewRepository(config.DB)
 	var roleRepo = role.NewRepository(config.DB)
 	var permissionRepo = permission.NewRepository(config.DB)
-	api.AllControllers.AuthController = auth.NewAuthController(
-		auth.NewAuthService(
-			api.AllControllers.UserController.Service,
-			api.AllControllers.RoleController.Service,
-		),
-	)
 	api.AllControllers.UserController = user.NewController(
 		user.NewService(
 			userRepo,
@@ -84,6 +78,12 @@ func InjectDependencies() {
 	api.AllControllers.PermissionController = permission.NewController(
 		permission.NewService(
 			permissionRepo,
+		),
+	)
+	api.AllControllers.AuthController = auth.NewAuthController(
+		auth.NewAuthService(
+			api.AllControllers.UserController.Service,
+			api.AllControllers.RoleController.Service,
 		),
 	)
 	api.AllControllers.ProfileController = profile.NewController(
