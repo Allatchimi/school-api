@@ -72,15 +72,14 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 		DomainCert: item.Config.DomainCert,
 		DomainKey:  item.Config.DomainKey,
 
-		SmtpHost:     item.Config.SmtpHost,
-		SmtpPort:     item.Config.SmtpPort,
-		SmtpUsername: item.Config.SmtpUsername,
-		SmtpPassword: item.Config.SmtpPassword,
-		SmtpSender:   item.Config.SmtpSender,
+		SmtpHost:         item.Config.SmtpHost,
+		SmtpPort:         item.Config.SmtpPort,
+		SmtpUsername:     item.Config.SmtpUsername,
+		SmtpPassword:     item.Config.SmtpPassword,
+		SmtpNoReplyEmail: item.Config.SmtpNoReplyEmail,
+		SmtpSupportEmail: item.Config.SmtpSupportEmail,
 
-		EmailDomain:  item.Config.EmailDomain,
-		NoReplyEmail: item.Config.NoReplyEmail,
-		SupportEmail: item.Config.SupportEmail,
+		UserEmailDomain: item.Config.UserEmailDomain,
 
 		WebsiteTitle:       item.Config.WebsiteTitle,
 		WebsiteDescription: item.Config.WebsiteDescription,

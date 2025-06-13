@@ -53,15 +53,14 @@ type SchoolConfigRequest struct {
 	DomainCert string `json:"domainCert" required:"false" minLength:"3" maxLength:"150" doc:"Domain cert" example:""`
 	DomainKey  string `json:"domainKey" required:"false" minLength:"3" maxLength:"150" doc:"Domain key" example:""`
 
-	SmtpHost     string `json:"smtpHost" required:"true" minLength:"3" maxLength:"150" doc:"SMTP host" example:"smtp.google.com"`
-	SmtpPort     int    `json:"smtpPort" required:"true" min:"1" max:"65535" doc:"SMTP port" example:"587"`
-	SmtpUsername string `json:"smtpUsername" required:"true" minLength:"3" maxLength:"150" doc:"SMTP username" example:"user@gmail.com"`
-	SmtpPassword string `json:"smtpPassword" required:"true" minLength:"3" maxLength:"150" doc:"SMTP password" example:"password"`
-	SmtpSender   string `json:"smtpSender" required:"true" minLength:"3" maxLength:"150" doc:"SMTP sender" example:"user@gmail.com"`
+	SmtpHost         string `json:"smtpHost" required:"true" minLength:"3" maxLength:"150" doc:"SMTP host" example:"smtp.google.com"`
+	SmtpPort         int    `json:"smtpPort" required:"true" min:"1" max:"65535" doc:"SMTP port" example:"587"`
+	SmtpUsername     string `json:"smtpUsername" required:"true" minLength:"3" maxLength:"150" doc:"SMTP username" example:"user@gmail.com"`
+	SmtpPassword     string `json:"smtpPassword" required:"true" minLength:"3" maxLength:"150" doc:"SMTP password" example:"password"`
+	SmtpNoReplyEmail string `json:"smtpNoReplyEmail" required:"true" minLength:"3" maxLength:"150" doc:"No reply email" example:"noreply@gmail.com"`
+	SmtpSupportEmail string `json:"smtpSupportEmail" required:"true" minLength:"3" maxLength:"150" doc:"Support email" example:"support@gmail.com"`
 
-	EmailDomain  string `json:"emailDomain" required:"true" minLength:"3" maxLength:"150" doc:"Email domain" example:"google.com"`
-	NoReplyEmail string `json:"noReplyEmail" required:"true" minLength:"3" maxLength:"150" doc:"No reply email" example:"noreply@gmail.com"`
-	SupportEmail string `json:"supportEmail" required:"true" minLength:"3" maxLength:"150" doc:"Support email" example:"support@gmail.com"`
+	UserEmailDomain string `json:"userEmailDomain" required:"true" minLength:"3" maxLength:"150" doc:"User email domain" example:"google.com"`
 
 	WebsiteTitle       string `json:"websiteTitle" required:"true" minLength:"3" maxLength:"150" doc:"Website title" example:"School"`
 	WebsiteDescription string `json:"websiteDescription" required:"true" minLength:"3" maxLength:"500" doc:"Website description" example:"School description"`

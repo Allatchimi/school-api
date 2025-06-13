@@ -101,15 +101,14 @@ func (repository *Repository) UpdateConfigByID(id int64, item *model.SchoolConfi
 			"domain_cert": item.DomainCert,
 			"domain_key":  item.DomainKey,
 
-			"smtp_host":     item.SmtpHost,
-			"smtp_port":     item.SmtpPort,
-			"smtp_username": item.SmtpUsername,
-			"smtp_password": item.SmtpPassword,
-			"smtp_sender":   item.SmtpSender,
+			"smtp_host":           item.SmtpHost,
+			"smtp_port":           item.SmtpPort,
+			"smtp_username":       item.SmtpUsername,
+			"smtp_password":       item.SmtpPassword,
+			"smtp_no_reply_email": item.SmtpNoReplyEmail,
+			"smtp_support_email":  item.SmtpSupportEmail,
 
-			"email_domain":   item.EmailDomain,
-			"no_reply_email": item.NoReplyEmail,
-			"support_email":  item.SupportEmail,
+			"user_email_domain": item.UserEmailDomain,
 
 			"website_title":       item.WebsiteTitle,
 			"website_description": item.WebsiteDescription,

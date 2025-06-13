@@ -13,15 +13,14 @@ type SchoolConfig struct {
 	DomainCert string `gorm:"default:null"`
 	DomainKey  string `gorm:"default:null"`
 
-	SmtpHost     string `gorm:"default:null"`
-	SmtpPort     int    `gorm:"default:null"`
-	SmtpUsername string `gorm:"default:null"`
-	SmtpPassword string `gorm:"default:null"`
-	SmtpSender   string `gorm:"default:null"`
+	SmtpHost         string `gorm:"default:null"`
+	SmtpPort         int    `gorm:"default:null"`
+	SmtpUsername     string `gorm:"default:null"`
+	SmtpPassword     string `gorm:"default:null"`
+	SmtpNoReplyEmail string `gorm:"default:null"`
+	SmtpSupportEmail string `gorm:"default:null"`
 
-	EmailDomain  string `gorm:"default:null"`
-	NoReplyEmail string `gorm:"default:null"`
-	SupportEmail string `gorm:"default:null"`
+	UserEmailDomain string `gorm:"default:null"`
 
 	WebsiteTitle       string `gorm:"default:null"`
 	WebsiteDescription string `gorm:"default:null"`
@@ -42,10 +41,9 @@ func (item *SchoolConfig) ToResponse() *data.SchoolConfigResponse {
 	resp.SmtpPort = item.SmtpPort
 	resp.SmtpUsername = item.SmtpUsername
 	resp.SmtpPassword = item.SmtpPassword
-	resp.SmtpSender = item.SmtpSender
-	resp.EmailDomain = item.EmailDomain
-	resp.NoReplyEmail = item.NoReplyEmail
-	resp.SupportEmail = item.SupportEmail
+	resp.SmtpNoReplyEmail = item.SmtpNoReplyEmail
+	resp.SmtpSupportEmail = item.SmtpSupportEmail
+	resp.UserEmailDomain = item.UserEmailDomain
 	resp.WebsiteTitle = item.WebsiteTitle
 	resp.WebsiteDescription = item.WebsiteDescription
 	resp.ColorPrimary = item.ColorPrimary
@@ -62,10 +60,9 @@ func FromConfigRequest(item *data.SchoolConfigRequest) *SchoolConfig {
 		SmtpPort:           item.SmtpPort,
 		SmtpUsername:       item.SmtpUsername,
 		SmtpPassword:       item.SmtpPassword,
-		SmtpSender:         item.SmtpSender,
-		EmailDomain:        item.EmailDomain,
-		NoReplyEmail:       item.NoReplyEmail,
-		SupportEmail:       item.SupportEmail,
+		SmtpNoReplyEmail:   item.SmtpNoReplyEmail,
+		SmtpSupportEmail:   item.SmtpSupportEmail,
+		UserEmailDomain:    item.UserEmailDomain,
 		WebsiteTitle:       item.WebsiteTitle,
 		WebsiteDescription: item.WebsiteDescription,
 		ColorPrimary:       item.ColorPrimary,

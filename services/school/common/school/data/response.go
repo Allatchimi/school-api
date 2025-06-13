@@ -56,15 +56,14 @@ type SchoolConfigResponse struct {
 	DomainCert string `json:"domainCert" required:"false" doc:"Domain cert"`
 	DomainKey  string `json:"domainKey" required:"false" doc:"Domain key"`
 
-	SmtpHost     string `json:"smtpHost" required:"false" doc:"SMTP host"`
-	SmtpPort     int    `json:"smtpPort" required:"false" doc:"SMTP port"`
-	SmtpUsername string `json:"smtpUsername" required:"false" doc:"SMTP username"`
-	SmtpPassword string `json:"smtpPassword" required:"false" doc:"SMTP password"`
-	SmtpSender   string `json:"smtpSender" required:"false" doc:"SMTP sender"`
+	SmtpHost         string `json:"smtpHost" required:"false" doc:"SMTP host"`
+	SmtpPort         int    `json:"smtpPort" required:"false" doc:"SMTP port"`
+	SmtpUsername     string `json:"smtpUsername" required:"false" doc:"SMTP username"`
+	SmtpPassword     string `json:"smtpPassword" required:"false" doc:"SMTP password"`
+	SmtpNoReplyEmail string `json:"smtpNoReplyEmail" required:"false" doc:"No reply email"`
+	SmtpSupportEmail string `json:"smtpSupportEmail" required:"false" doc:"Support email"`
 
-	EmailDomain  string `json:"emailDomain" required:"false" doc:"Email domain"`
-	NoReplyEmail string `json:"noReplyEmail" required:"false" doc:"No reply email"`
-	SupportEmail string `json:"supportEmail" required:"false" doc:"Support email"`
+	UserEmailDomain string `json:"userEmailDomain" required:"false" doc:"User email domain"`
 
 	WebsiteTitle       string `json:"websiteTitle" required:"false" doc:"Website title"`
 	WebsiteDescription string `json:"websiteDescription" required:"false" doc:"Website description"`
