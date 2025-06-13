@@ -13,10 +13,10 @@ type QuizQuestion struct {
 	SolutionID int64               `gorm:"default:null"`
 	Solution   *QuizQuestionOption `gorm:"default:null;foreignKey:SolutionID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Options []QuizQuestionOption `gorm:"foreignKey:QuizQuestionID;references:ID"`
-
 	Title       string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
+
+	Options []QuizQuestionOption `gorm:"-"` // `gorm:"foreignKey:QuizQuestionID;references:ID"`
 }
 
 func (item *QuizQuestion) ToResponse() *data.QuizQuestionResponse {
@@ -44,7 +44,7 @@ func ToQuizQuestionResponseList(itemList []QuizQuestion) []data.QuizQuestionResp
 	return resp
 }
 
-func (item *QuizQuestion) ToResponseV2() *data.QuizQuestionResponseV2 {
+func (item *QuizQuestion) ToResponseWithOptions() *data.QuizQuestionResponseV2 {
 	if item == nil {
 		return nil
 	}
@@ -54,10 +54,10 @@ func (item *QuizQuestion) ToResponseV2() *data.QuizQuestionResponseV2 {
 	return resp
 }
 
-func ToQuizQuestionResponseListV2(itemList []QuizQuestion) []data.QuizQuestionResponseV2 {
+func ToQuizQuestionResponseListWithOptions(itemList []QuizQuestion) []data.QuizQuestionResponseV2 {
 	resp := make([]data.QuizQuestionResponseV2, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToResponseV2()
+		resp[index] = *item.ToResponseWithOptions()
 	}
 	return resp
 }

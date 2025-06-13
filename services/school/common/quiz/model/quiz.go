@@ -23,7 +23,7 @@ type Quiz struct {
 	UnitID int64                     `gorm:"default:null"`
 	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Questions []QuizQuestion `gorm:"foreignKey:QuizID;references:ID"`
+	Questions []QuizQuestion `gorm:"-"`
 
 	Title       string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
@@ -43,7 +43,7 @@ func (item *Quiz) ToResponse() *data.QuizResponse {
 	resp.Year = item.Year.ToPublicResponse()
 	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
 	resp.Unit = item.Unit.ToPublicResponse()
-	resp.Questions = ToQuizQuestionResponseListV2(item.Questions)
+	resp.Questions = ToQuizQuestionResponseListWithOptions(item.Questions)
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

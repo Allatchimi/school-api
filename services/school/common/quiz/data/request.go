@@ -20,17 +20,17 @@ type QuizRequest struct {
 	Description string `json:"description" required:"false" doc:"Description" example:""`
 	Status      string `json:"status" required:"false" enum:"default,active,closed"  doc:"Status" example:""`
 
-	Questions []QuestionRequest `json:"questions" required:"false" doc:"Questions" example:"[]"`
+	Questions []QuizQuestionRequest `json:"questions" required:"false" doc:"Questions" example:"[]"`
 }
 
-type QuestionRequest struct {
+type QuizQuestionRequest struct {
 	Title       string `json:"title" required:"true" doc:"Title" example:""`
 	Description string `json:"description" required:"false" doc:"Description" example:""`
 
-	Options []QuestionOptionRequest `json:"options" required:"false" doc:"Options" example:"[]"`
+	Options []QuizQuestionOptionRequest `json:"options" required:"false" doc:"Options" example:"[]"`
 }
 
-type QuestionOptionRequest struct {
+type QuizQuestionOptionRequest struct {
 	Title       string `json:"title" required:"true" doc:"Title" example:""`
 	Description string `json:"description" required:"false" doc:"Description" example:""`
 }
