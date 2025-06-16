@@ -12,7 +12,7 @@ type ResultResponse struct {
 }
 
 type ResultPublicResponse struct {
-	Value int `json:"value" required:"false" doc:"Value"`
+	Value float64 `json:"value" required:"false" doc:"Value"`
 
 	Student *studentData.StudentPublicResponse `json:"Student" required:"true" doc:"Student"`
 	Exam    *examData.ExamPublicResponse       `json:"Exam" required:"true" doc:"Exam"`

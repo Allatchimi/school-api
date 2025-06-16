@@ -15,7 +15,7 @@ type Result struct {
 	ExamID int64           `gorm:"default:null"`
 	Exam   *examModel.Exam `gorm:"default:null;foreignKey:ExamID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Value int `gorm:"default:null"`
+	Value float64 `gorm:"default:null"`
 }
 
 func (item *Result) ToResponse() *data.ResultResponse {

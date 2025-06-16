@@ -10,6 +10,7 @@ import (
 	"api/common/constants"
 	"api/common/types"
 	"api/services/school/common/result/data"
+	"api/services/school/common/result/model"
 )
 
 func RegisterEndpoints(
@@ -229,6 +230,18 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			tempResults := make([]model.Result, 40)
+			for i := range tempResults {
+				tmpModel := model.Result{}
+				tmpModel.ID = int64(i)
+				tmpModel.StudentID = int64(i)
+				tmpModel.ExamID = int64(i)
+				tmpModel.Value = float64(13)
+				tempResults[i] = tmpModel
+			}
+			result.Data = model.ToResultResponseList(tempResults)
+
 			return &struct {
 				Body data.ResultResponseList
 			}{Body: *result}, nil
