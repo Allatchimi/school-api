@@ -1,6 +1,7 @@
 package data
 
 import (
+	"api/common/types"
 	dataUser "api/services/user/user/data"
 	"time"
 )
@@ -50,6 +51,6 @@ type GetAllRequest struct {
 }
 
 type GetAllStudentEnrollRequest struct {
-	SchoolID  int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
-	StudentID int64 `json:"teacherID" query:"teacherID" required:"false" doc:"Student id" example:"1"`
+	types.FilterSchoolYearClassSubjectUnitRequest
+	StudentID int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id" example:"1"`
 }

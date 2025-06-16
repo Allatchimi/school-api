@@ -138,7 +138,7 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.StudentResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	studentList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllRequest.SchoolID)
+	studentList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}
@@ -159,7 +159,7 @@ func (controller *Controller) GetAllStudentEnroll(
 	},
 ) (result *data.StudentEnrollResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	studentList, errCode, err := controller.Service.GetAllStudentEnroll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.GetAllStudentEnrollRequest.SchoolID, input.GetAllStudentEnrollRequest.StudentID)
+	studentList, errCode, err := controller.Service.GetAllStudentEnroll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllStudentEnrollRequest)
 	if err != nil {
 		return
 	}

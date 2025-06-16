@@ -381,8 +381,8 @@ func (service *Service) GetStudentEnroll(inputJwtToken *types.JwtToken, id int64
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.Student, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, schoolID)
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Student, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -390,8 +390,8 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 	return
 }
 
-func (service *Service) GetAllStudentEnroll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64, studentID int64) (result []model.StudentEnroll, errCode int, err error) {
-	result, err = service.Repository.GetAllStudentEnroll(filter, pagination, schoolID, studentID)
+func (service *Service) GetAllStudentEnroll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllStudentEnrollRequest) (result []model.StudentEnroll, errCode int, err error) {
+	result, err = service.Repository.GetAllStudentEnroll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

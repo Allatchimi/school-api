@@ -411,6 +411,55 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Get all students enrolls
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-student-enrolls-list",
+			Summary:     "Get all students enrolls",
+			Description: "Get all students enrolls with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/enrolls", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Features scope
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllStudentEnrollRequest
+			},
+		) (*struct {
+			Body data.StudentEnrollResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllStudentEnroll(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct {
+				Body data.StudentEnrollResponseList
+			}{Body: *result}, nil
+		},
+	)
+
 	// Get all students level domain/class
 	huma.Register(
 		*humaApi,

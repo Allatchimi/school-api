@@ -46,6 +46,7 @@ type QuizQuestionOptionResponse struct {
 
 type QuizAnswerResponse struct {
 	types.BaseGormModelResponse
+	Quiz    *QuizResponse                      `json:"quiz" required:"false" doc:"Quiz"`
 	Student *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
 
 	Answers []QuizAnswersResponse `json:"answers" required:"false" doc:"Answers"`

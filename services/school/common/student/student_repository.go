@@ -8,6 +8,7 @@ import (
 
 	"api/common/helpers"
 	"api/common/types"
+	"api/services/school/common/student/data"
 	"api/services/school/common/student/model"
 )
 
@@ -273,11 +274,13 @@ func (repository *Repository) GetStudentEnrollByUserIDSchoolIDYearIDLevelDomainI
 	return result, err
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.Student, err error) {
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Student, err error) {
 	result = make([]model.Student, 0)
 	var where string = ""
-	if schoolID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("students.school_id = %d", schoolID))
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("students.school_id = %d", request.SchoolID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
@@ -310,14 +313,25 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	return
 }
 
-func (repository *Repository) GetAllStudentEnroll(filter *types.Filter, pagination *types.Pagination, schoolID int64, studentID int64) (result []model.StudentEnroll, err error) {
+func (repository *Repository) GetAllStudentEnroll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllStudentEnrollRequest) (result []model.StudentEnroll, err error) {
 	result = make([]model.StudentEnroll, 0)
 	var where string = ""
-	if schoolID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("students.school_id = %d", schoolID))
-	}
-	if studentID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.student_id = %d", studentID))
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("students.school_id = %d", request.SchoolID))
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.student_id = %d", request.StudentID))
+		}
+		if request.YearID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.year_id = %d", request.YearID))
+		}
+		if request.ClassSubjectID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.class_id = %d", request.ClassSubjectID))
+		}
+		if request.UnitID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.level_domain_id = %d", request.UnitID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
