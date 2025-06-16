@@ -30,10 +30,9 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Requ
 		UnitID:         request.UnitID,
 		StudentID:      request.StudentID,
 
-		Status:  request.Status,
-		Type:    request.Type,
-		Title:   request.Title,
-		Message: request.Message,
+		Audience: request.Audience,
+		Title:    request.Title,
+		Message:  request.Message,
 
 		Document1: request.Document1,
 		Document2: request.Document2,
@@ -75,10 +74,9 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 		UnitID:         request.UnitID,
 		StudentID:      request.StudentID,
 
-		Status:  request.Status,
-		Type:    request.Type,
-		Title:   request.Title,
-		Message: request.Message,
+		Audience: request.Audience,
+		Title:    request.Title,
+		Message:  request.Message,
 
 		Document1: request.Document1,
 		Document2: request.Document2,
@@ -115,6 +113,38 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 
 	// Update request
 	result, err = service.Repository.Update(id, item)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	return
+}
+
+func (service *Service) UpdateStatus(inputJwtToken *types.JwtToken, id int64, request *data.RequestUpdateRequest) (result *model.Request, errCode int, err error) {
+	// Format request
+	item := &model.Request{
+		Status:         request.Status,
+		StatusFeedback: request.StatusFeedback,
+	}
+
+	// Check if request already exists
+	foundItem, err := service.Repository.GetByID(id)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundItem == nil {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+	foundItem.Status = item.Status
+	foundItem.StatusFeedback = item.StatusFeedback
+
+	// Update request
+	result, err = service.Repository.Update(id, foundItem)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

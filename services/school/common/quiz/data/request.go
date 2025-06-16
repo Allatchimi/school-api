@@ -58,10 +58,6 @@ type GetAllRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
 }
 
-type GetAllQuizQuestionOptionRequest struct {
-	QuizQuestionID
-}
-
 type GetAllQuizAnswerRequest struct {
 	QuizID
 	QuizQuestionID int64 `json:"quizQuestionID" query:"quizQuestionID" required:"false" doc:"Quiz question id" example:"1"`

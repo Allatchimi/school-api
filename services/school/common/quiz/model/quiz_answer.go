@@ -68,3 +68,44 @@ func ToQuizAnswerResponseList(itemList []QuizAnswer) []data.QuizAnswerResponse {
 
 	return result
 }
+
+func ToQuizAnswerResultResponseList(itemList []QuizAnswer) *data.QuizResultResponse {
+	resultsMap := make(map[int64]*data.QuizResultStudentResponse)
+
+	for _, qa := range itemList {
+		// Skip nil student
+		if qa.Student == nil {
+			continue
+		}
+		student := qa.Student
+
+		// Check if student already exists
+		sr, exists := resultsMap[student.ID]
+		if !exists {
+			// Create new student notation
+			sr = &data.QuizResultStudentResponse{
+				Student:  student.ToStudentPublicResponse(),
+				Notation: 0,
+			}
+			resultsMap[student.ID] = sr
+		}
+
+		// Increment notation if answer is correct
+		if qa.QuizQuestion != nil && qa.QuizQuestionOption != nil {
+			if qa.QuizQuestionOption.ID == qa.QuizQuestion.SolutionID {
+				sr.Notation += 1
+			}
+		}
+	}
+
+	// Convert the map to a slice
+	result := make([]data.QuizResultStudentResponse, 0, len(resultsMap))
+	for _, sr := range resultsMap {
+		result = append(result, *sr)
+	}
+
+	return &data.QuizResultResponse{
+		Quiz:    itemList[0].QuizQuestion.Quiz.ToResponse(),
+		Results: result,
+	}
+}

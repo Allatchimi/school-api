@@ -369,64 +369,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all quiz question options
+	// Get all quiz results
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-quiz-question-option-list",
-			Summary:     "Get all quiz question options",
-			Description: "Get all quiz question options with support for search, filter and pagination",
+			OperationID: "get-quiz-result-list",
+			Summary:     "Get all results for quiz",
+			Description: "Get all results for quiz with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/questions/{id}/options", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s,%s,%s,%s,%s",
-							constants.FeatureAdmin,
-							constants.FeatureDirector,
-							constants.FeatureTeacher,
-							constants.FeatureStudent,
-							constants.FeatureParent,
-						), // Features scope
-						tableName,                // Table name
-						constants.PermissionRead, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				types.Filter
-				types.PaginationRequest
-				data.GetAllQuizQuestionOptionRequest
-			},
-		) (*struct {
-			Body data.QuizQuestionOptionResponseList
-		}, error) {
-			result, errCode, err := controller.GetAllQuizQuestionOption(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct {
-				Body data.QuizQuestionOptionResponseList
-			}{Body: *result}, nil
-		},
-	)
-
-	// Get all quiz answers
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "get-quiz-answer-list",
-			Summary:     "Get all answers for quiz",
-			Description: "Get all answers for quiz with support for search, filter and pagination",
-			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/{id}/answers", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/{id}/results", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -456,14 +407,14 @@ func RegisterEndpoints(
 				data.GetAllQuizAnswerRequest
 			},
 		) (*struct {
-			Body data.QuizAnswerResponseList
+			Body data.QuizResultResponseList
 		}, error) {
-			result, errCode, err := controller.GetAllQuizAnswer(&ctx, input)
+			result, errCode, err := controller.GetAllQuizResult(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
-				Body data.QuizAnswerResponseList
+				Body data.QuizResultResponseList
 			}{Body: *result}, nil
 		},
 	)

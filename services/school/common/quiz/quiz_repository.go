@@ -9,7 +9,6 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
-	"api/services/school/common/quiz/data"
 	"api/services/school/common/quiz/model"
 )
 
@@ -180,17 +179,6 @@ func (repository *Repository) GetAll(
 		).Find(&result).Error
 
 	err = tmpErr
-	return
-}
-
-func (repository *Repository) GetAllQuizQuestionOption(
-	filter *types.Filter,
-	pagination *types.Pagination,
-	request *data.GetAllQuizQuestionOptionRequest,
-) (result []model.QuizQuestionOption, err error) {
-	result = make([]model.QuizQuestionOption, 0)
-	err = repository.Db.Preload(clause.Associations).
-		Where("quiz_question_id = ?", request.QuizQuestionID.ID).Limit(1).Find(result).Error
 	return
 }
 

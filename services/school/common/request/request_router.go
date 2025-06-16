@@ -35,9 +35,10 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s,%s",
+						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
+							constants.FeatureStudent,
 						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
@@ -75,9 +76,10 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s,%s",
+						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
+							constants.FeatureStudent,
 						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionUpdate, // Operation
@@ -103,6 +105,48 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Update request status with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "update-request-status",
+			Summary:     "Update request status",
+			Description: "Update existing request status with matching id and return the new request object.",
+			Method:      http.MethodPut,
+			Path:        fmt.Sprintf("%s/{id}/status", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+						), // Features scope
+						tableName,                  // Table name
+						constants.PermissionUpdate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.RequestID
+				Body data.RequestUpdateRequest
+			},
+		) (*struct{ Body data.RequestResponse }, error) {
+			result, errCode, err := controller.UpdateStatus(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.RequestResponse }{Body: *result.ToResponse()}, nil
+		},
+	)
+
 	// Delete request with id
 	huma.Register(
 		*humaApi,
@@ -116,9 +160,10 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s,%s",
+						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
+							constants.FeatureStudent,
 						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation

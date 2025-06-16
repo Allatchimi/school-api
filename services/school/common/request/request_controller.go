@@ -45,6 +45,21 @@ func (controller *Controller) Update(
 	return
 }
 
+func (controller *Controller) UpdateStatus(
+	ctx *context.Context,
+	input *struct {
+		data.RequestID
+		Body data.RequestUpdateRequest
+	},
+) (request *model.Request, errCode int, err error) {
+	request, errCode, err = controller.Service.UpdateStatus(
+		helpers.GetJwtContext(ctx),
+		input.ID,
+		&input.Body,
+	)
+	return
+}
+
 func (controller *Controller) Delete(
 	ctx *context.Context,
 	input *struct {

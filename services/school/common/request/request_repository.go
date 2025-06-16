@@ -41,10 +41,11 @@ func (repository *Repository) Update(id int64, data *model.Request) (*model.Requ
 			"unit_id":          data.UnitID,
 			"student_id":       data.StudentID,
 
-			"status":  data.Status,
-			"type":    data.Type,
-			"title":   data.Title,
-			"message": data.Message,
+			"status":          data.Status,
+			"status_feedback": data.StatusFeedback,
+			"audience":        data.Audience,
+			"title":           data.Title,
+			"message":         data.Message,
 
 			"document1": data.Document1,
 			"document2": data.Document2,

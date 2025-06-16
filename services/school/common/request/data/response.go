@@ -16,10 +16,11 @@ type RequestResponse struct {
 }
 
 type RequestPublicResponse struct {
-	Status  string `json:"status" required:"false" doc:"Status"`
-	Type    string `json:"type" required:"false" doc:"Type"`
-	Title   string `json:"title" required:"false" doc:"Title"`
-	Message string `json:"message" required:"false" doc:"Message"`
+	Status         string `json:"status" required:"false" doc:"Status"`
+	StatusFeedback string `json:"statusFeedback" required:"false" doc:"Status feedback"`
+	Audience       string `json:"audience" required:"false" doc:"Audience"`
+	Title          string `json:"title" required:"false" doc:"Title"`
+	Message        string `json:"message" required:"false" doc:"Message"`
 
 	Document1 string `json:"document1" required:"false" doc:"Document1"`
 	Document2 string `json:"document2" required:"false" doc:"Document2"`

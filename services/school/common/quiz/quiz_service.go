@@ -358,17 +358,3 @@ func (service *Service) GetAllQuizAnswer(
 	}
 	return
 }
-
-func (service *Service) GetAllQuizQuestionOption(
-	inputJwtToken *types.JwtToken,
-	filter *types.Filter,
-	pagination *types.Pagination,
-	request *data.GetAllQuizQuestionOptionRequest,
-) (result []model.QuizQuestionOption, errCode int, err error) {
-	result, err = service.Repository.GetAllQuizQuestionOption(filter, pagination, request)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-	}
-	return
-}

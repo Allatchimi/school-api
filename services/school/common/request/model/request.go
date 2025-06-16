@@ -31,10 +31,11 @@ type Request struct {
 	StudentID int64                 `gorm:"default:null"`
 	Student   *studentmodel.Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Status  string `gorm:"default:null"`
-	Type    string `gorm:"default:null"`
-	Title   string `gorm:"default:null"`
-	Message string `gorm:"default:null"`
+	Status         string `gorm:"default:null"`
+	StatusFeedback string `gorm:"default:null"`
+	Audience       string `gorm:"default:null"`
+	Title          string `gorm:"default:null"`
+	Message        string `gorm:"default:null"`
 
 	Document1 string `gorm:"default:null"`
 	Document2 string `gorm:"default:null"`
@@ -49,7 +50,8 @@ func (item *Request) ToResponse() *data.RequestResponse {
 	}
 	resp := &data.RequestResponse{}
 	resp.Status = item.Status
-	resp.Type = item.Type
+	resp.StatusFeedback = item.StatusFeedback
+	resp.Audience = item.Audience
 	resp.Title = item.Title
 	resp.Message = item.Message
 
@@ -78,7 +80,8 @@ func (item *Request) ToPublicResponse() *data.RequestPublicResponse {
 	}
 	resp := &data.RequestPublicResponse{}
 	resp.Status = item.Status
-	resp.Type = item.Type
+	resp.StatusFeedback = item.StatusFeedback
+	resp.Audience = item.Audience
 	resp.Title = item.Title
 	resp.Message = item.Message
 
