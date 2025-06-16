@@ -4,6 +4,7 @@ import (
 	"api/common/types"
 	"api/services/school/common/quiz/data"
 	modelStudent "api/services/school/common/student/model"
+	"sort"
 )
 
 type QuizAnswer struct {
@@ -69,8 +70,8 @@ func ToQuizAnswerResponseList(itemList []QuizAnswer) []data.QuizAnswerResponse {
 	return result
 }
 
-func ToQuizAnswerResultResponseList(itemList []QuizAnswer) *data.QuizResultResponse {
-	resultsMap := make(map[int64]*data.QuizResultStudentResponse)
+func ToQuizAnswerResultResponseList(itemList []QuizAnswer) []data.QuizResultResponse {
+	resultsMap := make(map[int64]*data.QuizResultResponse)
 
 	for _, qa := range itemList {
 		// Skip nil student
@@ -83,9 +84,9 @@ func ToQuizAnswerResultResponseList(itemList []QuizAnswer) *data.QuizResultRespo
 		sr, exists := resultsMap[student.ID]
 		if !exists {
 			// Create new student notation
-			sr = &data.QuizResultStudentResponse{
-				Student:  student.ToStudentPublicResponse(),
-				Notation: 0,
+			sr = &data.QuizResultResponse{
+				Student: student.ToStudentPublicResponse(),
+				Result:  0,
 			}
 			resultsMap[student.ID] = sr
 		}
@@ -93,19 +94,21 @@ func ToQuizAnswerResultResponseList(itemList []QuizAnswer) *data.QuizResultRespo
 		// Increment notation if answer is correct
 		if qa.QuizQuestion != nil && qa.QuizQuestionOption != nil {
 			if qa.QuizQuestionOption.ID == qa.QuizQuestion.SolutionID {
-				sr.Notation += 1
+				sr.Result += 1
 			}
 		}
 	}
 
 	// Convert the map to a slice
-	result := make([]data.QuizResultStudentResponse, 0, len(resultsMap))
+	result := make([]data.QuizResultResponse, 0, len(resultsMap))
 	for _, sr := range resultsMap {
 		result = append(result, *sr)
 	}
 
-	return &data.QuizResultResponse{
-		Quiz:    itemList[0].QuizQuestion.Quiz.ToResponse(),
-		Results: result,
-	}
+	// Sort desc by result
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Result > result[j].Result
+	})
+
+	return result
 }

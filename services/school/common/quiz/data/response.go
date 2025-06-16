@@ -63,16 +63,11 @@ type QuizResponseList struct {
 }
 
 type QuizResultResponse struct {
-	Quiz    *QuizResponse               `json:"quiz" required:"false" doc:"Quiz"`
-	Results []QuizResultStudentResponse `json:"results" required:"false" doc:"Results"`
-}
-
-type QuizResultStudentResponse struct {
-	Student  *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
-	Notation float64                            `json:"notation" required:"false" doc:"Notation"`
+	Student *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
+	Result  float64                            `json:"result" required:"false" doc:"Result"`
 }
 
 type QuizResultResponseList struct {
 	types.PaginatedResponse
-	Data *QuizResultResponse `json:"data" required:"false" doc:"List of quiz results" example:""`
+	Data []QuizResultResponse `json:"data" required:"false" doc:"List of quiz results" example:"[]"`
 }

@@ -414,15 +414,14 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			tempData := &data.QuizResultResponse{}
-			tempResults := make([]data.QuizResultStudentResponse, 40)
+			tempResults := make([]data.QuizResultResponse, 40)
 			for i := range tempResults {
-				tmpModel := data.QuizResultStudentResponse{}
+				tmpModel := data.QuizResultResponse{}
 				tmpModel.Student = nil
-				tmpModel.Notation = float64(i)
+				tmpModel.Result = float64(i)
 				tempResults[i] = tmpModel
 			}
-			result.Data = tempData
+			result.Data = tempResults
 
 			return &struct {
 				Body data.QuizResultResponseList
