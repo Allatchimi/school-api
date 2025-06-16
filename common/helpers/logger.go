@@ -12,16 +12,30 @@ func EnableLogger() {
 	defer Logger.Sync()
 }
 
-// LogMigrations Shows custom log message for migrations.
-func LogMigrations(err error) {
+// LogMigrationsWithoutFk Shows custom log message for migrations without foreign key.
+func LogMigrationsWithoutFk(err error) {
 	if err != nil {
 		Logger.Error(
-			"Failed to migrate some tables!",
+			"Failed to migrate some tables without foreign key!",
 			zap.String("Error", err.Error()),
 		)
 		return
 	}
 	Logger.Info(
-		"Migration done for all tables!",
+		"Migration done for all tables without foreign key!",
+	)
+}
+
+// LogMigrations Shows custom log message for migrations with foreign key.
+func LogMigrations(err error) {
+	if err != nil {
+		Logger.Error(
+			"Failed to migrate some tables with foreign key!",
+			zap.String("Error", err.Error()),
+		)
+		return
+	}
+	Logger.Info(
+		"Migration done for all tables with foreign key!",
 	)
 }

@@ -38,7 +38,21 @@ import (
 
 // Apply applies all models with default migration rule.
 func Apply() error {
+	// Migrate models without foreign key
 	err := config.DB.AutoMigrate(
+		// ----------- Quiz models -----------
+		&quizModel.QuizWithoutFk{},
+		&quizModel.QuizQuestionWithoutFk{},
+		&quizModel.QuizQuestionOptionWithoutFk{},
+		&quizModel.QuizAnswerWithoutFk{},
+	)
+	helpers.LogMigrationsWithoutFk(err)
+	if err != nil {
+		return err
+	}
+
+	// Migrate models with foreign key
+	err = config.DB.AutoMigrate(
 		// ----------- Others models -----------
 		// Notification
 		&notificationModel.Notification{},
@@ -88,10 +102,6 @@ func Apply() error {
 		// Meeting
 		&meetingModel.MeetingRoom{},
 		// Quiz
-		&quizModel.QuizWithoutFk{},
-		&quizModel.QuizQuestionWithoutFk{},
-		&quizModel.QuizQuestionOptionWithoutFk{},
-		&quizModel.QuizAnswerWithoutFk{},
 		&quizModel.Quiz{},
 		&quizModel.QuizQuestion{},
 		&quizModel.QuizQuestionOption{},
