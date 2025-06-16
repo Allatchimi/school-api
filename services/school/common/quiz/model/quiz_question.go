@@ -16,7 +16,19 @@ type QuizQuestion struct {
 	Title       string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
 
-	Options []QuizQuestionOption `gorm:"-"` // `gorm:"foreignKey:QuizQuestionID;references:ID"`
+	Options []QuizQuestionOption `gorm:"foreignKey:QuizQuestionID;references:ID"`
+}
+type QuizQuestionWithoutFk struct {
+	types.BaseGormModel
+	QuizID     int64 `gorm:"index"`
+	SolutionID int64 `gorm:"index"`
+
+	Title       string `gorm:"default:null"`
+	Description string `gorm:"default:null"`
+}
+
+func (QuizQuestionWithoutFk) TableName() string {
+	return "quiz_questions"
 }
 
 func (item *QuizQuestion) ToResponse() *data.QuizQuestionResponse {

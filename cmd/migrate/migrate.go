@@ -88,6 +88,10 @@ func Apply() error {
 		// Meeting
 		&meetingModel.MeetingRoom{},
 		// Quiz
+		&quizModel.QuizWithoutFk{},
+		&quizModel.QuizQuestionWithoutFk{},
+		&quizModel.QuizQuestionOptionWithoutFk{},
+		&quizModel.QuizAnswerWithoutFk{},
 		&quizModel.Quiz{},
 		&quizModel.QuizQuestion{},
 		&quizModel.QuizQuestionOption{},

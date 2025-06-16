@@ -167,11 +167,11 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScope(
 				repository.Db,
-				"SELECT * "+
+				"SELECT quizzes.* "+
 					"FROM quizzes "+
 					"LEFT JOIN schools ON quizzes.school_id = schools.id "+
 					"LEFT JOIN years ON quizzes.year_id = years.id "+
-					"LEFT JOIN highschool_highschool_class_subjects ON quizzes.class_subject_id = highschool_highschool_class_subjects.id "+
+					"LEFT JOIN highschool_class_subjects ON quizzes.class_subject_id = highschool_class_subjects.id "+
 					"LEFT JOIN university_units ON quizzes.unit_id = university_units.id ",
 				where,
 				pagination,

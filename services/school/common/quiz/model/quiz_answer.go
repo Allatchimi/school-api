@@ -17,6 +17,16 @@ type QuizAnswer struct {
 	QuizQuestionOptionID int64               `gorm:"default:null"`
 	QuizQuestionOption   *QuizQuestionOption `gorm:"default:null;foreignKey:QuizQuestionOptionID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
+type QuizAnswerWithoutFk struct {
+	types.BaseGormModel
+	StudentID            int64 `gorm:"index"`
+	QuizQuestionID       int64 `gorm:"index"`
+	QuizQuestionOptionID int64 `gorm:"index"`
+}
+
+func (QuizAnswerWithoutFk) TableName() string {
+	return "quiz_answers"
+}
 
 func ToQuizAnswerResponseList(itemList []QuizAnswer) []data.QuizAnswerResponse {
 	studentResponsesMap := make(map[int64]*data.QuizAnswerResponse)
