@@ -3,48 +3,80 @@ package teacher
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"api/common/constants"
 	"api/common/types"
 	"api/common/utils"
+	"api/common/utils/mail"
+	"api/common/utils/password"
 	"api/config"
+	"api/services/school/common/school"
 	"api/services/school/common/teacher/data"
 	"api/services/school/common/teacher/model"
 	"api/services/user/role"
 	"api/services/user/user"
-	userData "api/services/user/user/data"
+	dataUser "api/services/user/user/data"
 )
 
 type Service struct {
-	Repository  *Repository
-	RoleService *role.Service
-	UserService *user.Service
+	Repository    *Repository
+	RoleService   *role.Service
+	UserService   *user.Service
+	SchoolService *school.Service
 }
 
-func NewService(repository *Repository, roleService *role.Service, userService *user.Service) *Service {
+func NewService(
+	repository *Repository,
+	roleService *role.Service,
+	userService *user.Service,
+	schoolService *school.Service,
+) *Service {
 	return &Service{
-		Repository:  repository,
-		RoleService: roleService,
-		UserService: userService,
+		Repository:    repository,
+		RoleService:   roleService,
+		UserService:   userService,
+		SchoolService: schoolService,
 	}
 }
 
 const MODEL_NAME = "teacher"
 const DEFAULT_ERROR_MESSAGE = "interact with teacher model"
-const teacherUIDSeparator = "T"
+const uidAcceptedLetters = "T"
 
 func (service *Service) Create(
 	inputJwtToken *types.JwtToken,
 	request *data.TeacherRequest,
 ) (result *model.Teacher, errCode int, err error) {
-	// Get teacher role
-	teacherRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleTeacher)
-	if errRole != nil || teacherRole == nil || teacherRole.ID < 1 {
+	// Get role
+	userRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleStudent)
+	if errRole != nil || userRole == nil || userRole.ID < 1 {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get teacher role")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
+	}
+
+	// Get the school
+	foundSchool, errSchool := service.SchoolService.Repository.GetByID(request.SchoolID)
+	if errSchool != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundSchool == nil || foundSchool.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage("school")
+		return
+	}
+
+	// Check email
+	newEmail := request.Email
+	if request.AutoGenerateEmail {
+		newEmail = mail.GenerateEmailFromFullName(
+			request.Info.FirstName,
+			request.Info.LastName,
+			foundSchool.Config.UserEmailDomain,
+		)
 	}
 
 	// Format request
@@ -53,12 +85,12 @@ func (service *Service) Create(
 		err = constants.Http400BadRequestErrorMessage()
 		return
 	}
-	var item = &userData.UserRequest{
-		RoleID:      teacherRole.ID,
-		Email:       request.Email,
+	var item = &dataUser.UserRequest{
+		RoleID:      userRole.ID,
+		Email:       newEmail,
 		PhoneNumber: request.PhoneNumber,
 		IsActivated: true,
-		Info: &userData.UserInfoRequest{
+		Info: &dataUser.UserInfoRequest{
 			Gender:        request.Info.Gender,
 			Username:      request.Info.Username,
 			FirstName:     request.Info.FirstName,
@@ -72,23 +104,11 @@ func (service *Service) Create(
 	}
 
 	// Generate password
-	var firstName, lastName string
-	var birthYear = time.Now().Year()
-	firstNameParts := strings.Split(request.Info.FirstName, " ")
-	if len(firstNameParts) > 0 {
-		firstName = firstNameParts[0]
-	}
-	lastNameParts := strings.Split(request.Info.LastName, " ")
-	if len(lastNameParts) > 0 {
-		lastName = lastNameParts[0]
-	}
-	if request.Info.Birthday != nil {
-		birthYear = request.Info.Birthday.Year()
-	}
-	var password string = ""
-	if len(firstName) > 0 && len(lastName) > 0 && birthYear > 0 {
-		password = fmt.Sprintf("%s%s%d", firstName, lastName, birthYear)
-	}
+	password := password.GeneratePasswordFromUserInfo(
+		item.Info.FirstName,
+		item.Info.LastName,
+		item.Info.Birthday,
+	)
 
 	// Create user
 	createdUser, errCodeCreate, errCreate := service.UserService.Create(nil, item, &password)
@@ -106,10 +126,32 @@ func (service *Service) Create(
 	// Generate the uid if it is empty
 	var newUID = request.UID
 	if len(newUID) < 1 {
-		prefix := fmt.Sprintf("%02dT", time.Now().Year())
-		newUID = utils.GenerateRandomUID(4, prefix, "")
+		// Get all uids to exclude
+		uids, errUids := service.Repository.GetAll(nil, nil, &data.GetAllRequest{SchoolID: request.SchoolID})
+		if errUids != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
+		formattedUids := make([]string, len(uids))
+		for i, uid := range uids {
+			formattedUids[i] = uid.UID
+		}
+		// Generate uid
+		var errGenerateUID error
+		newUID, errGenerateUID = utils.GenerateRandomUID(
+			fmt.Sprintf("%02d", time.Now().Year()),
+			uidAcceptedLetters,
+			formattedUids,
+		)
+		if errGenerateUID != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
 	}
-	// Insert teacher
+
+	// Insert
 	result, err = service.Repository.Create(&model.Teacher{
 		SchoolID: request.SchoolID,
 		UserID:   createdUser.ID,
@@ -127,7 +169,7 @@ func (service *Service) CreateTeacherClassSubjectUnit(
 	inputJwtToken *types.JwtToken,
 	request *data.TeacherClassSubjectUnitRequest,
 ) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
-	// Retrieve item
+	// Format request
 	item := &model.TeacherClassSubjectUnit{
 		TeacherID:      request.TeacherID,
 		YearID:         request.YearID,
@@ -148,7 +190,7 @@ func (service *Service) CreateTeacherClassSubjectUnit(
 		return
 	}
 
-	// Insert teacher unit/subject
+	// Insert
 	result, err = service.Repository.CreateTeacherClassSubjectUnit(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -163,7 +205,7 @@ func (service *Service) Update(
 	id int64,
 	request *data.TeacherRequest,
 ) (result *model.Teacher, errCode int, err error) {
-	// Check if teacher exists
+	// Check if exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -176,12 +218,34 @@ func (service *Service) Update(
 		return
 	}
 
-	// Check the uid
+	// Generate the uid if it is empty
 	var newUID = request.UID
 	if len(newUID) < 1 {
-		prefix := fmt.Sprintf("%02d%s", time.Now().Year(), teacherUIDSeparator)
-		newUID = utils.GenerateRandomUID(4, prefix, "")
+		// Get all uids to exclude
+		uids, errUids := service.Repository.GetAll(nil, nil, &data.GetAllRequest{SchoolID: request.SchoolID})
+		if errUids != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
+		formattedUids := make([]string, len(uids))
+		for i, uid := range uids {
+			formattedUids[i] = uid.UID
+		}
+		// Generate uid
+		var errGenerateUID error
+		newUID, errGenerateUID = utils.GenerateRandomUID(
+			fmt.Sprintf("%02d", time.Now().Year()),
+			uidAcceptedLetters,
+			formattedUids,
+		)
+		if errGenerateUID != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
 	}
+
 	// Check unique by uid
 	foundUnique, err := service.Repository.GetUniqueObjectByUID(&model.Teacher{
 		SchoolID: foundItem.SchoolID,
@@ -207,21 +271,21 @@ func (service *Service) Update(
 		return
 	}
 
-	// Get teacher role
+	// Get role
 	teacherRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleTeacher)
 	if errRole != nil || teacherRole == nil || teacherRole.ID < 1 {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get teacher role")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
 	// Update user
-	userRequest := userData.UserRequest{
+	userRequest := dataUser.UserRequest{
 		RoleID:      teacherRole.ID,
 		Email:       request.Email,
 		PhoneNumber: request.PhoneNumber,
 		IsActivated: true,
-		Info: &userData.UserInfoRequest{
+		Info: &dataUser.UserInfoRequest{
 			Gender:        request.Info.Gender,
 			Username:      request.Info.Username,
 			FirstName:     request.Info.FirstName,
@@ -240,7 +304,7 @@ func (service *Service) Update(
 		return
 	}
 
-	// Update teacher
+	// Update
 	result, err = service.Repository.UpdateByID(id, &model.Teacher{
 		SchoolID: foundItem.SchoolID,
 		UserID:   foundItem.UserID,
@@ -259,7 +323,7 @@ func (service *Service) UpdateTeacherClassSubjectUnit(
 	id int64,
 	request *data.TeacherClassSubjectUnitRequest,
 ) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
-	// Check if teacher unit/subject exists
+	// Check if exists
 	foundItem, err := service.Repository.GetTeacherClassSubjectUnitByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -272,7 +336,7 @@ func (service *Service) UpdateTeacherClassSubjectUnit(
 		return
 	}
 
-	// Retrieve item
+	// Format request
 	item := &model.TeacherClassSubjectUnit{
 		TeacherID:      request.TeacherID,
 		YearID:         request.YearID,
@@ -293,7 +357,7 @@ func (service *Service) UpdateTeacherClassSubjectUnit(
 		return
 	}
 
-	// Update teacher class subject/unit
+	// Update
 	result, err = service.Repository.UpdateTeacherClassSubjectUnitByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError

@@ -12,10 +12,11 @@ type SchoolResponse struct {
 }
 
 type SchoolPublicResponse struct {
-	Name     string `json:"name" required:"false" doc:"School name"`
-	Type     string `json:"type" required:"false" doc:"Type"`
-	Logo     string `json:"logo" required:"false" doc:"School logo"`
-	Currency string `json:"currency" required:"false" doc:"Currency"`
+	Name         string `json:"name" required:"false" doc:"School name"`
+	Type         string `json:"type" required:"false" doc:"Type"`
+	Logo         string `json:"logo" required:"false" doc:"School logo"`
+	Currency     string `json:"currency" required:"false" doc:"Currency"`
+	PaymentCount int64  `json:"paymentCount" required:"false" doc:"Payment count"`
 
 	Info *SchoolInfoResponse `json:"info" required:"false" doc:"Information"`
 }

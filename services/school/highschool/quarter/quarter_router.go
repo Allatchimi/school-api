@@ -28,7 +28,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-quarter",
 			Summary:     "Create quarter",
-			Description: "Create new quarter.",
+			Description: "Create new quarter and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,

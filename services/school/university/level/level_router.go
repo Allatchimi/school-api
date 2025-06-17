@@ -28,7 +28,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-level",
 			Summary:     "Create level",
-			Description: "Create new level.",
+			Description: "Create new level and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -355,13 +355,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all level domains
+	// Get all level domain
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-level-domain-list",
-			Summary:     "Get all level domains",
-			Description: "Get all level domains with support for search, filter and pagination",
+			Summary:     "Get all level domain",
+			Description: "Get all level domain with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/leveldomains", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -26,7 +27,7 @@ func GenerateRandomCode(length int) (int, error) {
 	if safeLength <= 0 {
 		safeLength = 1
 	}
-	return strconv.Atoi(generateRandomValue(letterNumeric, safeLength))
+	return strconv.Atoi(GenerateRandomValue(letterNumeric, safeLength))
 }
 
 // GenerateRandomPassword Returns a random password of the specified length.
@@ -35,7 +36,7 @@ func GenerateRandomPassword(length int) string {
 	if safeLength <= 0 {
 		safeLength = 1
 	}
-	return generateRandomValue(letterAlphaNumericSymbol, safeLength)
+	return GenerateRandomValue(letterAlphaNumericSymbol, safeLength)
 }
 
 // GenerateRandomAlphaNumeric Returns a generated alphanumeric
@@ -45,12 +46,12 @@ func GenerateRandomAlphaNumeric(length int) string {
 	if safeLength <= 0 {
 		safeLength = 1
 	}
-	return generateRandomValue(letterAlphaNumeric, safeLength)
+	return GenerateRandomValue(letterAlphaNumeric, safeLength)
 }
 
-// generateRandomValue Returns a random string of specified length, using provided characters.
+// GenerateRandomValue Returns a random string of specified length, using provided characters.
 // It's useful to generate passwords, OTP code and various other things
-func generateRandomValue(letters string, length int) string {
+func GenerateRandomValue(letters string, length int) string {
 	sb := strings.Builder{}
 	sb.Grow(length)
 	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
@@ -69,23 +70,41 @@ func generateRandomValue(letters string, length int) string {
 	return sb.String()
 }
 
-// GenerateRandomValue Returns a unique identifier string.
+// GenerateRandomUID returns a unique identifier string.
 // It combines a prefix, a random value of a given length, and a suffix.
-func GenerateRandomUID(length int, prefix string, suffix string) string {
-	// Generate the random part of the UID
-	safeLength := length
-	if safeLength <= 0 {
-		safeLength = 1
+// Ensures that the generated UID is not in the exclude list.
+// Limits the number of attempts to avoid infinite loops.
+func GenerateRandomUID(prefix string, acceptedChars string, exclude []string) (string, error) {
+	const maxAttempts = 1000
+
+	excludeSet := make(map[string]struct{}, len(exclude))
+	for _, uid := range exclude {
+		excludeSet[uid] = struct{}{}
 	}
-	randomPart := generateRandomValue(letterNumeric, safeLength)
 
-	// Use strings.Builder for efficient string concatenation
-	var sb strings.Builder
-	sb.Grow(len(prefix) + length + len(suffix)) // Pre-allocate memory for efficiency
+	randomLetter := GenerateRandomValue(acceptedChars, 1)
 
-	sb.WriteString(prefix)     // Add the prefix
-	sb.WriteString(randomPart) // Add the random part
-	sb.WriteString(suffix)     // Add the suffix
+	safeLength := 3
+	for range maxAttempts {
+		// Generate the random part of the UID
+		randomPart := GenerateRandomValue(letterNumeric, safeLength)
 
-	return sb.String()
+		// Build the UID
+		var sb strings.Builder
+		sb.Grow(len(prefix) + len(randomLetter) + safeLength + 1)
+		sb.WriteString(prefix)
+		sb.WriteString(randomLetter)
+		sb.WriteString(randomPart)
+		sb.WriteString(GenerateRandomValue("123456789", 1))
+
+		uid := sb.String()
+
+		// Return if UID is not in exclude list
+		if _, exists := excludeSet[uid]; !exists {
+
+			return uid, nil
+		}
+	}
+
+	return "", errors.New("failed to generate a unique UID after max attempts")
 }

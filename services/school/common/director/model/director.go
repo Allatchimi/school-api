@@ -3,38 +3,30 @@ package model
 import (
 	"api/common/types"
 	"api/services/school/common/director/data"
-	dataSchool "api/services/school/common/school/data"
-	schoolModel "api/services/school/common/school/model"
-	dataUser "api/services/user/user/data"
-	userModel "api/services/user/user/model"
+	modelSchool "api/services/school/common/school/model"
+	modelUser "api/services/user/user/model"
 )
 
 type Director struct {
 	types.BaseGormModel
-
 	SchoolID int64               `gorm:"default:null"`
-	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	UserID int64           `gorm:"default:null"`
-	User   *userModel.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	User   *modelUser.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	UID string `gorm:"default:null"`
 }
 
-func (item *Director) ToResponse() *data.DirectorResponse {
+func (item *Director) ToDirectorResponse() *data.DirectorResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.DirectorResponse{
-		DirectorPublicResponse: data.DirectorPublicResponse{
-			School: &dataSchool.SchoolPublicResponse{},
-			User:   &dataUser.UserPublicResponse{},
-		},
-	}
-	if item.School != nil {
-		resp.School = item.School.ToPublicResponse()
-	}
-	if item.User != nil {
-		resp.User = item.User.ToPublicResponse()
-	}
+	resp := &data.DirectorResponse{}
+	resp.UID = item.UID
+
+	resp.School = item.School.ToPublicResponse()
+	resp.User = item.User.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -42,27 +34,22 @@ func (item *Director) ToResponse() *data.DirectorResponse {
 	return resp
 }
 
-func (item *Director) ToPublicResponse() *data.DirectorPublicResponse {
+func (item *Director) ToDirectorPublicResponse() *data.DirectorPublicResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.DirectorPublicResponse{
-		School: &dataSchool.SchoolPublicResponse{},
-		User:   &dataUser.UserPublicResponse{},
-	}
-	if item.School != nil {
-		resp.School = item.School.ToPublicResponse()
-	}
-	if item.User != nil {
-		resp.User = item.User.ToPublicResponse()
-	}
+	resp := &data.DirectorPublicResponse{}
+	resp.UID = item.UID
+
+	resp.School = item.School.ToPublicResponse()
+	resp.User = item.User.ToPublicResponse()
 	return resp
 }
 
-func ToResponseList(itemList []Director) []data.DirectorResponse {
+func ToDirectorResponseList(itemList []Director) []data.DirectorResponse {
 	resp := make([]data.DirectorResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToResponse()
+		resp[index] = *item.ToDirectorResponse()
 	}
 	return resp
 }

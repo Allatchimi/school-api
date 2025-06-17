@@ -53,17 +53,20 @@ func (repository *Repository) UpdateStudentEnrollByID(id int64, item *model.Stud
 	result := &model.StudentEnroll{}
 	return result, repository.Db.Model(result).Where("id = ?", item.ID).Updates(
 		map[string]any{
-			"student_id":      item.StudentID,
+			"school_id":       item.SchoolID,
 			"year_id":         item.YearID,
 			"class_id":        item.ClassID,
 			"level_domain_id": item.LevelDomainID,
+			"student_id":      item.StudentID,
 
 			"email":        item.Email,
 			"phone_number": item.PhoneNumber,
 
-			"message":     item.Message,
-			"origin":      item.Origin,
-			"is_accepted": item.IsAccepted,
+			"origin":          item.Origin,
+			"status":          item.Status,
+			"status_feedback": item.StatusFeedback,
+
+			"message": item.Message,
 
 			"gender":     item.Gender,
 			"first_name": item.FirstName,
@@ -318,10 +321,7 @@ func (repository *Repository) GetAllStudentEnroll(filter *types.Filter, paginati
 	var where string = ""
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("students.school_id = %d", request.SchoolID))
-		}
-		if request.StudentID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.student_id = %d", request.StudentID))
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.school_id = %d", request.SchoolID))
 		}
 		if request.YearID > 0 {
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.year_id = %d", request.YearID))
@@ -331,6 +331,9 @@ func (repository *Repository) GetAllStudentEnroll(filter *types.Filter, paginati
 		}
 		if request.UnitID > 0 {
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.level_domain_id = %d", request.UnitID))
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.student_id = %d", request.StudentID))
 		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {

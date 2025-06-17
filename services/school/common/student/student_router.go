@@ -28,7 +28,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-student",
 			Summary:     "Create student",
-			Description: "Create new student by providing name and description and return created object. The name student should be unique.",
+			Description: "Create new student and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -62,13 +62,81 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Create student level domain/class
+	// Create student enroll
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-student-level-domain/class",
-			Summary:     "Create student level domain/class",
-			Description: "Create new student level domain/class and return created object.",
+			OperationID: "post-student-enroll",
+			Summary:     "Create student enroll",
+			Description: "Create new student enroll and return created object.",
+			Method:      http.MethodPost,
+			Path:        fmt.Sprintf("%s/enrolls", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
+						tableName,                  // Table name
+						constants.PermissionCreate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body data.StudentEnrollRequest
+			},
+		) (*struct{ Body data.StudentEnrollResponse }, error) {
+			result, errCode, err := controller.CreateStudentEnroll(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.StudentEnrollResponse }{Body: *result.ToStudentEnrollResponse()}, nil
+		},
+	)
+
+	// Create student enroll anonym
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID:   "post-student-enroll-anonym",
+			Summary:       "Create student enroll anonym",
+			Description:   "Create new student enroll anonym and return created object.",
+			Method:        http.MethodPost,
+			Path:          fmt.Sprintf("%s/enrolls/anonyms", endpointConfig.Group),
+			Tags:          endpointConfig.Tag,
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body data.StudentEnrollAnonymRequest
+			},
+		) (*struct{ Body data.StudentEnrollResponse }, error) {
+			result, errCode, err := controller.CreateStudentEnrollAnonym(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.StudentEnrollResponse }{Body: *result.ToStudentEnrollResponse()}, nil
+		},
+	)
+
+	// Create student level domain class
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "post-student-level-domain-class",
+			Summary:     "Create student level domain class",
+			Description: "Create new student level domain class and return created object.",
 			Method:      http.MethodPost,
 			Path:        fmt.Sprintf("%s/leveldomainclasses", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -147,13 +215,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Update student level domain/class with id
+	// Update student level domain class with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "update-student-level-domain/class",
-			Summary:     "Update student level domain/class",
-			Description: "Update existing student level domain/class with matching id and return the new object.",
+			OperationID: "update-student-level-domain-class",
+			Summary:     "Update student level domain class",
+			Description: "Update existing student level domain class with matching id and return the new object.",
 			Method:      http.MethodPut,
 			Path:        fmt.Sprintf("%s/leveldomainclasses/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -232,13 +300,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete student level domain/class with id
+	// Delete student level domain class with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-student-level-domain/class",
-			Summary:     "Delete student level domain/class",
-			Description: "Delete existing student level domain/class with matching id and return affected rows in database.",
+			OperationID: "delete-student-level-domain-class",
+			Summary:     "Delete student level domain class",
+			Description: "Delete existing student level domain class with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/leveldomainclasses/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -315,13 +383,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get student level domain/class by id
+	// Get student level domain class by id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-student-level-domain/class-id",
-			Summary:     "Get student level domain/class by id",
-			Description: "Return one student level domain/class with matching id",
+			OperationID: "get-student-level-domain-class-id",
+			Summary:     "Get student level domain class by id",
+			Description: "Return one student level domain class with matching id",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/leveldomainclasses/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -362,13 +430,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all students
+	// Get all student
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-student-list",
-			Summary:     "Get all students",
-			Description: "Get all students with support for search, filter and pagination",
+			Summary:     "Get all student",
+			Description: "Get all student with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -411,13 +479,47 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all students enrolls
+	// Get all student public
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-student-enrolls-list",
-			Summary:     "Get all students enrolls",
-			Description: "Get all students enrolls with support for search, filter and pagination",
+			OperationID:   "get-student-list-public",
+			Summary:       "Get all student public",
+			Description:   "Get all student public with support for search, filter and pagination",
+			Method:        http.MethodGet,
+			Path:          fmt.Sprintf("%s/public", endpointConfig.Group),
+			Tags:          endpointConfig.Tag,
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllRequest
+			},
+		) (*struct {
+			Body data.StudentResponseList
+		}, error) {
+			result, errCode, err := controller.GetAll(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct {
+				Body data.StudentResponseList
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get all student enroll
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-student-enroll-list",
+			Summary:     "Get all student enroll",
+			Description: "Get all student enroll with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/enrolls", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -460,13 +562,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all students level domain/class
+	// Get all student level domain class
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-student-level-domain/class-list",
-			Summary:     "Get all students level domain/class",
-			Description: "Get all level domain/class for specified student with support for search, filter and pagination",
+			OperationID: "get-student-level-domain-class-list",
+			Summary:     "Get all student level domain class",
+			Description: "Get all level domain class for specified student with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/leveldomainclasses", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,

@@ -28,7 +28,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-quiz",
 			Summary:     "Create quiz",
-			Description: "Create new quiz.",
+			Description: "Create new quiz and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,

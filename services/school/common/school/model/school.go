@@ -7,10 +7,11 @@ import (
 
 type School struct {
 	types.BaseGormModel
-	Name     string `gorm:"unique;not null"`
-	Type     string `gorm:"not null"`
-	Logo     string `gorm:"default:null"`
-	Currency string `gorm:"default:null"`
+	Name         string `gorm:"unique;not null"`
+	Type         string `gorm:"not null"`
+	Logo         string `gorm:"default:null"`
+	Currency     string `gorm:"default:null"`
+	PaymentCount int64  `gorm:"default:1"`
 
 	ConfigID int64         `gorm:"default:null"`
 	Config   *SchoolConfig `gorm:"default:null;foreignKey:ConfigID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -28,6 +29,7 @@ func (item *School) ToResponse() *data.SchoolResponse {
 	resp.Type = item.Type
 	resp.Logo = item.Logo
 	resp.Currency = item.Currency
+	resp.PaymentCount = item.PaymentCount
 
 	resp.Info = item.Info.ToResponse()
 	resp.Config = item.Config.ToResponse()
@@ -47,6 +49,7 @@ func (item *School) ToPublicResponse() *data.SchoolPublicResponse {
 	resp.Type = item.Type
 	resp.Logo = item.Logo
 	resp.Currency = item.Currency
+	resp.PaymentCount = item.PaymentCount
 
 	resp.Info = item.Info.ToResponse()
 	return resp

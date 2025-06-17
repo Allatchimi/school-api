@@ -9,10 +9,11 @@ type SchoolID struct {
 }
 
 type SchoolRequest struct {
-	Name     string `json:"name" required:"true" minLength:"2" maxLength:"50" doc:"School name" example:"uy1"`
-	Type     string `json:"type" required:"true" minLength:"2" maxLength:"50" enum:"highschool,university" doc:"School type" example:"university"`
-	Logo     string `json:"logo" required:"false" doc:"School logo" example:""`
-	Currency string `json:"currency" required:"false" minLength:"2" maxLength:"20" doc:"Currency" example:"XAF"`
+	Name         string `json:"name" required:"true" minLength:"2" maxLength:"50" doc:"School name" example:"uy1"`
+	Type         string `json:"type" required:"true" minLength:"2" maxLength:"50" enum:"highschool,university" doc:"School type" example:"university"`
+	Logo         string `json:"logo" required:"false" doc:"School logo" example:""`
+	Currency     string `json:"currency" required:"true" minLength:"2" maxLength:"20" doc:"Currency" example:"XAF"`
+	PaymentCount int64  `json:"paymentCount" required:"true" min:"1" max:"10" doc:"Payment count" example:"1"`
 
 	Info   *SchoolInfoRequest   `json:"info" required:"true" doc:"Information"`
 	Config *SchoolConfigRequest `json:"config" required:"true" doc:"Configuration"`
@@ -50,8 +51,8 @@ type SchoolConfigRequest struct {
 	Protocol string `json:"protocol" required:"true" enum:"http,https" doc:"Protocol" example:"http"`
 
 	DomainName string `json:"domainName" required:"true" minLength:"3" maxLength:"150" doc:"Domain name" example:"google.com"`
-	DomainCert string `json:"domainCert" required:"false" minLength:"3" maxLength:"150" doc:"Domain cert" example:""`
-	DomainKey  string `json:"domainKey" required:"false" minLength:"3" maxLength:"150" doc:"Domain key" example:""`
+	DomainCert string `json:"domainCert" required:"true" minLength:"3" maxLength:"150" doc:"Domain cert" example:""`
+	DomainKey  string `json:"domainKey" required:"true" minLength:"3" maxLength:"150" doc:"Domain key" example:""`
 
 	SmtpHost         string `json:"smtpHost" required:"true" minLength:"3" maxLength:"150" doc:"SMTP host" example:"smtp.google.com"`
 	SmtpPort         int    `json:"smtpPort" required:"true" min:"1" max:"65535" doc:"SMTP port" example:"587"`

@@ -17,29 +17,42 @@ type StudentEnrollID struct {
 type StudentRequest struct {
 	SchoolID int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
 
-	UID         string                    `json:"uid" required:"false" doc:"Teacher UID" example:"1"`
-	Email       string                    `json:"email" required:"true" minLength:"3" max:"100" doc:"Email" example:"example@domain.com"`
-	PhoneNumber uint64                    `json:"phoneNumber" required:"false" doc:"Phone number" example:"237690909090"`
-	Info        *dataUser.UserInfoRequest `json:"info" required:"true" doc:"Information" example:""`
+	UID               string                    `json:"uid" required:"false" doc:"User UID" example:"1"`
+	AutoGenerateEmail bool                      `json:"autoGenerateEmail" required:"true" doc:"Auto generate email" example:"true"`
+	Email             string                    `json:"email" required:"false" minLength:"3" max:"100" doc:"Email" example:"example@domain.com"`
+	PhoneNumber       uint64                    `json:"phoneNumber" required:"false" doc:"Phone number" example:"237690909090"`
+	Info              *dataUser.UserInfoRequest `json:"info" required:"true" doc:"Information" example:""`
 }
 
 type StudentEnrollRequest struct {
-	StudentID     int64 `json:"teacherID" required:"false" doc:"Student id" example:"1"`
+	SchoolID      int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
+	YearID        int64 `json:"yearID" required:"true" doc:"Year id" example:"1"`
+	ClassID       int64 `json:"classID" required:"false" doc:"Class id" example:"1"`
+	LevelDomainID int64 `json:"levelDomainID" required:"false" doc:"Level domain id" example:"1"`
+	StudentID     int64 `json:"studentID" required:"true" doc:"Student id" example:"1"`
+
+	Status         string `json:"status" required:"true" enum:"initiated,pending,accepted,declined" doc:"Status" example:"pending"`
+	StatusFeedback string `json:"statusFeedback" required:"false" minLength:"3" max:"100" doc:"Status feedback" example:""`
+}
+
+type StudentEnrollAnonymRequest struct {
+	SchoolID      int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
 	YearID        int64 `json:"yearID" required:"true" doc:"Year id" example:"1"`
 	ClassID       int64 `json:"classID" required:"false" doc:"Class id" example:"1"`
 	LevelDomainID int64 `json:"levelDomainID" required:"false" doc:"Level domain id" example:"1"`
 
-	Email       string `json:"email" required:"false" minLength:"3" max:"100" doc:"Email" example:"example@domain.com"`
-	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number" example:"237690909090"`
+	Email       string `json:"email" required:"true" minLength:"3" max:"100" doc:"Email" example:"example@domain.com"`
+	PhoneNumber uint64 `json:"phoneNumber" required:"true" doc:"Phone number" example:"237690909090"`
 
-	Message       string     `json:"message" required:"false" doc:"Message" example:""`
+	Message string `json:"message" required:"true" doc:"Message" example:""`
+
 	Gender        string     `json:"gender" required:"true" enum:"m,f" doc:"Gender" example:"M"`
 	FirstName     string     `json:"firstName" required:"true" max:"30" doc:"First name" example:"John"`
 	LastName      string     `json:"lastName" required:"true" max:"30" doc:"Last name" example:"Doe"`
 	Birthday      *time.Time `json:"birthday" required:"true" doc:"Birthday date time"`
 	BirthLocation string     `json:"birthLocation" required:"true" doc:"Birth location"`
 
-	Document1 string `json:"file1" required:"false" doc:"Document1" example:""`
+	Document1 string `json:"file1" required:"true" doc:"Document1" example:""`
 	Document2 string `json:"file2" required:"false" doc:"Document2" example:""`
 	Document3 string `json:"file3" required:"false" doc:"Document3" example:""`
 	Document4 string `json:"file4" required:"false" doc:"Document4" example:""`

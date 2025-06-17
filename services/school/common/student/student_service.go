@@ -3,48 +3,80 @@ package student
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"api/common/constants"
 	"api/common/types"
 	"api/common/utils"
+	"api/common/utils/mail"
+	"api/common/utils/password"
 	"api/config"
+	"api/services/school/common/school"
 	"api/services/school/common/student/data"
 	"api/services/school/common/student/model"
 	"api/services/user/role"
 	"api/services/user/user"
-	userData "api/services/user/user/data"
+	dataUser "api/services/user/user/data"
 )
 
 type Service struct {
-	Repository  *Repository
-	RoleService *role.Service
-	UserService *user.Service
+	Repository    *Repository
+	RoleService   *role.Service
+	UserService   *user.Service
+	SchoolService *school.Service
 }
 
-func NewService(repository *Repository, roleService *role.Service, userService *user.Service) *Service {
+func NewService(
+	repository *Repository,
+	roleService *role.Service,
+	userService *user.Service,
+	schoolService *school.Service,
+) *Service {
 	return &Service{
-		Repository:  repository,
-		RoleService: roleService,
-		UserService: userService,
+		Repository:    repository,
+		RoleService:   roleService,
+		UserService:   userService,
+		SchoolService: schoolService,
 	}
 }
 
 const MODEL_NAME = "student"
 const DEFAULT_ERROR_MESSAGE = "interact with student model"
-const studentUIDSeparator = "S"
+const uidAcceptedLetters = "ABCEFGHIJKLMNOPQRSUVWXYZ"
 
 func (service *Service) Create(
 	inputJwtToken *types.JwtToken,
 	request *data.StudentRequest,
 ) (result *model.Student, errCode int, err error) {
-	// Get student role
-	studentRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleStudent)
-	if errRole != nil || studentRole == nil || studentRole.ID < 1 {
+	// Get role
+	userRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleStudent)
+	if errRole != nil || userRole == nil || userRole.ID < 1 {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get student role")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
+	}
+
+	// Get the school
+	foundSchool, errSchool := service.SchoolService.Repository.GetByID(request.SchoolID)
+	if errSchool != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundSchool == nil || foundSchool.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage("school")
+		return
+	}
+
+	// Generate the email
+	newEmail := request.Email
+	if request.AutoGenerateEmail {
+		newEmail = mail.GenerateEmailFromFullName(
+			request.Info.FirstName,
+			request.Info.LastName,
+			foundSchool.Config.UserEmailDomain,
+		)
 	}
 
 	// Format request
@@ -53,12 +85,12 @@ func (service *Service) Create(
 		err = constants.Http400BadRequestErrorMessage()
 		return
 	}
-	var item = &userData.UserRequest{
-		RoleID:      studentRole.ID,
-		Email:       request.Email,
+	var item = &dataUser.UserRequest{
+		RoleID:      userRole.ID,
+		Email:       newEmail,
 		PhoneNumber: request.PhoneNumber,
 		IsActivated: true,
-		Info: &userData.UserInfoRequest{
+		Info: &dataUser.UserInfoRequest{
 			Gender:        request.Info.Gender,
 			Username:      request.Info.Username,
 			FirstName:     request.Info.FirstName,
@@ -72,23 +104,11 @@ func (service *Service) Create(
 	}
 
 	// Generate password
-	var firstName, lastName string
-	var birthYear = time.Now().Year()
-	firstNameParts := strings.Split(request.Info.FirstName, " ")
-	if len(firstNameParts) > 0 {
-		firstName = firstNameParts[0]
-	}
-	lastNameParts := strings.Split(request.Info.LastName, " ")
-	if len(lastNameParts) > 0 {
-		lastName = lastNameParts[0]
-	}
-	if request.Info.Birthday != nil {
-		birthYear = request.Info.Birthday.Year()
-	}
-	var password string = ""
-	if len(firstName) > 0 && len(lastName) > 0 && birthYear > 0 {
-		password = fmt.Sprintf("%s%s%d", firstName, lastName, birthYear)
-	}
+	password := password.GeneratePasswordFromUserInfo(
+		item.Info.FirstName,
+		item.Info.LastName,
+		item.Info.Birthday,
+	)
 
 	// Create user
 	createdUser, errCodeCreate, errCreate := service.UserService.Create(nil, item, &password)
@@ -106,10 +126,32 @@ func (service *Service) Create(
 	// Generate the uid if it is empty
 	var newUID = request.UID
 	if len(newUID) < 1 {
-		prefix := fmt.Sprintf("%02dT", time.Now().Year())
-		newUID = utils.GenerateRandomUID(4, prefix, "")
+		// Get all uids to exclude
+		uids, errUids := service.Repository.GetAll(nil, nil, &data.GetAllRequest{SchoolID: request.SchoolID})
+		if errUids != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
+		formattedUids := make([]string, len(uids))
+		for i, uid := range uids {
+			formattedUids[i] = uid.UID
+		}
+		// Generate uid
+		var errGenerateUID error
+		newUID, errGenerateUID = utils.GenerateRandomUID(
+			fmt.Sprintf("%02d", time.Now().Year()),
+			uidAcceptedLetters,
+			formattedUids,
+		)
+		if errGenerateUID != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
 	}
-	// Insert student
+
+	// Create
 	result, err = service.Repository.Create(&model.Student{
 		SchoolID: request.SchoolID,
 		UserID:   createdUser.ID,
@@ -134,10 +176,53 @@ func (service *Service) CreateStudentEnroll(
 		ClassID:       request.ClassID,
 		LevelDomainID: request.LevelDomainID,
 
+		Origin:         "dashboard",
+		Status:         request.Status,
+		StatusFeedback: request.StatusFeedback,
+	}
+
+	// Check unique
+	foundUnique, err := service.Repository.GetStudentEnrollUniqueObject(item)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if service.Repository.AreStudentEnrollSameUniqueObjects(foundUnique, item) {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+
+	// Create
+	result, err = service.Repository.CreateStudentEnroll(item)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	return
+}
+
+func (service *Service) CreateStudentEnrollAnonym(
+	inputJwtToken *types.JwtToken,
+	request *data.StudentEnrollAnonymRequest,
+) (result *model.StudentEnroll, errCode int, err error) {
+	// Format request
+	item := &model.StudentEnroll{
+		SchoolID:      request.SchoolID,
+		YearID:        request.YearID,
+		ClassID:       request.ClassID,
+		LevelDomainID: request.LevelDomainID,
+
 		Email:       request.Email,
 		PhoneNumber: request.PhoneNumber,
 
-		Message:       request.Message,
+		Origin: "website",
+		Status: "initiated",
+
+		Message: request.Message,
+
 		Gender:        request.Gender,
 		FirstName:     request.FirstName,
 		LastName:      request.LastName,
@@ -164,7 +249,7 @@ func (service *Service) CreateStudentEnroll(
 		return
 	}
 
-	// Insert student class/level domain
+	// Create
 	result, err = service.Repository.CreateStudentEnroll(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -179,7 +264,7 @@ func (service *Service) Update(
 	id int64,
 	request *data.StudentRequest,
 ) (result *model.Student, errCode int, err error) {
-	// Check if student exists
+	// Check if exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -192,12 +277,34 @@ func (service *Service) Update(
 		return
 	}
 
-	// Check the uid
+	// Generate the uid if it is empty
 	var newUID = request.UID
 	if len(newUID) < 1 {
-		prefix := fmt.Sprintf("%02d%s", time.Now().Year(), studentUIDSeparator)
-		newUID = utils.GenerateRandomUID(4, prefix, "")
+		// Get all uids to exclude
+		uids, errUids := service.Repository.GetAll(nil, nil, &data.GetAllRequest{SchoolID: request.SchoolID})
+		if errUids != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
+		formattedUids := make([]string, len(uids))
+		for i, uid := range uids {
+			formattedUids[i] = uid.UID
+		}
+		// Generate uid
+		var errGenerateUID error
+		newUID, errGenerateUID = utils.GenerateRandomUID(
+			fmt.Sprintf("%02d", time.Now().Year()),
+			uidAcceptedLetters,
+			formattedUids,
+		)
+		if errGenerateUID != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
 	}
+
 	// Check unique by uid
 	foundUnique, err := service.Repository.GetUniqueObjectByUID(&model.Student{
 		SchoolID: foundItem.SchoolID,
@@ -223,21 +330,34 @@ func (service *Service) Update(
 		return
 	}
 
-	// Get student role
-	studentRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleStudent)
-	if errRole != nil || studentRole == nil || studentRole.ID < 1 {
+	// Get the role
+	userRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleStudent)
+	if errRole != nil || userRole == nil || userRole.ID < 1 {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get student role")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
-	// Update user
-	userRequest := userData.UserRequest{
-		RoleID:      studentRole.ID,
+	// Get the school
+	foundSchool, errSchool := service.SchoolService.Repository.GetByID(request.SchoolID)
+	if errSchool != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundSchool == nil || foundSchool.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage("school")
+		return
+	}
+
+	// Update
+	userRequest := dataUser.UserRequest{
+		RoleID:      userRole.ID,
 		Email:       request.Email,
 		PhoneNumber: request.PhoneNumber,
 		IsActivated: true,
-		Info: &userData.UserInfoRequest{
+		Info: &dataUser.UserInfoRequest{
 			Gender:        request.Info.Gender,
 			Username:      request.Info.Username,
 			FirstName:     request.Info.FirstName,
@@ -256,7 +376,7 @@ func (service *Service) Update(
 		return
 	}
 
-	// Update student
+	// Update
 	result, err = service.Repository.UpdateByID(id, &model.Student{
 		SchoolID: foundItem.SchoolID,
 		UserID:   foundItem.UserID,
@@ -275,7 +395,7 @@ func (service *Service) UpdateStudentEnroll(
 	id int64,
 	request *data.StudentEnrollRequest,
 ) (result *model.StudentEnroll, errCode int, err error) {
-	// Check if student class/level domain exists
+	// Check if exists
 	foundItem, err := service.Repository.GetStudentEnrollByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -295,21 +415,25 @@ func (service *Service) UpdateStudentEnroll(
 		ClassID:       request.ClassID,
 		LevelDomainID: request.LevelDomainID,
 
-		Email:       request.Email,
-		PhoneNumber: request.PhoneNumber,
+		Email:       foundItem.Email,
+		PhoneNumber: foundItem.PhoneNumber,
 
-		Message:       request.Message,
-		Gender:        request.Gender,
-		FirstName:     request.FirstName,
-		LastName:      request.LastName,
-		Birthday:      request.Birthday,
-		BirthLocation: request.BirthLocation,
+		Message:        foundItem.Message,
+		Origin:         foundItem.Origin,
+		Status:         request.Status,
+		StatusFeedback: request.StatusFeedback,
 
-		Document1: request.Document1,
-		Document2: request.Document2,
-		Document3: request.Document3,
-		Document4: request.Document4,
-		Document5: request.Document5,
+		Gender:        foundItem.Gender,
+		FirstName:     foundItem.FirstName,
+		LastName:      foundItem.LastName,
+		Birthday:      foundItem.Birthday,
+		BirthLocation: foundItem.BirthLocation,
+
+		Document1: foundItem.Document1,
+		Document2: foundItem.Document2,
+		Document3: foundItem.Document3,
+		Document4: foundItem.Document4,
+		Document5: foundItem.Document5,
 	}
 
 	// Check unique
@@ -325,7 +449,7 @@ func (service *Service) UpdateStudentEnroll(
 		return
 	}
 
-	// Update student
+	// Update
 	result, err = service.Repository.UpdateStudentEnrollByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError

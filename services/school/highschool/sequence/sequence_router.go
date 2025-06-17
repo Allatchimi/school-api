@@ -28,7 +28,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-sequence",
 			Summary:     "Create sequence",
-			Description: "Create new sequence.",
+			Description: "Create new sequence and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,

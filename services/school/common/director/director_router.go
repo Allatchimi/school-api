@@ -28,15 +28,16 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-director",
 			Summary:     "Create director",
-			Description: "Create new director.",
+			Description: "Create new director and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s",
+						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
+							constants.FeatureDirector,
 						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
@@ -57,7 +58,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.DirectorResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.DirectorResponse }{Body: *result.ToDirectorResponse()}, nil
 		},
 	)
 
@@ -74,8 +75,9 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s",
+						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
+							constants.FeatureDirector,
 						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionUpdate, // Operation
@@ -97,7 +99,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.DirectorResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.DirectorResponse }{Body: *result.ToDirectorResponse()}, nil
 		},
 	)
 
@@ -114,8 +116,9 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s",
+						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
+							constants.FeatureDirector,
 						), // Features scope
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
@@ -140,45 +143,6 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete multiple director
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "delete-director-multiple",
-			Summary:     "Delete multiple director",
-			Description: "Delete multiple director by providing a lis of IDs and return affected rows in database.",
-			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s",
-							constants.FeatureAdmin,
-						), // Features scope
-						tableName,                  // Table name
-						constants.PermissionDelete, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				Body types.DeleteMultipleRequest
-			},
-		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteMultiple(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
-		},
-	)
-
 	// Get director by id
 	huma.Register(
 		*humaApi,
@@ -192,8 +156,12 @@ func RegisterEndpoints(
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s",
+						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureDirector,
+							constants.FeatureStudent,
+							constants.FeatureParent,
 						), // Features scope
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
@@ -214,25 +182,29 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.DirectorResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.DirectorResponse }{Body: *result.ToDirectorResponse()}, nil
 		},
 	)
 
-	// Get all directors
+	// Get all director
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-director-list",
-			Summary:     "Get all directors",
-			Description: "Get all directors with support for search, filter and pagination",
+			Summary:     "Get all director",
+			Description: "Get all director with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
 					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s",
+						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureDirector,
+							constants.FeatureStudent,
+							constants.FeatureParent,
 						), // Features scope
 						tableName,                // Table name
 						constants.PermissionRead, // Operation

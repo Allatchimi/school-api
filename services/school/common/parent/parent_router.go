@@ -28,7 +28,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-parent",
 			Summary:     "Create parent",
-			Description: "Create new parent by providing name and description and return created object. The name parent should be unique.",
+			Description: "Create new parent and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -62,15 +62,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Create parent level/class
+	// Create parent level domain class
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-parent-level/class",
-			Summary:     "Create parent level/class",
-			Description: "Create new parent level/class and return created object.",
+			OperationID: "post-parent-level-domain-class",
+			Summary:     "Create parent level domain class",
+			Description: "Create new parent level domain class and return created object.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/levelclass", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/leveldomainclasses", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -147,15 +147,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Update parent level/class with id
+	// Update parent level domain class with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "update-parent-level/class",
-			Summary:     "Update parent level/class",
-			Description: "Update existing parent level/class with matching id and return the new object.",
+			OperationID: "update-parent-level-domain-class",
+			Summary:     "Update parent level domain class",
+			Description: "Update existing parent level domain class with matching id and return the new object.",
 			Method:      http.MethodPut,
-			Path:        fmt.Sprintf("%s/levelclass/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/leveldomainclasses/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -232,15 +232,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete parent level/class with id
+	// Delete parent level domain class with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-parent-level/class",
-			Summary:     "Delete parent level/class",
-			Description: "Delete existing parent level/class with matching id and return affected rows in database.",
+			OperationID: "delete-parent-level-domain-class",
+			Summary:     "Delete parent level domain class",
+			Description: "Delete existing parent level domain class with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/levelclass/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/leveldomainclasses/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -315,13 +315,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all parents
+	// Get all parent
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-parent-list",
-			Summary:     "Get all parents",
-			Description: "Get all parents with support for search, filter and pagination",
+			Summary:     "Get all parent",
+			Description: "Get all parent with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -364,13 +364,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all parents students
+	// Get all parent student
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-parent-student-list",
-			Summary:     "Get all parents students",
-			Description: "Get all parents students with support for search, filter and pagination",
+			Summary:     "Get all parent student",
+			Description: "Get all parent student with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/students", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,

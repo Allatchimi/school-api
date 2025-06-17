@@ -14,6 +14,8 @@ type DirectorResponse struct {
 type DirectorPublicResponse struct {
 	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
 	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
+
+	UID string `json:"uid" required:"false" doc:"Director UID"`
 }
 
 type DirectorResponseList struct {

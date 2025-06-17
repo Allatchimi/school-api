@@ -11,6 +11,7 @@ import (
 	examModel "api/services/school/common/exam/model"
 	meetingModel "api/services/school/common/meeting/model"
 	parentModel "api/services/school/common/parent/model"
+	paymentModel "api/services/school/common/payment/model"
 	quizModel "api/services/school/common/quiz/model"
 	requestModel "api/services/school/common/request/model"
 	resultModel "api/services/school/common/result/model"
@@ -72,14 +73,12 @@ func Apply() error {
 		&roleModel.Role{},
 
 		// ----------- Common school models -----------
-		// Director
-		&directorModel.Director{},
 		// School
 		&schoolModel.School{},
 		&schoolModel.SchoolInfo{},
 		&schoolModel.SchoolConfig{},
-		// Year
-		&yearModel.Year{},
+		// Director
+		&directorModel.Director{},
 		// Teacher
 		&teacherModel.Teacher{},
 		&teacherModel.TeacherClassSubjectUnit{},
@@ -91,6 +90,8 @@ func Apply() error {
 		&parentModel.ParentStudent{},
 		&parentModel.ParentAssign{},
 		&parentModel.ParentAssignStudent{},
+		// Year
+		&yearModel.Year{},
 		// Course
 		&courseModel.Course{},
 		&courseModel.CourseDocument{},
@@ -113,6 +114,8 @@ func Apply() error {
 		&scheduleModel.ScheduleGeneric{},
 		// Result
 		&resultModel.Result{},
+		// Payment
+		&paymentModel.Payment{},
 
 		// ----------- Highschool models -----------
 		// Section

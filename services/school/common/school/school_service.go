@@ -24,12 +24,14 @@ const DEFAULT_ERROR_MESSAGE = "interact with school model"
 func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.SchoolRequest) (result *model.School, errCode int, err error) {
 	// Format request
 	item := &model.School{
-		Name:     request.Name,
-		Type:     request.Type,
-		Logo:     request.Logo,
-		Currency: request.Currency,
-		Info:     model.FromInfoRequest(request.Info),
-		Config:   model.FromConfigRequest(request.Config),
+		Name:         request.Name,
+		Type:         request.Type,
+		Logo:         request.Logo,
+		Currency:     request.Currency,
+		PaymentCount: request.PaymentCount,
+
+		Info:   model.FromInfoRequest(request.Info),
+		Config: model.FromConfigRequest(request.Config),
 	}
 
 	// Create info
@@ -94,10 +96,11 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 
 	// Create school
 	result, err = service.Repository.Create(&model.School{
-		Name:     item.Name,
-		Type:     item.Type,
-		Logo:     item.Logo,
-		Currency: item.Currency,
+		Name:         item.Name,
+		Type:         item.Type,
+		Logo:         item.Logo,
+		Currency:     item.Currency,
+		PaymentCount: item.PaymentCount,
 
 		ConfigID: newConfig.ID,
 		InfoID:   newInfo.ID,
@@ -134,12 +137,14 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 
 	// Format request
 	item := &model.School{
-		Name:     request.Name,
-		Type:     request.Type,
-		Logo:     request.Logo,
-		Currency: request.Currency,
-		Info:     model.FromInfoRequest(request.Info),
-		Config:   model.FromConfigRequest(request.Config),
+		Name:         request.Name,
+		Type:         request.Type,
+		Logo:         request.Logo,
+		Currency:     request.Currency,
+		PaymentCount: request.PaymentCount,
+
+		Info:   model.FromInfoRequest(request.Info),
+		Config: model.FromConfigRequest(request.Config),
 	}
 
 	// Check unique

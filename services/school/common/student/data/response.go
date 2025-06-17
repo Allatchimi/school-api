@@ -28,17 +28,20 @@ type StudentEnrollResponse struct {
 }
 
 type StudentEnrollPublicResponse struct {
-	Student     *StudentPublicResponse                     `json:"student" required:"false" doc:"Student"`
+	School      *dataSchool.SchoolPublicResponse           `json:"school" required:"false" doc:"School"`
 	Year        *dataYear.YearPublicResponse               `json:"year" required:"false" doc:"Year"`
 	Class       *dataClass.ClassPublicResponse             `json:"class" required:"false" doc:"Class"`
 	LevelDomain *dataLevelDomain.LevelDomainPublicResponse `json:"levelDomain" required:"false" doc:"Level for domain"`
+	Student     *StudentPublicResponse                     `json:"student" required:"false" doc:"Student"`
 
 	Email       string `json:"email" required:"false" doc:"Email"`
 	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number"`
 
-	Message    string `json:"Message" required:"false" doc:"Message"`
-	Origin     string `json:"origin" required:"false" doc:"Origin"`
-	IsAccepted bool   `json:"isAccepted" required:"false" doc:"Is accepted"`
+	Origin         string `json:"origin" required:"false" doc:"Origin"`
+	Status         string `json:"status" required:"false" doc:"Status"`
+	StatusFeedback string `json:"statusFeedback" required:"false" doc:"Status feedback"`
+
+	Message string `json:"Message" required:"false" doc:"Message"`
 
 	Gender        string     `json:"gender" required:"false" doc:"Gender"`
 	FirstName     string     `json:"firstName" required:"false" doc:"First name"`
@@ -60,5 +63,5 @@ type StudentResponseList struct {
 
 type StudentEnrollResponseList struct {
 	types.PaginatedResponse
-	Data []StudentEnrollResponse `json:"data" required:"false" doc:"List of level domain/class for the specified student" example:"[]"`
+	Data []StudentEnrollResponse `json:"data" required:"false" doc:"List of level domain class for the specified student" example:"[]"`
 }

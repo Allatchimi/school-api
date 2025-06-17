@@ -1,12 +1,12 @@
-package director
+package payment
 
 import (
 	"context"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/services/school/common/director/data"
-	"api/services/school/common/director/model"
+	"api/services/school/common/payment/data"
+	"api/services/school/common/payment/model"
 )
 
 type Controller struct {
@@ -20,9 +20,9 @@ func NewController(service *Service) *Controller {
 func (controller *Controller) Create(
 	ctx *context.Context,
 	input *struct {
-		Body data.DirectorRequest
+		Body data.PaymentRequest
 	},
-) (result *model.Director, errCode int, err error) {
+) (result *model.Payment, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
 		&input.Body,
@@ -33,10 +33,10 @@ func (controller *Controller) Create(
 func (controller *Controller) Update(
 	ctx *context.Context,
 	input *struct {
-		data.DirectorID
-		Body data.DirectorRequest
+		data.PaymentID
+		Body data.PaymentRequest
 	},
-) (result *model.Director, errCode int, err error) {
+) (result *model.Payment, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx),
 		input.ID,
@@ -48,7 +48,7 @@ func (controller *Controller) Update(
 func (controller *Controller) Delete(
 	ctx *context.Context,
 	input *struct {
-		data.DirectorID
+		data.PaymentID
 	},
 ) (result int64, errCode int, err error) {
 	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
@@ -59,17 +59,31 @@ func (controller *Controller) Delete(
 	return
 }
 
-func (controller *Controller) Get(
+func (controller *Controller) DeleteMultiple(
 	ctx *context.Context,
 	input *struct {
-		data.DirectorID
+		Body types.DeleteMultipleRequest
 	},
-) (result *model.Director, errCode int, err error) {
-	director, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+) (result int64, errCode int, err error) {
+	affectedRows, errCode, err := controller.Service.DeleteMultiple(helpers.GetJwtContext(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
-	result = director
+	result = affectedRows
+	return
+}
+
+func (controller *Controller) Get(
+	ctx *context.Context,
+	input *struct {
+		data.PaymentID
+	},
+) (result *model.Payment, errCode int, err error) {
+	payment, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+	if err != nil {
+		return
+	}
+	result = payment
 	return
 }
 
@@ -80,19 +94,14 @@ func (controller *Controller) GetAll(
 		types.PaginationRequest
 		data.GetAllRequest
 	},
-) (result *data.DirectorResponseList, errCode int, err error) {
+) (result *data.PaymentResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	directorList, errCode, err := controller.Service.GetAll(
-		helpers.GetJwtContext(ctx),
-		newFilter,
-		newPagination,
-		input.GetAllRequest.SchoolID,
-	)
+	paymentList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, input.SchoolID)
 	if err != nil {
 		return
 	}
-	result = &data.DirectorResponseList{
-		Data: model.ToDirectorResponseList(directorList),
+	result = &data.PaymentResponseList{
+		Data: model.ToResponseList(paymentList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

@@ -29,7 +29,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-result",
 			Summary:     "Create result",
-			Description: "Create new result by providing name and description and return created object. The name result should be unique.",
+			Description: "Create new result and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,

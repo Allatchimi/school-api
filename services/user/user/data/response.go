@@ -24,7 +24,9 @@ type UserResponse struct {
 }
 
 type UserPublicResponse struct {
-	Info *UserInfoPublicResponse `json:"info" required:"false" doc:"Additional user info(e.g. address, first name, last name, ...)" `
+	UID   string                  `json:"uid" required:"false" doc:"User id"`
+	Email string                  `json:"email" required:"false" doc:"Email"`
+	Info  *UserInfoPublicResponse `json:"info" required:"false" doc:"Additional user info(e.g. address, first name, last name, ...)" `
 }
 
 type UserInfoResponse struct {

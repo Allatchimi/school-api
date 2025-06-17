@@ -28,7 +28,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-faculty",
 			Summary:     "Create faculty",
-			Description: "Create new faculty.",
+			Description: "Create new faculty and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,

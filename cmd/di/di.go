@@ -12,6 +12,7 @@ import (
 	"api/services/school/common/exam"
 	"api/services/school/common/meeting"
 	"api/services/school/common/parent"
+	"api/services/school/common/payment"
 	"api/services/school/common/quiz"
 	"api/services/school/common/request"
 	"api/services/school/common/result"
@@ -106,6 +107,7 @@ func InjectDependencies() {
 	var requestRepo = request.NewRepository(config.DB)
 	var resultRepo = result.NewRepository(config.DB)
 	var scheduleRepo = schedule.NewRepository(config.DB)
+	var paymentRepo = payment.NewRepository(config.DB)
 	api.AllControllers.SchoolController = school.NewController(
 		school.NewService(
 			schoolRepo,
@@ -116,6 +118,7 @@ func InjectDependencies() {
 			directorRepo,
 			api.AllControllers.RoleController.Service,
 			api.AllControllers.UserController.Service,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 	api.AllControllers.TeacherController = teacher.NewController(
@@ -123,6 +126,7 @@ func InjectDependencies() {
 			teacherRepo,
 			api.AllControllers.RoleController.Service,
 			api.AllControllers.UserController.Service,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 	api.AllControllers.StudentController = student.NewController(
@@ -130,6 +134,7 @@ func InjectDependencies() {
 			studentRepo,
 			api.AllControllers.RoleController.Service,
 			api.AllControllers.UserController.Service,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 	api.AllControllers.ParentController = parent.NewController(
@@ -137,6 +142,7 @@ func InjectDependencies() {
 			parentRepo,
 			api.AllControllers.RoleController.Service,
 			api.AllControllers.UserController.Service,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 	api.AllControllers.YearController = year.NewController(
@@ -179,6 +185,11 @@ func InjectDependencies() {
 	api.AllControllers.ScheduleController = schedule.NewController(
 		schedule.NewService(
 			scheduleRepo,
+		),
+	)
+	api.AllControllers.PaymentController = payment.NewController(
+		payment.NewService(
+			paymentRepo,
 		),
 	)
 

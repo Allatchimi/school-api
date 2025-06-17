@@ -28,7 +28,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-specialty",
 			Summary:     "Create specialty",
-			Description: "Create new specialty.",
+			Description: "Create new specialty and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,

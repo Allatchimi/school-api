@@ -2,6 +2,7 @@ package model
 
 import (
 	"api/common/types"
+	modelSchool "api/services/school/common/school/model"
 	"api/services/school/common/student/data"
 	modelYear "api/services/school/common/year/model"
 	modelClassSubject "api/services/school/highschool/class/model"
@@ -12,8 +13,8 @@ import (
 type StudentEnroll struct {
 	types.BaseGormModel
 
-	StudentID int64    `gorm:"default:null"`
-	Student   *Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	SchoolID int64               `gorm:"default:null"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	YearID int64           `gorm:"default:null"`
 	Year   *modelYear.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -24,12 +25,17 @@ type StudentEnroll struct {
 	LevelDomainID int64                             `gorm:"default:null"`
 	LevelDomain   *modelLevel.UniversityLevelDomain `gorm:"default:null;foreignKey:LevelID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
+	StudentID int64    `gorm:"default:null"`
+	Student   *Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
 	Email       string `gorm:"default:null"`
 	PhoneNumber uint64 `gorm:"default:null"`
 
-	Message    string `gorm:"default:null"`
-	Origin     string `gorm:"default:null"`
-	IsAccepted bool   `gorm:"default:null"`
+	Origin         string `gorm:"default:null"`
+	Status         string `gorm:"default:null"`
+	StatusFeedback string `gorm:"default:null"`
+
+	Message string `gorm:"default:null"`
 
 	Gender        string     `gorm:"default:null"`
 	FirstName     string     `gorm:"default:null"`
@@ -52,9 +58,11 @@ func (item *StudentEnroll) ToStudentEnrollResponse() *data.StudentEnrollResponse
 	resp.Email = item.Email
 	resp.PhoneNumber = item.PhoneNumber
 
-	resp.Message = item.Message
 	resp.Origin = item.Origin
-	resp.IsAccepted = item.IsAccepted
+	resp.Status = item.Status
+	resp.StatusFeedback = item.StatusFeedback
+
+	resp.Message = item.Message
 
 	resp.Gender = item.Gender
 	resp.FirstName = item.FirstName
@@ -67,10 +75,11 @@ func (item *StudentEnroll) ToStudentEnrollResponse() *data.StudentEnrollResponse
 	resp.Document4 = item.Document4
 	resp.Document5 = item.Document5
 
-	resp.Student = item.Student.ToStudentPublicResponse()
+	resp.School = item.School.ToPublicResponse()
 	resp.Year = item.Year.ToPublicResponse()
 	resp.LevelDomain = item.LevelDomain.ToLevelDomainPublicResponse()
 	resp.Class = item.Class.ToPublicResponse()
+	resp.Student = item.Student.ToStudentPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -86,9 +95,11 @@ func (item *StudentEnroll) ToStudentEnrollPublicResponse() *data.StudentEnrollPu
 	resp.Email = item.Email
 	resp.PhoneNumber = item.PhoneNumber
 
-	resp.Message = item.Message
 	resp.Origin = item.Origin
-	resp.IsAccepted = item.IsAccepted
+	resp.Status = item.Status
+	resp.StatusFeedback = item.StatusFeedback
+
+	resp.Message = item.Message
 
 	resp.Gender = item.Gender
 	resp.FirstName = item.FirstName
@@ -101,10 +112,11 @@ func (item *StudentEnroll) ToStudentEnrollPublicResponse() *data.StudentEnrollPu
 	resp.Document4 = item.Document4
 	resp.Document5 = item.Document5
 
-	resp.Student = item.Student.ToStudentPublicResponse()
+	resp.School = item.School.ToPublicResponse()
 	resp.Year = item.Year.ToPublicResponse()
 	resp.LevelDomain = item.LevelDomain.ToLevelDomainPublicResponse()
 	resp.Class = item.Class.ToPublicResponse()
+	resp.Student = item.Student.ToStudentPublicResponse()
 	return resp
 }
 

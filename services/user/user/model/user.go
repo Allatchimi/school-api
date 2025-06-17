@@ -71,6 +71,8 @@ func (item *User) ToPublicResponse() *data.UserPublicResponse {
 		return nil
 	}
 	resp := &data.UserPublicResponse{}
+	resp.Email = item.Email
+
 	resp.Info = item.Info.ToPublicResponse()
 	return resp
 }

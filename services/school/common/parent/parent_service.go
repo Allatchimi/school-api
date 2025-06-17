@@ -1,32 +1,39 @@
 package parent
 
 import (
-	"fmt"
 	"net/http"
-	"strings"
-	"time"
 
 	"api/common/constants"
 	"api/common/types"
+	"api/common/utils/mail"
+	"api/common/utils/password"
 	"api/config"
 	"api/services/school/common/parent/data"
 	"api/services/school/common/parent/model"
+	"api/services/school/common/school"
 	"api/services/user/role"
 	"api/services/user/user"
-	userData "api/services/user/user/data"
+	dataUser "api/services/user/user/data"
 )
 
 type Service struct {
-	Repository  *Repository
-	RoleService *role.Service
-	UserService *user.Service
+	Repository    *Repository
+	RoleService   *role.Service
+	UserService   *user.Service
+	SchoolService *school.Service
 }
 
-func NewService(repository *Repository, roleService *role.Service, userService *user.Service) *Service {
+func NewService(
+	repository *Repository,
+	roleService *role.Service,
+	userService *user.Service,
+	schoolService *school.Service,
+) *Service {
 	return &Service{
-		Repository:  repository,
-		RoleService: roleService,
-		UserService: userService,
+		Repository:    repository,
+		RoleService:   roleService,
+		UserService:   userService,
+		SchoolService: schoolService,
 	}
 }
 
@@ -37,12 +44,35 @@ func (service *Service) Create(
 	inputJwtToken *types.JwtToken,
 	request *data.ParentRequest,
 ) (result *model.Parent, errCode int, err error) {
-	// Get parent role
-	parentRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleParent)
-	if errRole != nil || parentRole == nil || parentRole.ID < 1 {
+	// Get role
+	userRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleStudent)
+	if errRole != nil || userRole == nil || userRole.ID < 1 {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get parent role")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
+	}
+
+	// Get the school
+	foundSchool, errSchool := service.SchoolService.Repository.GetByID(request.SchoolID)
+	if errSchool != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundSchool == nil || foundSchool.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage("school")
+		return
+	}
+
+	// Generate the email
+	newEmail := request.Email
+	if request.AutoGenerateEmail {
+		newEmail = mail.GenerateEmailFromFullName(
+			request.Info.FirstName,
+			request.Info.LastName,
+			foundSchool.Config.UserEmailDomain,
+		)
 	}
 
 	// Format request
@@ -51,12 +81,12 @@ func (service *Service) Create(
 		err = constants.Http400BadRequestErrorMessage()
 		return
 	}
-	var item = &userData.UserRequest{
-		RoleID:      parentRole.ID,
-		Email:       request.Email,
+	var item = &dataUser.UserRequest{
+		RoleID:      userRole.ID,
+		Email:       newEmail,
 		PhoneNumber: request.PhoneNumber,
 		IsActivated: true,
-		Info: &userData.UserInfoRequest{
+		Info: &dataUser.UserInfoRequest{
 			Gender:        request.Info.Gender,
 			Username:      request.Info.Username,
 			FirstName:     request.Info.FirstName,
@@ -70,23 +100,11 @@ func (service *Service) Create(
 	}
 
 	// Generate password
-	var firstName, lastName string
-	var birthYear = time.Now().Year()
-	firstNameParts := strings.Split(request.Info.FirstName, " ")
-	if len(firstNameParts) > 0 {
-		firstName = firstNameParts[0]
-	}
-	lastNameParts := strings.Split(request.Info.LastName, " ")
-	if len(lastNameParts) > 0 {
-		lastName = lastNameParts[0]
-	}
-	if request.Info.Birthday != nil {
-		birthYear = request.Info.Birthday.Year()
-	}
-	var password string = ""
-	if len(firstName) > 0 && len(lastName) > 0 && birthYear > 0 {
-		password = fmt.Sprintf("%s%s%d", firstName, lastName, birthYear)
-	}
+	password := password.GeneratePasswordFromUserInfo(
+		item.Info.FirstName,
+		item.Info.LastName,
+		item.Info.Birthday,
+	)
 
 	// Create user
 	createdUser, errCodeCreate, errCreate := service.UserService.Create(nil, item, &password)
@@ -101,7 +119,7 @@ func (service *Service) Create(
 		return
 	}
 
-	// Insert parent
+	// Create
 	result, err = service.Repository.Create(&model.Parent{
 		SchoolID: request.SchoolID,
 		UserID:   createdUser.ID,
@@ -124,7 +142,7 @@ func (service *Service) CreateParentStudent(
 		StudentID: request.StudentID,
 	}
 
-	// Check if parent level/class already exists
+	// Check if exists
 	foundItem, err := service.Repository.GetParentStudentByObject(&model.ParentStudent{
 		ParentID:  item.ParentID,
 		StudentID: item.StudentID,
@@ -140,7 +158,7 @@ func (service *Service) CreateParentStudent(
 		return
 	}
 
-	// Create parent level/class
+	// Create
 	result, err = service.Repository.CreateParentStudent(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -155,7 +173,7 @@ func (service *Service) Update(
 	id int64,
 	request *data.ParentRequest,
 ) (result *model.Parent, errCode int, err error) {
-	// Check if parent exists
+	// Check if exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -168,21 +186,34 @@ func (service *Service) Update(
 		return
 	}
 
-	// Get parent role
-	parentRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleParent)
-	if errRole != nil || parentRole == nil || parentRole.ID < 1 {
+	// Get the role
+	userRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleStudent)
+	if errRole != nil || userRole == nil || userRole.ID < 1 {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage("get parent role")
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
-	// Update user
-	userRequest := userData.UserRequest{
-		RoleID:      parentRole.ID,
+	// Get the school
+	foundSchool, errSchool := service.SchoolService.Repository.GetByID(request.SchoolID)
+	if errSchool != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundSchool == nil || foundSchool.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage("school")
+		return
+	}
+
+	// Update
+	userRequest := dataUser.UserRequest{
+		RoleID:      userRole.ID,
 		Email:       request.Email,
 		PhoneNumber: request.PhoneNumber,
 		IsActivated: true,
-		Info: &userData.UserInfoRequest{
+		Info: &dataUser.UserInfoRequest{
 			Gender:        request.Info.Gender,
 			Username:      request.Info.Username,
 			FirstName:     request.Info.FirstName,
@@ -201,7 +232,7 @@ func (service *Service) Update(
 		return
 	}
 
-	// Update parent
+	// Update
 	result, err = service.Repository.UpdateByID(id, &model.Parent{
 		SchoolID: foundItem.SchoolID,
 		UserID:   foundItem.UserID,
@@ -252,7 +283,7 @@ func (service *Service) UpdateParentStudent(
 		return
 	}
 
-	// Update parent
+	// Update
 	result, err = service.Repository.UpdateParentStudent(parentParentStudentID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError

@@ -43,6 +43,19 @@ func (controller *Controller) CreateStudentEnroll(
 	return
 }
 
+func (controller *Controller) CreateStudentEnrollAnonym(
+	ctx *context.Context,
+	input *struct {
+		Body data.StudentEnrollAnonymRequest
+	},
+) (result *model.StudentEnroll, errCode int, err error) {
+	result, errCode, err = controller.Service.CreateStudentEnrollAnonym(
+		helpers.GetJwtContext(ctx),
+		&input.Body,
+	)
+	return
+}
+
 func (controller *Controller) Update(
 	ctx *context.Context,
 	input *struct {

@@ -28,7 +28,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-exam-type",
 			Summary:     "Create exam type",
-			Description: "Create new exam type by providing name and description and return created object.",
+			Description: "Create new exam type and return created object.",
 			Method:      http.MethodPost,
 			Path:        fmt.Sprintf("%s/type", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -68,7 +68,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-exam",
 			Summary:     "Create exam",
-			Description: "Create new exam by providing name and description and return created object. The name exam should be unique.",
+			Description: "Create new exam and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,

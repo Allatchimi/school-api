@@ -28,7 +28,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-year",
 			Summary:     "Create year",
-			Description: "Create new year by providing name and description and return created object. The name year should be unique.",
+			Description: "Create new year and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,

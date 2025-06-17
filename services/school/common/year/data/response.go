@@ -12,10 +12,10 @@ type YearResponse struct {
 }
 
 type YearPublicResponse struct {
-	Name      string                           `json:"name" doc:"Name"`
-	StartDate *time.Time                       `json:"startDate" doc:"Academic year start date"`
-	EndDate   *time.Time                       `json:"endDate" doc:"Academic year end date"`
-	School    *dataSchool.SchoolPublicResponse `json:"school" doc:"School"`
+	Name      string                           `json:"name" required:"false" doc:"Name"`
+	StartDate *time.Time                       `json:"startDate" required:"false" doc:"Academic year start date"`
+	EndDate   *time.Time                       `json:"endDate" required:"false" doc:"Academic year end date"`
+	School    *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
 }
 
 type YearResponseList struct {

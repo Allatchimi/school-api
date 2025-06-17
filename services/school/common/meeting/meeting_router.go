@@ -31,7 +31,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-meeting-room",
 			Summary:     "Create a room",
-			Description: "Create new room.",
+			Description: "Create new room and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,

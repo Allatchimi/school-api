@@ -28,7 +28,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-teacher",
 			Summary:     "Create teacher",
-			Description: "Create new teacher by providing name and description and return created object. The name teacher should be unique.",
+			Description: "Create new teacher and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -62,15 +62,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Create teacher unit/subject
+	// Create teacher class subject unit
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-teacher-unit/subject",
-			Summary:     "Create teacher unit/subject",
-			Description: "Create new teacher unit/subject and return created object.",
+			OperationID: "post-teacher-class subject unit",
+			Summary:     "Create teacher class subject unit",
+			Description: "Create new teacher class subject unit and return created object.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/unitsubjects", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/classsubjectunits", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -147,15 +147,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Update teacher unit/subject with id
+	// Update teacher class subject unit with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "update-teacher-unit/subject",
-			Summary:     "Update teacher unit/subject",
-			Description: "Update existing teacher unit/subject with matching id and return the new object.",
+			OperationID: "update-teacher-class subject unit",
+			Summary:     "Update teacher class subject unit",
+			Description: "Update existing teacher class subject unit with matching id and return the new object.",
 			Method:      http.MethodPut,
-			Path:        fmt.Sprintf("%s/unitsubjects/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/classsubjectunits/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -232,15 +232,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete teacher unit/subject with id
+	// Delete teacher class subject unit with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-teacher-unit/subject",
-			Summary:     "Delete teacher unit/subject",
-			Description: "Delete existing teacher unit/subject with matching id and return affected rows in database.",
+			OperationID: "delete-teacher-class subject unit",
+			Summary:     "Delete teacher class subject unit",
+			Description: "Delete existing teacher class subject unit with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/unitsubjects/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/classsubjectunits/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -315,15 +315,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get teacher unit/subject by id
+	// Get teacher class subject unit by id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-teacher-unit/subject-id",
-			Summary:     "Get teacher unit/subject by id",
-			Description: "Return one teacher unit/subject with matching id",
+			OperationID: "get-teacher-class subject unit-id",
+			Summary:     "Get teacher class subject unit by id",
+			Description: "Return one teacher class subject unit with matching id",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/unitsubjects/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/classsubjectunits/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -362,13 +362,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all teachers
+	// Get all teacher
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-teacher-list",
-			Summary:     "Get all teachers",
-			Description: "Get all teachers with support for search, filter and pagination",
+			Summary:     "Get all teacher",
+			Description: "Get all teacher with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -411,15 +411,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all teachers unit/subject
+	// Get all teacher class subject unit
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-teacher-unit/subject-list",
-			Summary:     "Get all teachers unit/subject",
-			Description: "Get all unit/subject for specified teacher with support for search, filter and pagination",
+			OperationID: "get-teacher-class subject unit-list",
+			Summary:     "Get all teacher class subject unit",
+			Description: "Get all class subject unit for specified teacher with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/unitsubjects", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/classsubjectunits", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
