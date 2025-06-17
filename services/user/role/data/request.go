@@ -11,4 +11,5 @@ type RoleRequest struct {
 }
 
 type GetAllRequest struct {
+	Feature string `json:"feature" query:"feature" required:"false" doc:"Feature name" example:"feature-admin"`
 }

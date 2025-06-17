@@ -28,7 +28,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-schedule",
 			Summary:     "Create schedule",
-			Description: "Create new schedule by providing name and description and return created object. The name schedule should be unique.",
+			Description: "Create new schedule and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -54,11 +54,11 @@ func RegisterEndpoints(
 				Body data.ScheduleRequest
 			},
 		) (*struct{ Body data.ScheduleResponse }, error) {
-			schedule, errCode, err := controller.Create(&ctx, input)
+			result, errCode, err := controller.Create(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ScheduleResponse }{Body: *schedule.ToResponse()}, nil
+			return &struct{ Body data.ScheduleResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -95,11 +95,11 @@ func RegisterEndpoints(
 				Body data.ScheduleRequest
 			},
 		) (*struct{ Body data.ScheduleResponse }, error) {
-			schedule, errCode, err := controller.Update(&ctx, input)
+			result, errCode, err := controller.Update(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ScheduleResponse }{Body: *schedule.ToResponse()}, nil
+			return &struct{ Body data.ScheduleResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -135,11 +135,94 @@ func RegisterEndpoints(
 				data.ScheduleID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
-			schedule, errCode, err := controller.Delete(&ctx, input)
+			result, errCode, err := controller.Delete(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: schedule}}, nil
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
+	// Delete schedule generic with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "delete-schedule-generic",
+			Summary:     "Delete schedule generic",
+			Description: "Delete existing schedule generic with matching id and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/generic/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.ScheduleID
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteGeneric(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
+	// Get schedule generic by id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-schedule-generic-id",
+			Summary:     "Get schedule generic by id",
+			Description: "Return one schedule generic with matching id",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/generic/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Features scope
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.ScheduleID
+			},
+		) (*struct{ Body data.ScheduleResponse }, error) {
+			result, errCode, err := controller.GetGeneric(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.ScheduleResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -178,11 +261,11 @@ func RegisterEndpoints(
 				data.ScheduleID
 			},
 		) (*struct{ Body data.ScheduleResponse }, error) {
-			schedule, errCode, err := controller.Get(&ctx, input)
+			result, errCode, err := controller.Get(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ScheduleResponse }{Body: *schedule.ToResponse()}, nil
+			return &struct{ Body data.ScheduleResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -225,13 +308,80 @@ func RegisterEndpoints(
 		) (*struct {
 			Body data.ScheduleResponseList
 		}, error) {
-			schedule, errCode, err := controller.GetAll(&ctx, input)
+			result, errCode, err := controller.GetAll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct {
 				Body data.ScheduleResponseList
-			}{Body: *schedule}, nil
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get all schedules weekly view
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-schedule-list-weekly-view",
+			Summary:     "Get all schedules weekly view",
+			Description: "Get all schedules with weekly view support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/weekly-view", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Features scope
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllRequest
+			},
+		) (*struct {
+			Body data.ScheduleWeeklyViewResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllWeeklyView(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+
+			tempResults := make([]data.ScheduleWeeklyViewResponse, 40)
+			for i := range tempResults {
+				tmpModel := data.ScheduleWeeklyViewResponse{
+					StartTime: fmt.Sprintf("%02d:00", i),
+					EndTime:   fmt.Sprintf("%02d:00", i+1),
+				}
+				tmpModel.Monday = make([]data.ScheduleResponse, 1)
+				tmpModel.Tuesday = make([]data.ScheduleResponse, 1)
+				tmpModel.Wednesday = make([]data.ScheduleResponse, 1)
+				tmpModel.Thursday = make([]data.ScheduleResponse, 1)
+				tmpModel.Friday = make([]data.ScheduleResponse, 1)
+				tmpModel.Saturday = make([]data.ScheduleResponse, 1)
+				tmpModel.Sunday = make([]data.ScheduleResponse, 1)
+				tempResults[i] = tmpModel
+			}
+			result.Data = tempResults
+
+			return &struct {
+				Body data.ScheduleWeeklyViewResponseList
+			}{Body: *result}, nil
 		},
 	)
 }

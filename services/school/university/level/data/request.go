@@ -31,4 +31,5 @@ type GetAllRequest struct {
 type GetAllLevelDomainRequest struct {
 	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
 	LevelID  int64 `json:"levelID" query:"levelID" required:"false" doc:"Level id" example:"1"`
+	DomainID int64 `json:"domainID" query:"domainID" required:"false" doc:"Domain id" example:"1"`
 }

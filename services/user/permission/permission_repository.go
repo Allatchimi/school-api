@@ -34,6 +34,8 @@ func (repository *Repository) UpdateByID(
 	result = &model.Permission{}
 	tmpErr := repository.Db.Preload(clause.Associations).Model(result).Where("role_id = ?", roleID).Where("table_name = ?", tableName).Updates(
 		map[string]any{
+			"role_id": data.RoleID,
+
 			"table_name": data.TableName,
 			"create":     data.Create,
 			"read":       data.Read,
@@ -90,6 +92,9 @@ func (repository *Repository) GetAll(
 	if request != nil {
 		if request.RoleID > 0 {
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("permissions.role_id = %d", request.RoleID))
+		}
+		if len(request.TableName) > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("permissions.table_name = %s", request.TableName))
 		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {

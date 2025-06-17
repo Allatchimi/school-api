@@ -364,15 +364,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all parents level/class
+	// Get all parents students
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-parent-level/class-list",
-			Summary:     "Get all parents level/class",
-			Description: "Get all parents level/class with support for search, filter and pagination",
+			OperationID: "get-parent-student-list",
+			Summary:     "Get all parents students",
+			Description: "Get all parents students with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/levelclass", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/students", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -398,7 +398,7 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
-				data.GetAllRequest
+				data.GetAllParentStudentRequest
 			},
 		) (*struct {
 			Body data.ParentStudentResponseList

@@ -13,6 +13,15 @@ import (
 
 type User struct {
 	types.BaseGormModel
+	RoleID int64       `gorm:"default:null"`
+	Role   *model.Role `gorm:"default:null;foreignKey:RoleID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	UserInfoID int64     `gorm:"default:null"`
+	Info       *UserInfo `gorm:"default:null;foreignKey:UserInfoID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	UserMfaID int64    `gorm:"default:null"`
+	Mfa       *UserMfa `gorm:"default:null;foreignKey:UserMfaID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
 	Email       string `gorm:"default:null"`
 	PhoneNumber uint64 `gorm:"default:null"`
 	Password    string `gorm:"default:null"`
@@ -22,15 +31,6 @@ type User struct {
 	ProviderUserID string     `gorm:"default:null"`
 	IsActivated    bool       `gorm:"default:false"`
 	ActivatedAt    *time.Time `gorm:"default:null"`
-
-	RoleID int64       `gorm:"default:null"`
-	Role   *model.Role `gorm:"default:null;foreignKey:RoleID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-
-	UserInfoID int64     `gorm:"default:null"`
-	Info       *UserInfo `gorm:"default:null;foreignKey:UserInfoID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-
-	UserMfaID int64    `gorm:"default:null"`
-	Mfa       *UserMfa `gorm:"default:null;foreignKey:UserMfaID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *User) BeforeCreate(db *gorm.DB) (err error) {

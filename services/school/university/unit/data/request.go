@@ -19,5 +19,7 @@ type UnitRequest struct {
 }
 
 type GetAllRequest struct {
-	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
+	SchoolID      int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
+	LevelDomainID int64 `json:"levelDomainID" query:"levelDomainID" required:"false" doc:"Level domain id" example:"1"`
+	SemesterID    int64 `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id" example:"1"`
 }

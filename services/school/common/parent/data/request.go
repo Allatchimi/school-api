@@ -1,6 +1,9 @@
 package data
 
-import dataUser "api/services/user/user/data"
+import (
+	"api/common/types"
+	dataUser "api/services/user/user/data"
+)
 
 type ParentID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Parent id" example:"1"`
@@ -39,4 +42,10 @@ type ParentAssignStatusRequest struct {
 
 type GetAllRequest struct {
 	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
+}
+
+type GetAllParentStudentRequest struct {
+	types.FilterSchoolYearClassSubjectUnitRequest
+	ParentID  int64 `json:"parentID" query:"parentID" required:"false" doc:"Parent id" example:"1"`
+	StudentID int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id" example:"1"`
 }

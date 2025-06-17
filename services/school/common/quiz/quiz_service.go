@@ -324,14 +324,7 @@ func (service *Service) GetAll(
 	pagination *types.Pagination,
 	request *data.GetAllRequest,
 ) (result []model.Quiz, errCode int, err error) {
-	var schoolID, yearID, classSubjectID, unitID int64
-	if request != nil {
-		schoolID = request.SchoolID
-		yearID = request.YearID
-		classSubjectID = request.ClassSubjectID
-		unitID = request.UnitID
-	}
-	result, err = service.Repository.GetAll(filter, pagination, schoolID, yearID, classSubjectID, unitID)
+	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -343,15 +336,9 @@ func (service *Service) GetAllQuizAnswer(
 	inputJwtToken *types.JwtToken,
 	filter *types.Filter,
 	pagination *types.Pagination,
-	quizID int64,
 	request *data.GetAllQuizAnswerRequest,
 ) (result []model.QuizAnswer, errCode int, err error) {
-	var quizQuestionID, studentID int64
-	if request != nil {
-		quizQuestionID = request.QuizQuestionID
-		studentID = request.StudentID
-	}
-	result, err = service.Repository.GetAllQuizAnswer(filter, pagination, quizID, quizQuestionID, studentID)
+	result, err = service.Repository.GetAllQuizAnswer(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

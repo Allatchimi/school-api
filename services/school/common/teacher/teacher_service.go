@@ -35,7 +35,10 @@ const MODEL_NAME = "teacher"
 const DEFAULT_ERROR_MESSAGE = "interact with teacher model"
 const teacherUIDSeparator = "T"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.TeacherRequest) (result *model.Teacher, errCode int, err error) {
+func (service *Service) Create(
+	inputJwtToken *types.JwtToken,
+	request *data.TeacherRequest,
+) (result *model.Teacher, errCode int, err error) {
 	// Get teacher role
 	teacherRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleTeacher)
 	if errRole != nil || teacherRole == nil || teacherRole.ID < 1 {
@@ -120,7 +123,10 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Teac
 	return
 }
 
-func (service *Service) CreateTeacherClassSubjectUnit(inputJwtToken *types.JwtToken, request *data.TeacherClassSubjectUnitRequest) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
+func (service *Service) CreateTeacherClassSubjectUnit(
+	inputJwtToken *types.JwtToken,
+	request *data.TeacherClassSubjectUnitRequest,
+) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
 	// Retrieve item
 	item := &model.TeacherClassSubjectUnit{
 		TeacherID:      request.TeacherID,
@@ -152,7 +158,11 @@ func (service *Service) CreateTeacherClassSubjectUnit(inputJwtToken *types.JwtTo
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.TeacherRequest) (result *model.Teacher, errCode int, err error) {
+func (service *Service) Update(
+	inputJwtToken *types.JwtToken,
+	id int64,
+	request *data.TeacherRequest,
+) (result *model.Teacher, errCode int, err error) {
 	// Check if teacher exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -244,7 +254,11 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	return
 }
 
-func (service *Service) UpdateTeacherClassSubjectUnit(inputJwtToken *types.JwtToken, id int64, request *data.TeacherClassSubjectUnitRequest) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
+func (service *Service) UpdateTeacherClassSubjectUnit(
+	inputJwtToken *types.JwtToken,
+	id int64,
+	request *data.TeacherClassSubjectUnitRequest,
+) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
 	// Check if teacher unit/subject exists
 	foundItem, err := service.Repository.GetTeacherClassSubjectUnitByID(id)
 	if err != nil {
@@ -289,7 +303,10 @@ func (service *Service) UpdateTeacherClassSubjectUnit(inputJwtToken *types.JwtTo
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) Delete(
+	inputJwtToken *types.JwtToken,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -304,7 +321,10 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteTeacherClassSubjectUnit(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteTeacherClassSubjectUnit(
+	inputJwtToken *types.JwtToken,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteTeacherClassSubjectUnitByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -334,7 +354,10 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetTeacherClassSubjectUnit(inputJwtToken *types.JwtToken, id int64) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
+func (service *Service) GetTeacherClassSubjectUnit(
+	inputJwtToken *types.JwtToken,
+	id int64,
+) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
 	result, err = service.Repository.GetTeacherClassSubjectUnitByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -349,8 +372,13 @@ func (service *Service) GetTeacherClassSubjectUnit(inputJwtToken *types.JwtToken
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.Teacher, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, schoolID)
+func (service *Service) GetAll(
+	inputJwtToken *types.JwtToken,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	schoolID int64,
+) (result []model.Teacher, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination, &data.GetAllRequest{SchoolID: schoolID})
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -358,8 +386,13 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 	return
 }
 
-func (service *Service) GetAllTeacherClassSubjectUnit(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64, teacherID int64) (result []model.TeacherClassSubjectUnit, errCode int, err error) {
-	result, err = service.Repository.GetAllTeacherClassSubjectUnit(filter, pagination, schoolID, teacherID)
+func (service *Service) GetAllTeacherClassSubjectUnit(
+	inputJwtToken *types.JwtToken,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllTeacherClassSubjectUnitRequest,
+) (result []model.TeacherClassSubjectUnit, errCode int, err error) {
+	result, err = service.Repository.GetAllTeacherClassSubjectUnit(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

@@ -8,14 +8,14 @@ import (
 
 type Permission struct {
 	types.BaseGormModel
+	RoleID int64       `gorm:"default:null"`
+	Role   *model.Role `gorm:"default:null;foreignKey:RoleID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
 	TableName string `gorm:"default:null"`
 	Create    bool   `gorm:"default:null"`
 	Read      bool   `gorm:"default:null"`
 	Update    bool   `gorm:"default:null"`
 	Delete    bool   `gorm:"default:null"`
-
-	RoleID int64       `gorm:"default:null"`
-	Role   *model.Role `gorm:"default:null;foreignKey:RoleID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *Permission) ToResponse() *data.PermissionResponse {

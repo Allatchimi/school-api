@@ -8,6 +8,7 @@ import (
 
 	"api/common/helpers"
 	"api/common/types"
+	"api/services/school/common/parent/data"
 	"api/services/school/common/parent/model"
 )
 
@@ -122,11 +123,17 @@ func (repository *Repository) GetParentStudentByUserIDSchoolID(userID int64, sch
 	return result, err
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.Parent, err error) {
+func (repository *Repository) GetAll(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.Parent, err error) {
 	result = make([]model.Parent, 0)
 	var where string = ""
-	if schoolID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("parents.school_id = %d", schoolID))
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("parents.school_id = %d", request.SchoolID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
@@ -159,11 +166,32 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	return
 }
 
-func (repository *Repository) GetAllParentStudent(filter *types.Filter, pagination *types.Pagination, parentID int64) (result []model.ParentStudent, err error) {
+func (repository *Repository) GetAllParentStudent(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllParentStudentRequest,
+) (result []model.ParentStudent, err error) {
 	result = make([]model.ParentStudent, 0)
 	var where string = ""
-	if parentID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("parent_students.parent_id = %d", parentID))
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("students.school_id = %d", request.SchoolID))
+		}
+		if request.YearID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.year_id = %d", request.YearID))
+		}
+		if request.ClassSubjectID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.class_subject_id = %d", request.ClassSubjectID))
+		}
+		if request.UnitID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.unit_id = %d", request.UnitID))
+		}
+		if request.ParentID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("parent_students.parent_id = %d", request.ParentID))
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("parent_students.student_id = %d", request.StudentID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
@@ -185,7 +213,12 @@ func (repository *Repository) GetAllParentStudent(filter *types.Filter, paginati
 				"SELECT parent_students.* "+
 					"FROM parent_students "+
 					"LEFT JOIN parents ON parent_students.parent_id = parents.id "+
-					"LEFT JOIN students ON parent_students.student_id = students.id ",
+					"LEFT JOIN students ON parent_students.student_id = students.id "+
+					"LEFT JOIN schools ON students.school_id = schools.id "+
+					"LEFT JOIN student_enrolls ON students.id = student_enrolls.student_id "+
+					"LEFT JOIN years ON student_enrolls.year_id = years.id "+
+					"LEFT JOIN highschool_class_subjects ON student_enrolls.class_subject_id = highschool_class_subjects.id "+
+					"LEFT JOIN university_units ON student_enrolls.unit_id = university_units.id ",
 				where,
 				pagination,
 				filter,

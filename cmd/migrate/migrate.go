@@ -110,6 +110,7 @@ func Apply() error {
 		&requestModel.Request{},
 		// Schedule
 		&scheduleModel.Schedule{},
+		&scheduleModel.ScheduleGeneric{},
 		// Result
 		&resultModel.Result{},
 

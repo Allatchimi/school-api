@@ -79,7 +79,11 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.Director, item2 
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Director, err error) {
+func (repository *Repository) GetAll(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.Director, err error) {
 	result = make([]model.Director, 0)
 	var where string = ""
 	if request != nil {

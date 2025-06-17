@@ -10,6 +10,10 @@ var Http400BadRequestErrorMessage = func() error {
 	return fmt.Errorf("%s", "Bad request! Please enter valid information.")
 }
 
+var Http400BadRequestErrorMessageV2 = func(message string) error {
+	return fmt.Errorf("%s", fmt.Sprintf("Invalid %s! Please enter valid information.", message))
+}
+
 var Http401InvalidTokenErrorMessage = func() error {
 	return fmt.Errorf("%s", "Invalid or expired token! Please enter valid information.")
 }

@@ -86,6 +86,11 @@ func (repository *Repository) GetByName(name string) (result *model.Role, err er
 func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Role, err error) {
 	result = make([]model.Role, 0)
 	var where string = ""
+	if request != nil {
+		if len(request.Feature) > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("roles.feature = %s", request.Feature))
+		}
+	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(roles.id AS TEXT) = '%s' OR roles.name ILIKE '%s' OR roles.feature ILIKE '%s' OR roles.description ILIKE '%s')",

@@ -4,7 +4,7 @@ type PermissionID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Permission id" example:"1"`
 }
 
-type PermissionPathRequest struct {
+type PermissionRoleID struct {
 	RoleID int64 `json:"roleID" path:"roleID" required:"true" doc:"Role id" example:"1"`
 }
 
@@ -17,5 +17,6 @@ type UpdatePermissionRequest struct {
 }
 
 type GetAllRequest struct {
-	RoleID int64 `json:"roleID" path:"roleID" required:"true" doc:"Role id" example:"1"`
+	RoleID    int64  `json:"roleID" query:"roleID" required:"false" doc:"Role id" example:"1"`
+	TableName string `json:"tableName" query:"tableName" required:"false" minLength:"2" doc:"Table name" example:"users"`
 }

@@ -20,13 +20,13 @@ func NewController(service *Service) *Controller {
 func (controller *Controller) Update(
 	ctx *context.Context,
 	input *struct {
-		data.PermissionPathRequest
+		data.PermissionRoleID
 		Body data.UpdatePermissionRequest
 	},
 ) (result *data.PermissionResponse, errCode int, err error) {
 	tmpResult, errCode, err := controller.Service.Update(
 		helpers.GetJwtContext(ctx),
-		input.PermissionPathRequest.RoleID,
+		input.PermissionRoleID.RoleID,
 		&input.Body,
 	)
 	result = tmpResult.ToResponse()

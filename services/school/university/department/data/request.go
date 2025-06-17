@@ -12,5 +12,6 @@ type DepartmentRequest struct {
 }
 
 type GetAllRequest struct {
-	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
+	SchoolID  int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
+	FacultyID int64 `json:"facultyID" query:"facultyID" required:"false" doc:"Faculty id" example:"1"`
 }

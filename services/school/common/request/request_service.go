@@ -168,8 +168,8 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, requestID int64) (result *model.Request, errCode int, err error) {
-	result, err = service.Repository.GetByID(requestID)
+func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Request, errCode int, err error) {
+	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

@@ -9,6 +9,7 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
+	"api/services/school/common/year/data"
 	"api/services/school/common/year/model"
 )
 
@@ -73,11 +74,13 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.Year, item2 *mod
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.Year, err error) {
+func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Year, err error) {
 	result = make([]model.Year, 0)
 	var where string = ""
-	if schoolID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("years.school_id = %d", schoolID))
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("years.school_id = %d", request.SchoolID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(

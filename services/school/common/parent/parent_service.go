@@ -33,7 +33,10 @@ func NewService(repository *Repository, roleService *role.Service, userService *
 const MODEL_NAME = "parent"
 const DEFAULT_ERROR_MESSAGE = "interact with parent model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.ParentRequest) (result *model.Parent, errCode int, err error) {
+func (service *Service) Create(
+	inputJwtToken *types.JwtToken,
+	request *data.ParentRequest,
+) (result *model.Parent, errCode int, err error) {
 	// Get parent role
 	parentRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleParent)
 	if errRole != nil || parentRole == nil || parentRole.ID < 1 {
@@ -111,7 +114,10 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Pare
 	return
 }
 
-func (service *Service) CreateParentStudent(inputJwtToken *types.JwtToken, request *data.ParentStudentRequest) (result *model.ParentStudent, errCode int, err error) {
+func (service *Service) CreateParentStudent(
+	inputJwtToken *types.JwtToken,
+	request *data.ParentStudentRequest,
+) (result *model.ParentStudent, errCode int, err error) {
 	// Format request
 	item := &model.ParentStudent{
 		ParentID:  request.ParentID,
@@ -144,7 +150,11 @@ func (service *Service) CreateParentStudent(inputJwtToken *types.JwtToken, reque
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.ParentRequest) (result *model.Parent, errCode int, err error) {
+func (service *Service) Update(
+	inputJwtToken *types.JwtToken,
+	id int64,
+	request *data.ParentRequest,
+) (result *model.Parent, errCode int, err error) {
 	// Check if parent exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -204,7 +214,11 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	return
 }
 
-func (service *Service) UpdateParentStudent(inputJwtToken *types.JwtToken, parentParentStudentID int64, request *data.ParentStudentRequest) (result *model.ParentStudent, errCode int, err error) {
+func (service *Service) UpdateParentStudent(
+	inputJwtToken *types.JwtToken,
+	parentParentStudentID int64,
+	request *data.ParentStudentRequest,
+) (result *model.ParentStudent, errCode int, err error) {
 	// Format request
 	item := &model.ParentStudent{
 		ParentID:  request.ParentID,
@@ -248,7 +262,10 @@ func (service *Service) UpdateParentStudent(inputJwtToken *types.JwtToken, paren
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) Delete(
+	inputJwtToken *types.JwtToken,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.Delete(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -263,7 +280,10 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteParentStudent(inputJwtToken *types.JwtToken, parentParentStudentID int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteParentStudent(
+	inputJwtToken *types.JwtToken,
+	parentParentStudentID int64,
+) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteParentStudent(parentParentStudentID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -278,7 +298,10 @@ func (service *Service) DeleteParentStudent(inputJwtToken *types.JwtToken, paren
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Parent, errCode int, err error) {
+func (service *Service) Get(
+	inputJwtToken *types.JwtToken,
+	id int64,
+) (result *model.Parent, errCode int, err error) {
 	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -293,7 +316,10 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetParentStudent(inputJwtToken *types.JwtToken, parentParentStudentID int64) (result *model.ParentStudent, errCode int, err error) {
+func (service *Service) GetParentStudent(
+	inputJwtToken *types.JwtToken,
+	parentParentStudentID int64,
+) (result *model.ParentStudent, errCode int, err error) {
 	result, err = service.Repository.GetParentStudentByID(parentParentStudentID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -308,8 +334,13 @@ func (service *Service) GetParentStudent(inputJwtToken *types.JwtToken, parentPa
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.Parent, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, schoolID)
+func (service *Service) GetAll(
+	inputJwtToken *types.JwtToken,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.Parent, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -317,8 +348,13 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 	return
 }
 
-func (service *Service) GetAllParentStudent(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.ParentStudent, errCode int, err error) {
-	result, err = service.Repository.GetAllParentStudent(filter, pagination, schoolID)
+func (service *Service) GetAllParentStudent(
+	inputJwtToken *types.JwtToken,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllParentStudentRequest,
+) (result []model.ParentStudent, errCode int, err error) {
+	result, err = service.Repository.GetAllParentStudent(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

@@ -151,6 +151,8 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 		invalidDate := new(time.Time)
 		*invalidDate = time.Now()
 		item.InvalidDate = invalidDate
+	} else if item.IsValid && !foundItem.IsValid {
+		item.InvalidDate = nil
 	}
 
 	// Update unit

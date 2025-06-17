@@ -9,6 +9,7 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
+	"api/services/school/common/quiz/data"
 	"api/services/school/common/quiz/model"
 )
 
@@ -124,24 +125,23 @@ func (repository *Repository) GetAllQuizAnswerByStudentIDQuizQuestionIDs(student
 func (repository *Repository) GetAll(
 	filter *types.Filter,
 	pagination *types.Pagination,
-	schoolID int64,
-	yearID int64,
-	classSubjectID int64,
-	unitID int64,
+	request *data.GetAllRequest,
 ) (result []model.Quiz, err error) {
 	result = make([]model.Quiz, 0)
 	var where string = ""
-	if schoolID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("quizzes.school_id = %d", schoolID))
-	}
-	if yearID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("quizzes.year_id = %d", yearID))
-	}
-	if classSubjectID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("quizzes.class_subject_id = %d", classSubjectID))
-	}
-	if unitID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("quizzes.unit_id = %d", unitID))
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("quizzes.school_id = %d", request.SchoolID))
+		}
+		if request.YearID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("quizzes.year_id = %d", request.YearID))
+		}
+		if request.ClassSubjectID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("quizzes.class_subject_id = %d", request.ClassSubjectID))
+		}
+		if request.UnitID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("quizzes.unit_id = %d", request.UnitID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
@@ -185,20 +185,20 @@ func (repository *Repository) GetAll(
 func (repository *Repository) GetAllQuizAnswer(
 	filter *types.Filter,
 	pagination *types.Pagination,
-	quizID int64,
-	quizQuestionID int64,
-	studentID int64,
+	request *data.GetAllQuizAnswerRequest,
 ) (result []model.QuizAnswer, err error) {
 	result = make([]model.QuizAnswer, 0)
 	var where string = ""
-	if quizID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("quiz_questions.quiz_id = %d", quizID))
-	}
-	if quizQuestionID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("quiz_answers.quiz_question_id = %d", quizQuestionID))
-	}
-	if studentID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("quiz_answers.student_id = %d", studentID))
+	if request != nil {
+		if request.QuizID.ID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("quiz_questions.quiz_id = %d", request.QuizID.ID))
+		}
+		if request.QuizQuestionID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("quiz_answers.quiz_question_id = %d", request.QuizQuestionID))
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("quiz_answers.student_id = %d", request.StudentID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(

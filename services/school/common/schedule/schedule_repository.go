@@ -21,8 +21,13 @@ func NewRepository(db *gorm.DB) *Repository {
 }
 
 func (repository *Repository) Create(data *model.Schedule) (*model.Schedule, error) {
-	schedule := *data
-	return &schedule, repository.Db.Create(&schedule).Error
+	result := *data
+	return &result, repository.Db.Create(&result).Error
+}
+
+func (repository *Repository) CreateScheduleGeneric(data *model.ScheduleGeneric) (*model.ScheduleGeneric, error) {
+	result := *data
+	return &result, repository.Db.Create(&result).Error
 }
 
 func (repository *Repository) Update(id int64, data *model.Schedule) (*model.Schedule, error) {
@@ -31,8 +36,8 @@ func (repository *Repository) Update(id int64, data *model.Schedule) (*model.Sch
 		return nil, err
 	}
 
-	schedule := &model.Schedule{}
-	return schedule, repository.Db.Model(schedule).Where("id = ?", id).Updates(
+	result := &model.Schedule{}
+	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
 		map[string]any{
 			"school_id":        data.SchoolID,
 			"year_id":          data.YearID,
@@ -45,6 +50,32 @@ func (repository *Repository) Update(id int64, data *model.Schedule) (*model.Sch
 			"repeat_type":     data.RepeatType,
 			"start_time":      data.StartTime,
 			"end_time":        data.EndTime,
+			"is_valid":        data.IsValid,
+			"invalid_date":    data.InvalidDate,
+		},
+	).Error
+}
+
+func (repository *Repository) UpdateScheduleGeneric(id int64, data *model.ScheduleGeneric) (*model.ScheduleGeneric, error) {
+	tempSchedule, err := repository.GetScheduleGenericByID(id)
+	if err != nil || tempSchedule == nil || tempSchedule.ID != id {
+		return nil, err
+	}
+
+	result := &model.ScheduleGeneric{}
+	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
+		map[string]any{
+			"school_id": data.SchoolID,
+			"year_id":   data.YearID,
+
+			"type":            data.Type,
+			"day_of_the_week": data.DayOfTheWeek,
+			"repeat_count":    data.RepeatCount,
+			"repeat_type":     data.RepeatType,
+			"start_time":      data.StartTime,
+			"end_time":        data.EndTime,
+			"is_valid":        data.IsValid,
+			"invalid_date":    data.InvalidDate,
 		},
 	).Error
 }
@@ -55,23 +86,43 @@ func (repository *Repository) Delete(id int64) (int64, error) {
 		return -1, err
 	}
 
-	schedule := repository.Db.Where("id = ?", id).Delete(&model.Schedule{})
-	return schedule.RowsAffected, schedule.Error
+	result := repository.Db.Where("id = ?", id).Delete(&model.Schedule{})
+	return result.RowsAffected, result.Error
+}
+
+func (repository *Repository) DeleteScheduleGeneric(id int64) (int64, error) {
+	tempSchedule, err := repository.GetScheduleGenericByID(id)
+	if err != nil || tempSchedule == nil || tempSchedule.ID != id {
+		return -1, err
+	}
+
+	result := repository.Db.Where("id = ?", id).Delete(&model.ScheduleGeneric{})
+	return result.RowsAffected, result.Error
 }
 
 func (repository *Repository) GetByID(id int64) (*model.Schedule, error) {
-	schedule := &model.Schedule{}
-	return schedule, repository.Db.Model(&model.Schedule{}).Where("id = ?", id).Limit(1).Find(schedule).Error
+	result := &model.Schedule{}
+	return result, repository.Db.Model(&model.Schedule{}).Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetScheduleGenericByID(id int64) (*model.ScheduleGeneric, error) {
+	result := &model.ScheduleGeneric{}
+	return result, repository.Db.Model(&model.ScheduleGeneric{}).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.Schedule) (*model.Schedule, error) {
-	schedule := &model.Schedule{}
-	return schedule, repository.Db.Preload(clause.Associations).Where(&model.Schedule{
+	result := &model.Schedule{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.Schedule{
 		SchoolID:       item.SchoolID,
 		YearID:         item.YearID,
 		ClassSubjectID: item.ClassSubjectID,
 		UnitID:         item.UnitID,
-	}).Limit(1).Find(schedule).Error
+		DayOfTheWeek:   item.DayOfTheWeek,
+		RepeatCount:    item.RepeatCount,
+		RepeatType:     item.RepeatType,
+		StartTime:      item.StartTime,
+		EndTime:        item.EndTime,
+	}).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) AreSameUniqueObjects(item1 *model.Schedule, item2 *model.Schedule) bool {
@@ -79,7 +130,39 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.Schedule, item2 
 		(item1.SchoolID == item2.SchoolID &&
 			item1.YearID == item2.YearID &&
 			item1.ClassSubjectID == item2.ClassSubjectID &&
-			item1.UnitID == item2.UnitID) {
+			item1.UnitID == item2.UnitID &&
+			item1.DayOfTheWeek == item2.DayOfTheWeek &&
+			item1.RepeatCount == item2.RepeatCount &&
+			item1.RepeatType == item2.RepeatType &&
+			item1.StartTime == item2.StartTime &&
+			item1.EndTime == item2.EndTime) {
+		return true
+	}
+	return false
+}
+
+func (repository *Repository) GetScheduleGenericUniqueObject(item *model.ScheduleGeneric) (*model.ScheduleGeneric, error) {
+	result := &model.ScheduleGeneric{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.ScheduleGeneric{
+		SchoolID:     item.SchoolID,
+		YearID:       item.YearID,
+		DayOfTheWeek: item.DayOfTheWeek,
+		RepeatCount:  item.RepeatCount,
+		RepeatType:   item.RepeatType,
+		StartTime:    item.StartTime,
+		EndTime:      item.EndTime,
+	}).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) AreScheduleGenericSameUniqueObjects(item1 *model.ScheduleGeneric, item2 *model.ScheduleGeneric) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID &&
+			item1.YearID == item2.YearID &&
+			item1.DayOfTheWeek == item2.DayOfTheWeek &&
+			item1.RepeatCount == item2.RepeatCount &&
+			item1.RepeatType == item2.RepeatType &&
+			item1.StartTime == item2.StartTime &&
+			item1.EndTime == item2.EndTime) {
 		return true
 	}
 	return false
@@ -88,8 +171,8 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.Schedule, item2 
 func (repository *Repository) GetAll(
 	filter *types.Filter, pagination *types.Pagination,
 	request *data.GetAllRequest,
-) (schedule []model.Schedule, err error) {
-	schedule = make([]model.Schedule, 0)
+) (result []model.Schedule, err error) {
+	result = make([]model.Schedule, 0)
 	var where string = ""
 	if request != nil {
 		if request.SchoolID > 0 {
@@ -138,8 +221,16 @@ func (repository *Repository) GetAll(
 				pagination,
 				filter,
 			),
-		).Find(&schedule).Error
+		).Find(&result).Error
 
 	err = tmpErr
+	return
+}
+
+func (repository *Repository) GetAllScheduleGeneric(
+	filter *types.Filter, pagination *types.Pagination,
+) (result []model.ScheduleGeneric, err error) {
+	result = make([]model.ScheduleGeneric, 0)
+	err = repository.Db.Preload(clause.Associations).Find(result).Error
 	return
 }

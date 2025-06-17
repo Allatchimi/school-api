@@ -35,7 +35,10 @@ const MODEL_NAME = "student"
 const DEFAULT_ERROR_MESSAGE = "interact with student model"
 const studentUIDSeparator = "S"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.StudentRequest) (result *model.Student, errCode int, err error) {
+func (service *Service) Create(
+	inputJwtToken *types.JwtToken,
+	request *data.StudentRequest,
+) (result *model.Student, errCode int, err error) {
 	// Get student role
 	studentRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleStudent)
 	if errRole != nil || studentRole == nil || studentRole.ID < 1 {
@@ -120,7 +123,10 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Stud
 	return
 }
 
-func (service *Service) CreateStudentEnroll(inputJwtToken *types.JwtToken, request *data.StudentEnrollRequest) (result *model.StudentEnroll, errCode int, err error) {
+func (service *Service) CreateStudentEnroll(
+	inputJwtToken *types.JwtToken,
+	request *data.StudentEnrollRequest,
+) (result *model.StudentEnroll, errCode int, err error) {
 	// Format request
 	item := &model.StudentEnroll{
 		StudentID:     request.StudentID,
@@ -168,7 +174,11 @@ func (service *Service) CreateStudentEnroll(inputJwtToken *types.JwtToken, reque
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.StudentRequest) (result *model.Student, errCode int, err error) {
+func (service *Service) Update(
+	inputJwtToken *types.JwtToken,
+	id int64,
+	request *data.StudentRequest,
+) (result *model.Student, errCode int, err error) {
 	// Check if student exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -260,7 +270,11 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	return
 }
 
-func (service *Service) UpdateStudentEnroll(inputJwtToken *types.JwtToken, id int64, request *data.StudentEnrollRequest) (result *model.StudentEnroll, errCode int, err error) {
+func (service *Service) UpdateStudentEnroll(
+	inputJwtToken *types.JwtToken,
+	id int64,
+	request *data.StudentEnrollRequest,
+) (result *model.StudentEnroll, errCode int, err error) {
 	// Check if student class/level domain exists
 	foundItem, err := service.Repository.GetStudentEnrollByID(id)
 	if err != nil {
@@ -321,7 +335,10 @@ func (service *Service) UpdateStudentEnroll(inputJwtToken *types.JwtToken, id in
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) Delete(
+	inputJwtToken *types.JwtToken,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -336,7 +353,10 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteStudentEnroll(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteStudentEnroll(
+	inputJwtToken *types.JwtToken,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteStudentEnrollByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -351,7 +371,10 @@ func (service *Service) DeleteStudentEnroll(inputJwtToken *types.JwtToken, id in
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Student, errCode int, err error) {
+func (service *Service) Get(
+	inputJwtToken *types.JwtToken,
+	id int64,
+) (result *model.Student, errCode int, err error) {
 	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -366,7 +389,10 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetStudentEnroll(inputJwtToken *types.JwtToken, id int64) (result *model.StudentEnroll, errCode int, err error) {
+func (service *Service) GetStudentEnroll(
+	inputJwtToken *types.JwtToken,
+	id int64,
+) (result *model.StudentEnroll, errCode int, err error) {
 	result, err = service.Repository.GetStudentEnrollByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -381,7 +407,12 @@ func (service *Service) GetStudentEnroll(inputJwtToken *types.JwtToken, id int64
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Student, errCode int, err error) {
+func (service *Service) GetAll(
+	inputJwtToken *types.JwtToken,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.Student, errCode int, err error) {
 	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -390,7 +421,12 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 	return
 }
 
-func (service *Service) GetAllStudentEnroll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllStudentEnrollRequest) (result []model.StudentEnroll, errCode int, err error) {
+func (service *Service) GetAllStudentEnroll(
+	inputJwtToken *types.JwtToken,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllStudentEnrollRequest,
+) (result []model.StudentEnroll, errCode int, err error) {
 	result, err = service.Repository.GetAllStudentEnroll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError

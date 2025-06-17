@@ -94,6 +94,12 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 		if request.SchoolID > 0 {
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("units.school_id = %d", request.SchoolID))
 		}
+		if request.LevelDomainID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("units.level_domain_id = %d", request.LevelDomainID))
+		}
+		if request.SemesterID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("units.semester_id = %d", request.SemesterID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(

@@ -28,7 +28,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-request",
 			Summary:     "Create request",
-			Description: "Create new request by providing name and description and return created object. The name request should be unique.",
+			Description: "Create new request and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -194,7 +194,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "get-request-id",
 			Summary:     "Get request by id",
-			Description: "Return one request with matching id",
+			Description: "Return one result with matching id",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,

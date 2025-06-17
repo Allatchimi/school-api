@@ -7,6 +7,7 @@ import (
 	yearModel "api/services/school/common/year/model"
 	classModel "api/services/school/highschool/class/model"
 	Unitmodel "api/services/school/university/unit/model"
+	"time"
 )
 
 type Schedule struct {
@@ -23,12 +24,15 @@ type Schedule struct {
 	UnitID int64                     `gorm:"default:null"`
 	Unit   *Unitmodel.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Type         string `gorm:"default:null"`
-	DayOfTheWeek string `gorm:"default:null"`
-	RepeatCount  string `gorm:"default:null"`
-	RepeatType   string `gorm:"default:null"`
-	StartTime    string `gorm:"default:null"`
-	EndTime      string `gorm:"default:null"`
+	Type           string     `gorm:"default:null"`
+	DayOfTheWeek   string     `gorm:"default:null"`
+	RepeatCount    string     `gorm:"default:null"`
+	RepeatType     string     `gorm:"default:null"`
+	StartTime      string     `gorm:"default:null"`
+	EndTime        string     `gorm:"default:null"`
+	StartCountDate *time.Time `gorm:"default:null"`
+	IsValid        bool       `gorm:"default:null"`
+	InvalidDate    *time.Time `gorm:"default:null"`
 }
 
 func (item *Schedule) ToResponse() *data.ScheduleResponse {
@@ -42,6 +46,9 @@ func (item *Schedule) ToResponse() *data.ScheduleResponse {
 	resp.RepeatType = item.RepeatType
 	resp.StartTime = item.StartTime
 	resp.EndTime = item.EndTime
+	resp.StartCountDate = item.StartCountDate
+	resp.IsValid = item.IsValid
+	resp.InvalidDate = item.InvalidDate
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Year = item.Year.ToPublicResponse()
@@ -65,6 +72,9 @@ func (item *Schedule) ToPublicResponse() *data.SchedulePublicResponse {
 	resp.RepeatType = item.RepeatType
 	resp.StartTime = item.StartTime
 	resp.EndTime = item.EndTime
+	resp.StartCountDate = item.StartCountDate
+	resp.IsValid = item.IsValid
+	resp.InvalidDate = item.InvalidDate
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Year = item.Year.ToPublicResponse()
@@ -79,4 +89,51 @@ func ToScheduleResponseList(itemList []Schedule) []data.ScheduleResponse {
 		resp[index] = *item.ToResponse()
 	}
 	return resp
+}
+
+func ToScheduleWeeklyViewResponseList(itemList []Schedule) []data.ScheduleWeeklyViewResponse {
+	type key struct {
+		StartTime string
+		EndTime   string
+	}
+
+	groupMap := make(map[key]*data.ScheduleWeeklyViewResponse)
+
+	for _, schedule := range itemList {
+		k := key{StartTime: schedule.StartTime, EndTime: schedule.EndTime}
+
+		// Check if the time group exists
+		if _, exists := groupMap[k]; !exists {
+			groupMap[k] = &data.ScheduleWeeklyViewResponse{
+				StartTime: k.StartTime,
+				EndTime:   k.EndTime,
+			}
+		}
+
+		// Add schedule to the correct day
+		switch schedule.DayOfTheWeek {
+		case "monday":
+			groupMap[k].Monday = append(groupMap[k].Monday, *schedule.ToResponse())
+		case "tuesday":
+			groupMap[k].Tuesday = append(groupMap[k].Tuesday, *schedule.ToResponse())
+		case "wednesday":
+			groupMap[k].Wednesday = append(groupMap[k].Wednesday, *schedule.ToResponse())
+		case "thursday":
+			groupMap[k].Thursday = append(groupMap[k].Thursday, *schedule.ToResponse())
+		case "friday":
+			groupMap[k].Friday = append(groupMap[k].Friday, *schedule.ToResponse())
+		case "saturday":
+			groupMap[k].Saturday = append(groupMap[k].Saturday, *schedule.ToResponse())
+		case "sunday":
+			groupMap[k].Sunday = append(groupMap[k].Sunday, *schedule.ToResponse())
+		}
+	}
+
+	// Conversion de map en slice
+	result := make([]data.ScheduleWeeklyViewResponse, 0, len(groupMap))
+	for _, v := range groupMap {
+		result = append(result, *v)
+	}
+
+	return result
 }

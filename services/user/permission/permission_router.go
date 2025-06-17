@@ -51,7 +51,7 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.PermissionPathRequest
+				data.PermissionRoleID
 				Body data.UpdatePermissionRequest
 			},
 		) (*struct {

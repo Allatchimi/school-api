@@ -22,8 +22,15 @@ func (controller *Controller) Create(
 	input *struct {
 		Body data.ScheduleRequest
 	},
-) (schedule *model.Schedule, errCode int, err error) {
-	schedule, errCode, err = controller.Service.Create(
+) (result *model.Schedule, errCode int, err error) {
+	if input.Body.IsGeneric {
+		result, errCode, err = controller.Service.CreateGeneric(
+			helpers.GetJwtContext(ctx),
+			&input.Body,
+		)
+		return
+	}
+	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
 		&input.Body,
 	)
@@ -36,8 +43,16 @@ func (controller *Controller) Update(
 		data.ScheduleID
 		Body data.ScheduleRequest
 	},
-) (schedule *model.Schedule, errCode int, err error) {
-	schedule, errCode, err = controller.Service.Update(
+) (result *model.Schedule, errCode int, err error) {
+	if input.Body.IsGeneric {
+		result, errCode, err = controller.Service.UpdateGeneric(
+			helpers.GetJwtContext(ctx),
+			input.ID,
+			&input.Body,
+		)
+		return
+	}
+	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx),
 		input.ID,
 		&input.Body,
@@ -50,12 +65,26 @@ func (controller *Controller) Delete(
 	input *struct {
 		data.ScheduleID
 	},
-) (schedule int64, errCode int, err error) {
+) (result int64, errCode int, err error) {
 	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
-	schedule = affectedRows
+	result = affectedRows
+	return
+}
+
+func (controller *Controller) DeleteGeneric(
+	ctx *context.Context,
+	input *struct {
+		data.ScheduleID
+	},
+) (result int64, errCode int, err error) {
+	affectedRows, errCode, err := controller.Service.DeleteGeneric(helpers.GetJwtContext(ctx), input.ID)
+	if err != nil {
+		return
+	}
+	result = affectedRows
 	return
 }
 
@@ -64,8 +93,18 @@ func (controller *Controller) Get(
 	input *struct {
 		data.ScheduleID
 	},
-) (schedule *model.Schedule, errCode int, err error) {
-	schedule, errCode, err = controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+) (result *model.Schedule, errCode int, err error) {
+	result, errCode, err = controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+	return
+}
+
+func (controller *Controller) GetGeneric(
+	ctx *context.Context,
+	input *struct {
+		data.ScheduleID
+	},
+) (result *model.Schedule, errCode int, err error) {
+	result, errCode, err = controller.Service.GetGeneric(helpers.GetJwtContext(ctx), input.ID)
 	return
 }
 
@@ -76,16 +115,37 @@ func (controller *Controller) GetAll(
 		types.PaginationRequest
 		data.GetAllRequest
 	},
-) (schedule *data.ScheduleResponseList, errCode int, err error) {
+) (result *data.ScheduleResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
 	scheduleList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}
-	schedule = &data.ScheduleResponseList{
+	result = &data.ScheduleResponseList{
 		Data: model.ToScheduleResponseList(scheduleList),
 	}
-	schedule.Filter = newFilter
-	schedule.Pagination = newPagination
+	result.Filter = newFilter
+	result.Pagination = newPagination
+	return
+}
+
+func (controller *Controller) GetAllWeeklyView(
+	ctx *context.Context,
+	input *struct {
+		types.Filter
+		types.PaginationRequest
+		data.GetAllRequest
+	},
+) (result *data.ScheduleWeeklyViewResponseList, errCode int, err error) {
+	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
+	scheduleList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
+	if err != nil {
+		return
+	}
+	result = &data.ScheduleWeeklyViewResponseList{
+		Data: model.ToScheduleWeeklyViewResponseList(scheduleList),
+	}
+	result.Filter = newFilter
+	result.Pagination = newPagination
 	return
 }

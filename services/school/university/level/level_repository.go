@@ -2,7 +2,6 @@ package level
 
 import (
 	"fmt"
-	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -101,26 +100,28 @@ func (repository *Repository) AreLevelDomainSameUniqueObjects(item1 *model.Unive
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.UniversityLevel, err error) {
+func (repository *Repository) GetAll(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.UniversityLevel, err error) {
 	result = make([]model.UniversityLevel, 0)
 	var where string = ""
-	if schoolID > 0 {
-		where = fmt.Sprintf("WHERE levels.school_id = %d", schoolID)
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("levels.school_id = %d", request.SchoolID))
+		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
 		tempWhere := fmt.Sprintf(
-			"CAST(levels.id AS TEXT) = '%s' OR levels.name ILIKE '%s' OR levels.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s'",
+			"(CAST(levels.id AS TEXT) = '%s' OR levels.name ILIKE '%s' OR levels.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s')",
 			filter.Search,
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 			"%"+filter.Search+"%",
 		)
-		if strings.HasPrefix(where, "WHERE") {
-			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
-		} else {
-			where = fmt.Sprintf("WHERE %s", tempWhere)
-		}
+		where = helpers.AppendWhereClause(where, tempWhere)
 	}
 	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
 		helpers.PaginationScope(
@@ -147,6 +148,9 @@ func (repository *Repository) GetAllLevelDomain(filter *types.Filter, pagination
 		}
 		if request.LevelID > 0 {
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("ld.level_id = %d", request.LevelID))
+		}
+		if request.DomainID > 0 {
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("ld.domain_id = %d", request.DomainID))
 		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {

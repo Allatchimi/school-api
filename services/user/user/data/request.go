@@ -29,5 +29,5 @@ type UserInfoRequest struct {
 }
 
 type GetAllRequest struct {
-	RoleName string `json:"role" query:"role" required:"false" doc:"Role name" example:"admin"`
+	RoleName string `json:"roleName" query:"roleName" required:"false" doc:"Role name" example:"admin"`
 }

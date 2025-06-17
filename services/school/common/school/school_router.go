@@ -28,7 +28,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "post-school",
 			Summary:     "Create school",
-			Description: "Create new school by providing name and description and return created object. The name school should be unique.",
+			Description: "Create new school and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,

@@ -12,5 +12,6 @@ type DomainRequest struct {
 }
 
 type GetAllRequest struct {
-	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
+	SchoolID     int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
+	DepartmentID int64 `json:"departmentID" query:"departmentID" required:"false" doc:"Department id" example:"1"`
 }

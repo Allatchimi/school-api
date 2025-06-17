@@ -21,7 +21,10 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "year"
 const DEFAULT_ERROR_MESSAGE = "interact with year model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.YearRequest) (result *model.Year, errCode int, err error) {
+func (service *Service) Create(
+	inputJwtToken *types.JwtToken,
+	request *data.YearRequest,
+) (result *model.Year, errCode int, err error) {
 	// Format request
 	item := &model.Year{
 		SchoolID:  request.SchoolID,
@@ -53,7 +56,11 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Year
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.YearRequest) (result *model.Year, errCode int, err error) {
+func (service *Service) Update(
+	inputJwtToken *types.JwtToken,
+	id int64,
+	request *data.YearRequest,
+) (result *model.Year, errCode int, err error) {
 	// Check if year exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -98,7 +105,10 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) Delete(
+	inputJwtToken *types.JwtToken,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.Delete(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -113,7 +123,10 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteMultiple(
+	inputJwtToken *types.JwtToken,
+	list []int64,
+) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultiple(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -128,7 +141,10 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Year, errCode int, err error) {
+func (service *Service) Get(
+	inputJwtToken *types.JwtToken,
+	id int64,
+) (result *model.Year, errCode int, err error) {
 	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -143,8 +159,13 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.Year, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, schoolID)
+func (service *Service) GetAll(
+	inputJwtToken *types.JwtToken,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	schoolID int64,
+) (result []model.Year, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination, &data.GetAllRequest{SchoolID: schoolID})
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

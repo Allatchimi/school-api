@@ -152,7 +152,6 @@ func (controller *Controller) GetAllQuizResult(
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
 	quizAnswerList, errCode, err := controller.Service.GetAllQuizAnswer(
 		helpers.GetJwtContext(ctx), newFilter, newPagination,
-		input.ID,
 		&input.GetAllQuizAnswerRequest,
 	)
 	if err != nil {
