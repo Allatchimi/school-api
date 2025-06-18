@@ -226,13 +226,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all payments
+	// Get all payment
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-payment-list",
-			Summary:     "Get all payments",
-			Description: "Get all payments with support for search, filter and pagination",
+			Summary:     "Get all payment",
+			Description: "Get all payment with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -269,6 +269,15 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			tempResults := make([]data.PaymentResponse, 10)
+			for i := range tempResults {
+				tmpModel := data.PaymentResponse{}
+				tmpModel.ID = int64(i)
+				tempResults[i] = tmpModel
+			}
+			result.Data = tempResults
+
 			return &struct {
 				Body data.PaymentResponseList
 			}{Body: *result}, nil

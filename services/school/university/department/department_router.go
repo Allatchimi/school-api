@@ -226,13 +226,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all departments
+	// Get all department
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-department-list",
-			Summary:     "Get all departments",
-			Description: "Get all departments with support for search, filter and pagination",
+			Summary:     "Get all department",
+			Description: "Get all department with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -269,6 +269,17 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.DepartmentResponse, 10)
+			for i := range result.Data {
+				tempModel := data.DepartmentResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.DepartmentResponseList
 			}{Body: *result}, nil

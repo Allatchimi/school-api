@@ -217,14 +217,43 @@ func RegisterEndpoints(
 			return &struct{ Body data.SchoolResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
+	// Get school by id public
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID:   "get-school-id-public",
+			Summary:       "Get school by id public",
+			Description:   "Return one school with matching id public",
+			Method:        http.MethodGet,
+			Path:          fmt.Sprintf("%s/{id}/public", endpointConfig.Group),
+			Tags:          endpointConfig.Tag,
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.SchoolID
+			},
+		) (*struct{ Body data.SchoolResponse }, error) {
+			result, errCode, err := controller.Get(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			newResult := result
+			newResult.Config = nil
+			return &struct{ Body data.SchoolResponse }{Body: *newResult.ToResponse()}, nil
+		},
+	)
 
-	// Get all schools
+	// Get all school
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-school-list",
-			Summary:     "Get all schools",
-			Description: "Get all schools with support for search, filter and pagination",
+			Summary:     "Get all school",
+			Description: "Get all school with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -257,6 +286,17 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.SchoolResponse, 10)
+			for i := range result.Data {
+				tempModel := data.SchoolResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.SchoolResponseList
 			}{Body: *result}, nil

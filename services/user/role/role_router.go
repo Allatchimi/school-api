@@ -218,13 +218,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all roles
+	// Get all role
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-role-list",
-			Summary:     "Get all roles",
-			Description: "Get all roles with support for search, filter and pagination",
+			Summary:     "Get all role",
+			Description: "Get all role with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -257,6 +257,17 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.RoleResponse, 10)
+			for i := range result.Data {
+				tempModel := data.RoleResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.RoleResponseList
 			}{Body: *result}, nil

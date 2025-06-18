@@ -226,13 +226,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all semesters
+	// Get all semester
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-semester-list",
-			Summary:     "Get all semesters",
-			Description: "Get all semesters with support for search, filter and pagination",
+			Summary:     "Get all semester",
+			Description: "Get all semester with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -269,6 +269,17 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.SemesterResponse, 10)
+			for i := range result.Data {
+				tempModel := data.SemesterResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.SemesterResponseList
 			}{Body: *result}, nil

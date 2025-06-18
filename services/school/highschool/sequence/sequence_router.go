@@ -226,13 +226,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all sequences
+	// Get all sequence
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-sequence-list",
-			Summary:     "Get all sequences",
-			Description: "Get all sequences with support for search, filter and pagination",
+			Summary:     "Get all sequence",
+			Description: "Get all sequence with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -269,6 +269,17 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.SequenceResponse, 10)
+			for i := range result.Data {
+				tempModel := data.SequenceResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.SequenceResponseList
 			}{Body: *result}, nil

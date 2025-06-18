@@ -226,13 +226,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all years
+	// Get all year
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-year-list",
-			Summary:     "Get all years",
-			Description: "Get all years with support for search, filter and pagination",
+			Summary:     "Get all year",
+			Description: "Get all year with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -269,6 +269,17 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.YearResponse, 10)
+			for i := range result.Data {
+				tempModel := data.YearResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.YearResponseList
 			}{Body: *result}, nil

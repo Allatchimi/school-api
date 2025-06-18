@@ -102,13 +102,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all communications
+	// Get all communication
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-communication-list",
-			Summary:     "Get all communications",
-			Description: "Get all communications with support for search, filter and pagination",
+			Summary:     "Get all communication",
+			Description: "Get all communication with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -142,6 +142,17 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.CommunicationResponse, 10)
+			for i := range result.Data {
+				tempModel := data.CommunicationResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.CommunicationResponseList
 			}{Body: *result}, nil

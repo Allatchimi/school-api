@@ -473,6 +473,18 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.StudentResponse, 10)
+			for i := range result.Data {
+				tempModel := data.StudentResponse{}
+				tempModel.ID = int64(i)
+				tempModel.UID = fmt.Sprintf("UID-%d", i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.StudentResponseList
 			}{Body: *result}, nil
@@ -507,6 +519,18 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.StudentResponse, 10)
+			for i := range result.Data {
+				tempModel := data.StudentResponse{}
+				tempModel.ID = int64(i)
+				tempModel.UID = fmt.Sprintf("UID-%d", i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.StudentResponseList
 			}{Body: *result}, nil
@@ -556,55 +580,20 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct {
-				Body data.StudentEnrollResponseList
-			}{Body: *result}, nil
-		},
-	)
 
-	// Get all student level domain class
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "get-student-level-domain-class-list",
-			Summary:     "Get all student level domain class",
-			Description: "Get all level domain class for specified student with support for search, filter and pagination",
-			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/leveldomainclasses", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecurityAuthName: { // Authentication
-						fmt.Sprintf("%s,%s,%s,%s,%s",
-							constants.FeatureAdmin,
-							constants.FeatureDirector,
-							constants.FeatureTeacher,
-							constants.FeatureStudent,
-							constants.FeatureParent,
-						), // Features scope
-						tableName,                // Table name
-						constants.PermissionRead, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				types.Filter
-				types.PaginationRequest
-				data.GetAllStudentEnrollRequest
-			},
-		) (*struct {
-			Body data.StudentEnrollResponseList
-		}, error) {
-			result, errCode, err := controller.GetAllStudentEnroll(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
+			// Generate items
+			tempResult := make([]data.StudentEnrollResponse, 10)
+			for i := range result.Data {
+				tempModel := data.StudentEnrollResponse{}
+				tempModel.ID = int64(i)
+				tempModel.Email = "example@example.com"
+				tempModel.Student = &data.StudentPublicResponse{}
+				tempModel.Student.UID = fmt.Sprintf("UID-%d", i)
+
+				tempResult[i] = tempModel
 			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.StudentEnrollResponseList
 			}{Body: *result}, nil

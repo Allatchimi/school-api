@@ -226,13 +226,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all specialties
+	// Get all specialty
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-specialty-list",
-			Summary:     "Get all specialties",
-			Description: "Get all specialties with support for search, filter and pagination",
+			Summary:     "Get all specialty",
+			Description: "Get all specialty with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -269,6 +269,17 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.SpecialtyResponse, 10)
+			for i := range result.Data {
+				tempModel := data.SpecialtyResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.SpecialtyResponseList
 			}{Body: *result}, nil

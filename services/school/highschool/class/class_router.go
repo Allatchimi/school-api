@@ -311,8 +311,8 @@ func RegisterEndpoints(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-class-list",
-			Summary:     "Get all classes",
-			Description: "Get all classes with support for search, filter and pagination",
+			Summary:     "Get all class",
+			Description: "Get all class with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -349,6 +349,62 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.ClassResponse, 10)
+			for i := range result.Data {
+				tempModel := data.ClassResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
+			return &struct {
+				Body data.ClassResponseList
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get class list public
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID:   "get-class-list-public",
+			Summary:       "Get all class public",
+			Description:   "Get all class with support for search, filter and pagination",
+			Method:        http.MethodGet,
+			Path:          fmt.Sprintf("%s/public", endpointConfig.Group),
+			Tags:          endpointConfig.Tag,
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllRequest
+			},
+		) (*struct {
+			Body data.ClassResponseList
+		}, error) {
+			result, errCode, err := controller.GetAll(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+
+			// Generate items
+			tempResult := make([]data.ClassResponse, 10)
+			for i := range result.Data {
+				tempModel := data.ClassResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.ClassResponseList
 			}{Body: *result}, nil
@@ -398,6 +454,17 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.ClassSubjectResponse, 10)
+			for i := range result.Data {
+				tempModel := data.ClassSubjectResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.ClassSubjectResponseList
 			}{Body: *result}, nil

@@ -90,13 +90,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all contacts
+	// Get all contact
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-contact-list",
-			Summary:     "Get all contacts",
-			Description: "Get all contacts with support for search, filter and pagination",
+			Summary:     "Get all contact",
+			Description: "Get all contact with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -130,6 +130,17 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.ContactResponse, 10)
+			for i := range result.Data {
+				tempModel := data.ContactResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.ContactResponseList
 			}{Body: *result}, nil

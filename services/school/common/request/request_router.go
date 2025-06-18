@@ -231,13 +231,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all requests
+	// Get all request
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-request-list",
-			Summary:     "Get all requests",
-			Description: "Get all requests with support for search, filter and pagination",
+			Summary:     "Get all request",
+			Description: "Get all request with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -274,6 +274,16 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			tempResults := make([]data.RequestResponse, 10)
+			for i := range tempResults {
+				tmpModel := data.RequestResponse{}
+				tmpModel.ID = int64(i)
+
+				tempResults[i] = tmpModel
+			}
+			result.Data = tempResults
+
 			return &struct {
 				Body data.RequestResponseList
 			}{Body: *result}, nil

@@ -226,13 +226,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all domains
+	// Get all domain
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-domain-list",
-			Summary:     "Get all domains",
-			Description: "Get all domains with support for search, filter and pagination",
+			Summary:     "Get all domain",
+			Description: "Get all domain with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -269,6 +269,17 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.DomainResponse, 10)
+			for i := range result.Data {
+				tempModel := data.DomainResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.DomainResponseList
 			}{Body: *result}, nil

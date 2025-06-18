@@ -320,13 +320,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all quizzes
+	// Get all quiz
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-quiz-list",
-			Summary:     "Get all quizzes",
-			Description: "Get all quizzes with support for search, filter and pagination",
+			Summary:     "Get all quiz",
+			Description: "Get all quiz with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -363,19 +363,30 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// TODO: Remove this
+			tempResults := make([]data.QuizResponse, 10)
+			for i := range tempResults {
+				tmpModel := data.QuizResponse{}
+				tmpModel.ID = int64(i)
+
+				tempResults[i] = tmpModel
+			}
+			result.Data = tempResults
+
 			return &struct {
 				Body data.QuizResponseList
 			}{Body: *result}, nil
 		},
 	)
 
-	// Get all quiz results
+	// Get all quiz result
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-quiz-result-list",
-			Summary:     "Get all results for quiz",
-			Description: "Get all results for quiz with support for search, filter and pagination",
+			Summary:     "Get all result for quiz",
+			Description: "Get all result for quiz with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/{id}/results", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -414,7 +425,7 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			tempResults := make([]data.QuizResultResponse, 40)
+			tempResults := make([]data.QuizResultResponse, 10)
 			for i := range tempResults {
 				tmpModel := data.QuizResultResponse{}
 				tmpModel.Student = nil

@@ -202,7 +202,7 @@ func RegisterEndpoints(
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-							constants.FeatureDirector,
+							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
 						), // Features scope
@@ -229,6 +229,15 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			tempResults := make([]data.DirectorResponse, 10)
+			for i := range tempResults {
+				tmpModel := data.DirectorResponse{}
+				tmpModel.ID = int64(i)
+				tempResults[i] = tmpModel
+			}
+			result.Data = tempResults
+
 			return &struct {
 				Body data.DirectorResponseList
 			}{Body: *result}, nil

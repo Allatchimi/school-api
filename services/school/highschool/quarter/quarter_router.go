@@ -226,13 +226,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all quarters
+	// Get all quarter
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-quarter-list",
-			Summary:     "Get all quarters",
-			Description: "Get all quarters with support for search, filter and pagination",
+			Summary:     "Get all quarter",
+			Description: "Get all quarter with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -269,6 +269,17 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.QuarterResponse, 10)
+			for i := range result.Data {
+				tempModel := data.QuarterResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.QuarterResponseList
 			}{Body: *result}, nil

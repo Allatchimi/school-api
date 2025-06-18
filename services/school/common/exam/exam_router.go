@@ -399,13 +399,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all exams
+	// Get all exam
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-exam-list",
-			Summary:     "Get all exams",
-			Description: "Get all exams with support for search, filter and pagination",
+			Summary:     "Get all exam",
+			Description: "Get all exam with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -442,6 +442,15 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			tempResults := make([]data.ExamResponse, 10)
+			for i := range tempResults {
+				tmpModel := data.ExamResponse{}
+				tmpModel.ID = int64(i)
+				tempResults[i] = tmpModel
+			}
+			result.Data = tempResults
+
 			return &struct {
 				Body data.ExamResponseList
 			}{Body: *result}, nil

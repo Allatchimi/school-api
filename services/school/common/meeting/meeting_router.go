@@ -188,13 +188,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all rooms
+	// Get all room
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-meeting-room-list",
-			Summary:     "Get all rooms",
-			Description: "Get all rooms with support for search, filter and pagination",
+			Summary:     "Get all room",
+			Description: "Get all room with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -231,6 +231,15 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			tempResults := make([]data.MeetingRoomResponse, 10)
+			for i := range tempResults {
+				tmpModel := data.MeetingRoomResponse{}
+				tmpModel.ID = int64(i)
+				tempResults[i] = tmpModel
+			}
+			result.Data = tempResults
+
 			return &struct {
 				Body data.MeetingRoomResponseList
 			}{Body: *result}, nil

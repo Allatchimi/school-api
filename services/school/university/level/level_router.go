@@ -70,7 +70,7 @@ func RegisterEndpoints(
 			Summary:     "Create level domain",
 			Description: "Create new level domain.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/leveldomains", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/domains", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -191,7 +191,7 @@ func RegisterEndpoints(
 			Summary:     "Delete level domain",
 			Description: "Delete existing level domain with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/leveldomains/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/domains/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -363,7 +363,7 @@ func RegisterEndpoints(
 			Summary:     "Get all level domain",
 			Description: "Get all level domain with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/leveldomains", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/domains", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -398,6 +398,62 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.LevelDomainResponse, 10)
+			for i := range result.Data {
+				tempModel := data.LevelDomainResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
+			return &struct {
+				Body data.LevelDomainResponseList
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get all level domain public
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID:   "get-level-domain-list-public",
+			Summary:       "Get all level domain public",
+			Description:   "Get all level domain public with support for search, filter and pagination",
+			Method:        http.MethodGet,
+			Path:          fmt.Sprintf("%s/domains/public", endpointConfig.Group),
+			Tags:          endpointConfig.Tag,
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllLevelDomainRequest
+			},
+		) (*struct {
+			Body data.LevelDomainResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllLevelDomain(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+
+			// Generate items
+			tempResult := make([]data.LevelDomainResponse, 10)
+			for i := range result.Data {
+				tempModel := data.LevelDomainResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.LevelDomainResponseList
 			}{Body: *result}, nil

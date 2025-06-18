@@ -147,13 +147,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all courses
+	// Get all course
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-course-list",
-			Summary:     "Get all courses",
-			Description: "Get all courses with support for search, filter and pagination",
+			Summary:     "Get all course",
+			Description: "Get all course with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -190,6 +190,15 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			tempResults := make([]data.CoursePublicResponse, 10)
+			for i := range tempResults {
+				tmpModel := data.CoursePublicResponse{}
+				tmpModel.ID = int64(i)
+				tempResults[i] = tmpModel
+			}
+			result.Data = tempResults
+
 			return &struct {
 				Body data.CourseResponseList
 			}{Body: *result}, nil

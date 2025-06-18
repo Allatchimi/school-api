@@ -147,13 +147,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all permissions
+	// Get all permission
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-permission-list",
-			Summary:     "Get all permissions",
-			Description: "Get all permissions and support for search, filter and pagination",
+			Summary:     "Get all permission",
+			Description: "Get all permission and support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -186,6 +186,17 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.PermissionResponse, 10)
+			for i := range result.Data {
+				tempModel := data.PermissionResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.PermissionListResponse
 			}{Body: *result}, nil

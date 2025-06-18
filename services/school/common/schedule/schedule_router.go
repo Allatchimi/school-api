@@ -269,13 +269,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all schedules
+	// Get all schedule
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-schedule-list",
-			Summary:     "Get all schedules",
-			Description: "Get all schedules with support for search, filter and pagination",
+			Summary:     "Get all schedule",
+			Description: "Get all schedule with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -312,19 +312,30 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.ScheduleResponse, 10)
+			for i := range result.Data {
+				tempModel := data.ScheduleResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.ScheduleResponseList
 			}{Body: *result}, nil
 		},
 	)
 
-	// Get all schedules weekly view
+	// Get all schedule weekly view
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-schedule-list-weekly-view",
-			Summary:     "Get all schedules weekly view",
-			Description: "Get all schedules with weekly view support for search, filter and pagination",
+			Summary:     "Get all schedule weekly view",
+			Description: "Get all schedule with weekly view support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/weekly-view", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -362,7 +373,7 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			tempResults := make([]data.ScheduleWeeklyViewResponse, 40)
+			tempResults := make([]data.ScheduleWeeklyViewResponse, 10)
 			for i := range tempResults {
 				tmpModel := data.ScheduleWeeklyViewResponse{
 					StartTime: fmt.Sprintf("%02d:00", i),
