@@ -26,7 +26,7 @@ type Schedule struct {
 
 	Type           string     `gorm:"default:null"`
 	DayOfTheWeek   string     `gorm:"default:null"`
-	RepeatCount    string     `gorm:"default:null"`
+	RepeatCount    int        `gorm:"default:null"`
 	RepeatType     string     `gorm:"default:null"`
 	StartTime      string     `gorm:"default:null"`
 	EndTime        string     `gorm:"default:null"`
@@ -136,4 +136,43 @@ func ToScheduleWeeklyViewResponseList(itemList []Schedule) []data.ScheduleWeekly
 	}
 
 	return result
+}
+
+func ListAppendGenericSchedules(dest []Schedule, src []ScheduleGeneric) []Schedule {
+	defaultSize := len(dest)
+	genericSize := len(src)
+	result := make([]Schedule, defaultSize+genericSize)
+	copy(result, dest)
+	for index := range src {
+		schedule := ConvertScheduleGenericToSchedule(&src[index])
+		if schedule != nil {
+			result[defaultSize+index] = *schedule
+		}
+	}
+	return result
+}
+
+func ConvertScheduleGenericToSchedule(item *ScheduleGeneric) (result *Schedule) {
+	if item == nil {
+		return
+	}
+	result = &Schedule{
+		SchoolID: item.SchoolID,
+		School:   item.School,
+		YearID:   item.YearID,
+		Year:     item.Year,
+
+		Type:         item.Type,
+		DayOfTheWeek: item.DayOfTheWeek,
+		RepeatCount:  item.RepeatCount,
+		RepeatType:   item.RepeatType,
+		StartTime:    item.StartTime,
+		EndTime:      item.EndTime,
+		IsValid:      item.IsValid,
+		InvalidDate:  item.InvalidDate,
+	}
+	result.ID = item.ID
+	result.CreatedAt = item.CreatedAt
+	result.UpdatedAt = item.UpdatedAt
+	return
 }

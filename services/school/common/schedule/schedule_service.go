@@ -332,11 +332,12 @@ func (service *Service) GetGeneric(inputJwtToken *types.JwtToken, id int64) (res
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
-	result = genericToSchedule(resultGeneric)
+	result = model.ConvertScheduleGenericToSchedule(resultGeneric)
 	return
 }
 
 func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Schedule, errCode int, err error) {
+	// Get default schedules
 	if request.Type == "default" {
 		resultDefault, errDefault := service.Repository.GetAll(filter, pagination, request)
 		if errDefault != nil {
@@ -347,74 +348,32 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 		result = resultDefault
 		return
 	}
+	// Get generic schedules
 	if request.Type == "generic" {
-		resultGeneric, errGeneric := service.Repository.GetAllScheduleGeneric(filter, pagination)
+		resultGeneric, errGeneric := service.Repository.GetAllScheduleGeneric(filter, pagination, request)
 		if errGeneric != nil {
 			errCode = http.StatusInternalServerError
 			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
 		}
 		resultDefault := make([]model.Schedule, 0)
-		result = appendGenericSchedules(resultDefault, resultGeneric)
+		result = model.ListAppendGenericSchedules(resultDefault, resultGeneric)
 		return
 	}
 
-	// Get default schedules
+	// Get all schedules
 	resultDefault, err := service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-
-	// Get generic schedules
-	resultGeneric, err := service.Repository.GetAllScheduleGeneric(filter, pagination)
+	resultGeneric, err := service.Repository.GetAllScheduleGeneric(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-
-	// Append generic schedules
-	result = appendGenericSchedules(resultDefault, resultGeneric)
-	return
-}
-
-func appendGenericSchedules(dest []model.Schedule, src []model.ScheduleGeneric) []model.Schedule {
-	defaultSize := len(dest)
-	genericSize := len(src)
-	result := make([]model.Schedule, defaultSize+genericSize)
-	copy(result, dest)
-	for index := range src {
-		schedule := genericToSchedule(&src[index])
-		if schedule != nil {
-			result[defaultSize+index] = *schedule
-		}
-	}
-	return result
-}
-
-func genericToSchedule(item *model.ScheduleGeneric) (result *model.Schedule) {
-	if item == nil {
-		return
-	}
-	result = &model.Schedule{
-		SchoolID: item.SchoolID,
-		School:   item.School,
-		YearID:   item.YearID,
-		Year:     item.Year,
-
-		Type:         item.Type,
-		DayOfTheWeek: item.DayOfTheWeek,
-		RepeatCount:  item.RepeatCount,
-		RepeatType:   item.RepeatType,
-		StartTime:    item.StartTime,
-		EndTime:      item.EndTime,
-		IsValid:      item.IsValid,
-		InvalidDate:  item.InvalidDate,
-	}
-	result.ID = item.ID
-	result.CreatedAt = item.CreatedAt
-	result.UpdatedAt = item.UpdatedAt
+	result = model.ListAppendGenericSchedules(resultDefault, resultGeneric)
 	return
 }

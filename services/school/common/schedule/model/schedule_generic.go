@@ -18,7 +18,7 @@ type ScheduleGeneric struct {
 
 	Type         string     `gorm:"default:null"`
 	DayOfTheWeek string     `gorm:"default:null"`
-	RepeatCount  string     `gorm:"default:null"`
+	RepeatCount  int        `gorm:"default:null"`
 	RepeatType   string     `gorm:"default:null"`
 	StartTime    string     `gorm:"default:null"`
 	EndTime      string     `gorm:"default:null"`

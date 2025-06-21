@@ -22,11 +22,11 @@ import (
 // sorting the results in ascending or descending based on the Sort parameter.
 //
 // - Pagination applies an offset and limit to the results, determining which subset of data to display.
-func PaginationScope(db *gorm.DB, selection string, where string, pagination *types.Pagination, filter *types.Filter, args ...any) func(*gorm.DB) *gorm.DB {
+func PaginationScope(db *gorm.DB, selection string, where string, pagination *types.Pagination, filter *types.Filter) func(*gorm.DB) *gorm.DB {
 	if pagination != nil {
-		var count *int64 = new(int64)
-		db.Raw(fmt.Sprintf("SELECT COUNT(*) FROM (%s %s) AS subquery;", selection, where)).Count(count)
-		pagination.UpdateFields(*count)
+		var count int64
+		db.Raw(fmt.Sprintf("SELECT COUNT(*) FROM (%s %s) AS subquery;", selection, where)).Count(&count)
+		pagination.UpdateFields(count)
 	}
 
 	var paginationFilter = ""
@@ -47,7 +47,7 @@ func PaginationScope(db *gorm.DB, selection string, where string, pagination *ty
 		))
 	}
 }
-func PaginationScopeSafe(
+func PaginationScopeV2(
 	db *gorm.DB,
 	selection string,
 	where string,
@@ -55,30 +55,30 @@ func PaginationScopeSafe(
 	filter *types.Filter,
 	args ...any,
 ) func(*gorm.DB) *gorm.DB {
+	// Count total records using the WHERE clause and bound arguments
+	if pagination != nil {
+		var count int64
+		countQuery := fmt.Sprintf("SELECT COUNT(*) FROM (%s %s) AS subquery", selection, where)
+		db.Raw(countQuery, args...).Count(&count)
+		pagination.UpdateFields(count)
+	}
+
+	// Build pagination (ORDER BY + LIMIT + OFFSET)
+	var paginationFilter string
+	if pagination != nil && filter != nil {
+		paginationFilter = fmt.Sprintf(
+			"ORDER BY %s %s LIMIT %d OFFSET %d",
+			filter.OrderBy,
+			filter.Sort,
+			pagination.Limit,
+			pagination.Offset,
+		)
+	}
+
+	// Return scoped function to apply raw SQL with parameters
 	return func(tx *gorm.DB) *gorm.DB {
-		var finalQuery string
-		finalQuery = selection + " " + where
-
-		// Add pagination and filters
-		if pagination != nil && filter != nil {
-			finalQuery += fmt.Sprintf(
-				" ORDER BY %s %s LIMIT %d OFFSET %d",
-				filter.OrderBy,
-				filter.Sort,
-				pagination.Limit,
-				pagination.Offset,
-			)
-		}
-
-		// Count total for pagination
-		if pagination != nil {
-			countQuery := fmt.Sprintf("SELECT COUNT(*) FROM (%s %s) AS subquery", selection, where)
-			var count int64
-			tx.Raw(countQuery, args...).Count(&count)
-			pagination.UpdateFields(count)
-		}
-
-		return tx.Raw(finalQuery, args...)
+		rawQuery := fmt.Sprintf("%s %s %s", selection, where, paginationFilter)
+		return tx.Raw(rawQuery, args...)
 	}
 }
 

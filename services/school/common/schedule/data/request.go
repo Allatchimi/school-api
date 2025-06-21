@@ -18,7 +18,7 @@ type ScheduleRequest struct {
 	IsGeneric      bool       `json:"isGeneric" required:"true" doc:"Is generic" example:"false"`
 	Type           string     `json:"type" required:"true" doc:"Type" example:"Normal"`
 	DayOfTheWeek   string     `json:"dayOfTheWeek" required:"true" doc:"Day of the week" example:"MONDAY"`
-	RepeatCount    string     `json:"repeatCount" required:"true" doc:"Repeat count" example:"1"`
+	RepeatCount    int        `json:"repeatCount" required:"true" doc:"Repeat count" example:"1"`
 	RepeatType     string     `json:"repeatType" required:"true" doc:"Repeat type" example:"WEEKLY"`
 	StartTime      string     `json:"startTime" required:"true" doc:"Start time" example:"09:00:00"`
 	EndTime        string     `json:"endTime" required:"true" doc:"End time" example:"10:00:00"`

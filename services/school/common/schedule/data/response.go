@@ -18,7 +18,7 @@ type ScheduleResponse struct {
 type SchedulePublicResponse struct {
 	Type           string     `json:"type" required:"false" doc:"Type"`
 	DayOfTheWeek   string     `json:"dayOfTheWeek" required:"false" doc:"Day of the week"`
-	RepeatCount    string     `json:"repeatCount" required:"false" doc:"Repeat count"`
+	RepeatCount    int        `json:"repeatCount" required:"false" doc:"Repeat count"`
 	RepeatType     string     `json:"repeatType" required:"false" doc:"Repeat type"`
 	StartTime      string     `json:"startTime" required:"false" doc:"Start time"`
 	EndTime        string     `json:"endTime" required:"false" doc:"End time"`

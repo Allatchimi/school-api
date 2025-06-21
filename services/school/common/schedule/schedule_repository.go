@@ -1,8 +1,6 @@
 package schedule
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -173,64 +171,131 @@ func (repository *Repository) GetAll(
 	request *data.GetAllRequest,
 ) (result []model.Schedule, err error) {
 	result = make([]model.Schedule, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("schedules.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "schedules.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 		if request.YearID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("schedules.year_id = %d", request.YearID))
+			where = helpers.AppendWhereClause(where, "schedules.year_id = ?")
+			args = append(args, request.YearID)
 		}
 		if request.ClassSubjectID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("schedules.class_subject_id = %d", request.ClassSubjectID))
+			where = helpers.AppendWhereClause(where, "schedules.class_subject_id = ?")
+			args = append(args, request.ClassSubjectID)
 		}
 		if request.UnitID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("schedules.unit_id = %d", request.UnitID))
+			where = helpers.AppendWhereClause(where, "schedules.unit_id = ?")
+			args = append(args, request.UnitID)
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(schedules.id AS TEXT) = '%s' OR schedules.type ILIKE '%s' OR schedules.day_of_the_week ILIKE '%s' OR schedules.repeat_count ILIKE '%s' OR schedules.repeat_type ILIKE '%s' OR schedules.start_time ILIKE '%s' OR schedules.end_time ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+
+	// Handle search filter securely
+	if filter != nil && len(filter.Search) > 0 {
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(schedules.id AS TEXT) = ? OR 
+			schedules.type ILIKE ? OR 
+			schedules.day_of_the_week ILIKE ? OR 
+			schedules.repeat_type ILIKE ? OR 
+			schedules.start_time ILIKE ? OR 
+			schedules.end_time ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
 		Preload("ClassSubject.Subject").
-		Preload("Unit.Domain").
-		Preload("Unit.Level").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.Semester").
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT schedules.* "+
-					"FROM schedules "+
-					"LEFT JOIN schools ON schedules.school_id = schools.id "+
-					"LEFT JOIN years ON schedules.year_id = years.id "+
-					"LEFT JOIN highschool_class_subjects ON schedules.class_subject_id = highschool_class_subjects.id "+
-					"LEFT JOIN university_units ON schedules.unit_id = university_units.id ",
+				`SELECT schedules.* 
+				FROM schedules 
+				LEFT JOIN schools ON schedules.school_id = schools.id 
+				LEFT JOIN years ON schedules.year_id = years.id 
+				LEFT JOIN highschool_class_subjects ON schedules.class_subject_id = highschool_class_subjects.id 
+				LEFT JOIN university_units ON schedules.unit_id = university_units.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }
 
 func (repository *Repository) GetAllScheduleGeneric(
 	filter *types.Filter, pagination *types.Pagination,
+	request *data.GetAllRequest,
 ) (result []model.ScheduleGeneric, err error) {
 	result = make([]model.ScheduleGeneric, 0)
-	err = repository.Db.Preload(clause.Associations).Find(result).Error
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, "schedule_generics.school_id = ?")
+			args = append(args, request.SchoolID)
+		}
+		if request.YearID > 0 {
+			where = helpers.AppendWhereClause(where, "schedule_generics.year_id = ?")
+			args = append(args, request.YearID)
+		}
+	}
+
+	// Handle search filter securely
+	if filter != nil && len(filter.Search) > 0 {
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(schedule_generics.id AS TEXT) = ? OR 
+			schedule_generics.type ILIKE ? OR 
+			schedule_generics.day_of_the_week ILIKE ? OR 
+			schedule_generics.repeat_type ILIKE ? OR 
+			schedule_generics.start_time ILIKE ? OR 
+			schedule_generics.end_time ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like)
+	}
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScopeV2(
+				repository.Db,
+				`SELECT schedule_generics.* 
+				FROM schedule_generics 
+				LEFT JOIN schools ON schedule_generics.school_id = schools.id 
+				LEFT JOIN years ON schedule_generics.year_id = years.id`,
+				where,
+				pagination,
+				filter,
+				args...,
+			),
+		).Find(&result).Error
+
 	return
 }
