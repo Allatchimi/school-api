@@ -1,25 +1,25 @@
 package data
 
 type UnitID struct {
-	ID int64 `json:"id" path:"id" required:"true" doc:"Unit id" example:"1"`
+	ID int64 `json:"id" path:"id" required:"true" doc:"Unit id"`
 }
 
 type UnitRequest struct {
-	SchoolID      int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
-	LevelDomainID int64 `json:"levelDomainID" required:"true" doc:"Level domain id" example:"1"`
-	SemesterID    int64 `json:"semesterID" required:"true" doc:"Semester id" example:"1"`
+	SchoolID      int64 `json:"schoolID" required:"true" doc:"School id"`
+	LevelDomainID int64 `json:"levelDomainID" required:"true" doc:"Level domain id"`
+	SemesterID    int64 `json:"semesterID" required:"true" doc:"Semester id"`
 
-	Name         string `json:"name" required:"true" doc:"Name" example:"MATH110"`
-	Description  string `json:"description" required:"false" doc:"Description" example:""`
-	Credit       int    `json:"credit" required:"true" min:"1" doc:"Credit" example:"1"`
-	Program      string `json:"program" required:"false" doc:"Program" example:""`
-	Requirements string `json:"requirements" required:"false" doc:"Requirements" example:""`
+	Name         string `json:"name" required:"true" doc:"Name"`
+	Description  string `json:"description" required:"false" doc:"Description"`
+	Credit       int    `json:"credit" required:"true" min:"1" doc:"Credit"`
+	Program      string `json:"program" required:"false" doc:"Program"`
+	Requirements string `json:"requirements" required:"false" doc:"Requirements"`
 
-	IsValid bool `json:"isValid" required:"false" doc:"Is valid" example:"true"`
+	IsValid bool `json:"isValid" required:"false" doc:"Is valid"`
 }
 
 type GetAllRequest struct {
-	SchoolID      int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
-	LevelDomainID int64 `json:"levelDomainID" query:"levelDomainID" required:"false" doc:"Level domain id" example:"1"`
-	SemesterID    int64 `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id" example:"1"`
+	SchoolID      int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
+	LevelDomainID int64 `json:"levelDomainID" query:"levelDomainID" required:"false" doc:"Level domain id"`
+	SemesterID    int64 `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id"`
 }

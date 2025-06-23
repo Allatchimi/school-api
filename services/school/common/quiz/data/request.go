@@ -3,55 +3,55 @@ package data
 import "api/common/types"
 
 type QuizID struct {
-	ID int64 `json:"id" path:"id" required:"true" doc:"Quiz id" example:"1"`
+	ID int64 `json:"id" path:"id" required:"true" doc:"Quiz id"`
 }
 
 type QuizQuestionID struct {
-	ID int64 `json:"id" path:"id" required:"true" doc:"Quiz question id" example:"1"`
+	ID int64 `json:"id" path:"id" required:"true" doc:"Quiz question id"`
 }
 
 type QuizRequest struct {
-	SchoolID       int64 `json:"schoolID" required:"true" doc:"School id" example:"1"`
-	YearID         int64 `json:"yearID" required:"true" doc:"Year id" example:"1"`
-	ClassSubjectID int64 `json:"classSubjectID" required:"false" doc:"Class subject id" example:"1"`
-	UnitID         int64 `json:"unitID" required:"false" doc:"Unit id" example:"1"`
+	SchoolID       int64 `json:"schoolID" required:"true" doc:"School id"`
+	YearID         int64 `json:"yearID" required:"true" doc:"Year id"`
+	ClassSubjectID int64 `json:"classSubjectID" required:"false" doc:"Class subject id"`
+	UnitID         int64 `json:"unitID" required:"false" doc:"Unit id"`
 
-	Title       string `json:"title" required:"true" doc:"Title" example:""`
-	Description string `json:"description" required:"false" doc:"Description" example:""`
-	Status      string `json:"status" required:"false" enum:"default,active,closed"  doc:"Status" example:""`
+	Title       string `json:"title" required:"true" doc:"Title"`
+	Description string `json:"description" required:"false" doc:"Description"`
+	Status      string `json:"status" required:"false" enum:"default,active,closed" doc:"Status"`
 
-	Questions []QuizQuestionRequest `json:"questions" required:"false" doc:"Questions" example:"[]"`
+	Questions []QuizQuestionRequest `json:"questions" required:"false" doc:"Questions"`
 }
 
 type QuizQuestionRequest struct {
-	Title       string `json:"title" required:"true" doc:"Title" example:""`
-	Description string `json:"description" required:"false" doc:"Description" example:""`
+	Title       string `json:"title" required:"true" doc:"Title"`
+	Description string `json:"description" required:"false" doc:"Description"`
 
-	Options []QuizQuestionOptionRequest `json:"options" required:"false" doc:"Options" example:"[]"`
+	Options []QuizQuestionOptionRequest `json:"options" required:"false" doc:"Options"`
 }
 
 type QuizQuestionOptionRequest struct {
-	Title       string `json:"title" required:"true" doc:"Title" example:""`
-	Description string `json:"description" required:"false" doc:"Description" example:""`
+	Title       string `json:"title" required:"true" doc:"Title"`
+	Description string `json:"description" required:"false" doc:"Description"`
 }
 
 type QuizSolutionRequest struct {
-	Solutions []QuestionSolutionRequest `json:"solutions" required:"true" doc:"Solutions" example:"[]"`
+	Solutions []QuestionSolutionRequest `json:"solutions" required:"true" doc:"Solutions"`
 }
 
 type QuestionSolutionRequest struct {
-	QuestionID int64 `json:"questionID" required:"true" doc:"Question id" example:"1"`
-	OptionID   int64 `json:"optionID" required:"true" doc:"Option id" example:"1"`
+	QuestionID int64 `json:"questionID" required:"true" doc:"Question id"`
+	OptionID   int64 `json:"optionID" required:"true" doc:"Option id"`
 }
 
 type QuizAnswerRequest struct {
-	StudentID int64                   `json:"studentID" required:"true" doc:"Student id" example:"1"`
-	Answers   []QuestionAnswerRequest `json:"answers" required:"true" doc:"Answers" example:"[]"`
+	StudentID int64                   `json:"studentID" required:"true" doc:"Student id"`
+	Answers   []QuestionAnswerRequest `json:"answers" required:"true" doc:"Answers"`
 }
 
 type QuestionAnswerRequest struct {
-	QuestionID int64 `json:"questionID" required:"true" doc:"Question id" example:"1"`
-	OptionID   int64 `json:"optionID" required:"true" doc:"Option id" example:"1"`
+	QuestionID int64 `json:"questionID" required:"true" doc:"Question id"`
+	OptionID   int64 `json:"optionID" required:"true" doc:"Option id"`
 }
 
 type GetAllRequest struct {
@@ -60,6 +60,6 @@ type GetAllRequest struct {
 
 type GetAllQuizAnswerRequest struct {
 	QuizID
-	QuizQuestionID int64 `json:"quizQuestionID" query:"quizQuestionID" required:"false" doc:"Quiz question id" example:"1"`
-	StudentID      int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id" example:"1"`
+	QuizQuestionID int64 `json:"quizQuestionID" query:"quizQuestionID" required:"false" doc:"Quiz question id"`
+	StudentID      int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id"`
 }

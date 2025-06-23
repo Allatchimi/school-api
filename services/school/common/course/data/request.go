@@ -21,14 +21,14 @@ type CourseRequest struct {
 	Content     string `json:"content" required:"false" doc:"Content"`
 
 	Documents []struct {
-		Title       string `json:"title" required:"true" doc:"Title" example:""`
-		Description string `json:"description" required:"false" doc:"Description" example:""`
+		Title       string `json:"title" required:"true" doc:"Title"`
+		Description string `json:"description" required:"false" doc:"Description"`
 		Url         string `json:"url" required:"false" doc:"Url" example:"[]"`
 	} `json:"documents" required:"false" doc:"Documents" example:"[]"`
 
 	Videos []struct {
-		Title       string `json:"title" required:"true" doc:"Title" example:""`
-		Description string `json:"description" required:"false" doc:"Description" example:""`
+		Title       string `json:"title" required:"true" doc:"Title"`
+		Description string `json:"description" required:"false" doc:"Description"`
 		Url         string `json:"url" required:"false" doc:"Url" example:"[]"`
 	} `json:"videos" required:"false" doc:"Videos" example:"[]"`
 }
