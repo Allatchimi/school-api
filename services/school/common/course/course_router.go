@@ -191,6 +191,7 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
+			// Generate items
 			tempResults := make([]data.CoursePublicResponse, 10)
 			for i := range tempResults {
 				tmpModel := data.CoursePublicResponse{}

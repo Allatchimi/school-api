@@ -373,6 +373,7 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
+			// Generate items
 			tempResults := make([]data.ScheduleWeeklyViewResponse, 10)
 			for i := range tempResults {
 				tmpModel := data.ScheduleWeeklyViewResponse{
