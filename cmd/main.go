@@ -57,6 +57,18 @@ func init() {
 		helpers.Logger.Info("Env loaded!")
 	}
 
+	// Load jwt keys
+	errKeys := config.LoadKeys()
+	if errKeys != nil {
+		errInit = errKeys
+		helpers.Logger.Warn(
+			"Failed to load keys!",
+			zap.String("Error", errKeys.Error()),
+		)
+	} else {
+		helpers.Logger.Info("Keys loaded!")
+	}
+
 	// Test Argon 2id with an empty password to ensure that everything works as expected
 	_, errArgon2id := security.EncodeArgon2id("Testing")
 	if errArgon2id != nil {
@@ -67,18 +79,6 @@ func init() {
 		)
 	} else {
 		helpers.Logger.Info("Argon2id initialized ok!")
-	}
-
-	// Connect database
-	errDB := config.ConnectDatabase()
-	if errDB != nil {
-		errInit = errDB
-		helpers.Logger.Warn(
-			"Failed to connect to database!",
-			zap.String("Error", errDB.Error()),
-		)
-	} else {
-		helpers.Logger.Info("Connected to database!")
 	}
 
 	// Connect redis
@@ -93,16 +93,28 @@ func init() {
 		helpers.Logger.Info("Connected to Redis!")
 	}
 
-	// Load keys
-	errKeys := config.LoadKeys()
-	if errKeys != nil {
-		errInit = errKeys
+	// Connect database
+	errDB := config.ConnectDatabase()
+	if errDB != nil {
+		errInit = errDB
 		helpers.Logger.Warn(
-			"Failed to load keys!",
-			zap.String("Error", errRedis.Error()),
+			"Failed to connect to database!",
+			zap.String("Error", errDB.Error()),
 		)
 	} else {
-		helpers.Logger.Info("Keys loaded!")
+		helpers.Logger.Info("Connected to database!")
+	}
+
+	// Setup SMS
+	errSms := config.SetupSMS()
+	if errSms != nil {
+		errInit = errSms
+		helpers.Logger.Warn(
+			"Failed to setup SMS!",
+			zap.String("Error", errSms.Error()),
+		)
+	} else {
+		helpers.Logger.Info("SMS configured!")
 	}
 
 	// Load OpenAPI templates
@@ -111,7 +123,7 @@ func init() {
 		errInit = errOpenAPITemplates
 		helpers.Logger.Warn(
 			"Failed to load OpenAPI templates!",
-			zap.String("Error", errRedis.Error()),
+			zap.String("Error", errOpenAPITemplates.Error()),
 		)
 	} else {
 		helpers.Logger.Info("OpenAPI templates loaded!")

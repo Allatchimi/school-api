@@ -7,10 +7,10 @@ const emptyRecipientsErrMsg = "Empty recipients! Please add least one receiver."
 
 // SendSMS Sends a SMS to a specified receiver
 func SendSMS(message string, receiver string) error {
-	return sendSMSWithTwilio(message, receiver)
+	return nil
 }
 
 // SendBulkSMS Send a SMS to multiple recipients
 func SendBulkSMS(message string, recipients []string) error {
-	return sendBulkSMSWithTwilio(message, recipients)
+	return nil
 }
