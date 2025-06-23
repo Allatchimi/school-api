@@ -59,6 +59,9 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+			if result == nil {
+				return &struct{ Body data.RequestResponse }{Body: data.RequestResponse{}}, nil
+			}
 			return &struct{ Body data.RequestResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
@@ -101,6 +104,9 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+			if result == nil {
+				return &struct{ Body data.RequestResponse }{Body: data.RequestResponse{}}, nil
+			}
 			return &struct{ Body data.RequestResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
@@ -142,6 +148,9 @@ func RegisterEndpoints(
 			result, errCode, err := controller.UpdateStatus(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			if result == nil {
+				return &struct{ Body data.RequestResponse }{Body: data.RequestResponse{}}, nil
 			}
 			return &struct{ Body data.RequestResponse }{Body: *result.ToResponse()}, nil
 		},
@@ -227,6 +236,9 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+			if result == nil {
+				return &struct{ Body data.RequestResponse }{Body: data.RequestResponse{}}, nil
+			}
 			return &struct{ Body data.RequestResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
@@ -284,6 +296,9 @@ func RegisterEndpoints(
 			}
 			result.Data = tempResults
 
+			if result == nil {
+				return &struct{ Body data.RequestResponseList }{Body: data.RequestResponseList{}}, nil
+			}
 			return &struct {
 				Body data.RequestResponseList
 			}{Body: *result}, nil
