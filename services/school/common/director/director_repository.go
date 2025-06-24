@@ -8,6 +8,7 @@ import (
 
 	"api/common/helpers"
 	"api/common/types"
+	"api/common/utils"
 	"api/services/school/common/director/data"
 	"api/services/school/common/director/model"
 )
@@ -54,6 +55,24 @@ func (repository *Repository) DeleteByID(
 	}
 	result := repository.Db.Where("id = ?", id).Delete(&model.Director{})
 	return result.RowsAffected, result.Error
+}
+
+func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
+	tmpResult := repository.Db.Where(where).Delete(&model.Director{})
+
+	result = tmpResult.RowsAffected
+	err = tmpResult.Error
+	return
+}
+
+func (repository *Repository) CountAll(schoolID int64) (result int64, err error) {
+	if schoolID <= 1 {
+		err = repository.Db.Model(&model.Director{}).Count(&result).Error
+		return
+	}
+	err = repository.Db.Model(&model.Director{}).Where("school_id = ?", schoolID).Count(&result).Error
+	return
 }
 
 func (repository *Repository) GetByID(

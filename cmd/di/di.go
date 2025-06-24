@@ -18,6 +18,7 @@ import (
 	"api/services/school/common/result"
 	"api/services/school/common/schedule"
 	"api/services/school/common/school"
+	"api/services/school/common/statistic"
 	"api/services/school/common/student"
 	"api/services/school/common/teacher"
 	"api/services/school/common/year"
@@ -190,6 +191,15 @@ func InjectDependencies() {
 	api.AllControllers.PaymentController = payment.NewController(
 		payment.NewService(
 			paymentRepo,
+		),
+	)
+	api.AllControllers.StatisticController = statistic.NewController(
+		statistic.NewService(
+			api.AllControllers.UserController.Service,
+			api.AllControllers.DirectorController.Service,
+			api.AllControllers.TeacherController.Service,
+			api.AllControllers.StudentController.Service,
+			api.AllControllers.ParentController.Service,
 		),
 	)
 

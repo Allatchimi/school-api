@@ -1,12 +1,12 @@
-package request
+package report
 
 import (
 	"net/http"
 
 	"api/common/constants"
 	"api/common/types"
-	"api/services/school/common/request/data"
-	"api/services/school/common/request/model"
+	"api/services/school/common/report/data"
+	"api/services/school/common/report/model"
 )
 
 type Service struct {
@@ -17,28 +17,16 @@ func NewService(repository *Repository) *Service {
 	return &Service{Repository: repository}
 }
 
-const MODEL_NAME = "request"
-const DEFAULT_ERROR_MESSAGE = "interact with request model"
+const MODEL_NAME = "report"
+const DEFAULT_ERROR_MESSAGE = "interact with report model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.RequestRequest) (result *model.Request, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.ReportRequest) (result *model.Report, errCode int, err error) {
 	// Format request
-	item := &model.Request{
-		SchoolID:       request.SchoolID,
-		YearID:         request.YearID,
-		ClassSubjectID: request.ClassSubjectID,
-		SequenceID:     request.SequenceID,
-		UnitID:         request.UnitID,
-		StudentID:      request.StudentID,
+	item := &model.Report{
+		StudentID: request.StudentID,
+		ExamID:    request.ExamID,
 
-		Audience: request.Audience,
-		Title:    request.Title,
-		Message:  request.Message,
-
-		Document1: request.Document1,
-		Document2: request.Document2,
-		Document3: request.Document3,
-		Document4: request.Document4,
-		Document5: request.Document5,
+		Value: request.Value,
 	}
 
 	// Check unique
@@ -54,7 +42,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Requ
 		return
 	}
 
-	// Insert request
+	// Insert
 	result, err = service.Repository.Create(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -64,28 +52,16 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Requ
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.RequestRequest) (result *model.Request, errCode int, err error) {
+func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.ReportRequest) (result *model.Report, errCode int, err error) {
 	// Format request
-	item := &model.Request{
-		SchoolID:       request.SchoolID,
-		YearID:         request.YearID,
-		ClassSubjectID: request.ClassSubjectID,
-		SequenceID:     request.SequenceID,
-		UnitID:         request.UnitID,
-		StudentID:      request.StudentID,
+	item := &model.Report{
+		StudentID: request.StudentID,
+		ExamID:    request.ExamID,
 
-		Audience: request.Audience,
-		Title:    request.Title,
-		Message:  request.Message,
-
-		Document1: request.Document1,
-		Document2: request.Document2,
-		Document3: request.Document3,
-		Document4: request.Document4,
-		Document5: request.Document5,
+		Value: request.Value,
 	}
 
-	// Check if request already exists
+	// Check if already exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -111,40 +87,8 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 		return
 	}
 
-	// Update request
+	// Update
 	result, err = service.Repository.Update(id, item)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	return
-}
-
-func (service *Service) UpdateStatus(inputJwtToken *types.JwtToken, id int64, request *data.RequestUpdateRequest) (result *model.Request, errCode int, err error) {
-	// Format request
-	item := &model.Request{
-		Status:         request.Status,
-		StatusFeedback: request.StatusFeedback,
-	}
-
-	// Check if request already exists
-	foundItem, err := service.Repository.GetByID(id)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundItem == nil {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-	foundItem.Status = item.Status
-	foundItem.StatusFeedback = item.StatusFeedback
-
-	// Update request
-	result, err = service.Repository.Update(id, foundItem)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -183,7 +127,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Request, errCode int, err error) {
+func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Report, errCode int, err error) {
 	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -198,7 +142,7 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Request, errCode int, err error) {
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Report, errCode int, err error) {
 	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError

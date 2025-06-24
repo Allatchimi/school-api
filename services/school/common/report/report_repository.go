@@ -1,4 +1,4 @@
-package result
+package report
 
 import (
 	"fmt"
@@ -9,8 +9,8 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
-	"api/services/school/common/result/data"
-	"api/services/school/common/result/model"
+	"api/services/school/common/report/data"
+	"api/services/school/common/report/model"
 )
 
 type Repository struct {
@@ -21,18 +21,18 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(data *model.Result) (*model.Result, error) {
+func (repository *Repository) Create(data *model.Report) (*model.Report, error) {
 	result := *data
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, data *model.Result) (*model.Result, error) {
+func (repository *Repository) Update(id int64, data *model.Report) (*model.Report, error) {
 	foundItem, err := repository.GetByID(id)
 	if err != nil || foundItem == nil || foundItem.ID != id {
 		return nil, err
 	}
 
-	result := &model.Result{}
+	result := &model.Report{}
 	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
 		map[string]any{
 			"student_id": data.StudentID,
@@ -44,33 +44,38 @@ func (repository *Repository) Update(id int64, data *model.Result) (*model.Resul
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
-	result := repository.Db.Where("id = ?", id).Delete(&model.Result{})
+	foundItem, err := repository.GetByID(id)
+	if err != nil || foundItem == nil || foundItem.ID != id {
+		return -1, err
+	}
+
+	result := repository.Db.Where("id = ?", id).Delete(&model.Report{})
 	return result.RowsAffected, result.Error
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.Result{})
+	tmpResult := repository.Db.Where(where).Delete(&model.Report{})
 
 	result = tmpResult.RowsAffected
 	err = tmpResult.Error
 	return
 }
 
-func (repository *Repository) GetByID(id int64) (*model.Result, error) {
-	result := &model.Result{}
-	return result, repository.Db.Model(&model.Result{}).Where("id = ?", id).Limit(1).Find(result).Error
+func (repository *Repository) GetByID(id int64) (*model.Report, error) {
+	result := &model.Report{}
+	return result, repository.Db.Model(&model.Report{}).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetUniqueObject(item *model.Result) (*model.Result, error) {
-	result := &model.Result{}
-	return result, repository.Db.Preload(clause.Associations).Where(&model.Result{
+func (repository *Repository) GetUniqueObject(item *model.Report) (*model.Report, error) {
+	result := &model.Report{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.Report{
 		StudentID: item.StudentID,
 		ExamID:    item.ExamID,
 	}).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) AreSameUniqueObjects(item1 *model.Result, item2 *model.Result) bool {
+func (repository *Repository) AreSameUniqueObjects(item1 *model.Report, item2 *model.Report) bool {
 	if item1 != nil && item2 != nil &&
 		(item1.StudentID == item2.StudentID &&
 			item1.ExamID == item2.ExamID) {
@@ -82,8 +87,8 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.Result, item2 *m
 func (repository *Repository) GetAll(
 	filter *types.Filter, pagination *types.Pagination,
 	request *data.GetAllRequest,
-) (result []model.Result, err error) {
-	result = make([]model.Result, 0)
+) (result []model.Report, err error) {
+	result = make([]model.Report, 0)
 	var where string = ""
 	if request != nil {
 		if request.SchoolID > 0 {

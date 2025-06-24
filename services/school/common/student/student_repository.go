@@ -8,6 +8,7 @@ import (
 
 	"api/common/helpers"
 	"api/common/types"
+	"api/common/utils"
 	"api/services/school/common/student/data"
 	"api/services/school/common/student/model"
 )
@@ -31,8 +32,8 @@ func (repository *Repository) CreateStudentEnroll(item *model.StudentEnroll) (*m
 }
 
 func (repository *Repository) UpdateByID(id int64, item *model.Student) (*model.Student, error) {
-	tempStudent, err := repository.GetByID(id)
-	if err != nil || tempStudent == nil || tempStudent.ID != id {
+	foundItem, err := repository.GetByID(id)
+	if err != nil || foundItem == nil || foundItem.ID != id {
 		return nil, err
 	}
 	result := &model.Student{}
@@ -46,8 +47,8 @@ func (repository *Repository) UpdateByID(id int64, item *model.Student) (*model.
 }
 
 func (repository *Repository) UpdateStudentEnrollByID(id int64, item *model.StudentEnroll) (*model.StudentEnroll, error) {
-	tempStudent, err := repository.GetByID(id)
-	if err != nil || tempStudent == nil || tempStudent.ID != id {
+	foundItem, err := repository.GetByID(id)
+	if err != nil || foundItem == nil || foundItem.ID != id {
 		return nil, err
 	}
 	result := &model.StudentEnroll{}
@@ -83,21 +84,31 @@ func (repository *Repository) UpdateStudentEnrollByID(id int64, item *model.Stud
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
-	foundItem, err := repository.GetByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return -1, err
-	}
 	result := repository.Db.Where("id = ?", id).Delete(&model.Student{})
 	return result.RowsAffected, result.Error
 }
 
 func (repository *Repository) DeleteStudentEnrollByID(id int64) (int64, error) {
-	foundItem, err := repository.GetStudentEnrollByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return -1, err
-	}
 	result := repository.Db.Where("id = ?", id).Delete(&model.StudentEnroll{})
 	return result.RowsAffected, result.Error
+}
+
+func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
+	tmpResult := repository.Db.Where(where).Delete(&model.Student{})
+
+	result = tmpResult.RowsAffected
+	err = tmpResult.Error
+	return
+}
+
+func (repository *Repository) CountAll(schoolID int64) (result int64, err error) {
+	if schoolID <= 1 {
+		err = repository.Db.Model(&model.Student{}).Count(&result).Error
+		return
+	}
+	err = repository.Db.Model(&model.Student{}).Where("school_id = ?", schoolID).Count(&result).Error
+	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.Student, error) {

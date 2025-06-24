@@ -1,4 +1,4 @@
-package director
+package report
 
 import (
 	"context"
@@ -9,7 +9,8 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
-	"api/services/school/common/director/data"
+	"api/services/school/common/report/data"
+	"api/services/school/common/report/model"
 )
 
 func RegisterEndpoints(
@@ -17,18 +18,18 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/schools/directors",
-		Tag:   []string{"Directors"},
+		Group: "/schools/reports",
+		Tag:   []string{"Reports"},
 	}
-	const tableName = "directors"
+	const tableName = "reports"
 
-	// Create director
+	// Create report
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-director",
-			Summary:     "Create director",
-			Description: "Create new director and return created object.",
+			OperationID: "post-report",
+			Summary:     "Create report",
+			Description: "Create new report and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -51,24 +52,24 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.DirectorRequest
+				Body data.ReportRequest
 			},
-		) (*struct{ Body data.DirectorResponse }, error) {
+		) (*struct{ Body data.ReportResponse }, error) {
 			result, errCode, err := controller.Create(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.DirectorResponse }{Body: *result.ToDirectorResponse()}, nil
+			return &struct{ Body data.ReportResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Update director with id
+	// Update report with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "update-director",
-			Summary:     "Update director",
-			Description: "Update existing director with matching id and return the new object.",
+			OperationID: "update-report",
+			Summary:     "Update report",
+			Description: "Update existing report with matching id and return the new report object.",
 			Method:      http.MethodPut,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -91,25 +92,25 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.DirectorID
-				Body data.DirectorRequest
+				data.ReportID
+				Body data.ReportRequest
 			},
-		) (*struct{ Body data.DirectorResponse }, error) {
+		) (*struct{ Body data.ReportResponse }, error) {
 			result, errCode, err := controller.Update(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.DirectorResponse }{Body: *result.ToDirectorResponse()}, nil
+			return &struct{ Body data.ReportResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Delete director with id
+	// Delete report with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-director",
-			Summary:     "Delete director",
-			Description: "Delete existing director with matching id and return affected rows in database.",
+			OperationID: "delete-report",
+			Summary:     "Delete report",
+			Description: "Delete existing report with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -132,7 +133,7 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.DirectorID
+				data.ReportID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.Delete(&ctx, input)
@@ -143,13 +144,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete multiple director
+	// Delete multiple report
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-director-multiple",
-			Summary:     "Delete multiple director",
-			Description: "Delete multiple director by providing a lis of IDs and return affected rows in database.",
+			OperationID: "delete-report-multiple",
+			Summary:     "Delete multiple report",
+			Description: "Delete multiple report by providing a lis of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -183,13 +184,13 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get director by id
+	// Get report by id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-director-id",
-			Summary:     "Get director by id",
-			Description: "Return one director with matching id",
+			OperationID: "get-report-id",
+			Summary:     "Get report by id",
+			Description: "Return one report with matching id",
 			Method:      http.MethodGet,
 			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -199,7 +200,7 @@ func RegisterEndpoints(
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-							constants.FeatureDirector,
+							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
 						), // Features scope
@@ -215,24 +216,24 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.DirectorID
+				data.ReportID
 			},
-		) (*struct{ Body data.DirectorResponse }, error) {
+		) (*struct{ Body data.ReportResponse }, error) {
 			result, errCode, err := controller.Get(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.DirectorResponse }{Body: *result.ToDirectorResponse()}, nil
+			return &struct{ Body data.ReportResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Get all director
+	// Get all report
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-director-list",
-			Summary:     "Get all director",
-			Description: "Get all director with support for search, filter and pagination",
+			OperationID: "get-report-list",
+			Summary:     "Get all report",
+			Description: "Get all report with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -263,23 +264,26 @@ func RegisterEndpoints(
 				data.GetAllRequest
 			},
 		) (*struct {
-			Body data.DirectorResponseList
+			Body data.ReportResponseList
 		}, error) {
 			result, errCode, err := controller.GetAll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			tempResults := make([]data.DirectorResponse, 10)
-			for i := range tempResults {
-				tmpModel := data.DirectorResponse{}
+			tempReports := make([]model.Report, 10)
+			for i := range tempReports {
+				tmpModel := model.Report{}
 				tmpModel.ID = int64(i)
-				tempResults[i] = tmpModel
+				tmpModel.StudentID = int64(i)
+				tmpModel.ExamID = int64(i)
+				tmpModel.Value = float64(13)
+				tempReports[i] = tmpModel
 			}
-			result.Data = tempResults
+			result.Data = model.ToReportResponseList(tempReports)
 
 			return &struct {
-				Body data.DirectorResponseList
+				Body data.ReportResponseList
 			}{Body: *result}, nil
 		},
 	)

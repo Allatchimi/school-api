@@ -1,12 +1,12 @@
-package result
+package report
 
 import (
 	"context"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/services/school/common/result/data"
-	"api/services/school/common/result/model"
+	"api/services/school/common/report/data"
+	"api/services/school/common/report/model"
 )
 
 type Controller struct {
@@ -20,9 +20,9 @@ func NewController(service *Service) *Controller {
 func (controller *Controller) Create(
 	ctx *context.Context,
 	input *struct {
-		Body data.ResultRequest
+		Body data.ReportRequest
 	},
-) (result *model.Result, errCode int, err error) {
+) (result *model.Report, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
 		&input.Body,
@@ -33,10 +33,10 @@ func (controller *Controller) Create(
 func (controller *Controller) Update(
 	ctx *context.Context,
 	input *struct {
-		data.ResultID
-		Body data.ResultRequest
+		data.ReportID
+		Body data.ReportRequest
 	},
-) (result *model.Result, errCode int, err error) {
+) (result *model.Report, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
 		helpers.GetJwtContext(ctx),
 		input.ID,
@@ -48,7 +48,7 @@ func (controller *Controller) Update(
 func (controller *Controller) Delete(
 	ctx *context.Context,
 	input *struct {
-		data.ResultID
+		data.ReportID
 	},
 ) (result int64, errCode int, err error) {
 	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
@@ -76,9 +76,9 @@ func (controller *Controller) DeleteMultiple(
 func (controller *Controller) Get(
 	ctx *context.Context,
 	input *struct {
-		data.ResultID
+		data.ReportID
 	},
-) (result *model.Result, errCode int, err error) {
+) (result *model.Report, errCode int, err error) {
 	result, errCode, err = controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
 	return
 }
@@ -90,14 +90,14 @@ func (controller *Controller) GetAll(
 		types.PaginationRequest
 		data.GetAllRequest
 	},
-) (result *data.ResultResponseList, errCode int, err error) {
+) (result *data.ReportResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
 	resultList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}
-	result = &data.ResultResponseList{
-		Data: model.ToResultResponseList(resultList),
+	result = &data.ReportResponseList{
+		Data: model.ToReportResponseList(resultList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

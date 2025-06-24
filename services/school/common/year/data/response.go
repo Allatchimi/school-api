@@ -20,5 +20,5 @@ type YearPublicResponse struct {
 
 type YearResponseList struct {
 	types.PaginatedResponse
-	Data []YearResponse `json:"data" required:"false" doc:"List of academic years" example:"[]"`
+	Data []YearResponse `json:"data" required:"false" doc:"List of academic years"`
 }

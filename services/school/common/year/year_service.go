@@ -163,9 +163,9 @@ func (service *Service) GetAll(
 	inputJwtToken *types.JwtToken,
 	filter *types.Filter,
 	pagination *types.Pagination,
-	schoolID int64,
+	request *data.GetAllRequest,
 ) (result []model.Year, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, &data.GetAllRequest{SchoolID: schoolID})
+	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

@@ -8,6 +8,7 @@ import (
 
 	"api/common/helpers"
 	"api/common/types"
+	"api/common/utils"
 	"api/services/school/common/exam/data"
 	"api/services/school/common/exam/model"
 )
@@ -20,30 +21,14 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) CreateType(data *model.ExamType) (*model.ExamType, error) {
-	result := *data
-	return &result, repository.Db.Create(&result).Error
-}
-
 func (repository *Repository) Create(data *model.Exam) (*model.Exam, error) {
 	result := *data
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) UpdateType(id int64, data *model.ExamType) (*model.ExamType, error) {
-	tempExam, err := repository.GetTypeById(id)
-	if err != nil || tempExam == nil || tempExam.ID != id {
-		return nil, err
-	}
-
-	result := &model.ExamType{}
-	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":   data.SchoolID,
-			"name":        data.Name,
-			"description": data.Description,
-		},
-	).Error
+func (repository *Repository) CreateType(data *model.ExamType) (*model.ExamType, error) {
+	result := *data
+	return &result, repository.Db.Create(&result).Error
 }
 
 func (repository *Repository) Update(id int64, data *model.Exam) (*model.Exam, error) {
@@ -74,18 +59,24 @@ func (repository *Repository) Update(id int64, data *model.Exam) (*model.Exam, e
 	).Error
 }
 
-func (repository *Repository) DeleteType(id int64) (int64, error) {
-	tempExam, err := repository.GetTypeById(id)
+func (repository *Repository) UpdateType(id int64, data *model.ExamType) (*model.ExamType, error) {
+	tempExam, err := repository.GetTypeByID(id)
 	if err != nil || tempExam == nil || tempExam.ID != id {
-		return -1, err
+		return nil, err
 	}
 
-	result := repository.Db.Where("id = ?", id).Delete(&model.ExamType{})
-	return result.RowsAffected, result.Error
+	result := &model.ExamType{}
+	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
+		map[string]any{
+			"school_id":   data.SchoolID,
+			"name":        data.Name,
+			"description": data.Description,
+		},
+	).Error
 }
 
-func (repository *Repository) Delete(id int64) (int64, error) {
-	tempExam, err := repository.GetTypeById(id)
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
+	tempExam, err := repository.GetTypeByID(id)
 	if err != nil || tempExam == nil || tempExam.ID != id {
 		return -1, err
 	}
@@ -94,14 +85,33 @@ func (repository *Repository) Delete(id int64) (int64, error) {
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) GetTypeById(id int64) (*model.ExamType, error) {
-	result := &model.ExamType{}
-	return result, repository.Db.Model(&model.ExamType{}).Where("id = ?", id).Limit(1).Find(result).Error
+func (repository *Repository) DeleteTypeByID(id int64) (int64, error) {
+	tempExam, err := repository.GetTypeByID(id)
+	if err != nil || tempExam == nil || tempExam.ID != id {
+		return -1, err
+	}
+
+	result := repository.Db.Where("id = ?", id).Delete(&model.ExamType{})
+	return result.RowsAffected, result.Error
+}
+
+func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
+	tmpResult := repository.Db.Where(where).Delete(&model.Exam{})
+
+	result = tmpResult.RowsAffected
+	err = tmpResult.Error
+	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.Exam, error) {
 	result := &model.Exam{}
 	return result, repository.Db.Model(&model.Exam{}).Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetTypeByID(id int64) (*model.ExamType, error) {
+	result := &model.ExamType{}
+	return result, repository.Db.Model(&model.ExamType{}).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.Exam) (*model.Exam, error) {

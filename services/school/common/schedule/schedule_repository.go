@@ -78,22 +78,12 @@ func (repository *Repository) UpdateScheduleGeneric(id int64, data *model.Schedu
 	).Error
 }
 
-func (repository *Repository) Delete(id int64) (int64, error) {
-	tempSchedule, err := repository.GetByID(id)
-	if err != nil || tempSchedule == nil || tempSchedule.ID != id {
-		return -1, err
-	}
-
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.Schedule{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteScheduleGeneric(id int64) (int64, error) {
-	tempSchedule, err := repository.GetScheduleGenericByID(id)
-	if err != nil || tempSchedule == nil || tempSchedule.ID != id {
-		return -1, err
-	}
-
+func (repository *Repository) DeleteScheduleGenericByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.ScheduleGeneric{})
 	return result.RowsAffected, result.Error
 }

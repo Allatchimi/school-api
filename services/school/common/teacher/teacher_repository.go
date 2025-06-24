@@ -8,6 +8,7 @@ import (
 
 	"api/common/helpers"
 	"api/common/types"
+	"api/common/utils"
 	"api/services/school/common/teacher/data"
 	"api/services/school/common/teacher/model"
 )
@@ -38,8 +39,8 @@ func (repository *Repository) UpdateByID(
 	id int64,
 	item *model.Teacher,
 ) (*model.Teacher, error) {
-	tempTeacher, err := repository.GetByID(id)
-	if err != nil || tempTeacher == nil || tempTeacher.ID != id {
+	foundItem, err := repository.GetByID(id)
+	if err != nil || foundItem == nil || foundItem.ID != id {
 		return nil, err
 	}
 	result := &model.Teacher{}
@@ -56,8 +57,8 @@ func (repository *Repository) UpdateTeacherClassSubjectUnitByID(
 	id int64,
 	item *model.TeacherClassSubjectUnit,
 ) (*model.TeacherClassSubjectUnit, error) {
-	tempTeacher, err := repository.GetByID(id)
-	if err != nil || tempTeacher == nil || tempTeacher.ID != id {
+	foundItem, err := repository.GetByID(id)
+	if err != nil || foundItem == nil || foundItem.ID != id {
 		return nil, err
 	}
 	result := &model.TeacherClassSubjectUnit{}
@@ -74,10 +75,6 @@ func (repository *Repository) UpdateTeacherClassSubjectUnitByID(
 func (repository *Repository) DeleteByID(
 	id int64,
 ) (int64, error) {
-	foundItem, err := repository.GetByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return -1, err
-	}
 	result := repository.Db.Where("id = ?", id).Delete(&model.Teacher{})
 	return result.RowsAffected, result.Error
 }
@@ -91,6 +88,24 @@ func (repository *Repository) DeleteTeacherClassSubjectUnitByID(
 	}
 	result := repository.Db.Where("id = ?", id).Delete(&model.TeacherClassSubjectUnit{})
 	return result.RowsAffected, result.Error
+}
+
+func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
+	tmpResult := repository.Db.Where(where).Delete(&model.Teacher{})
+
+	result = tmpResult.RowsAffected
+	err = tmpResult.Error
+	return
+}
+
+func (repository *Repository) CountAll(schoolID int64) (result int64, err error) {
+	if schoolID <= 1 {
+		err = repository.Db.Model(&model.Teacher{}).Count(&result).Error
+		return
+	}
+	err = repository.Db.Model(&model.Teacher{}).Where("school_id = ?", schoolID).Count(&result).Error
+	return
 }
 
 func (repository *Repository) GetByID(

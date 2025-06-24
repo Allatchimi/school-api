@@ -76,6 +76,16 @@ func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, er
 	return
 }
 
+func (repository *Repository) CountAllGroupByYear(result any) (err error) {
+	err = repository.Db.
+		Model(&model.User{}).
+		Select("EXTRACT(YEAR FROM created_at) AS year, COUNT(*) AS count").
+		Group("year").
+		Order("year").
+		Scan(&result).Error
+	return
+}
+
 func (repository *Repository) GetByID(id int64) (*model.User, error) {
 	result := &model.User{}
 	return result, repository.Db.Preload(clause.Associations).
@@ -142,6 +152,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 			helpers.PaginationScope(
 				repository.Db,
 				"SELECT users.* "+
+					"FROM users "+
 					"LEFT JOIN user_infos AS infos ON users.user_info_id = infos.id "+
 					"LEFT JOIN roles ON users.role_id = roles.id",
 				where,

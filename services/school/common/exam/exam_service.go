@@ -20,37 +20,6 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "exam/type"
 const DEFAULT_ERROR_MESSAGE = "interact with exam/type model"
 
-func (service *Service) CreateType(inputJwtToken *types.JwtToken, request *data.ExamTypeRequest) (result *model.ExamType, errCode int, err error) {
-	// Format request
-	item := &model.ExamType{
-		SchoolID:    request.SchoolID,
-		Name:        request.Name,
-		Description: request.Description,
-	}
-
-	// Check unique
-	foundUnique, err := service.Repository.GetExamTypeUniqueObject(item)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if service.Repository.AreSameExamTypeUniqueObjects(foundUnique, item) {
-		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage(MODEL_NAME)
-		return
-	}
-
-	// Insert exam
-	result, err = service.Repository.CreateType(item)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	return
-}
-
 func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.ExamRequest) (result *model.Exam, errCode int, err error) {
 	// Format request
 	item := &model.Exam{
@@ -94,20 +63,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Exam
 	return
 }
 
-func (service *Service) UpdateType(inputJwtToken *types.JwtToken, id int64, request *data.ExamTypeRequest) (result *model.ExamType, errCode int, err error) {
-	// Check if exam already exists
-	foundItem, err := service.Repository.GetTypeById(id)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundItem == nil {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-
+func (service *Service) CreateType(inputJwtToken *types.JwtToken, request *data.ExamTypeRequest) (result *model.ExamType, errCode int, err error) {
 	// Format request
 	item := &model.ExamType{
 		SchoolID:    request.SchoolID,
@@ -122,14 +78,14 @@ func (service *Service) UpdateType(inputJwtToken *types.JwtToken, id int64, requ
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if service.Repository.AreSameExamTypeUniqueObjects(foundUnique, item) && !service.Repository.AreSameExamTypeUniqueObjects(foundUnique, foundItem) {
+	if service.Repository.AreSameExamTypeUniqueObjects(foundUnique, item) {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
 	}
 
-	// Update exam
-	result, err = service.Repository.UpdateType(id, item)
+	// Insert exam
+	result, err = service.Repository.CreateType(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -194,23 +150,52 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	return
 }
 
-func (service *Service) DeleteType(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteType(id)
+func (service *Service) UpdateType(inputJwtToken *types.JwtToken, id int64, request *data.ExamTypeRequest) (result *model.ExamType, errCode int, err error) {
+	// Check if exam already exists
+	foundItem, err := service.Repository.GetTypeByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if affectedRows <= 0 {
+	if foundItem == nil {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Format request
+	item := &model.ExamType{
+		SchoolID:    request.SchoolID,
+		Name:        request.Name,
+		Description: request.Description,
+	}
+
+	// Check unique
+	foundUnique, err := service.Repository.GetExamTypeUniqueObject(item)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if service.Repository.AreSameExamTypeUniqueObjects(foundUnique, item) && !service.Repository.AreSameExamTypeUniqueObjects(foundUnique, foundItem) {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Update exam
+	result, err = service.Repository.UpdateType(id, item)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	return
 }
 
 func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(id)
+	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -224,14 +209,29 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) GetType(inputJwtToken *types.JwtToken, examID int64) (result *model.ExamType, errCode int, err error) {
-	result, err = service.Repository.GetTypeById(examID)
+func (service *Service) DeleteType(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteTypeByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if result == nil {
+	if affectedRows <= 0 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+	return
+}
+
+func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteMultipleByID(list)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
@@ -254,8 +254,23 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, examID int64) (result
 	return
 }
 
-func (service *Service) GetAllExamType(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllExamTypeRequest) (result []model.ExamType, errCode int, err error) {
-	result, err = service.Repository.GetAllExamType(filter, pagination, request)
+func (service *Service) GetType(inputJwtToken *types.JwtToken, examID int64) (result *model.ExamType, errCode int, err error) {
+	result, err = service.Repository.GetTypeByID(examID)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if result == nil {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+	return
+}
+
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Exam, errCode int, err error) {
+	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -263,8 +278,8 @@ func (service *Service) GetAllExamType(inputJwtToken *types.JwtToken, filter *ty
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Exam, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, request)
+func (service *Service) GetAllExamType(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllExamTypeRequest) (result []model.ExamType, errCode int, err error) {
+	result, err = service.Repository.GetAllExamType(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

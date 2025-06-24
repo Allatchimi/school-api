@@ -8,6 +8,7 @@ import (
 
 	"api/common/helpers"
 	"api/common/types"
+	"api/common/utils"
 	"api/services/school/common/request/data"
 	"api/services/school/common/request/model"
 )
@@ -26,8 +27,8 @@ func (repository *Repository) Create(data *model.Request) (*model.Request, error
 }
 
 func (repository *Repository) Update(id int64, data *model.Request) (*model.Request, error) {
-	tempResult, err := repository.GetByID(id)
-	if err != nil || tempResult == nil || tempResult.ID != id {
+	foundItem, err := repository.GetByID(id)
+	if err != nil || foundItem == nil || foundItem.ID != id {
 		return nil, err
 	}
 
@@ -56,14 +57,23 @@ func (repository *Repository) Update(id int64, data *model.Request) (*model.Requ
 	).Error
 }
 
-func (repository *Repository) Delete(id int64) (int64, error) {
-	tempResult, err := repository.GetByID(id)
-	if err != nil || tempResult == nil || tempResult.ID != id {
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
+	foundItem, err := repository.GetByID(id)
+	if err != nil || foundItem == nil || foundItem.ID != id {
 		return -1, err
 	}
 
 	result := repository.Db.Where("id = ?", id).Delete(&model.Request{})
 	return result.RowsAffected, result.Error
+}
+
+func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
+	tmpResult := repository.Db.Where(where).Delete(&model.Request{})
+
+	result = tmpResult.RowsAffected
+	err = tmpResult.Error
+	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.Request, error) {

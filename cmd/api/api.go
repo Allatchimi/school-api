@@ -25,6 +25,7 @@ import (
 	"api/services/school/common/result"
 	"api/services/school/common/schedule"
 	"api/services/school/common/school"
+	"api/services/school/common/statistic"
 	"api/services/school/common/student"
 	"api/services/school/common/teacher"
 	"api/services/school/common/year"
@@ -61,20 +62,21 @@ type Controllers struct {
 	ProfileController    *profile.Controller
 
 	// School service
-	SchoolController   *school.Controller
-	DirectorController *director.Controller
-	TeacherController  *teacher.Controller
-	StudentController  *student.Controller
-	ParentController   *parent.Controller
-	YearController     *year.Controller
-	CourseController   *course.Controller
-	ExamController     *exam.Controller
-	MeetingController  *meeting.Controller
-	QuizController     *quiz.Controller
-	RequestController  *request.Controller
-	ResultController   *result.Controller
-	ScheduleController *schedule.Controller
-	PaymentController  *payment.Controller
+	SchoolController    *school.Controller
+	DirectorController  *director.Controller
+	TeacherController   *teacher.Controller
+	StudentController   *student.Controller
+	ParentController    *parent.Controller
+	YearController      *year.Controller
+	CourseController    *course.Controller
+	ExamController      *exam.Controller
+	MeetingController   *meeting.Controller
+	QuizController      *quiz.Controller
+	RequestController   *request.Controller
+	ResultController    *result.Controller
+	ScheduleController  *schedule.Controller
+	PaymentController   *payment.Controller
+	StatisticController *statistic.Controller
 	// Secondary
 	SectionController   *section.Controller
 	SpecialtyController *specialty.Controller
@@ -122,6 +124,7 @@ func registerEndpoints(humaApi *huma.API) {
 	result.RegisterEndpoints(humaApi, AllControllers.ResultController)
 	schedule.RegisterEndpoints(humaApi, AllControllers.ScheduleController)
 	payment.RegisterEndpoints(humaApi, AllControllers.PaymentController)
+	statistic.RegisterEndpoints(humaApi, AllControllers.StatisticController)
 	// Highschool
 	sequence.RegisterEndpoints(humaApi, AllControllers.SequenceController)
 	quarter.RegisterEndpoints(humaApi, AllControllers.QuarterController)

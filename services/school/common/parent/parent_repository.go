@@ -8,6 +8,7 @@ import (
 
 	"api/common/helpers"
 	"api/common/types"
+	"api/common/utils"
 	"api/services/school/common/parent/data"
 	"api/services/school/common/parent/model"
 )
@@ -59,7 +60,7 @@ func (repository *Repository) UpdateParentStudent(id int64, item *model.ParentSt
 	).Error
 }
 
-func (repository *Repository) Delete(id int64) (int64, error) {
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	foundItem, err := repository.GetByID(id)
 	if err != nil || foundItem == nil || foundItem.ID != id {
 		return -1, err
@@ -69,7 +70,7 @@ func (repository *Repository) Delete(id int64) (int64, error) {
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteParentStudent(id int64) (int64, error) {
+func (repository *Repository) DeleteParentStudentByID(id int64) (int64, error) {
 	foundItem, err := repository.GetParentStudentByID(id)
 	if err != nil || foundItem == nil || foundItem.ID != id {
 		return -1, err
@@ -77,6 +78,24 @@ func (repository *Repository) DeleteParentStudent(id int64) (int64, error) {
 
 	result := repository.Db.Where("id = ?", id).Delete(&model.ParentStudent{})
 	return result.RowsAffected, result.Error
+}
+
+func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
+	tmpResult := repository.Db.Where(where).Delete(&model.Parent{})
+
+	result = tmpResult.RowsAffected
+	err = tmpResult.Error
+	return
+}
+
+func (repository *Repository) CountAll(schoolID int64) (result int64, err error) {
+	if schoolID <= 1 {
+		err = repository.Db.Model(&model.Parent{}).Count(&result).Error
+		return
+	}
+	err = repository.Db.Model(&model.Parent{}).Where("school_id = ?", schoolID).Count(&result).Error
+	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.Parent, error) {
