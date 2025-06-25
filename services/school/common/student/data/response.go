@@ -5,7 +5,7 @@ import (
 	dataSchool "api/services/school/common/school/data"
 	dataYear "api/services/school/common/year/data"
 	dataClass "api/services/school/highschool/class/data"
-	dataLevelDomain "api/services/school/university/level/data"
+	dataLevel "api/services/school/university/level/data"
 	dataUser "api/services/user/user/data"
 	"time"
 )
@@ -28,11 +28,11 @@ type StudentEnrollResponse struct {
 }
 
 type StudentEnrollPublicResponse struct {
-	School      *dataSchool.SchoolPublicResponse           `json:"school" required:"false" doc:"School"`
-	Year        *dataYear.YearPublicResponse               `json:"year" required:"false" doc:"Year"`
-	Class       *dataClass.ClassPublicResponse             `json:"class" required:"false" doc:"Class"`
-	LevelDomain *dataLevelDomain.LevelDomainPublicResponse `json:"levelDomain" required:"false" doc:"Level for domain"`
-	Student     *StudentPublicResponse                     `json:"student" required:"false" doc:"Student"`
+	School      *dataSchool.SchoolPublicResponse     `json:"school" required:"false" doc:"School"`
+	Year        *dataYear.YearPublicResponse         `json:"year" required:"false" doc:"Year"`
+	Class       *dataClass.ClassPublicResponse       `json:"class" required:"false" doc:"Class"`
+	LevelDomain *dataLevel.LevelDomainPublicResponse `json:"levelDomain" required:"false" doc:"Level for domain"`
+	Student     *StudentPublicResponse               `json:"student" required:"false" doc:"Student"`
 
 	Email       string `json:"email" required:"false" doc:"Email"`
 	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number"`

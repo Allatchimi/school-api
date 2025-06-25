@@ -3,33 +3,33 @@ package model
 import (
 	"api/common/types"
 	"api/services/school/common/request/data"
-	schoolModel "api/services/school/common/school/model"
-	studentmodel "api/services/school/common/student/model"
-	yearModel "api/services/school/common/year/model"
-	classModel "api/services/school/highschool/class/model"
-	sequenceModel "api/services/school/highschool/sequence/model"
-	unitmodel "api/services/school/university/unit/model"
+	modelSchool "api/services/school/common/school/model"
+	modelStudent "api/services/school/common/student/model"
+	modelYear "api/services/school/common/year/model"
+	modelClass "api/services/school/highschool/class/model"
+	modelSequence "api/services/school/highschool/sequence/model"
+	modelUnit "api/services/school/university/unit/model"
 )
 
 type Request struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
-	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	YearID int64           `gorm:"default:null"`
-	Year   *yearModel.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Year   *modelYear.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	ClassSubjectID int64                              `gorm:"default:null"`
-	ClassSubject   *classModel.HighschoolClassSubject `gorm:"default:null;foreignKey:ClassSubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	ClassSubject   *modelClass.HighschoolClassSubject `gorm:"default:null;foreignKey:ClassSubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	SequenceID int64                             `gorm:"default:null"`
-	Sequence   *sequenceModel.HighschoolSequence `gorm:"default:null;foreignKey:SequenceID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Sequence   *modelSequence.HighschoolSequence `gorm:"default:null;foreignKey:SequenceID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	UnitID int64                     `gorm:"default:null"`
-	Unit   *unitmodel.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	StudentID int64                 `gorm:"default:null"`
-	Student   *studentmodel.Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Student   *modelStudent.Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Status         string `gorm:"default:null"`
 	StatusFeedback string `gorm:"default:null"`

@@ -2,7 +2,7 @@ package data
 
 import (
 	"api/common/types"
-	"api/services/school/common/school/data"
+	dataSchool "api/services/school/common/school/data"
 )
 
 type SubjectResponse struct {
@@ -11,7 +11,7 @@ type SubjectResponse struct {
 }
 
 type SubjectPublicResponse struct {
-	School *data.SchoolPublicResponse `json:"school" doc:"School"`
+	School *dataSchool.SchoolPublicResponse `json:"school" doc:"School"`
 
 	Name        string `json:"name" required:"false" doc:"Name"`
 	Description string `json:"description" required:"false" doc:"Description"`

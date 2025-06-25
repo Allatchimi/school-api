@@ -2,7 +2,7 @@ package model
 
 import (
 	"api/common/types"
-	domainModel "api/services/school/university/domain/model"
+	modelDomain "api/services/school/university/domain/model"
 	"api/services/school/university/level/data"
 	"time"
 )
@@ -13,7 +13,7 @@ type UniversityLevelDomain struct {
 	Level   *UniversityLevel `gorm:"default:null;foreignKey:LevelID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	DomainID int64                         `gorm:"default:null"`
-	Domain   *domainModel.UniversityDomain `gorm:"default:null;foreignKey:DomainID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Domain   *modelDomain.UniversityDomain `gorm:"default:null;foreignKey:DomainID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Fees         int64      `gorm:"default null"`
 	Program      string     `gorm:"default null"`

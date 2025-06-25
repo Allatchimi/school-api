@@ -2,8 +2,8 @@ package data
 
 import (
 	"api/common/types"
-	schoolData "api/services/school/common/school/data"
-	domainData "api/services/school/university/domain/data"
+	dataSchool "api/services/school/common/school/data"
+	dataDomain "api/services/school/university/domain/data"
 	"time"
 )
 
@@ -13,8 +13,8 @@ type LevelResponse struct {
 }
 
 type LevelPublicResponse struct {
-	School      *schoolData.SchoolPublicResponse `json:"school" doc:"School"`
-	Domain      *domainData.DomainPublicResponse `json:"domain" doc:"Domain"`
+	School      *dataSchool.SchoolPublicResponse `json:"school" doc:"School"`
+	Domain      *dataDomain.DomainPublicResponse `json:"domain" doc:"Domain"`
 	Name        string                           `json:"name" required:"false" doc:"Level name"`
 	Description string                           `json:"description" required:"false" doc:"Level description"`
 }
@@ -25,7 +25,7 @@ type LevelDomainResponse struct {
 }
 
 type LevelDomainPublicResponse struct {
-	Domain *domainData.DomainPublicResponse `json:"domain" required:"false" doc:"Domain"`
+	Domain *dataDomain.DomainPublicResponse `json:"domain" required:"false" doc:"Domain"`
 	Level  *LevelPublicResponse             `json:"level" required:"false" doc:"Level"`
 
 	Fees         int64  `json:"fees" required:"false" doc:"Level domain fees"`

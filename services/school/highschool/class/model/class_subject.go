@@ -3,7 +3,7 @@ package model
 import (
 	"api/common/types"
 	"api/services/school/highschool/class/data"
-	subjectModel "api/services/school/highschool/subject/model"
+	modelSubject "api/services/school/highschool/subject/model"
 	"time"
 )
 
@@ -13,7 +13,7 @@ type HighschoolClassSubject struct {
 	Class   *HighschoolClass `gorm:"default:null;foreignKey:ClassID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	SubjectID int64                           `gorm:"default:null"`
-	Subject   *subjectModel.HighschoolSubject `gorm:"default:null;foreignKey:SubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Subject   *modelSubject.HighschoolSubject `gorm:"default:null;foreignKey:SubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Coefficient  int        `gorm:"default:1"`
 	Program      string     `gorm:"default null"`

@@ -3,13 +3,13 @@ package model
 import (
 	"api/common/types"
 	"api/services/user/permission/data"
-	"api/services/user/role/model"
+	modelRole "api/services/user/role/model"
 )
 
 type Permission struct {
 	types.BaseGormModel
-	RoleID int64       `gorm:"default:null"`
-	Role   *model.Role `gorm:"default:null;foreignKey:RoleID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	RoleID int64           `gorm:"default:null"`
+	Role   *modelRole.Role `gorm:"default:null;foreignKey:RoleID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	TableName string `gorm:"default:null"`
 	Create    bool   `gorm:"default:null"`

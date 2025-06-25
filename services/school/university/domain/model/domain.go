@@ -2,18 +2,18 @@ package model
 
 import (
 	"api/common/types"
-	schoolModel "api/services/school/common/school/model"
-	departmentModel "api/services/school/university/department/model"
+	modelSchool "api/services/school/common/school/model"
+	modelDepartment "api/services/school/university/department/model"
 	"api/services/school/university/domain/data"
 )
 
 type UniversityDomain struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
-	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	DepartmentID int64                                 `gorm:"default:null"`
-	Department   *departmentModel.UniversityDepartment `gorm:"default:null;foreignKey:DepartmentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Department   *modelDepartment.UniversityDepartment `gorm:"default:null;foreignKey:DepartmentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Name        string `gorm:"default:null"`
 	Description string `gorm:"default:null"`

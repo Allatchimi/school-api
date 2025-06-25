@@ -2,8 +2,8 @@ package data
 
 import (
 	"api/common/types"
-	schoolData "api/services/school/common/school/data"
-	departmentData "api/services/school/university/department/data"
+	dataSchool "api/services/school/common/school/data"
+	dataDepartment "api/services/school/university/department/data"
 )
 
 type DomainResponse struct {
@@ -12,8 +12,8 @@ type DomainResponse struct {
 }
 
 type DomainPublicResponse struct {
-	School      *schoolData.SchoolPublicResponse         `json:"school" doc:"School"`
-	Department  *departmentData.DepartmentPublicResponse `json:"department" doc:"Department"`
+	School      *dataSchool.SchoolPublicResponse         `json:"school" doc:"School"`
+	Department  *dataDepartment.DepartmentPublicResponse `json:"department" doc:"Department"`
 	Name        string                                   `json:"name" required:"false" doc:"Department name"`
 	Description string                                   `json:"description" required:"false" doc:"Department description"`
 }

@@ -2,12 +2,12 @@ package data
 
 import (
 	"api/common/types"
-	userData "api/services/user/user/data"
+	dataUser "api/services/user/user/data"
 )
 
 type NotificationResponse struct {
 	types.BaseGormModelResponse
-	User    *userData.UserPublicResponse `json:"user" required:"false" doc:"User"`
+	User    *dataUser.UserPublicResponse `json:"user" required:"false" doc:"User"`
 	Title   string                       `json:"title" required:"true" doc:"Title"`
 	Message string                       `json:"message" required:"true" doc:"Message"`
 }

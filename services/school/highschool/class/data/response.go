@@ -2,9 +2,9 @@ package data
 
 import (
 	"api/common/types"
-	schoolData "api/services/school/common/school/data"
-	specialtyData "api/services/school/highschool/specialty/data"
-	subjectData "api/services/school/highschool/subject/data"
+	dataSchool "api/services/school/common/school/data"
+	dataSpecialty "api/services/school/highschool/specialty/data"
+	dataSubject "api/services/school/highschool/subject/data"
 	"time"
 )
 
@@ -14,8 +14,8 @@ type ClassResponse struct {
 }
 
 type ClassPublicResponse struct {
-	School      *schoolData.SchoolPublicResponse       `json:"school" doc:"School"`
-	Specialty   *specialtyData.SpecialtyPublicResponse `json:"specialty" doc:"Specialty"`
+	School      *dataSchool.SchoolPublicResponse       `json:"school" doc:"School"`
+	Specialty   *dataSpecialty.SpecialtyPublicResponse `json:"specialty" doc:"Specialty"`
 	Fees        int64                                  `json:"fees" required:"false" doc:"Class fees"`
 	Name        string                                 `json:"name" required:"false" doc:"Class name"`
 	Description string                                 `json:"description" required:"false" doc:"Class description"`
@@ -27,7 +27,7 @@ type ClassSubjectResponse struct {
 }
 
 type ClassSubjectPublicResponse struct {
-	Subject *subjectData.SubjectPublicResponse `json:"subject" required:"false" doc:"Subject"`
+	Subject *dataSubject.SubjectPublicResponse `json:"subject" required:"false" doc:"Subject"`
 	Class   *ClassPublicResponse               `json:"class" required:"false" doc:"Class"`
 
 	Coefficient  int    `json:"coefficient" required:"false" doc:"Coefficient"`

@@ -2,12 +2,12 @@ package data
 
 import (
 	"api/common/types"
-	schoolData "api/services/school/common/school/data"
+	dataSchool "api/services/school/common/school/data"
 )
 
 type CommunicationResponse struct {
 	types.BaseGormModelResponse
-	School   *schoolData.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	School   *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
 	Subject  string                           `json:"subject" required:"true" doc:"Subject"`
 	Message  string                           `json:"message" required:"true" doc:"Message"`
 	Audience string                           `json:"audience" required:"true" doc:"Audience"`

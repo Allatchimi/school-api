@@ -3,14 +3,14 @@ package model
 import (
 	"api/common/types"
 	"api/services/common/notification/data"
-	userModel "api/services/user/user/model"
+	modelUser "api/services/user/user/model"
 )
 
 type Notification struct {
 	types.BaseGormModel
 
 	UserID int64           `gorm:"default:null"`
-	User   *userModel.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	User   *modelUser.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Title   string `gorm:"default:null"`
 	Message string `gorm:"default:null"`

@@ -3,7 +3,7 @@ package model
 import (
 	"api/common/types"
 	"api/services/school/common/course/data"
-	schoolModel "api/services/school/common/school/model"
+	modelSchool "api/services/school/common/school/model"
 	modelYear "api/services/school/common/year/model"
 	modelClassSubject "api/services/school/highschool/class/model"
 	modelUnit "api/services/school/university/unit/model"
@@ -13,7 +13,7 @@ type Course struct {
 	types.BaseGormModel
 
 	SchoolID int64               `gorm:"default:null"`
-	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	YearID int64           `gorm:"default:null"`
 	Year   *modelYear.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`

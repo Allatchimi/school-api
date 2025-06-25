@@ -13,6 +13,7 @@ import (
 	parentModel "api/services/school/common/parent/model"
 	paymentModel "api/services/school/common/payment/model"
 	quizModel "api/services/school/common/quiz/model"
+	reportModel "api/services/school/common/report/model"
 	requestModel "api/services/school/common/request/model"
 	resultModel "api/services/school/common/result/model"
 	scheduleModel "api/services/school/common/schedule/model"
@@ -116,6 +117,10 @@ func Apply() error {
 		&resultModel.Result{},
 		// Payment
 		&paymentModel.Payment{},
+		// Report
+		&reportModel.Report{},
+		&reportModel.ReportGrade{},
+		&reportModel.ReportConfig{},
 
 		// ----------- Highschool models -----------
 		// Section

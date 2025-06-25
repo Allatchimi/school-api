@@ -3,7 +3,7 @@ package model
 import (
 	"api/common/types"
 	"api/services/school/highschool/quarter/data"
-	sequenceModel "api/services/school/highschool/sequence/model"
+	modelSequence "api/services/school/highschool/sequence/model"
 )
 
 type HighschoolQuarterSequence struct {
@@ -12,7 +12,7 @@ type HighschoolQuarterSequence struct {
 	Quarter   *HighschoolQuarter `gorm:"default:null;foreignKey:QuarterID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	SequenceID int64                             `gorm:"default:null"`
-	Sequence   *sequenceModel.HighschoolSequence `gorm:"default:null;foreignKey:SequenceID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Sequence   *modelSequence.HighschoolSequence `gorm:"default:null;foreignKey:SequenceID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *HighschoolQuarterSequence) ToQuarterSequenceResponse() *data.QuarterSequenceResponse {

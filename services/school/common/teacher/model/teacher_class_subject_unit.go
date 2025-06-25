@@ -4,7 +4,7 @@ import (
 	"api/common/types"
 	"api/services/school/common/teacher/data"
 	modelYear "api/services/school/common/year/model"
-	modelClassSubject "api/services/school/highschool/class/model"
+	modelClass "api/services/school/highschool/class/model"
 	modelUnit "api/services/school/university/unit/model"
 )
 
@@ -17,8 +17,8 @@ type TeacherClassSubjectUnit struct {
 	YearID int64           `gorm:"default:null"`
 	Year   *modelYear.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	ClassSubjectID int64                                     `gorm:"default:null"`
-	ClassSubject   *modelClassSubject.HighschoolClassSubject `gorm:"default:null;foreignKey:ClassSubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	ClassSubjectID int64                              `gorm:"default:null"`
+	ClassSubject   *modelClass.HighschoolClassSubject `gorm:"default:null;foreignKey:ClassSubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	UnitID int64                     `gorm:"default:null"`
 	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`

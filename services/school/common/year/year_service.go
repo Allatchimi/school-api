@@ -25,7 +25,7 @@ func (service *Service) Create(
 	inputJwtToken *types.JwtToken,
 	request *data.YearRequest,
 ) (result *model.Year, errCode int, err error) {
-	// Format request
+	// Format
 	item := &model.Year{
 		SchoolID:  request.SchoolID,
 		Name:      fmt.Sprintf("%d-%d", request.StartDate.Year(), request.EndDate.Year()),
@@ -61,7 +61,7 @@ func (service *Service) Update(
 	id int64,
 	request *data.YearRequest,
 ) (result *model.Year, errCode int, err error) {
-	// Check if year exists
+	// Check existance
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -74,7 +74,7 @@ func (service *Service) Update(
 		return
 	}
 
-	// Format request
+	// Format
 	item := &model.Year{
 		SchoolID:  request.SchoolID,
 		Name:      fmt.Sprintf("%d-%d", request.StartDate.Year(), request.EndDate.Year()),
@@ -95,7 +95,7 @@ func (service *Service) Update(
 		return
 	}
 
-	// Update year
+	// Update
 	result, err = service.Repository.Update(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError

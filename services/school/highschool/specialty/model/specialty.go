@@ -2,18 +2,18 @@ package model
 
 import (
 	"api/common/types"
-	schoolModel "api/services/school/common/school/model"
-	sectionModel "api/services/school/highschool/section/model"
+	modelSchool "api/services/school/common/school/model"
+	modelSection "api/services/school/highschool/section/model"
 	"api/services/school/highschool/specialty/data"
 )
 
 type HighschoolSpecialty struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
-	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	SectionID int64                           `gorm:"default:null"`
-	Section   *sectionModel.HighschoolSection `gorm:"default:null;foreignKey:SectionID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Section   *modelSection.HighschoolSection `gorm:"default:null;foreignKey:SectionID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Name        string `gorm:"default:null"`
 	Description string `gorm:"default:null"`

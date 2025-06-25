@@ -5,7 +5,7 @@ import (
 	modelSchool "api/services/school/common/school/model"
 	"api/services/school/common/student/data"
 	modelYear "api/services/school/common/year/model"
-	modelClassSubject "api/services/school/highschool/class/model"
+	modelClass "api/services/school/highschool/class/model"
 	modelLevel "api/services/school/university/level/model"
 	"time"
 )
@@ -19,8 +19,8 @@ type StudentEnroll struct {
 	YearID int64           `gorm:"default:null"`
 	Year   *modelYear.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	ClassID int64                              `gorm:"default:null"`
-	Class   *modelClassSubject.HighschoolClass `gorm:"default:null;foreignKey:ClassID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	ClassID int64                       `gorm:"default:null"`
+	Class   *modelClass.HighschoolClass `gorm:"default:null;foreignKey:ClassID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	LevelDomainID int64                             `gorm:"default:null"`
 	LevelDomain   *modelLevel.UniversityLevelDomain `gorm:"default:null;foreignKey:LevelID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`

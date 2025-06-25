@@ -2,18 +2,18 @@ package model
 
 import (
 	"api/common/types"
-	examModel "api/services/school/common/exam/model"
+	modelExam "api/services/school/common/exam/model"
 	"api/services/school/common/result/data"
-	studentModel "api/services/school/common/student/model"
+	modelStudent "api/services/school/common/student/model"
 )
 
 type Result struct {
 	types.BaseGormModel
 	StudentID int64                 `gorm:"default:null"`
-	Student   *studentModel.Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Student   *modelStudent.Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	ExamID int64           `gorm:"default:null"`
-	Exam   *examModel.Exam `gorm:"default:null;foreignKey:ExamID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Exam   *modelExam.Exam `gorm:"default:null;foreignKey:ExamID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Value float64 `gorm:"default:null"`
 }

@@ -3,14 +3,14 @@ package model
 import (
 	"api/common/types"
 	"api/services/common/contact/data"
-	schoolModel "api/services/school/common/school/model"
+	modelSchool "api/services/school/common/school/model"
 )
 
 type Contact struct {
 	types.BaseGormModel
 
 	SchoolID int64               `gorm:"default:null"`
-	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Subject string `gorm:"default:null"`
 	Email   string `gorm:"default:null"`
