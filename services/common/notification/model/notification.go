@@ -12,8 +12,9 @@ type Notification struct {
 	UserID int64           `gorm:"default:null"`
 	User   *modelUser.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Title   string `gorm:"default:null"`
-	Message string `gorm:"default:null"`
+	Title    string `gorm:"default:null"`
+	Message  string `gorm:"default:null"`
+	IsReaded bool   `gorm:"default:null"`
 }
 
 func (item *Notification) ToResponse() *data.NotificationResponse {
@@ -23,6 +24,7 @@ func (item *Notification) ToResponse() *data.NotificationResponse {
 	resp := &data.NotificationResponse{}
 	resp.Title = item.Title
 	resp.Message = item.Message
+	resp.IsReaded = item.IsReaded
 
 	resp.User = item.User.ToPublicResponse()
 

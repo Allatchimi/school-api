@@ -20,6 +20,11 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
+func (repository *Repository) Create(item *model.Notification) (*model.Notification, error) {
+	result := *item
+	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
+}
+
 func (repository *Repository) GetByID(id int64) (*model.Notification, error) {
 	result := &model.Notification{}
 	return result, repository.Db.Where("id = ?", id).Limit(1).Find(result).Error

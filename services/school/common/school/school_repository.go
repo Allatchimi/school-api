@@ -173,7 +173,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 	var where string = ""
 	if request != nil {
 		if len(request.Type) > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("schools.type = %s", request.Type))
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("schools.type = '%s'", request.Type))
 		}
 	}
 	if filter != nil && len(filter.Search) >= 1 {
@@ -196,6 +196,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 			helpers.PaginationScope(
 				repository.Db,
 				"SELECT schools.* "+
+					"FROM schools "+
 					"LEFT JOIN school_infos as infos ON schools.info_id = infos.id "+
 					"LEFT JOIN school_configs as configs ON schools.config_id = configs.id ",
 				where,

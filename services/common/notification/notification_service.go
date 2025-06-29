@@ -20,6 +20,17 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "notification"
 const DEFAULT_ERROR_MESSAGE = "interact with notification model"
 
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *model.Notification) (result *model.Notification, errCode int, err error) {
+	// Create
+	result, err = service.Repository.Create(request)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	return
+}
+
 func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Notification, errCode int, err error) {
 	result, err = service.Repository.GetByID(id)
 	if err != nil {

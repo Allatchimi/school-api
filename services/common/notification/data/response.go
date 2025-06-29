@@ -7,9 +7,10 @@ import (
 
 type NotificationResponse struct {
 	types.BaseGormModelResponse
-	User    *dataUser.UserPublicResponse `json:"user" required:"false" doc:"User"`
-	Title   string                       `json:"title" required:"true" doc:"Title"`
-	Message string                       `json:"message" required:"true" doc:"Message"`
+	User     *dataUser.UserPublicResponse `json:"user" required:"false" doc:"User"`
+	Title    string                       `json:"title" required:"true" doc:"Title"`
+	Message  string                       `json:"message" required:"true" doc:"Message"`
+	IsReaded bool                         `json:"isReaded" required:"true" doc:"Is readed"`
 }
 
 type NotificationResponseList struct {
