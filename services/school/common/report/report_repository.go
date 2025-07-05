@@ -255,7 +255,7 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("reports.student_id = %d", request.StudentID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(reports.id AS TEXT) = '%s')",
 			filter.Search,
@@ -304,7 +304,7 @@ func (repository *Repository) GetAllReportGrade(
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("reports.school_id = %d", request.SchoolID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(reports.id AS TEXT) = '%s')",
 			filter.Search,
@@ -340,7 +340,7 @@ func (repository *Repository) GetAllReportConfig(
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("reports.school_id = %d", request.SchoolID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(reports.id AS TEXT) = '%s')",
 			filter.Search,

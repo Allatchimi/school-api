@@ -1,4 +1,4 @@
-package statistic
+package monitoring
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
-	"api/services/school/common/statistic/data"
+	"api/services/common/monitoring/data"
 )
 
 func RegisterEndpoints(
@@ -17,18 +17,18 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/schools/statistics",
-		Tag:   []string{"Statistics"},
+		Group: "/monitorings",
+		Tag:   []string{"Monitorings"},
 	}
-	const tableName = "statistics"
+	const tableName = "monitorings"
 
-	// Get all statistic
+	// Get all monitoring
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-statistic-list",
-			Summary:     "Get all statistic",
-			Description: "Get all statistic with support for search, filter and pagination",
+			OperationID: "get-monitoring-list",
+			Summary:     "Get all monitoring",
+			Description: "Get all monitoring with support for search, filter and pagination",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -59,15 +59,29 @@ func RegisterEndpoints(
 				data.GetAllRequest
 			},
 		) (*struct {
-			Body data.StatisticResponseList
+			Body data.MonitoringResponseList
 		}, error) {
 			result, errCode, err := controller.GetAll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
+			// Generate items
+			tempResult := &data.MonitoringResponse{}
+			tempResult.Count = &data.CountResponse{
+				Schools:   2,
+				Directors: 4,
+				Teachers:  29,
+				Students:  3842,
+				Parents:   123,
+			}
+			tempResult.UsersByYear = make([]data.UsersByYearResponse, 5)
+			tempResult.SuccessBySchool = make([]data.SuccessBySchoolResponse, 5)
+			tempResult.SuccessBySchoolGender = make([]data.SuccessBySchoolGenderResponse, 5)
+			result.Data = tempResult
+
 			return &struct {
-				Body data.StatisticResponseList
+				Body data.MonitoringResponseList
 			}{Body: *result}, nil
 		},
 	)

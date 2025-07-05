@@ -163,7 +163,7 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("directors.school_id = %d", request.SchoolID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(directors.id AS TEXT) = '%s' OR directors.uid ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR users.email ILIKE '%s')",
 			filter.Search,

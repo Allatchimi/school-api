@@ -12,7 +12,6 @@ import (
 	"api/common/utils/auth"
 	"api/common/utils/mail"
 	"api/common/utils/security"
-	"api/common/utils/sms"
 	"api/config"
 	"api/services/user/auth/data"
 	"api/services/user/role"
@@ -40,9 +39,6 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	if utils.IsEmailValid(input.Email) {
 		userFound, err = service.UserService.Repository.GetByEmail(input.Email)
 		errMsg = "Invalid email or password! Please enter valid information."
-	} else {
-		errMsg = "Invalid phone number or password! Please enter valid information."
-		userFound, err = service.UserService.Repository.GetByPhoneNumber(input.PhoneNumber)
 	}
 	if err != nil || userFound == nil || userFound.Email != input.Email {
 		errCode = http.StatusNotFound
@@ -83,7 +79,7 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	}
 
 	// For non activated user account, generate new random code and token with
-	// issuer JWT_ISSUER_AUTH_ACTIVATE and send code to email or phone number
+	// issuer JWT_ISSUER_AUTH_ACTIVATE and send code to email
 	randomCode := 0
 	randomCode, err = utils.GenerateRandomCode(6)
 	if err != nil {
@@ -115,23 +111,13 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	errCode = http.StatusForbidden
 	err = fmt.Errorf("%s", "Account found but not activated! Please activate your account to start using your services.")
 
-	// Send code to email or phone number
+	// Send code to email
 	if utils.IsEmailValid(input.Email) {
 		go func() {
 			err := mail.SendMail(
 				fmt.Sprintf("%s - Activate your account", config.Env.AppName),
 				fmt.Sprintf("The code to activate your account is %d", randomCode),
 				input.Email,
-			)
-			if err != nil {
-				return
-			}
-		}()
-	} else {
-		go func() {
-			err := sms.SendSMS(
-				fmt.Sprintf("The code to activate your account is %d.", randomCode),
-				fmt.Sprintf("+%d", input.PhoneNumber),
 			)
 			if err != nil {
 				return
@@ -146,10 +132,11 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 	var newUser = &model.User{
 		Provider: input.Provider,
 		Info:     &model.UserInfo{},
-		Mfa:      &model.UserMfa{},
+		Config:   &model.UserConfig{},
 	}
 	var expires int64 = 0
-	if input.Provider == constants.AuthProviderGoogle {
+	switch input.Provider {
+	case constants.AuthProviderGoogle:
 		googleUser, errGoogleUser := auth.VerifyGoogleIDToken(input.Token)
 		if errGoogleUser != nil || googleUser == nil || len(googleUser.ID) <= 0 {
 			errCode = http.StatusUnprocessableEntity
@@ -163,7 +150,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 		}
 		expires = googleUser.Expires
 		newUser.FromGoogleUser(googleUser)
-	} else if input.Provider == constants.AuthProviderFacebook {
+	case constants.AuthProviderFacebook:
 		facebookUser, errFacebookUser := auth.VerifyFacebookToken(input.Token)
 		if errFacebookUser != nil || facebookUser == nil || len(facebookUser.ID) <= 0 {
 			errCode = http.StatusUnprocessableEntity
@@ -177,7 +164,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 		}
 		expires = facebookUser.Expires
 		newUser.FromFacebookUser(facebookUser)
-	} else {
+	default:
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", "Invalid provider or token! Please enter valid information.")
 		return
@@ -200,8 +187,8 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 			return
 		}
 		// Add mfa
-		var userMfa *model.UserMfa
-		userMfa, err = service.UserService.Repository.CreateUserMfa(newUser.Mfa)
+		var userConfig *model.UserConfig
+		userConfig, err = service.UserService.Repository.CreateUserConfig(newUser.Config)
 		if err != nil {
 			errCode = http.StatusInternalServerError
 			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -229,7 +216,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 				IsActivated:    true,
 				ActivatedAt:    &tmpActivatedAt,
 				UserInfoID:     userInfo.ID,
-				UserMfaID:      userMfa.ID,
+				UserConfigID:   userConfig.ID,
 			},
 		)
 		if err != nil {
@@ -269,9 +256,6 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	if utils.IsEmailValid(input.Email) {
 		userFound, err = service.UserService.Repository.GetByEmail(input.Email)
 		errMsg = "user email"
-	} else {
-		errMsg = "user phone number"
-		userFound, err = service.UserService.Repository.GetByPhoneNumber(input.PhoneNumber)
 	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -294,7 +278,6 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	}
 	// Create new user
 	userFound.Email = input.Email
-	userFound.PhoneNumber = input.PhoneNumber
 	userFound.Password = input.Password
 	userFound.LoginMethod = constants.AuthLoginMethodDefault
 	userFound.RoleID = defaultRole.ID
@@ -306,7 +289,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	}
 
 	// Since the new user account is not activated, we generate code with
-	// issuer JWT_ISSUER_AUTH_ACTIVATE and send code to email or phone number
+	// issuer JWT_ISSUER_AUTH_ACTIVATE and send code to email
 	randomCode := 0
 	randomCode, err = utils.GenerateRandomCode(6)
 	if err != nil {
@@ -335,23 +318,13 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}
 
-	// Send code to email or phone number
+	// Send code to email
 	if utils.IsEmailValid(input.Email) {
 		go func() {
 			err := mail.SendMail(
 				fmt.Sprintf("%s - Activate your account", config.Env.AppName),
 				fmt.Sprintf("The code to activate your account is %d", randomCode),
 				input.Email,
-			)
-			if err != nil {
-				return
-			}
-		}()
-	} else {
-		go func() {
-			err := sms.SendSMS(
-				fmt.Sprintf("The code to activate your account is %d.", randomCode),
-				fmt.Sprintf("+%d", input.PhoneNumber),
 			)
 			if err != nil {
 				return
@@ -383,7 +356,7 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	}
 
 	// Check if code is valid
-	if jwtToken.Code <= 0 || jwtToken.Code != input.Code {
+	if jwtToken.Code < 1 || jwtToken.Code != input.Code {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", "Invalid code! Please enter valid information.")
 		return
@@ -409,7 +382,7 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	newUserMfa, err := service.UserService.Repository.CreateUserMfa(&model.UserMfa{})
+	newUserConfig, err := service.UserService.Repository.CreateUserConfig(&model.UserConfig{})
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -419,10 +392,10 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	// Update account
 	tmpActivatedAt := time.Now()
 	userFound.UserInfoID = newUserInfo.ID
-	userFound.UserMfaID = newUserMfa.ID
+	userFound.UserConfigID = newUserConfig.ID
 	userFound.ActivatedAt = &tmpActivatedAt
 	userFound.IsActivated = true
-	updatedUser, err := service.UserService.Repository.UpdateUserActivation(userFound.ID, userFound)
+	updatedUser, err := service.UserService.Repository.UpdateActivationByID(userFound.ID, userFound)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -456,9 +429,6 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 	if utils.IsEmailValid(input.Email) {
 		errMsg = "email"
 		isInputValid = utils.IsEmailValid(input.Email)
-	} else {
-		errMsg = "phone number"
-		isInputValid = utils.IsPhoneNumberValid(input.PhoneNumber)
 	}
 	if !isInputValid {
 		errCode = http.StatusBadRequest
@@ -472,9 +442,6 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 	if utils.IsEmailValid(input.Email) {
 		errMsg = "User with this email"
 		userFound, err = service.UserService.Repository.GetByEmail(input.Email)
-	} else {
-		errMsg = "User with this phone number"
-		userFound, err = service.UserService.Repository.GetByPhoneNumber(input.PhoneNumber)
 	}
 	if err != nil || userFound.ID <= 0 {
 		errCode = http.StatusNotFound
@@ -510,7 +477,7 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 	}
 	token = newToken
 
-	// Send code to email or phone number
+	// Send code to email
 	if utils.IsEmailValid(input.Email) {
 		go func() {
 			err := mail.SendMail(
@@ -522,28 +489,18 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 				return
 			}
 		}()
-	} else {
-		go func() {
-			err := sms.SendSMS(
-				fmt.Sprintf("The code to reset your password is %d.", randomCode),
-				fmt.Sprintf("+%d", input.PhoneNumber),
-			)
-			if err != nil {
-				return
-			}
-		}()
 	}
 	return
 }
 
 func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest) (token string, errCode int, err error) {
 	// Check input
-	if len(input.Token) <= 0 && input.Code < 10000 {
+	if len(input.Token) < 1 && input.Code < 1 {
 		errCode = http.StatusBadRequest
 		err = fmt.Errorf("%s", "Invalid token and code! Please enter valid information.")
 		return
 	}
-	if len(input.Token) <= 0 {
+	if len(input.Token) < 1 {
 		errCode = http.StatusBadRequest
 		err = fmt.Errorf("%s", "Invalid token! Please enter valid information.")
 		return
@@ -575,7 +532,7 @@ func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest
 	}
 
 	// Check if the code is valid
-	if jwtToken.Code <= 0 || jwtToken.Code != input.Code {
+	if jwtToken.Code < 1 || jwtToken.Code != input.Code {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", "Invalid code! Please enter valid information.")
 		return
@@ -615,26 +572,9 @@ func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest
 
 func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewPasswordRequest) (errCode int, err error) {
 	// Check input
-	isPasswordValid, missingPasswordChars := utils.IsPasswordValid(input.NewPassword)
-	if len(input.Token) <= 0 && !isPasswordValid {
-		errCode = http.StatusBadRequest
-		err = fmt.Errorf("%s %s",
-			"Invalid token and password! Password missing",
-			missingPasswordChars,
-		)
-		return
-	}
-	if len(input.Token) <= 0 {
+	if len(input.Token) < 1 {
 		errCode = http.StatusBadRequest
 		err = fmt.Errorf("%s", "Invalid token! Please enter valid information.")
-		return
-	}
-	if !isPasswordValid {
-		errCode = http.StatusBadRequest
-		err = fmt.Errorf("%s %s",
-			"Invalid password! Password missing",
-			missingPasswordChars,
-		)
 		return
 	}
 
@@ -667,7 +607,7 @@ func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewP
 	}
 
 	// Update user password
-	userUpdated, err := service.UserService.Repository.UpdateUserPassword(jwtToken.UserID, input.NewPassword)
+	userUpdated, err := service.UserService.Repository.UpdatePasswordByID(jwtToken.UserID, input.NewPassword)
 	if err != nil || userUpdated == nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

@@ -12,9 +12,14 @@ type SchoolResponse struct {
 }
 
 type SchoolPublicResponse struct {
-	Name         string `json:"name" required:"false" doc:"School name"`
-	Type         string `json:"type" required:"false" doc:"Type"`
-	Logo         string `json:"logo" required:"false" doc:"School logo"`
+	Name   string `json:"name" required:"false" doc:"School name"`
+	Type   string `json:"type" required:"false" doc:"Type"`
+	Status string `json:"status" required:"false" doc:"Status"`
+
+	Favicon   string `json:"favicon" required:"false" doc:"Favicon"`
+	Logo      string `json:"logo" required:"false" doc:"Logo"`
+	LogoWhite string `json:"logoWhite" required:"false" doc:"Logo white"`
+
 	Currency     string `json:"currency" required:"false" doc:"Currency"`
 	PaymentCount int64  `json:"paymentCount" required:"false" doc:"Payment count"`
 
@@ -22,10 +27,9 @@ type SchoolPublicResponse struct {
 }
 
 type SchoolInfoResponse struct {
-	FullName    string `json:"fullName" required:"false" doc:"School name"`
+	FullName    string `json:"fullName" required:"false" doc:"Full name"`
 	Description string `json:"description" required:"false" doc:"Description"`
-	Slogan      string `json:"slogan" required:"false" doc:"Slogan"`
-	Currency    string `json:"currency" required:"false" doc:"Currency"`
+	Motto       string `json:"motto" required:"false" doc:"Motto"`
 
 	PhoneNumber1 int64 `json:"phoneNumber1" required:"false" doc:"Phone number 1"`
 	PhoneNumber2 int64 `json:"phoneNumber2" required:"false" doc:"Phone number 2"`
@@ -42,6 +46,12 @@ type SchoolInfoResponse struct {
 	PoBox             string  `json:"poBox" required:"false" doc:"PO Box"`
 	LocationLongitude float64 `json:"locationLongitude" required:"false" doc:"Location longitude"`
 	LocationLatitude  float64 `json:"locationLatitude" required:"false" doc:"Location latitude"`
+
+	SocialMediaTelegram string `json:"socialMediaTelegram" required:"false" doc:"Social media telegram"`
+	SocialMediaWhasapp  string `json:"socialMediaWhasapp" required:"false" doc:"Social media whasapp"`
+	SocialMediaYoutube  string `json:"socialMediaYoutube" required:"false" doc:"Social media youtube"`
+	SocialMediaTwitter  string `json:"socialMediaTwitter" required:"false" doc:"Social media twitter"`
+	SocialMediaFacebook string `json:"socialMediaFacebook" required:"false" doc:"Social media facebook"`
 
 	Image1 string `json:"image1" required:"false" doc:"Image 1"`
 	Image2 string `json:"image2" required:"false" doc:"Image 2"`
@@ -64,12 +74,16 @@ type SchoolConfigResponse struct {
 	SmtpNoReplyEmail string `json:"smtpNoReplyEmail" required:"false" doc:"No reply email"`
 	SmtpSupportEmail string `json:"smtpSupportEmail" required:"false" doc:"Support email"`
 
+	SmsUserID string `json:"smsUserID" required:"false" doc:"Sms user ID"`
+
 	UserEmailDomain string `json:"userEmailDomain" required:"false" doc:"User email domain"`
 
 	WebsiteTitle       string `json:"websiteTitle" required:"false" doc:"Website title"`
 	WebsiteDescription string `json:"websiteDescription" required:"false" doc:"Website description"`
 
-	ColorPrimary string `json:"colorPrimary" required:"false" doc:"Color primary"`
+	ColorPrimary        string `json:"colorPrimary" required:"false" doc:"Color primary"`
+	ColorPrimaryBg      string `json:"colorPrimaryBg" required:"false" doc:"Color primary bg"`
+	ColorPrimaryBgHover string `json:"colorPrimaryBgHover" required:"false" doc:"Color primary bg hover"`
 }
 
 type SchoolResponseList struct {

@@ -164,7 +164,7 @@ func (repository *Repository) GetAllExamType(filter *types.Filter, pagination *t
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("exam_types.school_id = %d", request.SchoolID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(exam_types.id AS TEXT) = '%s' OR exam_types.name ILIKE '%s' OR exam_types.description ILIKE '%s' OR schools.name ILIKE '%s')",
 			filter.Search,
@@ -215,7 +215,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("exams.sequence_id = %d", request.SequenceID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(exams.id AS TEXT) = '%s' OR exams.description ILIKE '%s' OR schools.name ILIKE '%s' OR years.name ILIKE '%s' OR exam_types.name ILIKE '%s' OR university_units.name ILIKE '%s' OR highschool_sequences.name ILIKE '%s')",
 			filter.Search,

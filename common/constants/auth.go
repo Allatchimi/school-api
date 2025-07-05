@@ -22,14 +22,10 @@ var AuthLoginWithFacebookRequiredScopes = []string{
 
 // Multiple Factor Authentication
 const AuthMfaMethodEmail = "email"
-const AuthMfaMethodPhone = "phone"
-const AuthMfaMethod2Password = "2password"
 const AuthMfaMethodAuthenticator = "authenticator"
 
 var AuthMfaMethods = []string{
 	AuthMfaMethodEmail,
-	AuthMfaMethodPhone,
-	AuthMfaMethod2Password,
 	AuthMfaMethodAuthenticator,
 }
 
@@ -46,10 +42,9 @@ var JwtIssuerAuthList []string
 // JWT issuers for user profile
 var JwtIssuerProfileUpdatePasswordCode string
 var JwtIssuerProfileUpdatePasswordNewPassword string
-var JwtIssuerProfileUpdateEmailCode string
-var JwtIssuerProfileUpdateEmailNewEmail string
 var JwtIssuerProfileUpdatePhoneNumberCode string
 var JwtIssuerProfileUpdatePhoneNumberNewPhoneNumber string
+var JwtIssuerProfileUpdateMfaEmailCode string
 var JwtIssuerProfile []string
 
 // InitializeJwtIssuerConst Initializes the JWT issuer with the provided passphrase.
@@ -77,16 +72,14 @@ func InitializeJwtIssuerConst(
 	// Profile issuers
 	JwtIssuerProfileUpdatePasswordCode = profileUpdatePasswordPassPhrase + "issuer_profile_update_password_code"
 	JwtIssuerProfileUpdatePasswordNewPassword = profileUpdatePasswordPassPhrase + "issuer_profile_update_password_code"
-	JwtIssuerProfileUpdateEmailCode = profileUpdateEmailPassPhrase + "issuer_profile_update_email_code"
-	JwtIssuerProfileUpdateEmailNewEmail = profileUpdateEmailPassPhrase + "issuer_profile_update_email_new_email"
 	JwtIssuerProfileUpdatePhoneNumberCode = profileUpdatePhoneNumberPassPhrase + "issuer_profile_update_phone_number_code"
 	JwtIssuerProfileUpdatePhoneNumberNewPhoneNumber = profileUpdatePhoneNumberPassPhrase + "issuer_profile_update_phone_number_new_phone_number"
+	JwtIssuerProfileUpdateMfaEmailCode = profileUpdateEmailPassPhrase + "issuer_profile_update_mfa_email_code"
 	JwtIssuerProfile = []string{
 		JwtIssuerProfileUpdatePasswordCode,
 		JwtIssuerProfileUpdatePasswordNewPassword,
-		JwtIssuerProfileUpdateEmailCode,
-		JwtIssuerProfileUpdateEmailNewEmail,
 		JwtIssuerProfileUpdatePhoneNumberCode,
 		JwtIssuerProfileUpdatePhoneNumberNewPhoneNumber,
+		JwtIssuerProfileUpdateMfaEmailCode,
 	}
 }

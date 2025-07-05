@@ -16,6 +16,7 @@ func NewController(service *Service) *Controller {
 	return &Controller{Service: service}
 }
 
+// ----------------- Info -----------------
 func (controller *Controller) UpdateProfileInfo(
 	ctx *context.Context,
 	input *struct {
@@ -24,44 +25,128 @@ func (controller *Controller) UpdateProfileInfo(
 ) (result *model.UserInfo, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateProfileInfo(
 		helpers.GetJwtContext(ctx),
-		&model.UserInfo{
-			Username:  input.Body.Username,
-			FirstName: input.Body.FirstName,
-			LastName:  input.Body.LastName,
-			Address:   input.Body.Address,
-			Image:     input.Body.Image,
-			Language:  input.Body.Language,
-		},
+		&input.Body,
 	)
 	return
 }
 
-func (controller *Controller) UpdateProfileMfa(
+// ----------------- Password -----------------
+func (controller *Controller) UpdateProfilePasswordInit(
 	ctx *context.Context,
 	input *struct {
-		Body data.UpdateProfileMfaRequest
 	},
-) (result *model.UserMfa, errCode int, err error) {
-	result, errCode, err = controller.Service.UpdateProfileMfa(helpers.GetJwtContext(ctx), input.Body.Method, input.Body.Value)
+) (result string, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateProfilePasswordInit(helpers.GetJwtContext(ctx))
+	return
+}
+func (controller *Controller) UpdateProfilePasswordCheckCode(
+	ctx *context.Context,
+	input *struct {
+		Body data.UpdateProfilePasswordCheckCodeRequest
+	},
+) (result string, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateProfilePasswordCheckCode(helpers.GetJwtContext(ctx), input.Body.Token, input.Body.Code)
+	return
+}
+func (controller *Controller) UpdateProfilePasswordNewPassword(
+	ctx *context.Context,
+	input *struct {
+		Body data.UpdateProfilePasswordNewPasswordRequest
+	},
+) (errCode int, err error) {
+	errCode, err = controller.Service.UpdateProfilePasswordNewPassword(helpers.GetJwtContext(ctx), input.Body.Token, input.Body.CurrentPassword, input.Body.NewPassword)
 	return
 }
 
-func (controller *Controller) DeleteProfile(
+// ----------------- Phone number -----------------
+func (controller *Controller) UpdateProfilePhoneNumberInit(
+	ctx *context.Context,
+	input *struct {
+	},
+) (result string, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateProfilePhoneNumberInit(helpers.GetJwtContext(ctx))
+	return
+}
+func (controller *Controller) UpdateProfilePhoneNumberCheckCode(
+	ctx *context.Context,
+	input *struct {
+		Body data.UpdateProfilePhoneNumberCheckCodeRequest
+	},
+) (result string, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateProfilePhoneNumberCheckCode(helpers.GetJwtContext(ctx), input.Body.Token, input.Body.Code)
+	return
+}
+func (controller *Controller) UpdateProfilePhoneNumberNewPhoneNumber(
+	ctx *context.Context,
+	input *struct {
+		Body data.UpdateProfilePhoneNumberNewPhoneNumberRequest
+	},
+) (errCode int, err error) {
+	errCode, err = controller.Service.UpdateProfilePhoneNumberNewPhoneNumber(helpers.GetJwtContext(ctx), input.Body.Token, input.Body.PhoneNumber)
+	return
+}
+
+// ----------------- Mfa Email -----------------
+func (controller *Controller) UpdateProfileMfaEmailInit(
 	ctx *context.Context,
 	input *struct{},
-) (result int64, errCode int, err error) {
-	result, errCode, err = controller.Service.DeleteProfile(helpers.GetJwtContext(ctx))
+) (result string, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateProfileMfaEmailInit(helpers.GetJwtContext(ctx))
+	return
+}
+func (controller *Controller) UpdateProfileMfaEmailCheckCode(
+	ctx *context.Context,
+	input *struct {
+		Body data.UpdateProfileMfaEmailCheckCodeRequest
+	},
+) (errCode int, err error) {
+	errCode, err = controller.Service.UpdateProfileMfaEmailCheckCode(helpers.GetJwtContext(ctx), input.Body.Token, input.Body.Code)
 	return
 }
 
+// ----------------- Notification -----------------
+func (controller *Controller) UpdateProfileNotification(
+	ctx *context.Context,
+	input *struct {
+		Body data.UpdateProfileSettingNotificationRequest
+	},
+) (result *model.User, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateProfileNotification(helpers.GetJwtContext(ctx), input.Body.IsEnabled)
+	return
+}
+
+// ----------------- Web push subscription -----------------
+func (controller *Controller) UpdateWebPushSubscription(
+	ctx *context.Context,
+	input *struct {
+		Body data.UpdateProfileWebPushSubscriptionRequest
+	},
+) (errCode int, err error) {
+	errCode, err = controller.Service.UpdateProfileWebPushSubscription(helpers.GetJwtContext(ctx), &input.Body)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// ----------------- Get -----------------
 func (controller *Controller) GetProfile(
 	ctx *context.Context,
 	input *struct{},
 ) (result *model.User, errCode int, err error) {
-	user, errCode, err := controller.Service.GetProfile(helpers.GetJwtContext(ctx))
+	result, errCode, err = controller.Service.GetProfile(helpers.GetJwtContext(ctx))
 	if err != nil {
 		return
 	}
-	result = user
+	return
+}
+func (controller *Controller) GetWebPushSubscriptionPublicKey(
+	ctx *context.Context,
+	input *struct{},
+) (result string, errCode int, err error) {
+	result, errCode, err = controller.Service.GetWebPushSubscriptionPublicKey(helpers.GetJwtContext(ctx))
+	if err != nil {
+		return
+	}
 	return
 }

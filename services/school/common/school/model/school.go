@@ -7,9 +7,14 @@ import (
 
 type School struct {
 	types.BaseGormModel
-	Name         string `gorm:"unique;not null"`
-	Type         string `gorm:"not null"`
-	Logo         string `gorm:"default:null"`
+	Name   string `gorm:"unique;not null"`
+	Type   string `gorm:"not null"`
+	Status string `gorm:"not null"`
+
+	Favicon   string `gorm:"default:null"`
+	Logo      string `gorm:"default:null"`
+	LogoWhite string `gorm:"default:null"`
+
 	Currency     string `gorm:"default:null"`
 	PaymentCount int64  `gorm:"default:1"`
 
@@ -27,7 +32,12 @@ func (item *School) ToResponse() *data.SchoolResponse {
 	resp := &data.SchoolResponse{}
 	resp.Name = item.Name
 	resp.Type = item.Type
+	resp.Status = item.Status
+
+	resp.Favicon = item.Favicon
 	resp.Logo = item.Logo
+	resp.LogoWhite = item.LogoWhite
+
 	resp.Currency = item.Currency
 	resp.PaymentCount = item.PaymentCount
 
@@ -47,7 +57,12 @@ func (item *School) ToPublicResponse() *data.SchoolPublicResponse {
 	resp := &data.SchoolPublicResponse{}
 	resp.Name = item.Name
 	resp.Type = item.Type
+	resp.Status = item.Status
+
+	resp.Favicon = item.Favicon
 	resp.Logo = item.Logo
+	resp.LogoWhite = item.LogoWhite
+
 	resp.Currency = item.Currency
 	resp.PaymentCount = item.PaymentCount
 

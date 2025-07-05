@@ -1,11 +1,9 @@
 package config
 
 import (
-	"api/common/helpers"
 	"fmt"
 	"time"
 
-	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -23,10 +21,6 @@ func ConnectDatabase() error {
 		Env.PostgresPort,
 		Env.PostgresSslMode,
 		Env.PostgresTimeZone,
-	)
-	helpers.Logger.Warn(
-		"Database DSN: ",
-		zap.String("Value: ", dsn),
 	)
 	var err error
 	DB, err = gorm.Open(

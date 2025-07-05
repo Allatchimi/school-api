@@ -9,9 +9,14 @@ type SchoolID struct {
 }
 
 type SchoolRequest struct {
-	Name         string `json:"name" required:"true" minLength:"2" maxLength:"50" doc:"School name"`
-	Type         string `json:"type" required:"true" minLength:"2" maxLength:"50" enum:"highschool,university" doc:"School type"`
-	Logo         string `json:"logo" required:"false" doc:"School logo"`
+	Name   string `json:"name" required:"true" minLength:"2" maxLength:"50" doc:"School name"`
+	Type   string `json:"type" required:"true" minLength:"2" maxLength:"50" enum:"highschool,university" doc:"School type"`
+	Status string `json:"status" required:"true" minLength:"2" maxLength:"50" enum:"enabled,disabled" doc:"School status"`
+
+	Favicon   string `json:"favicon" required:"false" doc:"School favicon"`
+	Logo      string `json:"logo" required:"false" doc:"School logo"`
+	LogoWhite string `json:"logoWhite" required:"false" doc:"School logo white"`
+
 	Currency     string `json:"currency" required:"true" minLength:"2" maxLength:"20" doc:"Currency"`
 	PaymentCount int64  `json:"paymentCount" required:"true" min:"1" max:"10" doc:"Payment count"`
 
@@ -22,7 +27,7 @@ type SchoolRequest struct {
 type SchoolInfoRequest struct {
 	FullName    string `json:"fullName" required:"true" minLength:"2" maxLength:"150" doc:"School name"`
 	Description string `json:"description" required:"false" maxLength:"500" doc:"Description"`
-	Slogan      string `json:"slogan" required:"false" maxLength:"150" doc:"Slogan"`
+	Motto       string `json:"motto" required:"false" maxLength:"150" doc:"Motto"`
 
 	PhoneNumber1 int64 `json:"phoneNumber1" required:"false" doc:"Phone number 1"`
 	PhoneNumber2 int64 `json:"phoneNumber2" required:"false" doc:"Phone number 2"`
@@ -39,6 +44,12 @@ type SchoolInfoRequest struct {
 	PoBox             string  `json:"poBox" required:"false" doc:"PO Box"`
 	LocationLongitude float64 `json:"locationLongitude" required:"false" doc:"Location longitude"`
 	LocationLatitude  float64 `json:"locationLatitude" required:"false" doc:"Location latitude"`
+
+	SocialMediaTelegram string `json:"socialMediaTelegram" required:"false" doc:"Social media telegram"`
+	SocialMediaWhasapp  string `json:"socialMediaWhasapp" required:"false" doc:"Social media whasapp"`
+	SocialMediaYoutube  string `json:"socialMediaYoutube" required:"false" doc:"Social media youtube"`
+	SocialMediaTwitter  string `json:"socialMediaTwitter" required:"false" doc:"Social media twitter"`
+	SocialMediaFacebook string `json:"socialMediaFacebook" required:"false" doc:"Social media facebook"`
 
 	Image1 string `json:"image1" required:"false" doc:"Image 1"`
 	Image2 string `json:"image2" required:"false" doc:"Image 2"`
@@ -61,12 +72,16 @@ type SchoolConfigRequest struct {
 	SmtpNoReplyEmail string `json:"smtpNoReplyEmail" required:"true" minLength:"3" maxLength:"150" doc:"No reply email" example:"noreply@gmail.com"`
 	SmtpSupportEmail string `json:"smtpSupportEmail" required:"true" minLength:"3" maxLength:"150" doc:"Support email" example:"support@gmail.com"`
 
+	SmsUserID string `json:"smsUserID" required:"true" minLength:"3" maxLength:"150" doc:"Sms user ID" example:"SMS user id"`
+
 	UserEmailDomain string `json:"userEmailDomain" required:"true" minLength:"3" maxLength:"150" doc:"User email domain" example:"google.com"`
 
 	WebsiteTitle       string `json:"websiteTitle" required:"true" minLength:"3" maxLength:"150" doc:"Website title" example:"School"`
 	WebsiteDescription string `json:"websiteDescription" required:"true" minLength:"3" maxLength:"500" doc:"Website description" example:"School description"`
 
-	ColorPrimary string `json:"colorPrimary" required:"true" minLength:"4" maxLength:"7" doc:"Primary color in HEX" example:"#FFFFFF"`
+	ColorPrimary        string `json:"colorPrimary" required:"true" minLength:"4" maxLength:"7" doc:"Primary color in HEX" example:"#FFFFFF"`
+	ColorPrimaryBg      string `json:"colorPrimaryBg" required:"true" minLength:"4" maxLength:"7" doc:"Primary color in HEX" example:"#FFFFFF"`
+	ColorPrimaryBgHover string `json:"colorPrimaryBgHover" required:"true" minLength:"4" maxLength:"7" doc:"Primary color in HEX" example:"#FFFFFF"`
 }
 
 type GetAllRequest struct {

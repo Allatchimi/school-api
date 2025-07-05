@@ -4,6 +4,7 @@ import (
 	"api/common/types"
 	"api/services/common/notification/data"
 	modelUser "api/services/user/user/model"
+	"time"
 )
 
 type Notification struct {
@@ -12,9 +13,10 @@ type Notification struct {
 	UserID int64           `gorm:"default:null"`
 	User   *modelUser.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Title    string `gorm:"default:null"`
-	Message  string `gorm:"default:null"`
-	IsReaded bool   `gorm:"default:null"`
+	Title   string     `gorm:"default:null"`
+	Message string     `gorm:"default:null"`
+	Seen    bool       `gorm:"default:null"`
+	SeenAt  *time.Time `gorm:"default:null"`
 }
 
 func (item *Notification) ToResponse() *data.NotificationResponse {
@@ -24,7 +26,8 @@ func (item *Notification) ToResponse() *data.NotificationResponse {
 	resp := &data.NotificationResponse{}
 	resp.Title = item.Title
 	resp.Message = item.Message
-	resp.IsReaded = item.IsReaded
+	resp.Seen = item.Seen
+	resp.SeenAt = item.SeenAt
 
 	resp.User = item.User.ToPublicResponse()
 

@@ -50,9 +50,10 @@ type Environment struct {
 	JwtIssuerProfileUpdateEmailPassphrase       string `mapstructure:"JWT_ISSUER_PROFILE_UPDATE_EMAIL_PASSPHRASE"`
 	JwtIssuerProfileUpdatePhoneNumberPassphrase string `mapstructure:"JWT_ISSUER_PROFILE_UPDATE_PHONE_NUMBER_PASSPHRASE"`
 
-	// GOOGLE reCAPTCHA
-	GoogleReCAPTCHASiteKey string  `mapstructure:"GOOGLE_RECAPTCHA_SITE_KEY"`
-	GoogleReCAPTCHAScore   float32 `mapstructure:"GOOGLE_RECAPTCHA_SCORE"`
+	// Web Push
+	WebPushSubscriber      string `mapstructure:"WEB_PUSH_SUBSCRIBER"`
+	WebPushVapidPublicKey  string `mapstructure:"WEB_PUSH_VAPID_PUBLIC_KEY"`
+	WebPushVapidPrivateKey string `mapstructure:"WEB_PUSH_VAPID_PRIVATE_KEY"`
 
 	// SMTP
 	SmtpHost     string `mapstructure:"SMTP_HOST"`
@@ -82,6 +83,10 @@ type Environment struct {
 	MeetingJoinUrl   string `mapstructure:"MEETING_JOIN_URL"`
 	MeetingApiKey    string `mapstructure:"MEETING_API_KEY"`
 	MeetingApiSecret string `mapstructure:"MEETING_API_SECRET"`
+
+	// GOOGLE reCAPTCHA
+	GoogleReCAPTCHASiteKey string  `mapstructure:"GOOGLE_RECAPTCHA_SITE_KEY"`
+	GoogleReCAPTCHAScore   float32 `mapstructure:"GOOGLE_RECAPTCHA_SCORE"`
 
 	// Database fixtures
 	RoleDefault  string `mapstructure:"ROLE_DEFAULT"`

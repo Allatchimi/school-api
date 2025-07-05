@@ -1,13 +1,11 @@
 package config
 
 import (
-	"api/common/helpers"
 	"context"
 	"fmt"
 	"slices"
 
 	"github.com/redis/go-redis/v9"
-	"go.uber.org/zap"
 )
 
 var RedisClient *redis.Client
@@ -16,10 +14,6 @@ var RedisContext = context.Background()
 // Establishes a connection to the Redis server.
 func ConnectRedis() error {
 	addr := fmt.Sprintf("%s:%d", Env.RedisHost, Env.RedisPort)
-	helpers.Logger.Warn(
-		"Redis address: ",
-		zap.String("Value: ", addr),
-	)
 	RedisClient = redis.NewClient(&redis.Options{
 		Addr:     addr,
 		Username: Env.RedisUsername,

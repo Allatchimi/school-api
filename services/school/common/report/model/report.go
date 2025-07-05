@@ -13,7 +13,6 @@ import (
 
 type Report struct {
 	types.BaseGormModel
-
 	SchoolID int64               `gorm:"default:null"`
 	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 

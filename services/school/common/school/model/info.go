@@ -11,7 +11,7 @@ type SchoolInfo struct {
 	types.BaseGormModel
 	FullName    string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
-	Slogan      string `gorm:"default:null"`
+	Motto       string `gorm:"default:null"`
 
 	PhoneNumber1 int64 `gorm:"default:null"`
 	PhoneNumber2 int64 `gorm:"default:null"`
@@ -26,8 +26,14 @@ type SchoolInfo struct {
 
 	Address           string  `gorm:"default:null"`
 	PoBox             string  `gorm:"default:null"`
-	LocationLongitude float64 `gorm:"default:0"`
-	LocationLatitude  float64 `gorm:"default:0"`
+	LocationLongitude float64 `gorm:"default:null"`
+	LocationLatitude  float64 `gorm:"default:null"`
+
+	SocialMediaTelegram string `gorm:"default:null"`
+	SocialMediaWhasapp  string `gorm:"default:null"`
+	SocialMediaYoutube  string `gorm:"default:null"`
+	SocialMediaTwitter  string `gorm:"default:null"`
+	SocialMediaFacebook string `gorm:"default:null"`
 
 	Image1 string `gorm:"default:null"`
 	Image2 string `gorm:"default:null"`
@@ -43,7 +49,7 @@ func (item *SchoolInfo) ToResponse() *data.SchoolInfoResponse {
 	resp := &data.SchoolInfoResponse{}
 	resp.FullName = item.FullName
 	resp.Description = item.Description
-	resp.Slogan = item.Slogan
+	resp.Motto = item.Motto
 
 	resp.PhoneNumber1 = item.PhoneNumber1
 	resp.PhoneNumber2 = item.PhoneNumber2
@@ -60,6 +66,12 @@ func (item *SchoolInfo) ToResponse() *data.SchoolInfoResponse {
 	resp.PoBox = item.PoBox
 	resp.LocationLongitude = item.LocationLongitude
 	resp.LocationLatitude = item.LocationLatitude
+
+	resp.SocialMediaTelegram = item.SocialMediaTelegram
+	resp.SocialMediaWhasapp = item.SocialMediaWhasapp
+	resp.SocialMediaYoutube = item.SocialMediaYoutube
+	resp.SocialMediaTwitter = item.SocialMediaTwitter
+	resp.SocialMediaFacebook = item.SocialMediaFacebook
 
 	resp.Image1 = item.Image1
 	resp.Image2 = item.Image2
@@ -76,7 +88,7 @@ func FromInfoRequest(item *data.SchoolInfoRequest) *SchoolInfo {
 	resp := &SchoolInfo{}
 	resp.FullName = item.FullName
 	resp.Description = item.Description
-	resp.Slogan = item.Slogan
+	resp.Motto = item.Motto
 
 	resp.PhoneNumber1 = item.PhoneNumber1
 	resp.PhoneNumber2 = item.PhoneNumber2
@@ -93,6 +105,12 @@ func FromInfoRequest(item *data.SchoolInfoRequest) *SchoolInfo {
 	resp.PoBox = item.PoBox
 	resp.LocationLongitude = item.LocationLongitude
 	resp.LocationLatitude = item.LocationLatitude
+
+	resp.SocialMediaTelegram = item.SocialMediaTelegram
+	resp.SocialMediaWhasapp = item.SocialMediaWhasapp
+	resp.SocialMediaYoutube = item.SocialMediaYoutube
+	resp.SocialMediaTwitter = item.SocialMediaTwitter
+	resp.SocialMediaFacebook = item.SocialMediaFacebook
 
 	resp.Image1 = item.Image1
 	resp.Image2 = item.Image2

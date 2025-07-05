@@ -2,6 +2,16 @@ package constants
 
 import "fmt"
 
+const (
+	TokenKey    = "bearer"
+	UserIDKey   = "userID"
+	IssuerKey   = "issuer"
+	PlatformKey = "platform"
+	DeviceKey   = "device"
+	AppKey      = "app"
+	CodeKey     = "code"
+)
+
 var Http500ErrorMessage = func(message string) error {
 	return fmt.Errorf("%s", fmt.Sprintf("Error occurred when trying to %s! Please try again later.", message))
 }

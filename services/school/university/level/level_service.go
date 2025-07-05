@@ -72,6 +72,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Leve
 func (service *Service) CreateLevelDomain(inputJwtToken *types.JwtToken, request *data.LevelDomainRequest) (result *model.UniversityLevelDomain, errCode int, err error) {
 	// Format request
 	item := &model.UniversityLevelDomain{
+		SchoolID: request.SchoolID,
 		LevelID:  request.LevelID,
 		DomainID: request.DomainID,
 
@@ -87,7 +88,7 @@ func (service *Service) CreateLevelDomain(inputJwtToken *types.JwtToken, request
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if service.Repository.AreLevelDomainSameUniqueObjects(foundUnique, item) {
+	if service.Repository.AreSameLevelDomainUniqueObjects(foundUnique, item) {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
@@ -131,7 +132,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 		return
 	}
 
-	// Check if level exists
+	// Check if exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -165,6 +166,73 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 
 	// Update level
 	result, err = service.Repository.Update(id, item)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	return
+}
+
+func (service *Service) UpdateLevelDomain(inputJwtToken *types.JwtToken, id int64, request *data.LevelDomainRequest) (result *model.UniversityLevelDomain, errCode int, err error) {
+	// Format request
+	item := &model.UniversityLevelDomain{
+		SchoolID: request.SchoolID,
+		LevelID:  request.LevelID,
+		DomainID: request.DomainID,
+
+		Program:      request.Program,
+		Requirements: request.Requirements,
+		IsValid:      request.IsValid,
+	}
+
+	// Check if the school type is university
+	foundSchool, err := service.SchoolService.Repository.GetByID(item.SchoolID)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundSchool.Type != constants.SCHOOL_TYPE_UNIVERSITY {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessage()
+		return
+	}
+
+	// Check if exists
+	foundItem, err := service.Repository.GetLevelDomainByID(id)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundItem == nil || foundItem.ID != id {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+	// Check if the school type is university
+	if foundItem.School.Type != constants.SCHOOL_TYPE_UNIVERSITY {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessage()
+		return
+	}
+
+	// Check unique
+	foundUnique, err := service.Repository.GetLevelDomainUniqueObject(item)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if service.Repository.AreSameLevelDomainUniqueObjects(foundUnique, item) && !service.Repository.AreSameLevelDomainUniqueObjects(foundUnique, foundItem) {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Update level
+	result, err = service.Repository.UpdateLevelDomain(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -218,8 +286,38 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
+func (service *Service) DeleteMultipleLevelDomain(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteMultipleLevelDomain(list)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if affectedRows <= 0 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+	return
+}
+
 func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.UniversityLevel, errCode int, err error) {
 	result, err = service.Repository.GetByID(id)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if result == nil {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+	return
+}
+
+func (service *Service) GetLevelDomain(inputJwtToken *types.JwtToken, id int64) (result *model.UniversityLevelDomain, errCode int, err error) {
+	result, err = service.Repository.GetLevelDomainByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

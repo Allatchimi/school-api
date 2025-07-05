@@ -17,6 +17,7 @@ type ClassRequest struct {
 	Description string `json:"description" required:"false" doc:"Class description"`
 }
 type ClassSubjectRequest struct {
+	SchoolID  int64 `json:"schoolID" required:"true" doc:"School id"`
 	SubjectID int64 `json:"subjectID" required:"false" doc:"Subject id"`
 	ClassID   int64 `json:"classID" required:"false" doc:"Class id"`
 
@@ -33,6 +34,7 @@ type GetAllRequest struct {
 }
 
 type GetAllClassSubjectRequest struct {
-	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
-	ClassID  int64 `json:"classID" query:"classID" required:"false" doc:"Class id"`
+	SchoolID  int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
+	ClassID   int64 `json:"classID" query:"classID" required:"false" doc:"Class id"`
+	SubjectID int64 `json:"subjectID" query:"subjectID" required:"false" doc:"Subject id"`
 }

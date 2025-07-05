@@ -16,6 +16,7 @@ type LevelRequest struct {
 }
 
 type LevelDomainRequest struct {
+	SchoolID int64 `json:"schoolID" required:"true" doc:"School id"`
 	LevelID  int64 `json:"levelID" required:"true" doc:"Level id"`
 	DomainID int64 `json:"domainID" required:"true" doc:"Domain id"`
 

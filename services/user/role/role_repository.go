@@ -91,7 +91,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("roles.feature = %s", request.Feature))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(roles.id AS TEXT) = '%s' OR roles.name ILIKE '%s' OR roles.feature ILIKE '%s' OR roles.description ILIKE '%s')",
 			filter.Search,

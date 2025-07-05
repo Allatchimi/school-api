@@ -1,15 +1,15 @@
-package statistic
+package monitoring
 
 import (
 	"net/http"
 
 	"api/common/constants"
 	"api/common/types"
+	"api/services/common/monitoring/data"
 	"api/services/school/common/director"
 	"api/services/school/common/parent"
 	"api/services/school/common/report"
 	"api/services/school/common/school"
-	"api/services/school/common/statistic/data"
 	"api/services/school/common/student"
 	"api/services/school/common/teacher"
 	"api/services/user/user"
@@ -45,15 +45,15 @@ func NewService(
 	}
 }
 
-const MODEL_NAME = "statistic"
-const DEFAULT_ERROR_MESSAGE = "interact with statistic model"
+const MODEL_NAME = "monitoring"
+const DEFAULT_ERROR_MESSAGE = "interact with monitoring model"
 
 func (service *Service) GetAll(
 	inputJwtToken *types.JwtToken,
 	filter *types.Filter,
 	pagination *types.Pagination,
 	request *data.GetAllRequest,
-) (result *data.StatisticResponseList, errCode int, err error) {
+) (result *data.MonitoringResponseList, errCode int, err error) {
 	// Count directors
 	directorCount, err := service.DirectorService.Repository.CountAll(request.SchoolID)
 	if err != nil {
@@ -124,8 +124,8 @@ func (service *Service) GetAll(
 		}
 	}
 
-	result = &data.StatisticResponseList{
-		Data: &data.StatisticResponse{
+	result = &data.MonitoringResponseList{
+		Data: &data.MonitoringResponse{
 			Count: &data.CountResponse{
 				Schools:   schoolsCount,
 				Directors: directorCount,

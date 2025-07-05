@@ -296,7 +296,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("students.school_id = %d", request.SchoolID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(students.id AS TEXT) = '%s' OR students.uid ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR users.email ILIKE '%s')",
 			filter.Search,
@@ -347,7 +347,7 @@ func (repository *Repository) GetAllStudentEnroll(filter *types.Filter, paginati
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.student_id = %d", request.StudentID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(student_enrolls.id AS TEXT) = '%s' OR years.name ILIKE '%s' OR highschool_classes.name ILIKE '%s' OR highschool_classes.description ILIKE '%s' OR university_level_domains.program ILIKE '%s' OR university_level_domains.requirements ILIKE '%s')",
 			filter.Search,

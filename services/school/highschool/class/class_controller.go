@@ -58,6 +58,21 @@ func (controller *Controller) Update(
 	return
 }
 
+func (controller *Controller) UpdateClassSubject(
+	ctx *context.Context,
+	input *struct {
+		data.ClassSubjectID
+		Body data.ClassSubjectRequest
+	},
+) (result *model.HighschoolClassSubject, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateClassSubject(
+		helpers.GetJwtContext(ctx),
+		input.ID,
+		&input.Body,
+	)
+	return
+}
+
 func (controller *Controller) Delete(
 	ctx *context.Context,
 	input *struct {
@@ -100,6 +115,20 @@ func (controller *Controller) DeleteMultiple(
 	return
 }
 
+func (controller *Controller) DeleteMultipleClassSubject(
+	ctx *context.Context,
+	input *struct {
+		Body types.DeleteMultipleRequest
+	},
+) (result int64, errCode int, err error) {
+	affectedRows, errCode, err := controller.Service.DeleteMultipleClassSubject(helpers.GetJwtContext(ctx), input.Body.List)
+	if err != nil {
+		return
+	}
+	result = affectedRows
+	return
+}
+
 func (controller *Controller) Get(
 	ctx *context.Context,
 	input *struct {
@@ -111,6 +140,20 @@ func (controller *Controller) Get(
 		return
 	}
 	result = class
+	return
+}
+
+func (controller *Controller) GetClassSubject(
+	ctx *context.Context,
+	input *struct {
+		data.ClassSubjectID
+	},
+) (result *model.HighschoolClassSubject, errCode int, err error) {
+	classSubject, errCode, err := controller.Service.GetClassSubject(helpers.GetJwtContext(ctx), input.ID)
+	if err != nil {
+		return
+	}
+	result = classSubject
 	return
 }
 

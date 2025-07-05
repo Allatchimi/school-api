@@ -143,7 +143,7 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("quizzes.unit_id = %d", request.UnitID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"WHERE CAST(quizzes.id AS TEXT) = '%s' OR quizzes.title ILIKE '%s' OR quizzes.description ILIKE '%s' OR schools.name ILIKE '%s' OR years.name ILIKE '%s' OR highschool_class_subjects.name ILIKE '%s' OR university_units.name ILIKE '%s'",
 			filter.Search,
@@ -200,7 +200,7 @@ func (repository *Repository) GetAllQuizAnswer(
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("quiz_answers.student_id = %d", request.StudentID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"CAST(quiz_answers.id AS TEXT) = '%s' OR quizzes.title ILIKE '%s' OR quizzes.description ILIKE '%s' OR students.uid ILIKE '%s' OR years.name ILIKE '%s' OR highschool_class_subjects.name ILIKE '%s' OR university_units.name ILIKE '%s'",
 			filter.Search,

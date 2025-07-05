@@ -10,10 +10,13 @@ import (
 
 	"api/common/constants"
 	"api/config"
+	configWS "api/config/ws"
 	"api/middlewares"
 	"api/services/common/communication"
 	"api/services/common/contact"
 	"api/services/common/health"
+	"api/services/common/monitoring"
+	"api/services/common/notification"
 	"api/services/school/common/course"
 	"api/services/school/common/director"
 	"api/services/school/common/exam"
@@ -26,7 +29,6 @@ import (
 	"api/services/school/common/result"
 	"api/services/school/common/schedule"
 	"api/services/school/common/school"
-	"api/services/school/common/statistic"
 	"api/services/school/common/student"
 	"api/services/school/common/teacher"
 	"api/services/school/common/year"
@@ -53,6 +55,7 @@ type Controllers struct {
 	// Others service
 	CommunicationController *communication.Controller
 	ContactController       *contact.Controller
+	NotificationController  *notification.Controller
 	HealthController        *health.Controller
 
 	// User service
@@ -63,22 +66,22 @@ type Controllers struct {
 	ProfileController    *profile.Controller
 
 	// School service
-	SchoolController    *school.Controller
-	DirectorController  *director.Controller
-	TeacherController   *teacher.Controller
-	StudentController   *student.Controller
-	ParentController    *parent.Controller
-	YearController      *year.Controller
-	CourseController    *course.Controller
-	ExamController      *exam.Controller
-	MeetingController   *meeting.Controller
-	QuizController      *quiz.Controller
-	RequestController   *request.Controller
-	ResultController    *result.Controller
-	ScheduleController  *schedule.Controller
-	PaymentController   *payment.Controller
-	StatisticController *statistic.Controller
-	ReportController    *report.Controller
+	SchoolController     *school.Controller
+	DirectorController   *director.Controller
+	TeacherController    *teacher.Controller
+	StudentController    *student.Controller
+	ParentController     *parent.Controller
+	YearController       *year.Controller
+	CourseController     *course.Controller
+	ExamController       *exam.Controller
+	MeetingController    *meeting.Controller
+	QuizController       *quiz.Controller
+	ResultController     *result.Controller
+	ReportController     *report.Controller
+	ScheduleController   *schedule.Controller
+	RequestController    *request.Controller
+	PaymentController    *payment.Controller
+	MonitoringController *monitoring.Controller
 	// Secondary
 	SectionController   *section.Controller
 	SpecialtyController *specialty.Controller
@@ -102,6 +105,7 @@ func registerEndpoints(humaApi *huma.API) {
 	// Others service
 	communication.RegisterEndpoints(humaApi, AllControllers.CommunicationController)
 	contact.RegisterEndpoints(humaApi, AllControllers.ContactController)
+	notification.RegisterEndpoints(humaApi, AllControllers.NotificationController)
 	health.RegisterEndpoints(humaApi, AllControllers.HealthController)
 
 	// User service
@@ -122,12 +126,12 @@ func registerEndpoints(humaApi *huma.API) {
 	exam.RegisterEndpoints(humaApi, AllControllers.ExamController)
 	meeting.RegisterEndpoints(humaApi, AllControllers.MeetingController)
 	quiz.RegisterEndpoints(humaApi, AllControllers.QuizController)
-	request.RegisterEndpoints(humaApi, AllControllers.RequestController)
+	report.RegisterEndpoints(humaApi, AllControllers.ReportController)
 	result.RegisterEndpoints(humaApi, AllControllers.ResultController)
 	schedule.RegisterEndpoints(humaApi, AllControllers.ScheduleController)
+	request.RegisterEndpoints(humaApi, AllControllers.RequestController)
 	payment.RegisterEndpoints(humaApi, AllControllers.PaymentController)
-	statistic.RegisterEndpoints(humaApi, AllControllers.StatisticController)
-	report.RegisterEndpoints(humaApi, AllControllers.ReportController)
+	monitoring.RegisterEndpoints(humaApi, AllControllers.MonitoringController)
 	// Highschool
 	sequence.RegisterEndpoints(humaApi, AllControllers.SequenceController)
 	quarter.RegisterEndpoints(humaApi, AllControllers.QuarterController)
@@ -197,10 +201,15 @@ func Start() {
 		),
 	)
 
-	// Register endpoints
 	// Serve static files as favicon
 	engine.StaticFS("/assets", http.Dir(constants.AssetAppPath))
-	// Register endpoint for docs with support for custom template
+
+	// Register websocket
+	wsManager := configWS.SetupWebsocket()
+	wsManager.SubscribeToNotifications()
+	engine.GET("/ws/notifications", wsManager.Listen)
+
+	// Register API endpoints
 	ginGroup.GET("/docs", func(ctx *gin.Context) {
 		ctx.Data(200, "text/html", []byte(*config.OpenAPITemplates.Scalar))
 	})

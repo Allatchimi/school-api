@@ -7,6 +7,8 @@ import (
 	"api/common/utils"
 	"api/services/user/user/data"
 	"api/services/user/user/model"
+
+	dataMonitoring "api/services/common/monitoring/data"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -31,7 +33,7 @@ func (repository *Repository) CreateUserInfo(item *model.UserInfo) (*model.UserI
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
-func (repository *Repository) CreateUserMfa(item *model.UserMfa) (*model.UserMfa, error) {
+func (repository *Repository) CreateUserConfig(item *model.UserConfig) (*model.UserConfig, error) {
 	result := *item
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
@@ -48,6 +50,58 @@ func (repository *Repository) UpdateByID(id int64, item *model.User) (*model.Use
 	).Error
 }
 
+func (repository *Repository) UpdateEmailByID(id int64, email string) (*model.User, error) {
+	result := &model.User{}
+	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+		map[string]any{
+			"email": email,
+		},
+	).Error
+}
+
+func (repository *Repository) UpdatePhoneNumberByID(id int64, phoneNumber uint64) (*model.User, error) {
+	result := &model.User{}
+	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+		map[string]any{
+			"phone_number": phoneNumber,
+		},
+	).Error
+}
+
+func (repository *Repository) UpdatePasswordByID(id int64, password string) (*model.User, error) {
+	result := &model.User{}
+	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Update("password", password).Error
+}
+
+func (repository *Repository) UpdateActivationByID(id int64, item *model.User) (*model.User, error) {
+	result := &model.User{}
+	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+		map[string]any{
+			"is_activated":   item.IsActivated,
+			"activated_at":   item.ActivatedAt,
+			"user_info_id":   item.UserInfoID,
+			"user_config_id": item.UserConfigID,
+		},
+	).Error
+}
+
+func (repository *Repository) UpdateUserConfigAllowNotificationByID(id int64, enabled bool) (*model.UserConfig, error) {
+	result := &model.UserConfig{}
+	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+		map[string]any{
+			"allow_notifications": enabled,
+		},
+	).Error
+}
+
+func (repository *Repository) UpdateUserConfigFieldByID(id int64, column string, value bool) (*model.UserConfig, error) {
+	result := &model.UserConfig{}
+	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+		map[string]any{
+			"" + column: value,
+		},
+	).Error
+}
 func (repository *Repository) UpdateUserInfoByID(id int64, item *model.UserInfo) (*model.UserInfo, error) {
 	result := &model.UserInfo{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
@@ -55,9 +109,24 @@ func (repository *Repository) UpdateUserInfoByID(id int64, item *model.UserInfo)
 			"username":   item.Username,
 			"first_name": item.FirstName,
 			"last_name":  item.LastName,
-			"address":    item.Address,
-			"image":      item.Image,
-			"language":   item.Language,
+
+			"gender":         item.Gender,
+			"birthday":       item.Birthday,
+			"birth_location": item.BirthLocation,
+			"address":        item.Address,
+			"language":       item.Language,
+			"image":          item.Image,
+		},
+	).Error
+}
+
+func (repository *Repository) UpdateUserConfigWebPushSubscriptionByID(userID int64, endpoint string, KeyP256dh string, keyAuth string) (*model.UserConfig, error) {
+	result := &model.UserConfig{}
+	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", userID).Updates(
+		map[string]any{
+			"web_push_subscription_endpoint":   endpoint,
+			"web_push_subscription_key_p256dh": KeyP256dh,
+			"web_push_subscription_key_auth":   keyAuth,
 		},
 	).Error
 }
@@ -76,13 +145,13 @@ func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, er
 	return
 }
 
-func (repository *Repository) CountAllGroupByYear(result any) (err error) {
+func (repository *Repository) CountAllGroupByYear(result *[]dataMonitoring.UsersByYearResponse) (err error) {
 	err = repository.Db.
 		Model(&model.User{}).
 		Select("EXTRACT(YEAR FROM created_at) AS year, COUNT(*) AS count").
 		Group("year").
 		Order("year").
-		Scan(&result).Error
+		Find(&result).Error
 	return
 }
 
@@ -132,7 +201,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("roles.name = %s", request.RoleName))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(users.id AS TEXT) = '%s' OR users.email ILIKE '%s' OR CAST(users.phone_number AS TEXT) ILIKE '%s' OR infos.first_name ILIKE '%s' OR infos.last_name ILIKE '%s' OR infos.username ILIKE '%s')",
 			filter.Search,
@@ -163,64 +232,4 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 
 	err = tmpErr
 	return
-}
-
-// ----------------- Authentication -----------------
-func (repository *Repository) UpdateUserPassword(id int64, password string) (*model.User, error) {
-	result := &model.User{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Update("password", password).Error
-}
-
-func (repository *Repository) UpdateUserActivation(id int64, item *model.User) (*model.User, error) {
-	result := &model.User{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"is_activated": item.IsActivated,
-			"activated_at": item.ActivatedAt,
-			"user_info_id": item.UserInfoID,
-			"user_mfa_id":  item.UserMfaID,
-		},
-	).Error
-}
-
-// ----------------- Profile -----------------
-
-func (repository *Repository) UpdateUserEmail(id int64, email string) (*model.User, error) {
-	result := &model.User{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"email": email,
-		},
-	).Error
-}
-func (repository *Repository) UpdateUserPhoneNumber(id int64, phoneNumber uint64) (*model.User, error) {
-	result := &model.User{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"phone_number": phoneNumber,
-		},
-	).Error
-}
-
-func (repository *Repository) UpdateProfileInfo(id int64, item *model.UserInfo) (*model.UserInfo, error) {
-	result := &model.UserInfo{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"username":   item.Username,
-			"first_name": item.FirstName,
-			"last_name":  item.LastName,
-			"address":    item.Address,
-			"image":      item.Image,
-			"language":   item.Language,
-		},
-	).Error
-}
-
-func (repository *Repository) UpdateProfileMfa(id int64, column string, value bool) (*model.UserMfa, error) {
-	result := &model.UserMfa{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"" + column: value,
-		},
-	).Error
 }

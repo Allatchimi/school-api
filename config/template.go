@@ -2,9 +2,7 @@ package config
 
 import (
 	"api/common/constants"
-	"api/common/helpers"
 	"api/common/utils"
-	"go.uber.org/zap"
 )
 
 type OpenAPITemplate struct {
@@ -17,56 +15,30 @@ type OpenAPITemplate struct {
 var OpenAPITemplates = &OpenAPITemplate{}
 
 // Loads OpenAPI templates from a specified location resources.
-func LoadOpenAPITemplates() error {
-	var err error
-	var errRead error
-
+func LoadOpenAPITemplates() (err error) {
 	// Redocly
-	OpenAPITemplates.Redocly, errRead = utils.ReadFileToString(constants.AssetTemplatesPath + "/openapi/redocly.html")
-	if errRead != nil {
-		err = errRead
-		helpers.Logger.Warn(
-			"Failed to load OpenAPI Redocly template",
-			zap.String("Error", errRead.Error()),
-		)
-	} else {
-		helpers.Logger.Info("OpenAPI template Redocly loaded!")
+	OpenAPITemplates.Redocly, err = utils.ReadFileToString(constants.AssetTemplatesPath + "/openapi/redocly.html")
+	if err != nil {
+		return
 	}
 
 	// Scalar
 	OpenAPITemplates.Scalar, err = utils.ReadFileToString(constants.AssetTemplatesPath + "/openapi/scalar.html")
-	if errRead != nil {
-		helpers.Logger.Warn(
-			"Failed to load OpenAPI Scalar template",
-			zap.String("Error", errRead.Error()),
-		)
-	} else {
-		helpers.Logger.Info("OpenAPI template Scalar loaded!")
+	if err != nil {
+		return
 	}
 
 	// Stoplight
-	OpenAPITemplates.Stoplight, errRead = utils.ReadFileToString(constants.AssetTemplatesPath + "/openapi/stoplight.html")
-	if errRead != nil {
-		err = errRead
-		helpers.Logger.Warn(
-			"Failed to load OpenAPI Stoplight template",
-			zap.String("Error", errRead.Error()),
-		)
-	} else {
-		helpers.Logger.Info("OpenAPI template Stoplight loaded!")
+	OpenAPITemplates.Stoplight, err = utils.ReadFileToString(constants.AssetTemplatesPath + "/openapi/stoplight.html")
+	if err != nil {
+		return
 	}
 
 	// Swagger
-	OpenAPITemplates.Swagger, errRead = utils.ReadFileToString(constants.AssetTemplatesPath + "/openapi/swagger.html")
-	if errRead != nil {
-		err = errRead
-		helpers.Logger.Warn(
-			"Failed to load OpenAPI Swagger template",
-			zap.String("Error", errRead.Error()),
-		)
-	} else {
-		helpers.Logger.Info("OpenAPI template Swagger loaded!")
+	OpenAPITemplates.Swagger, err = utils.ReadFileToString(constants.AssetTemplatesPath + "/openapi/swagger.html")
+	if err != nil {
+		return
 	}
 
-	return err
+	return
 }

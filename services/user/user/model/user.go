@@ -19,8 +19,8 @@ type User struct {
 	UserInfoID int64     `gorm:"default:null"`
 	Info       *UserInfo `gorm:"default:null;foreignKey:UserInfoID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	UserMfaID int64    `gorm:"default:null"`
-	Mfa       *UserMfa `gorm:"default:null;foreignKey:UserMfaID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	UserConfigID int64       `gorm:"default:null"`
+	Config       *UserConfig `gorm:"default:null;foreignKey:UserConfigID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Email       string `gorm:"default:null"`
 	PhoneNumber uint64 `gorm:"default:null"`
@@ -50,6 +50,7 @@ func (item *User) ToResponse() *data.UserResponse {
 	resp := &data.UserResponse{}
 	resp.Email = item.Email
 	resp.PhoneNumber = item.PhoneNumber
+
 	resp.LoginMethod = item.LoginMethod
 	resp.Provider = item.Provider
 	resp.ProviderUserID = item.ProviderUserID
@@ -58,7 +59,7 @@ func (item *User) ToResponse() *data.UserResponse {
 
 	resp.Role = item.Role.ToResponse()
 	resp.Info = item.Info.ToResponse()
-	resp.Mfa = item.Mfa.ToResponse()
+	resp.Config = item.Config.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -73,6 +74,7 @@ func (item *User) ToPublicResponse() *data.UserPublicResponse {
 	resp := &data.UserPublicResponse{}
 	resp.Email = item.Email
 
+	resp.Role = item.Role.ToPublicResponse()
 	resp.Info = item.Info.ToPublicResponse()
 	return resp
 }

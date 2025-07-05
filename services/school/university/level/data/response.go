@@ -13,8 +13,8 @@ type LevelResponse struct {
 }
 
 type LevelPublicResponse struct {
-	School      *dataSchool.SchoolPublicResponse `json:"school" doc:"School"`
-	Domain      *dataDomain.DomainPublicResponse `json:"domain" doc:"Domain"`
+	School      *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	Domain      *dataDomain.DomainPublicResponse `json:"domain" required:"false" doc:"Domain"`
 	Name        string                           `json:"name" required:"false" doc:"Level name"`
 	Description string                           `json:"description" required:"false" doc:"Level description"`
 }
@@ -25,6 +25,7 @@ type LevelDomainResponse struct {
 }
 
 type LevelDomainPublicResponse struct {
+	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
 	Domain *dataDomain.DomainPublicResponse `json:"domain" required:"false" doc:"Domain"`
 	Level  *LevelPublicResponse             `json:"level" required:"false" doc:"Level"`
 

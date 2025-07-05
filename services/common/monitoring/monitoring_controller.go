@@ -1,11 +1,11 @@
-package statistic
+package monitoring
 
 import (
 	"context"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/services/school/common/statistic/data"
+	"api/services/common/monitoring/data"
 )
 
 type Controller struct {
@@ -23,12 +23,12 @@ func (controller *Controller) GetAll(
 		types.PaginationRequest
 		data.GetAllRequest
 	},
-) (result *data.StatisticResponseList, errCode int, err error) {
+) (result *data.MonitoringResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	statisticList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
+	monitoringList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}
-	result = statisticList
+	result = monitoringList
 	return
 }

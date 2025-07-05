@@ -77,7 +77,7 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("payments.student_enroll_id = %d", request.StudentEnrollID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"CAST(payments.id AS TEXT) = '%s' OR payments.currency ILIKE '%s' OR payments.payment_method ILIKE '%s' OR payments.payment_status ILIKE '%s' OR payments.payment_note ILIKE '%s' OR schools.name ILIKE '%s'",
 			filter.Search,

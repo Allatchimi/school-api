@@ -26,12 +26,12 @@ func (repository *Repository) Create(item *model.School) (*model.School, error) 
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
-func (repository *Repository) CreateInfo(item *model.SchoolInfo) (*model.SchoolInfo, error) {
+func (repository *Repository) CreateSchoolInfo(item *model.SchoolInfo) (*model.SchoolInfo, error) {
 	result := *item
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
-func (repository *Repository) CreateConfig(item *model.SchoolConfig) (*model.SchoolConfig, error) {
+func (repository *Repository) CreateSchoolConfig(item *model.SchoolConfig) (*model.SchoolConfig, error) {
 	result := *item
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
@@ -40,9 +40,14 @@ func (repository *Repository) UpdateByID(id int64, item *model.School) (*model.S
 	result := &model.School{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
-			"name":          item.Name,
-			"type":          item.Type,
-			"logo":          item.Logo,
+			"name":   item.Name,
+			"type":   item.Type,
+			"status": item.Status,
+
+			"favicon":    item.Favicon,
+			"logo":       item.Logo,
+			"logo_white": item.LogoWhite,
+
 			"currency":      item.Currency,
 			"payment_count": item.PaymentCount,
 		},
@@ -59,13 +64,13 @@ func (repository *Repository) UpdateConfigInfoByID(id int64, configID int64, inf
 	).Error
 }
 
-func (repository *Repository) UpdateInfoByID(id int64, item *model.SchoolInfo) (*model.SchoolInfo, error) {
+func (repository *Repository) UpdateSchoolInfoByID(id int64, item *model.SchoolInfo) (*model.SchoolInfo, error) {
 	result := &model.SchoolInfo{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
 			"full_name":   item.FullName,
 			"description": item.Description,
-			"slogan":      item.Slogan,
+			"motto":       item.Motto,
 
 			"phone_number1": item.PhoneNumber1,
 			"phone_number2": item.PhoneNumber2,
@@ -83,6 +88,12 @@ func (repository *Repository) UpdateInfoByID(id int64, item *model.SchoolInfo) (
 			"location_longitude": item.LocationLongitude,
 			"location_latitude":  item.LocationLatitude,
 
+			"social_media_telegram": item.SocialMediaTelegram,
+			"social_media_whasapp":  item.SocialMediaWhasapp,
+			"social_media_youtube":  item.SocialMediaYoutube,
+			"social_media_twitter":  item.SocialMediaTwitter,
+			"social_media_facebook": item.SocialMediaFacebook,
+
 			"image1": item.Image1,
 			"image2": item.Image2,
 			"image3": item.Image3,
@@ -92,7 +103,7 @@ func (repository *Repository) UpdateInfoByID(id int64, item *model.SchoolInfo) (
 	).Error
 }
 
-func (repository *Repository) UpdateConfigByID(id int64, item *model.SchoolConfig) (*model.SchoolConfig, error) {
+func (repository *Repository) UpdateSchoolConfigByID(id int64, item *model.SchoolConfig) (*model.SchoolConfig, error) {
 	result := &model.SchoolConfig{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
@@ -109,12 +120,16 @@ func (repository *Repository) UpdateConfigByID(id int64, item *model.SchoolConfi
 			"smtp_no_reply_email": item.SmtpNoReplyEmail,
 			"smtp_support_email":  item.SmtpSupportEmail,
 
+			"sms_user_id": item.SmsUserID,
+
 			"user_email_domain": item.UserEmailDomain,
 
 			"website_title":       item.WebsiteTitle,
 			"website_description": item.WebsiteDescription,
 
-			"color_primary": item.ColorPrimary,
+			"color_primary":          item.ColorPrimary,
+			"color_primary_bg":       item.ColorPrimaryBg,
+			"color_primary_bg_hover": item.ColorPrimaryBgHover,
 		},
 	).Error
 }
@@ -158,12 +173,12 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.School, item2 *m
 	return false
 }
 
-func (repository *Repository) GetInfoByID(id int64) (*model.SchoolInfo, error) {
+func (repository *Repository) GetSchoolInfoByID(id int64) (*model.SchoolInfo, error) {
 	result := &model.SchoolInfo{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetConfigByID(id int64) (*model.SchoolConfig, error) {
+func (repository *Repository) GetSchoolConfigByID(id int64) (*model.SchoolConfig, error) {
 	result := &model.SchoolConfig{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
@@ -176,7 +191,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("schools.type = '%s'", request.Type))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(schools.id AS TEXT) = '%s' OR schools.name ILIKE '%s' OR CAST(schools.type AS TEXT) ILIKE '%s' OR infos.full_name ILIKE '%s' OR infos.slogan ILIKE '%s' OR infos.founder ILIKE '%s')",
 			filter.Search,

@@ -154,7 +154,7 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("parents.school_id = %d", request.SchoolID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"CAST(parents.id AS TEXT) = '%s' OR parents.uid ILIKE '%s' OR schools.name ILIKE '%s' OR users.email ILIKE '%s' OR users.phone_number ILIKE '%s'",
 			filter.Search,
@@ -212,7 +212,7 @@ func (repository *Repository) GetAllParentStudent(
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("parent_students.student_id = %d", request.StudentID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"CAST(parent_students.id AS TEXT) = '%s' OR students.uid ILIKE '%s'",
 			filter.Search,

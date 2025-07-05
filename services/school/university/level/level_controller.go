@@ -58,6 +58,21 @@ func (controller *Controller) Update(
 	return
 }
 
+func (controller *Controller) UpdateLevelDomain(
+	ctx *context.Context,
+	input *struct {
+		data.LevelDomainID
+		Body data.LevelDomainRequest
+	},
+) (result *model.UniversityLevelDomain, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateLevelDomain(
+		helpers.GetJwtContext(ctx),
+		input.ID,
+		&input.Body,
+	)
+	return
+}
+
 func (controller *Controller) Delete(
 	ctx *context.Context,
 	input *struct {
@@ -100,6 +115,20 @@ func (controller *Controller) DeleteMultiple(
 	return
 }
 
+func (controller *Controller) DeleteMultipleLevelDomain(
+	ctx *context.Context,
+	input *struct {
+		Body types.DeleteMultipleRequest
+	},
+) (result int64, errCode int, err error) {
+	affectedRows, errCode, err := controller.Service.DeleteMultipleLevelDomain(helpers.GetJwtContext(ctx), input.Body.List)
+	if err != nil {
+		return
+	}
+	result = affectedRows
+	return
+}
+
 func (controller *Controller) Get(
 	ctx *context.Context,
 	input *struct {
@@ -111,6 +140,20 @@ func (controller *Controller) Get(
 		return
 	}
 	result = level
+	return
+}
+
+func (controller *Controller) GetLevelDomain(
+	ctx *context.Context,
+	input *struct {
+		data.LevelDomainID
+	},
+) (result *model.UniversityLevelDomain, errCode int, err error) {
+	levelDomain, errCode, err := controller.Service.GetLevelDomain(helpers.GetJwtContext(ctx), input.ID)
+	if err != nil {
+		return
+	}
+	result = levelDomain
 	return
 }
 

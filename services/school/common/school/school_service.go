@@ -24,9 +24,14 @@ const DEFAULT_ERROR_MESSAGE = "interact with school model"
 func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.SchoolRequest) (result *model.School, errCode int, err error) {
 	// Format request
 	item := &model.School{
-		Name:         request.Name,
-		Type:         request.Type,
-		Logo:         request.Logo,
+		Name:   request.Name,
+		Type:   request.Type,
+		Status: request.Status,
+
+		Favicon:   request.Favicon,
+		Logo:      request.Logo,
+		LogoWhite: request.LogoWhite,
+
 		Currency:     request.Currency,
 		PaymentCount: request.PaymentCount,
 
@@ -35,10 +40,10 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 	}
 
 	// Create info
-	newInfo, err := service.Repository.CreateInfo(&model.SchoolInfo{
+	newInfo, err := service.Repository.CreateSchoolInfo(&model.SchoolInfo{
 		FullName:    item.Info.FullName,
 		Description: item.Info.Description,
-		Slogan:      item.Info.Slogan,
+		Motto:       item.Info.Motto,
 
 		PhoneNumber1: item.Info.PhoneNumber1,
 		PhoneNumber2: item.Info.PhoneNumber2,
@@ -55,10 +60,17 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 		LocationLongitude: item.Info.LocationLongitude,
 		LocationLatitude:  item.Info.LocationLatitude,
 
+		SocialMediaTelegram: item.Info.SocialMediaTelegram,
+		SocialMediaWhasapp:  item.Info.SocialMediaWhasapp,
+		SocialMediaYoutube:  item.Info.SocialMediaYoutube,
+		SocialMediaTwitter:  item.Info.SocialMediaTwitter,
+		SocialMediaFacebook: item.Info.SocialMediaFacebook,
+
 		Image1: item.Info.Image1,
 		Image2: item.Info.Image2,
 		Image3: item.Info.Image3,
 		Image4: item.Info.Image4,
+		Image5: item.Info.Image5,
 	})
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -67,7 +79,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 	}
 
 	// Create config
-	newConfig, err := service.Repository.CreateConfig(&model.SchoolConfig{
+	newConfig, err := service.Repository.CreateSchoolConfig(&model.SchoolConfig{
 		Protocol: item.Config.Protocol,
 
 		DomainName: item.Config.DomainName,
@@ -81,12 +93,16 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 		SmtpNoReplyEmail: item.Config.SmtpNoReplyEmail,
 		SmtpSupportEmail: item.Config.SmtpSupportEmail,
 
+		SmsUserID: item.Config.SmsUserID,
+
 		UserEmailDomain: item.Config.UserEmailDomain,
 
 		WebsiteTitle:       item.Config.WebsiteTitle,
 		WebsiteDescription: item.Config.WebsiteDescription,
 
-		ColorPrimary: item.Config.ColorPrimary,
+		ColorPrimary:        item.Config.ColorPrimary,
+		ColorPrimaryBg:      item.Config.ColorPrimaryBg,
+		ColorPrimaryBgHover: item.Config.ColorPrimaryBgHover,
 	})
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -96,9 +112,14 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 
 	// Create school
 	result, err = service.Repository.Create(&model.School{
-		Name:         item.Name,
-		Type:         item.Type,
-		Logo:         item.Logo,
+		Name:   item.Name,
+		Type:   item.Type,
+		Status: item.Status,
+
+		Favicon:   item.Favicon,
+		Logo:      item.Logo,
+		LogoWhite: item.LogoWhite,
+
 		Currency:     item.Currency,
 		PaymentCount: item.PaymentCount,
 
@@ -137,9 +158,14 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 
 	// Format request
 	item := &model.School{
-		Name:         request.Name,
-		Type:         request.Type,
-		Logo:         request.Logo,
+		Name:   request.Name,
+		Type:   request.Type,
+		Status: request.Status,
+
+		Favicon:   request.Favicon,
+		Logo:      request.Logo,
+		LogoWhite: request.LogoWhite,
+
 		Currency:     request.Currency,
 		PaymentCount: request.PaymentCount,
 
@@ -203,7 +229,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 
 func (service *Service) UpdateInfo(inputJwtToken *types.JwtToken, id int64, item *model.SchoolInfo) (result *model.SchoolInfo, errCode int, err error) {
 	// Check if school info already exists
-	foundItem, err := service.Repository.GetInfoByID(id)
+	foundItem, err := service.Repository.GetSchoolInfoByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -216,7 +242,7 @@ func (service *Service) UpdateInfo(inputJwtToken *types.JwtToken, id int64, item
 	}
 
 	// Update
-	result, err = service.Repository.UpdateInfoByID(id, item)
+	result, err = service.Repository.UpdateSchoolInfoByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -227,7 +253,7 @@ func (service *Service) UpdateInfo(inputJwtToken *types.JwtToken, id int64, item
 
 func (service *Service) UpdateConfig(inputJwtToken *types.JwtToken, id int64, item *model.SchoolConfig) (result *model.SchoolConfig, errCode int, err error) {
 	// Check if school config already exists
-	foundItem, err := service.Repository.GetConfigByID(id)
+	foundItem, err := service.Repository.GetSchoolConfigByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -240,7 +266,7 @@ func (service *Service) UpdateConfig(inputJwtToken *types.JwtToken, id int64, it
 	}
 
 	// Update
-	result, err = service.Repository.UpdateConfigByID(id, item)
+	result, err = service.Repository.UpdateSchoolConfigByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

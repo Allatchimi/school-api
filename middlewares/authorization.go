@@ -1,21 +1,36 @@
 package middlewares
 
 import (
-	"fmt"
 	"net/http"
-	"slices"
+	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
 
 	"api/common/constants"
-	"api/common/helpers"
+	"api/common/types"
 	"api/common/utils/security"
-	"api/config"
 )
+
+// ExtractBearerTokenHeader Retrieves the bearer token from the current request context.
+func ExtractBearerTokenHeader(ctx *huma.Context) string {
+	return strings.TrimPrefix((*ctx).Header("Authorization"), "Bearer ")
+}
+
+// SetAuthContext Adds information such as JWT token and bearer token to context in order
+// to pass information to middleware, operation and handler func
+func SetAuthContext(ctx *huma.Context, token string, jwtToken *types.JwtToken) *huma.Context {
+	ctxToken := huma.WithValue(*ctx, constants.TokenKey, token)
+	ctxUserID := huma.WithValue(ctxToken, constants.UserIDKey, jwtToken.UserID)
+	ctxIssuer := huma.WithValue(ctxUserID, constants.IssuerKey, jwtToken.Issuer)
+	ctxPlatform := huma.WithValue(ctxIssuer, constants.PlatformKey, jwtToken.Platform)
+	ctxDevice := huma.WithValue(ctxPlatform, constants.DeviceKey, jwtToken.Device)
+	ctxApp := huma.WithValue(ctxDevice, constants.AppKey, jwtToken.App)
+	ctxCode := huma.WithValue(ctxApp, constants.CodeKey, jwtToken.Code)
+	return &ctxCode
+}
 
 // AuthMiddleware Handles authentication for API requests.
 func AuthMiddleware(api huma.API) func(huma.Context, func(huma.Context)) {
-	var errMessage string
 	return func(ctx huma.Context, next func(huma.Context)) {
 		// Check if current endpoint requires authorization
 		isAuthorizationRequired := false
@@ -31,39 +46,14 @@ func AuthMiddleware(api huma.API) func(huma.Context, func(huma.Context)) {
 		}
 
 		// Parse and decode the token
-		token := helpers.ExtractBearerTokenHeader(&ctx)
-		if len(token) < 1 {
-			errMessage = "Missing or bad authorization header! Please enter valid information."
-			_ = huma.WriteErr(api, ctx, http.StatusUnauthorized, errMessage, fmt.Errorf("%s", errMessage))
+		token := ExtractBearerTokenHeader(&ctx)
+		jwtToken, errCode, err := security.ValidateAuthToken(token)
+		if err != nil {
+			_ = huma.WriteErr(api, ctx, errCode, err.Error(), err)
 			return
 		}
-		jwtDecoded, errDecoded := security.DecodeJWTToken(
-			token,
-			config.Keys.JwtPublicKey,
-		)
-		if errDecoded != nil || jwtDecoded == nil {
-			tempErr := errDecoded
-			_ = huma.WriteErr(api, ctx, http.StatusUnauthorized, tempErr.Error(), tempErr)
-			return
-		}
-
-		// Validate the token by checking if it's cached
-		isTokenCached := false
-		if jwtDecoded.Issuer == constants.JwtIssuerSession {
-			isTokenCached = security.ValidateJWTToken(
-				token,
-				jwtDecoded,
-				config.CheckValueInRedisList(token),
-			)
-		} else if slices.Contains(constants.JwtIssuerAuthList, jwtDecoded.Issuer) {
-			isTokenCached = security.ValidateJWTToken(
-				token,
-				jwtDecoded,
-				config.GetRedisString,
-			)
-		}
-		if isTokenCached {
-			next(*helpers.SetAuthContext(&ctx, token, jwtDecoded))
+		if jwtToken != nil {
+			next(*SetAuthContext(&ctx, token, jwtToken))
 			return
 		}
 

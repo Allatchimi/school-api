@@ -143,6 +143,47 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Update class subject with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "update-class-subject",
+			Summary:     "Update class subject",
+			Description: "Update existing class subject with matching id and return the new object.",
+			Method:      http.MethodPut,
+			Path:        fmt.Sprintf("%s/subjects/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
+						tableName,                  // Table name
+						constants.PermissionUpdate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.ClassSubjectID
+				Body data.ClassSubjectRequest
+			},
+		) (*struct{ Body data.ClassSubjectResponse }, error) {
+			result, errCode, err := controller.UpdateClassSubject(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.ClassSubjectResponse }{Body: *result.ToClassSubjectResponse()}, nil
+		},
+	)
+
 	// Delete class with id
 	huma.Register(
 		*humaApi,
@@ -263,6 +304,46 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Delete multiple class subject
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "delete-class-subject-multiple",
+			Summary:     "Delete multiple class subject",
+			Description: "Delete multiple class subject by providing a lis of IDs and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/subjects/multiple/delete", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body types.DeleteMultipleRequest
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteMultipleClassSubject(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
 	// Get class by id
 	huma.Register(
 		*humaApi,
@@ -303,6 +384,49 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct{ Body data.ClassResponse }{Body: *result.ToResponse()}, nil
+		},
+	)
+
+	// Get class subject by id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-class-subject-id",
+			Summary:     "Get class subject by id",
+			Description: "Return one class subject with matching id",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/subjects/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Features scope
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.ClassSubjectID
+			},
+		) (*struct{ Body data.ClassSubjectResponse }, error) {
+			result, errCode, err := controller.GetClassSubject(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.ClassSubjectResponse }{Body: *result.ToClassSubjectResponse()}, nil
 		},
 	)
 

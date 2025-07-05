@@ -2,60 +2,57 @@ package data
 
 import "time"
 
-type UpdateProfileEmailInitRequest struct {
-	Email       string `json:"email" required:"true" format:"email" doc:"Email"`
-	PhoneNumber uint64 `json:"phoneNumber" required:"true" minimum:"10000000" doc:"Phone number"`
-}
-
-type UpdateProfileEmailCheckCodeRequest struct {
-	Token string `json:"token" required:"true" minLength:"3" doc:"Received token on step 1"`
-	Code  int    `json:"code" required:"true" doc:"Received Code by email or phone number"`
-}
-
-type UpdateProfileEmailNewEmailRequest struct {
-	Email       string `json:"email" required:"true" format:"email" doc:"Email"`
-	PhoneNumber uint64 `json:"phoneNumber" required:"true" minimum:"10000000" doc:"Phone number"`
-}
-
-type UpdateProfilePhoneNumberInitRequest struct {
-	Email       string `json:"email" required:"true" format:"email" doc:"Email"`
-	PhoneNumber uint64 `json:"phoneNumber" required:"true" minimum:"10000000" doc:"Phone number"`
-}
-
-type UpdateProfilePhoneNumberCheckCodeRequest struct {
-	Token string `json:"token" required:"true" minLength:"3" doc:"Received token on step 1"`
-	Code  int    `json:"code" required:"true" doc:"Received Code on your phone number"`
-}
-
-type UpdateProfilePhoneNumberNewPhoneNumberRequest struct {
-	PhoneNumber uint64 `json:"phoneNumber" required:"true" minimum:"10000000" doc:"Phone number"`
-}
-
-type UpdateProfilePasswordInitRequest struct {
-}
-
-type UpdateProfilePasswordCheckCodeRequest struct {
-	Token string `json:"token" required:"true" minLength:"3" doc:"Received token on step 1"`
-	Code  int    `json:"code" required:"true" doc:"Received Code by email or phone number"`
-}
-type UpdateProfilePasswordNewPasswordRequest struct {
-	Token       string `json:"token" required:"true" minLength:"3" doc:"Received token on step 2"`
-	NewPassword string `json:"password" required:"true" minLength:"8" maxLength:"30" doc:"Base64 encoded password"`
-}
-
+// Update profile information
 type UpdateProfileInfoRequest struct {
-	Username  string `json:"username" required:"false" maxLength:"30" doc:"User name"`
-	FirstName string `json:"firstName" required:"false" maxLength:"30" doc:"First name"`
-	LastName  string `json:"lastName" required:"false" maxLength:"30" doc:"Last name"`
+	Username  string `json:"username" required:"false" minLength:"2" maxLength:"30" doc:"User name"`
+	FirstName string `json:"firstName" required:"true" minLength:"2" maxLength:"30" doc:"First name"`
+	LastName  string `json:"lastName" required:"true" minLength:"2" maxLength:"30" doc:"Last name"`
 
+	Gender        string     `json:"Gender" required:"true" enum:"male,female" doc:"Gender"`
 	Birthday      *time.Time `json:"birthday" required:"false" doc:"Birthday date time"`
 	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
-	Address       string     `json:"address" required:"false" maxLength:"30" doc:"Address"`
+	Address       string     `json:"address" required:"false" minLength:"2" maxLength:"30" doc:"Address"`
 	Language      string     `json:"language" required:"false" minLength:"2" maxLength:"2" doc:"Language code with 2 letter"`
 	Image         string     `json:"image" required:"false" doc:"Thumbnail"`
 }
 
-type UpdateProfileMfaRequest struct {
-	Method string `json:"method" required:"true" maxLength:"30" doc:"Method to update MFA"`
-	Value  bool   `json:"value" required:"true" doc:"Method status"`
+// Update password
+type UpdateProfilePasswordCheckCodeRequest struct {
+	Token string `json:"token" required:"true" minLength:"3" doc:"Received token on previous step"`
+	Code  int    `json:"code" required:"true" doc:"Received Code by email"`
+}
+type UpdateProfilePasswordNewPasswordRequest struct {
+	Token           string `json:"token" required:"true" minLength:"3" doc:"Received token on previous step"`
+	CurrentPassword string `json:"currentPassword" required:"true" minLength:"8" maxLength:"30" doc:"Base64 encoded password"`
+	NewPassword     string `json:"password" required:"true" minLength:"8" maxLength:"30" doc:"Base64 encoded password"`
+}
+
+// Update phone number
+type UpdateProfilePhoneNumberCheckCodeRequest struct {
+	Token string `json:"token" required:"true" minLength:"3" doc:"Received token on previous step"`
+	Code  int    `json:"code" required:"true" doc:"Received Code by email"`
+}
+type UpdateProfilePhoneNumberNewPhoneNumberRequest struct {
+	Token       string `json:"token" required:"true" minLength:"3" doc:"Received token on previous step"`
+	PhoneNumber uint64 `json:"phoneNumber" required:"true" minimum:"10000000" doc:"Phone number"`
+}
+
+// Update MFA for email
+type UpdateProfileMfaEmailCheckCodeRequest struct {
+	Token string `json:"token" required:"true" minLength:"3" doc:"Received token on previous step"`
+	Code  int    `json:"code" required:"true" doc:"Received Code by email"`
+}
+
+// Update notification setting
+type UpdateProfileSettingNotificationRequest struct {
+	IsEnabled bool `json:"isEnabled" required:"true" doc:"Is enabled"`
+}
+
+// Subscribe to web push notification
+type UpdateProfileWebPushSubscriptionRequest struct {
+	Endpoint string `json:"endpoint" required:"true" doc:"Endpoint"`
+	Keys     *struct {
+		P256dh string `json:"p256dh" required:"true" doc:"P256dh"`
+		Auth   string `json:"auth" required:"true" doc:"Auth"`
+	} `json:"keys" required:"true" doc:"Keys"`
 }

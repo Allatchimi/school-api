@@ -56,19 +56,19 @@ func Apply() error {
 	// Migrate models with foreign key
 	err = config.DB.AutoMigrate(
 		// ----------- Others models -----------
-		// Notification
-		&notificationModel.Notification{},
 		// Communication
 		&communicationModel.Communication{},
 		// Contact
 		&contactModel.Contact{},
+		// Notification
+		&notificationModel.Notification{},
 
 		// ----------- User models -----------
 		// Permission
 		&permissionModel.Permission{},
 		// User
 		&userModel.User{},
-		&userModel.UserMfa{},
+		&userModel.UserConfig{},
 		&userModel.UserInfo{},
 		// Role
 		&roleModel.Role{},
@@ -108,19 +108,19 @@ func Apply() error {
 		&quizModel.QuizQuestion{},
 		&quizModel.QuizQuestionOption{},
 		&quizModel.QuizAnswer{},
-		// Request
-		&requestModel.Request{},
-		// Schedule
-		&scheduleModel.Schedule{},
-		&scheduleModel.ScheduleGeneric{},
 		// Result
 		&resultModel.Result{},
-		// Payment
-		&paymentModel.Payment{},
 		// Report
 		&reportModel.Report{},
 		&reportModel.ReportGrade{},
 		&reportModel.ReportConfig{},
+		// Schedule
+		&scheduleModel.Schedule{},
+		&scheduleModel.ScheduleGeneric{},
+		// Request
+		&requestModel.Request{},
+		// Payment
+		&paymentModel.Payment{},
 
 		// ----------- Highschool models -----------
 		// Section

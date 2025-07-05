@@ -31,6 +31,73 @@ func (controller *Controller) Get(
 	return
 }
 
+func (controller *Controller) GetNotSeenCount(
+	ctx *context.Context,
+	input *struct {
+		data.NotificationNotSeenCountRequest
+	},
+) (result int64, errCode int, err error) {
+	count, errCode, err := controller.Service.GetNotSeenCount(helpers.GetJwtContext(ctx))
+	if err != nil {
+		return
+	}
+	result = count
+	return
+}
+
+func (controller *Controller) UpdateSeen(
+	ctx *context.Context,
+	input *struct {
+		data.NotificationID
+		Body data.NotificationSeenRequest
+	},
+) (result *model.Notification, errCode int, err error) {
+	notification, errCode, err := controller.Service.UpdateSeen(helpers.GetJwtContext(ctx), input.ID, &input.Body)
+	if err != nil {
+		return
+	}
+	result = notification
+	return
+}
+
+func (controller *Controller) UpdateSeenAll(
+	ctx *context.Context,
+	input *struct {
+		Body data.NotificationSeenAllRequest
+	},
+) (errCode int, err error) {
+	errCode, err = controller.Service.UpdateSeenAll(helpers.GetJwtContext(ctx), &input.Body)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (controller *Controller) Delete(
+	ctx *context.Context,
+	input *struct {
+		data.NotificationID
+	},
+) (result int64, errCode int, err error) {
+	result, errCode, err = controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (controller *Controller) DeleteAll(
+	ctx *context.Context,
+	input *struct{},
+) (result int64, errCode int, err error) {
+	affectedRows, errCode, err := controller.Service.DeleteAll(helpers.GetJwtContext(ctx))
+	if err != nil {
+		return
+	}
+	result = affectedRows
+	return
+}
+
 func (controller *Controller) GetAll(
 	ctx *context.Context,
 	input *struct {

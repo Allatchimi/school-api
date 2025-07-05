@@ -30,10 +30,11 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.User
 		PhoneNumber: request.PhoneNumber,
 		IsActivated: request.IsActivated,
 		Info: &model.UserInfo{
+			Username:  request.Info.Username,
+			FirstName: request.Info.FirstName,
+			LastName:  request.Info.LastName,
+
 			Gender:        request.Info.Gender,
-			Username:      request.Info.Username,
-			FirstName:     request.Info.FirstName,
-			LastName:      request.Info.LastName,
 			Birthday:      request.Info.Birthday,
 			BirthLocation: request.Info.BirthLocation,
 			Address:       request.Info.Address,
@@ -70,10 +71,11 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.User
 
 	// Create user info
 	tempInfo, err := service.Repository.CreateUserInfo(&model.UserInfo{
+		Username:  item.Info.Username,
+		FirstName: item.Info.FirstName,
+		LastName:  item.Info.LastName,
+
 		Gender:        item.Info.Gender,
-		Username:      item.Info.Username,
-		FirstName:     item.Info.FirstName,
-		LastName:      item.Info.LastName,
 		Birthday:      item.Info.Birthday,
 		BirthLocation: item.Info.BirthLocation,
 		Address:       item.Info.Address,
@@ -124,10 +126,11 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 		PhoneNumber: request.PhoneNumber,
 		IsActivated: request.IsActivated,
 		Info: &model.UserInfo{
+			Username:  request.Info.Username,
+			FirstName: request.Info.FirstName,
+			LastName:  request.Info.LastName,
+
 			Gender:        request.Info.Gender,
-			Username:      request.Info.Username,
-			FirstName:     request.Info.FirstName,
-			LastName:      request.Info.LastName,
 			Birthday:      request.Info.Birthday,
 			BirthLocation: request.Info.BirthLocation,
 			Address:       request.Info.Address,

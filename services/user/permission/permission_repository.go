@@ -97,7 +97,7 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("permissions.table_name = %s", request.TableName))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(permissions.id AS TEXT) = '%s' OR CAST(permissions.role_id AS TEXT) ILIKE '%s' OR permissions.table_name ILIKE '%s')",
 			filter.Search,

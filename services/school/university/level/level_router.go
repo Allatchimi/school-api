@@ -143,6 +143,47 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Update level domain with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "update-level-domain",
+			Summary:     "Update level domain",
+			Description: "Update existing level domain with matching id and return the new object.",
+			Method:      http.MethodPut,
+			Path:        fmt.Sprintf("%s/domains/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
+						tableName,                  // Table name
+						constants.PermissionUpdate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.LevelDomainID
+				Body data.LevelDomainRequest
+			},
+		) (*struct{ Body data.LevelDomainResponse }, error) {
+			result, errCode, err := controller.UpdateLevelDomain(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.LevelDomainResponse }{Body: *result.ToLevelDomainResponse()}, nil
+		},
+	)
+
 	// Delete level with id
 	huma.Register(
 		*humaApi,
@@ -263,6 +304,46 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Delete multiple level domain
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "delete-level-domain-multiple",
+			Summary:     "Delete multiple level domain",
+			Description: "Delete multiple level domain by providing a lis of IDs and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/domains/multiple/delete", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Features scope
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body types.DeleteMultipleRequest
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteMultipleLevelDomain(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
 	// Get level by id
 	huma.Register(
 		*humaApi,
@@ -303,6 +384,49 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct{ Body data.LevelResponse }{Body: *result.ToResponse()}, nil
+		},
+	)
+
+	// Get level domain by id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-level-domain-id",
+			Summary:     "Get level domain by id",
+			Description: "Return one level domain with matching id",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/domains/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecurityAuthName: { // Authentication
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Features scope
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.LevelDomainID
+			},
+		) (*struct{ Body data.LevelDomainResponse }, error) {
+			result, errCode, err := controller.GetLevelDomain(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.LevelDomainResponse }{Body: *result.ToLevelDomainResponse()}, nil
 		},
 	)
 
@@ -349,6 +473,17 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
+
+			// Generate items
+			tempResult := make([]data.LevelResponse, 10)
+			for i := range result.Data {
+				tempModel := data.LevelResponse{}
+				tempModel.ID = int64(i)
+
+				tempResult[i] = tempModel
+			}
+			result.Data = tempResult
+
 			return &struct {
 				Body data.LevelResponseList
 			}{Body: *result}, nil

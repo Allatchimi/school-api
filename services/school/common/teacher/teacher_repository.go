@@ -359,7 +359,7 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("teachers.school_id = %d", request.SchoolID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(teachers.id AS TEXT) = '%s' OR teachers.uid ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR users.email ILIKE '%s')",
 			filter.Search,
@@ -404,7 +404,7 @@ func (repository *Repository) GetAllTeacherClassSubjectUnit(
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("tcsu.teacher_id = %d", request.TeacherID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(tcsu.id AS TEXT) = '%s' OR years.name ILIKE '%s' OR university_units.name ILIKE '%s' OR university_units.description ILIKE '%s')",
 			filter.Search,

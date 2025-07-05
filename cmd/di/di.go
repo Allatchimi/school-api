@@ -6,6 +6,8 @@ import (
 	"api/services/common/communication"
 	"api/services/common/contact"
 	"api/services/common/health"
+	"api/services/common/monitoring"
+	"api/services/common/notification"
 	"api/services/common/permissionchecker"
 	"api/services/school/common/course"
 	"api/services/school/common/director"
@@ -19,7 +21,6 @@ import (
 	"api/services/school/common/result"
 	"api/services/school/common/schedule"
 	"api/services/school/common/school"
-	"api/services/school/common/statistic"
 	"api/services/school/common/student"
 	"api/services/school/common/teacher"
 	"api/services/school/common/year"
@@ -47,6 +48,7 @@ func InjectDependencies() {
 	// Others
 	var communicationRepo = communication.NewRepository(config.DB)
 	var contactRepo = contact.NewRepository(config.DB)
+	var notificationRepo = notification.NewRepository(config.DB)
 	var healthRepo = health.NewRepository(config.DB)
 	api.AllControllers.CommunicationController = communication.NewController(
 		communication.NewService(
@@ -56,6 +58,11 @@ func InjectDependencies() {
 	api.AllControllers.ContactController = contact.NewController(
 		contact.NewService(
 			contactRepo,
+		),
+	)
+	api.AllControllers.NotificationController = notification.NewController(
+		notification.NewService(
+			notificationRepo,
 		),
 	)
 	api.AllControllers.HealthController = health.NewController(
@@ -106,11 +113,11 @@ func InjectDependencies() {
 	var examRepo = exam.NewRepository(config.DB)
 	var meetingRepo = meeting.NewRepository(config.DB)
 	var quizRepo = quiz.NewRepository(config.DB)
-	var requestRepo = request.NewRepository(config.DB)
 	var resultRepo = result.NewRepository(config.DB)
-	var scheduleRepo = schedule.NewRepository(config.DB)
-	var paymentRepo = payment.NewRepository(config.DB)
 	var reportRepo = report.NewRepository(config.DB)
+	var scheduleRepo = schedule.NewRepository(config.DB)
+	var requestRepo = request.NewRepository(config.DB)
+	var paymentRepo = payment.NewRepository(config.DB)
 	api.AllControllers.SchoolController = school.NewController(
 		school.NewService(
 			schoolRepo,
@@ -200,8 +207,8 @@ func InjectDependencies() {
 			reportRepo,
 		),
 	)
-	api.AllControllers.StatisticController = statistic.NewController(
-		statistic.NewService(
+	api.AllControllers.MonitoringController = monitoring.NewController(
+		monitoring.NewService(
 			api.AllControllers.UserController.Service,
 			api.AllControllers.SchoolController.Service,
 			api.AllControllers.DirectorController.Service,

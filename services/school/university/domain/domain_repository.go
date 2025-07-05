@@ -86,7 +86,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 			where = helpers.AppendWhereClause(where, fmt.Sprintf("domains.department_id = %d", request.DepartmentID))
 		}
 	}
-	if filter != nil && len(filter.Search) >= 1 {
+	if filter != nil && len(filter.Search) > 0 {
 		tempWhere := fmt.Sprintf(
 			"(CAST(domains.id AS TEXT) = '%s' OR domains.name ILIKE '%s' OR domains.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR departments.name ILIKE '%s' OR departments.description ILIKE '%s')",
 			filter.Search,

@@ -1,8 +1,12 @@
 package security
 
 import (
+	"api/common/constants"
 	"api/common/types"
+	"api/config"
 	"fmt"
+	"net/http"
+	"slices"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -87,4 +91,42 @@ func ValidateJWTToken(token string, jwtToken *types.JwtToken, loadCachedFunc fun
 		return false
 	}
 	return true
+}
+
+// ValidateAuthToken Validates the token by checking if it is cached.
+func ValidateAuthToken(token string) (jwtToken *types.JwtToken, errCode int, err error) {
+	if len(token) < 1 {
+		errMsg := "Missing or bad authorization header! Please enter valid information."
+		return nil, http.StatusUnauthorized, fmt.Errorf("%s", errMsg)
+	}
+	jwtDecoded, errDecoded := DecodeJWTToken(
+		token,
+		config.Keys.JwtPublicKey,
+	)
+	if errDecoded != nil || jwtDecoded == nil {
+		return nil, http.StatusUnauthorized, errDecoded
+	}
+
+	// Validate the token by checking if it's cached
+	isTokenCached := false
+	if jwtDecoded.Issuer == constants.JwtIssuerSession {
+		isTokenCached = ValidateJWTToken(
+			token,
+			jwtDecoded,
+			config.CheckValueInRedisList(token),
+		)
+	} else if slices.Contains(constants.JwtIssuerAuthList, jwtDecoded.Issuer) {
+		isTokenCached = ValidateJWTToken(
+			token,
+			jwtDecoded,
+			config.GetRedisString,
+		)
+	}
+	if isTokenCached &&
+		jwtDecoded.Issuer == constants.JwtIssuerSession &&
+		jwtDecoded.UserID > 0 {
+		return jwtDecoded, http.StatusOK, nil
+	}
+	errMsg := "Invalid token! Please enter valid information."
+	return nil, http.StatusUnauthorized, fmt.Errorf("%s", errMsg)
 }

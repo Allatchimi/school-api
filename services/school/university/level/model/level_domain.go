@@ -2,6 +2,7 @@ package model
 
 import (
 	"api/common/types"
+	modelSchool "api/services/school/common/school/model"
 	modelDomain "api/services/school/university/domain/model"
 	"api/services/school/university/level/data"
 	"time"
@@ -9,6 +10,9 @@ import (
 
 type UniversityLevelDomain struct {
 	types.BaseGormModel
+	SchoolID int64               `gorm:"default:null"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
 	LevelID int64            `gorm:"default:null"`
 	Level   *UniversityLevel `gorm:"default:null;foreignKey:LevelID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
@@ -33,6 +37,7 @@ func (item *UniversityLevelDomain) ToLevelDomainResponse() *data.LevelDomainResp
 	resp.IsValid = item.IsValid
 	resp.InvalidDate = item.InvalidDate
 
+	resp.School = item.School.ToPublicResponse()
 	resp.Domain = item.Domain.ToPublicResponse()
 	resp.Level = item.Level.ToPublicResponse()
 
@@ -53,6 +58,7 @@ func (item *UniversityLevelDomain) ToLevelDomainPublicResponse() *data.LevelDoma
 	resp.IsValid = item.IsValid
 	resp.InvalidDate = item.InvalidDate
 
+	resp.School = item.School.ToPublicResponse()
 	resp.Domain = item.Domain.ToPublicResponse()
 	resp.Level = item.Level.ToPublicResponse()
 	return resp

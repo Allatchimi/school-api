@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"api/common/types"
-	"api/services/user/role/data"
+	dataRole "api/services/user/role/data"
 )
 
 type UserResponse struct {
@@ -12,20 +12,21 @@ type UserResponse struct {
 	Email       string `json:"email" required:"false" doc:"Email"`
 	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number"`
 
-	LoginMethod    string     `json:"loginMethod" required:"false" doc:"How the user should login ? with email, phone number or external provider?"`
+	LoginMethod    string     `json:"loginMethod" required:"false" doc:"How the user should login ? with email or external provider?"`
 	Provider       string     `json:"provider" required:"false" doc:"Provider name"`
 	ProviderUserID string     `json:"providerUserID" required:"false" doc:"User id from the provider"`
 	IsActivated    bool       `json:"isActivated" required:"false" doc:"Is user account activated ?"`
 	ActivatedAt    *time.Time `json:"activatedAt" required:"false" doc:"Activation date time"`
 
-	Role *data.RoleResponse `json:"role" required:"false" doc:"Role" `
-	Info *UserInfoResponse  `json:"info" required:"false" doc:"Additional user info(e.g. address, first name, last name, ...)" `
-	Mfa  *UserMfaResponse   `json:"mfa" required:"false" doc:"Multiple factor authenticator enabled by the user"`
+	Role   *dataRole.RoleResponse `json:"role" required:"false" doc:"Role" `
+	Info   *UserInfoResponse      `json:"info" required:"false" doc:"Additional user info(e.g. address, first name, last name, ...)" `
+	Config *UserConfigResponse    `json:"config" required:"false" doc:"Multiple factor authenticator enabled by the user"`
 }
 
 type UserPublicResponse struct {
-	Email string                  `json:"email" required:"false" doc:"Email"`
-	Info  *UserInfoPublicResponse `json:"info" required:"false" doc:"Additional user info(e.g. address, first name, last name, ...)" `
+	Email string                       `json:"email" required:"false" doc:"Email"`
+	Role  *dataRole.RolePublicResponse `json:"role" required:"false" doc:"Role"`
+	Info  *UserInfoPublicResponse      `json:"info" required:"false" doc:"Additional user info(e.g. address, first name, last name, ...)" `
 }
 
 type UserInfoResponse struct {
@@ -50,10 +51,14 @@ type UserInfoPublicResponse struct {
 	Image string `json:"image" required:"false" doc:"Thumbnail"`
 }
 
-type UserMfaResponse struct {
-	Email         bool `json:"email" required:"false" doc:"Is 2FA enabled with email ?"`
-	PhoneNumber   bool `json:"phoneNumber" required:"false" doc:"Is 2FA enabled with phone number ?"`
-	Authenticator bool `json:"authenticator" required:"false" doc:"Is 2FA enabled with authenticator ?"`
+type UserConfigResponse struct {
+	AllowNotifications bool `json:"allowNotifications" required:"false" doc:"Allow notifications"`
+	MfaEmail           bool `json:"email" required:"false" doc:"Is 2FA enabled with email ?"`
+	MfaAuthenticator   bool `json:"authenticator" required:"false" doc:"Is 2FA enabled with authenticator ?"`
+
+	WebPushSubscriptionEndpoint  string `json:"webPushSubscriptionEndpoint" required:"false" doc:"Web push subscription endpoint"`
+	WebPushSubscriptionKeyP256dh string `json:"webPushSubscriptionKeyP256dh" required:"false" doc:"Web push subscription key P256dh"`
+	WebPushSubscriptionKeyAuth   string `json:"webPushSubscriptionKeyAuth" required:"false" doc:"Web push subscription key auth"`
 }
 
 type UserResponseList struct {

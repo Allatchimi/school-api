@@ -5,7 +5,7 @@ import (
 	dataSchool "api/services/school/common/school/data"
 )
 
-type StatisticResponse struct {
+type MonitoringResponse struct {
 	Count                 *CountResponse                  `json:"count,omitempty" required:"false" doc:"Count of schools, directors, teachers, students, and parents"`
 	UsersByYear           []UsersByYearResponse           `json:"usersByYear,omitempty" required:"false" doc:"Users by year"`
 	SuccessBySchool       []SuccessBySchoolResponse       `json:"successBySchool,omitempty" required:"false" doc:"Success by school"`
@@ -36,7 +36,7 @@ type SuccessBySchoolGenderResponse struct {
 	Girls  int64                      `json:"girls,omitempty" required:"false" doc:"Girls"`
 }
 
-type StatisticResponseList struct {
+type MonitoringResponseList struct {
 	types.PaginatedResponse
-	Data *StatisticResponse `json:"data" required:"false" doc:"Statistics"`
+	Data *MonitoringResponse `json:"data" required:"false" doc:"Monitorings"`
 }

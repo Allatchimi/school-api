@@ -80,7 +80,7 @@ func Load() (err error) {
 			Username: "Admin",
 			Language: "en",
 		})
-		userMfaAdmin, _ := userRepo.CreateUserMfa(&userModel.UserMfa{})
+		userConfigAdmin, _ := userRepo.CreateUserConfig(&userModel.UserConfig{})
 
 		tmpActivatedAt := time.Now()
 		userAdmin, _ = userRepo.Create(&userModel.User{
@@ -91,9 +91,9 @@ func Load() (err error) {
 			IsActivated: true,
 			ActivatedAt: &tmpActivatedAt,
 
-			RoleID:     roleAdmin.ID,
-			UserInfoID: userInfoAdmin.ID,
-			UserMfaID:  userMfaAdmin.ID,
+			RoleID:       roleAdmin.ID,
+			UserInfoID:   userInfoAdmin.ID,
+			UserConfigID: userConfigAdmin.ID,
 		})
 	}
 
