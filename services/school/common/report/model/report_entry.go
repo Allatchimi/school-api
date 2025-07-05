@@ -11,7 +11,7 @@ import (
 	modelUnit "api/services/school/university/unit/model"
 )
 
-type Report struct {
+type ReportEntry struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
 	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -31,14 +31,17 @@ type Report struct {
 	StudentID int64                 `gorm:"default:null"`
 	Student   *modelStudent.Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Status string `gorm:"default:null"`
+	Coefficient int     `gorm:"default:null"`
+	Credit      int     `gorm:"default:null"`
+	Value       float64 `gorm:"default:null"`
+	Notation    float64 `gorm:"default:null"`
 }
 
-func (item *Report) ToResponse() *data.ReportResponse {
+func (item *ReportEntry) ToResponse() *data.ReportEntryResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.ReportResponse{}
+	resp := &data.ReportEntryResponse{}
 	resp.Coefficient = item.Coefficient
 	resp.Credit = item.Credit
 	resp.Value = item.Value
@@ -55,11 +58,11 @@ func (item *Report) ToResponse() *data.ReportResponse {
 	return resp
 }
 
-func (item *Report) ToPublicResponse() *data.ReportPublicResponse {
+func (item *ReportEntry) ToPublicResponse() *data.ReportEntryPublicResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.ReportPublicResponse{}
+	resp := &data.ReportEntryPublicResponse{}
 	resp.Coefficient = item.Coefficient
 	resp.Credit = item.Credit
 	resp.Value = item.Value
@@ -72,8 +75,8 @@ func (item *Report) ToPublicResponse() *data.ReportPublicResponse {
 	return resp
 }
 
-func ToReportResponseList(itemList []Report) []data.ReportResponse {
-	resp := make([]data.ReportResponse, len(itemList))
+func ToReportEntryResponseList(itemList []ReportEntry) []data.ReportEntryResponse {
+	resp := make([]data.ReportEntryResponse, len(itemList))
 	for index, item := range itemList {
 		resp[index] = *item.ToResponse()
 	}

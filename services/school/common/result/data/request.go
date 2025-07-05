@@ -8,7 +8,8 @@ type ResultRequest struct {
 	StudentID int64 `json:"studentID" required:"true" doc:"Student id"`
 	ExamID    int64 `json:"resultID" required:"true" doc:"Result id"`
 
-	Value float64 `json:"value" required:"true" doc:"Value"`
+	Value  float64 `json:"value" required:"true" doc:"Value"`
+	Status string  `json:"status" required:"true" doc:"Status"`
 }
 
 type GetAllRequest struct {
