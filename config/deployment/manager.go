@@ -108,9 +108,9 @@ func DeploySchool(school *model.School) (ok bool, err error) {
 		return
 	}
 	// Generate deployment files
-	if err = helpers.RenderTemplate(filepath.Join(deploymentDir, "domain.txt"), domainNameDeploymentTemplateContent, deploymentData); err != nil {
+	if err = helpers.RenderTemplate(filepath.Join(deploymentDir, "domainname.txt"), domainNameDeploymentTemplateContent, deploymentData); err != nil {
 		errMsg := "Failed to render template!"
-		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentDir, "domain.txt"), domainNameDeploymentTemplateContent, err)
+		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentDir, "domainname.txt"), domainNameDeploymentTemplateContent, err)
 		return
 	}
 	if err = helpers.RenderTemplate(filepath.Join(deploymentDir, "protocol.txt"), protocolDeploymentTemplateContent, deploymentData); err != nil {
