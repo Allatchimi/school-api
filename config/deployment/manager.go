@@ -17,75 +17,7 @@ import (
 )
 
 const (
-	// App env templates
-	envTemplateContent = `
-NEXT_PUBLIC_APP_NAME="{{ .Name }}"
-NEXT_PUBLIC_APP_DESCRIPTION="{{ .Description }}"
-NEXT_PUBLIC_WEBSITE_URL="{{ .WebsiteURL }}"
-
-API_BASE_URL="{{ .ApiBaseUrl }}"
-CDN_URL="{{ .CdnUrl }}"
-CDN_KEY="{{ .CdnKey }}"
-
-NEXT_AUTH_URL="{{ .NextAuthUrl }}"
-NEXT_AUTH_SECRET="{{ .NextAuthSecret }}"
-
-GOOGLE_CLIENT_ID="459098306223-7b9ln9s1s6ccv67r9mr2vp2o52j0f7hv.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET="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"
-
-SCHOOL_ID={{ .SchoolID }}
-SCHOOL_TYPE="{{ .SchoolType }}"
-SCHOOL_API_KEY="{{ .SchoolApiKey }}"
-`
-
-	// App color templates
-	colorTemplateContent = `
-export const COLOR_PRIMARY = "{{ .Primary }}";
-export const COLOR_PRIMARY_BG = "{{ .PrimaryBg }}";
-export const COLOR_PRIMARY_BG_HOVER = "{{ .PrimaryBgHover }}";
-
-export const COLORS = [COLOR_PRIMARY, COLOR_PRIMARY_BG, COLOR_PRIMARY_BG_HOVER];
-`
-
-	// Deployment templates
-	domainNameDeploymentTemplateContent = `{{ .DomainName }}`
-	protocolDeploymentTemplateContent   = `{{ .Protocol }}`
-	domainCertDeploymentTemplateContent = `{{ .DomainCert }}`
-	domainKeyDeploymentTemplateContent  = `{{ .DomainKey }}`
-)
-
-type AppEnvData struct {
-	Name        string
-	Description string
-	WebsiteURL  string
-
-	ApiBaseUrl string
-	CdnUrl     string
-	CdnKey     string
-
-	NextAuthUrl    string
-	NextAuthSecret string
-
-	SchoolID     int64
-	SchoolType   string
-	SchoolApiKey string
-}
-
-type AppColorData struct {
-	Primary        string
-	PrimaryBg      string
-	PrimaryBgHover string
-}
-
-type DeploymentData struct {
-	DomainName string
-	Protocol   string
-	DomainCert string
-	DomainKey  string
-}
-
-const (
-	deploymentsDir = ".deployment-"
+	baseDir = ".deployment-"
 )
 
 // DeploySchool generates configuration files and pushes them to the repository.
@@ -97,7 +29,7 @@ func DeploySchool(school *model.School) (ok bool, err error) {
 	}
 
 	// Create temp directory
-	tempDir, err := os.MkdirTemp("", deploymentsDir)
+	tempDir, err := os.MkdirTemp("", baseDir)
 	if err != nil {
 		errMsg := "Failed to create temp directory!"
 		err = fmt.Errorf("%s: %s %w", errMsg, err.Error(), err)
@@ -150,23 +82,24 @@ func DeploySchool(school *model.School) (ok bool, err error) {
 		DomainKey:  strings.ReplaceAll(school.Config.DomainKey, `\n`, "\n"),
 	}
 	// Define output directory structure
-	outputDir := filepath.Join(tempDir, "schools", fmt.Sprintf("%d", school.ID))
-	colorDir := filepath.Join(outputDir, "src", "lib", "api", "constants", "common")
-	faviconDir := filepath.Join(outputDir, "src", "app")
-	logosDir := filepath.Join(outputDir, "public", "images", "logos")
-	deploymentDir := filepath.Join(outputDir, "conf")
+	outputDir := filepath.Join(tempDir, fmt.Sprintf("%d", school.ID))
+	deploymentDir := filepath.Join(outputDir, "deployment")
+	websiteDir := filepath.Join(outputDir, "website")
+	colorDir := filepath.Join(websiteDir, "src", "lib", "api", "constants", "common")
+	faviconDir := filepath.Join(websiteDir, "src", "app")
+	logosDir := filepath.Join(websiteDir, "public", "images", "logos")
 	// Create required directories
-	for _, dir := range []string{outputDir, colorDir, faviconDir, logosDir, deploymentDir} {
+	for _, dir := range []string{outputDir, deploymentDir, websiteDir, colorDir, faviconDir, logosDir} {
 		if err = os.MkdirAll(dir, os.ModePerm); err != nil {
 			errMsg := "Failed to create directory!"
 			err = fmt.Errorf("%s: %s %w", errMsg, dir, err)
 			return
 		}
 	}
-	// Generate app files
-	if err = helpers.RenderTemplate(filepath.Join(outputDir, ".env"), envTemplateContent, envData); err != nil {
+	// Generate website files
+	if err = helpers.RenderTemplate(filepath.Join(websiteDir, ".env"), envTemplateContent, envData); err != nil {
 		errMsg := "Failed to render template!"
-		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(outputDir, ".env"), envTemplateContent, err)
+		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(websiteDir, ".env"), envTemplateContent, err)
 		return
 	}
 	if err = helpers.RenderTemplate(filepath.Join(colorDir, "color.ts"), colorTemplateContent, colorData); err != nil {
@@ -246,7 +179,7 @@ func DeleteSchoolDeployment(schoolID int64) (ok bool, err error) {
 	}
 
 	// Create temp directory
-	tempDir, err := os.MkdirTemp("", deploymentsDir)
+	tempDir, err := os.MkdirTemp("", baseDir)
 	if err != nil {
 		errMsg := "Failed to create temp directory!"
 		err = fmt.Errorf("%s: %s %w", errMsg, err.Error(), err)

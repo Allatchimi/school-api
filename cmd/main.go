@@ -41,9 +41,9 @@ func main() {
 		},
 	}
 	school.ID = 2
-	configDeploy.DeploySchool(school)
-	// configDeploy.DeleteSchoolDeployment(1)
-	// configDeploy.DeleteSchoolDeployment(2)
+	// configDeploy.DeploySchool(school)
+	configDeploy.DeleteSchoolDeployment(1)
+	configDeploy.DeleteSchoolDeployment(2)
 
 	/*
 		// Migrate
