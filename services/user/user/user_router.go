@@ -34,7 +34,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
 						), // Features scope
@@ -73,7 +73,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
 						), // Features scope
@@ -113,7 +113,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
 						), // Features scope
@@ -152,7 +152,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
 						), // Features scope
@@ -191,7 +191,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
 						), // Features scope
@@ -230,7 +230,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
 						), // Features scope

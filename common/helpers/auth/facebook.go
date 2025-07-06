@@ -50,7 +50,7 @@ func VerifyFacebookToken(token string) (*types.FacebookUserProfileResponse, erro
 
 	// Retrieve user info
 	userResp := &types.FacebookUserProfileResponse{}
-	secretProof, errSecretProof := security.EncodeHMAC_SHA256(token, config.Env.FacebookClientSecret)
+	secretProof, errSecretProof := security.GenerateHMAC_SHA256_Hex(token, config.Env.FacebookClientSecret)
 	if errSecretProof != nil {
 		return nil, constants.Http500ErrorMessage("encode Facebook HMAC HS256 secret proof")
 	}

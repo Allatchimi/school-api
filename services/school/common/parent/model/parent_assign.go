@@ -19,7 +19,7 @@ type ParentAssign struct {
 	Document2 string `gorm:"default:null"`
 
 	Status         string `gorm:"default:null"`
-	StatusFeedback string `gorm:"default:null"`
+	StatusFeedback string `gorm:"default:null;type:text"`
 }
 
 func (item *ParentAssign) ToResponse() *data.ParentAssignResponse {

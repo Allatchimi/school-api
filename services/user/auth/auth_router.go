@@ -243,7 +243,7 @@ func RegisterEndpoints(
 			Path:        fmt.Sprintf("%s/logout", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
-				{constants.SecurityAuthName: {}}, // Used to require authentication
+				{constants.SecuritySchemeBearerToken: {}}, // Used to require authentication
 			},
 			MaxBodyBytes:  constants.DefaultBodySize,
 			DefaultStatus: http.StatusOK,

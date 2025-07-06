@@ -62,8 +62,8 @@ type SchoolConfigRequest struct {
 	Protocol string `json:"protocol" required:"true" enum:"http,https" doc:"Protocol"`
 
 	DomainName string `json:"domainName" required:"true" minLength:"3" maxLength:"150" doc:"Domain name" example:"google.com"`
-	DomainCert string `json:"domainCert" required:"true" minLength:"3" maxLength:"150" doc:"Domain cert"`
-	DomainKey  string `json:"domainKey" required:"true" minLength:"3" maxLength:"150" doc:"Domain key"`
+	DomainCert string `json:"domainCert" required:"true" minLength:"3" maxLength:"150" doc:"SSL cert"`
+	DomainKey  string `json:"domainKey" required:"true" minLength:"3" maxLength:"150" doc:"SSL key"`
 
 	SmtpHost         string `json:"smtpHost" required:"true" minLength:"3" maxLength:"150" doc:"SMTP host" example:"smtp.google.com"`
 	SmtpPort         int    `json:"smtpPort" required:"true" min:"1" max:"65535" doc:"SMTP port" example:"587"`
@@ -82,6 +82,11 @@ type SchoolConfigRequest struct {
 	ColorPrimary        string `json:"colorPrimary" required:"true" minLength:"4" maxLength:"7" doc:"Primary color in HEX" example:"#FFFFFF"`
 	ColorPrimaryBg      string `json:"colorPrimaryBg" required:"true" minLength:"4" maxLength:"7" doc:"Primary color in HEX" example:"#FFFFFF"`
 	ColorPrimaryBgHover string `json:"colorPrimaryBgHover" required:"true" minLength:"4" maxLength:"7" doc:"Primary color in HEX" example:"#FFFFFF"`
+}
+
+type SchoolDeploymentStatusRequest struct {
+	Status   string `json:"status" required:"true" enum:"done,failed" doc:"Deployment status" example:"done"`
+	Feedback string `json:"feedback" required:"false" doc:"Deployment feedback" example:"Deployment feedback"`
 }
 
 type GetAllRequest struct {

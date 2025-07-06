@@ -33,9 +33,9 @@ type StudentEnroll struct {
 
 	Origin         string `gorm:"default:null"`
 	Status         string `gorm:"default:null"`
-	StatusFeedback string `gorm:"default:null"`
+	StatusFeedback string `gorm:"default:null;type:text"`
 
-	Message string `gorm:"default:null"`
+	Message string `gorm:"default:null;type:text"`
 
 	Gender        string     `gorm:"default:null"`
 	FirstName     string     `gorm:"default:null"`

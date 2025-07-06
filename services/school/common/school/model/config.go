@@ -10,8 +10,8 @@ type SchoolConfig struct {
 	Protocol string `gorm:"default:null"`
 
 	DomainName string `gorm:"default:null"`
-	DomainCert string `gorm:"default:null"`
-	DomainKey  string `gorm:"default:null"`
+	DomainCert string `gorm:"default:null;type:text"`
+	DomainKey  string `gorm:"default:null;type:text"`
 
 	SmtpHost         string `gorm:"default:null"`
 	SmtpPort         int    `gorm:"default:null"`

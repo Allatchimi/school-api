@@ -180,11 +180,23 @@ func Start() {
 		{URL: config.Env.ApiGroup},
 	}
 	humaConfig.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
-		constants.SecurityAuthName: {
+		constants.SecuritySchemeBearerToken: {
 			Type:         "http",
 			Scheme:       "bearer",
 			BearerFormat: "JWT",
 			Description:  "Bearer token used to access some resources",
+		},
+		constants.SecuritySchemeSchoolToken: {
+			Type:        "apiKey",
+			In:          "header",
+			Name:        "X-School-Api-Key",
+			Description: "School token used to access school resources",
+		},
+		constants.SecuritySchemeSchoolID: {
+			Type:        "apiKey",
+			In:          "header",
+			Name:        "X-School-Id",
+			Description: "School ID used to access school resources",
 		},
 	}
 	humaConfig.Info.Description = constants.OpenApiDescription

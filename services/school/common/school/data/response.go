@@ -8,6 +8,12 @@ import (
 type SchoolResponse struct {
 	types.BaseGormModelResponse
 	SchoolPublicResponse
+
+	DeploymentRequest  string `json:"deploymentRequest" required:"false" doc:"Deployment request"`
+	DeploymentStatus   string `json:"deploymentStatus" required:"false" doc:"Deployment status"`
+	DeploymentFeedback string `json:"deploymentFeedback" required:"false" doc:"Deployment feedback"`
+	DeploymentCount    int64  `json:"deploymentVersion" required:"false" doc:"Deployment version"`
+
 	Config *SchoolConfigResponse `json:"config" required:"false" doc:"Configuration"`
 }
 

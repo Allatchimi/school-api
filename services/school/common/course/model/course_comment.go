@@ -14,7 +14,7 @@ type CourseComment struct {
 	UserID int64       `gorm:"default:null"`
 	User   *model.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Message   string `gorm:"default:null"`
+	Message   string `gorm:"default:null;type:text"`
 	Rate      int    `gorm:"default:null"`
 	IsDeleted bool   `gorm:"default:null"`
 }

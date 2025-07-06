@@ -44,12 +44,27 @@ func (repository *Repository) UpdateByID(id int64, item *model.School) (*model.S
 			"type":   item.Type,
 			"status": item.Status,
 
+			"deployment_request":  item.DeploymentRequest,
+			"deployment_status":   item.DeploymentStatus,
+			"deployment_feedback": item.DeploymentFeedback,
+			"deployment_count":    item.DeploymentCount,
+
 			"favicon":    item.Favicon,
 			"logo":       item.Logo,
 			"logo_white": item.LogoWhite,
 
 			"currency":      item.Currency,
 			"payment_count": item.PaymentCount,
+		},
+	).Error
+}
+
+func (repository *Repository) UpdateDeploymentStatusByID(id int64, request *data.SchoolDeploymentStatusRequest) (*model.School, error) {
+	result := &model.School{}
+	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+		map[string]any{
+			"deployment_status":   request.Status,
+			"deployment_feedback": request.Feedback,
 		},
 	).Error
 }

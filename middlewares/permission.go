@@ -26,7 +26,7 @@ func PermissionMiddleware(api huma.API, userRepo *user.Repository, permissionRep
 		// Retrieve feature permissions
 		var featuresScope, tableName, tableOperation string
 		for _, opScheme := range ctx.Operation().Security {
-			if securityScheme, ok := opScheme[constants.SecurityAuthName]; ok {
+			if securityScheme, ok := opScheme[constants.SecuritySchemeBearerToken]; ok {
 				if len(securityScheme) > 0 {
 					featuresScope = securityScheme[0]
 					if len(securityScheme) > 1 {

@@ -5,6 +5,7 @@ import "fmt"
 const (
 	TokenKey    = "bearer"
 	UserIDKey   = "userID"
+	SchoolIDKey = "schoolID"
 	IssuerKey   = "issuer"
 	PlatformKey = "platform"
 	DeviceKey   = "device"
@@ -37,7 +38,11 @@ var Http403InvalidPermissionErrorMessage = func() error {
 }
 
 var Http409ConflictErrorMessage = func() error {
-	return fmt.Errorf("%s", "Can't process conflict inputs! Please enter valid information.")
+	return fmt.Errorf("%s", "Can't process now because of conflict! Please enter valid information.")
+}
+
+var Http423LockedErrorMessage = func() error {
+	return fmt.Errorf("%s", "Can't process now because this operation is locked! Please try again later.")
 }
 
 var Http406ErrorMessage = func() error {

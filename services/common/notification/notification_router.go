@@ -33,7 +33,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 					},
 				},
 			},
@@ -68,7 +68,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 					},
 				},
 			},
@@ -104,7 +104,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 					},
 				},
 			},
@@ -138,7 +138,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 					},
 				},
 			},
@@ -170,7 +170,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 					},
 				},
 			},
@@ -204,7 +204,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 					},
 				},
 			},
@@ -242,7 +242,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 					},
 				},
 			},

@@ -1,15 +1,13 @@
 package main
 
 import (
-	"go.uber.org/zap"
-
-	"api/cmd/api"
-	"api/cmd/di"
-	"api/cmd/fixture"
-	"api/cmd/migrate"
 	"api/common/helpers"
 	"api/common/utils/security"
 	"api/config"
+	configDeploy "api/config/deployment"
+	"api/services/school/common/school/model"
+
+	"go.uber.org/zap"
 )
 
 // Contains all errors during init() execution
@@ -25,19 +23,43 @@ func main() {
 		panic(errInit)
 	}
 
-	// Migrate
-	err := migrate.Apply()
-	if err != nil {
-		panic(err)
+	school := &model.School{
+		Type:      "university",
+		Favicon:   "https://www.google.com/favicon.ico",
+		Logo:      "https://www.gstatic.com/marketing-cms/assets/images/c5/3a/200414104c669203c62270f7884f/google-wordmarks-2x.webp=n-w100-h32-fcrop64=1,00000000ffffffff-rw",
+		LogoWhite: "https://www.gstatic.com/marketing-cms/assets/images/c5/3a/200414104c669203c62270f7884f/google-wordmarks-2x.webp=n-w100-h32-fcrop64=1,00000000ffffffff-rw",
+		Config: &model.SchoolConfig{
+			Protocol:            "https",
+			DomainName:          "www.uy1.cm",
+			DomainCert:          "CERT\nAAA",
+			DomainKey:           "KEY\nBBB",
+			WebsiteTitle:        "UY1",
+			WebsiteDescription:  "School management app",
+			ColorPrimary:        "#111111",
+			ColorPrimaryBg:      "#F1F1F1",
+			ColorPrimaryBgHover: "#D1D1D1",
+		},
 	}
-	// Load fixtures
-	err = fixture.Load()
-	if err != nil {
-		panic(err)
-	}
+	school.ID = 2
+	configDeploy.DeploySchool(school)
+	// configDeploy.DeleteSchoolDeployment(1)
+	// configDeploy.DeleteSchoolDeployment(2)
 
-	di.InjectDependencies()
-	api.Start()
+	/*
+		// Migrate
+		err := migrate.Apply()
+		if err != nil {
+			panic(err)
+		}
+		// Load fixtures
+		err = fixture.Load()
+		if err != nil {
+			panic(err)
+		}
+
+		di.InjectDependencies()
+		api.Start()
+	*/
 }
 
 // Called before the main entry point. It's useful for setting up

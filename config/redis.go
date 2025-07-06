@@ -4,22 +4,32 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"time"
 
-	"github.com/redis/go-redis/v9"
+	"github.com/go-redsync/redsync/v4"
+	"github.com/go-redsync/redsync/v4/redis/goredis/v9"
+	goredislib "github.com/redis/go-redis/v9"
 )
 
-var RedisClient *redis.Client
-var RedisContext = context.Background()
+var RedisClient *goredislib.Client
+var redsyncInstance *redsync.Redsync
+
+const (
+	deployLockKey = "deploy-lock"
+)
 
 // Establishes a connection to the Redis server.
 func ConnectRedis() error {
 	addr := fmt.Sprintf("%s:%d", Env.RedisHost, Env.RedisPort)
-	RedisClient = redis.NewClient(&redis.Options{
+	RedisClient = goredislib.NewClient(&goredislib.Options{
 		Addr:     addr,
 		Username: Env.RedisUsername,
 		Password: Env.RedisPassword,
 		DB:       Env.RedisDatabase,
 	})
+
+	pool := goredis.NewPool(RedisClient)
+	redsyncInstance = redsync.New(pool)
 
 	// Check redis status
 	err := CheckRedis()
@@ -28,8 +38,24 @@ func ConnectRedis() error {
 
 // Check redis status
 func CheckRedis() (err error) {
-	err = RedisClient.Ping(RedisContext).Err()
+	err = RedisClient.Ping(context.Background()).Err()
 	return
+}
+
+// GitDistributedLock acquires a distributed lock to prevent multiple git operations at the same time.
+func GitDistributedLock(operation func() error) error {
+	mutex := redsyncInstance.NewMutex(deployLockKey,
+		redsync.WithExpiry(30*time.Second),
+		redsync.WithTries(5),
+	)
+
+	if err := mutex.Lock(); err != nil {
+		errMsg := "Failed to acquire lock!"
+		return fmt.Errorf("%s: %s %w", errMsg, err.Error(), err)
+	}
+	defer mutex.Unlock()
+
+	return operation()
 }
 
 //
@@ -44,17 +70,17 @@ func CheckRedis() (err error) {
 
 // Retrieves a string value from Redis using the provided key.
 func GetRedisString(key string) (string, error) {
-	return RedisClient.Get(RedisContext, key).Result()
+	return RedisClient.Get(context.Background(), key).Result()
 }
 
 // Stores a string value in Redis using the provided key.
 func SetRedisString(key string, val string) error {
-	return RedisClient.Set(RedisContext, key, val, 0).Err()
+	return RedisClient.Set(context.Background(), key, val, 0).Err()
 }
 
 // Removes a string value from Redis using the provided key.
 func DeleteRedisString(key string) (int64, error) {
-	return RedisClient.Del(RedisContext, key).Result()
+	return RedisClient.Del(context.Background(), key).Result()
 }
 
 //
@@ -85,20 +111,20 @@ func CheckValueInRedisList(requiredVal string) func(string) (string, error) {
 
 // Retrieves a string array from Redis using the provided key.
 func GetRedisStringList(key string) ([]string, error) {
-	len, errLen := RedisClient.LLen(RedisContext, key).Result()
+	len, errLen := RedisClient.LLen(context.Background(), key).Result()
 	if errLen != nil {
 		return nil, errLen
 	}
-	return RedisClient.LRange(RedisContext, key, 0, len-1).Result()
+	return RedisClient.LRange(context.Background(), key, 0, len-1).Result()
 }
 
 // Appends a new element to a string array stored in Redis.
 func AppendToRedisStringList(key string, val string) error {
-	return RedisClient.LPush(RedisContext, key, val).Err()
+	return RedisClient.LPush(context.Background(), key, val).Err()
 }
 
 // Removes the element at the specified index from a string array stored in Redis.
 func RemoveFromRedisStringList(key string, index int64) error {
-	_, err := RedisClient.LTrim(RedisContext, key, index, index).Result()
+	_, err := RedisClient.LTrim(context.Background(), key, index, index).Result()
 	return err
 }

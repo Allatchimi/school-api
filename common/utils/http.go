@@ -3,8 +3,10 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -62,4 +64,26 @@ func HttpPost(url string, contentType string, headers []HttpHeader, bodyStruct a
 		return err
 	}
 	return nil
+}
+
+// Download file from url and save to destination
+func HttpDownloadFile(url, destination string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to download %s: status %d", url, resp.StatusCode)
+	}
+
+	out, err := os.Create(destination)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	return err
 }

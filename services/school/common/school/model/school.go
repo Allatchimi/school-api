@@ -8,8 +8,13 @@ import (
 type School struct {
 	types.BaseGormModel
 	Name   string `gorm:"unique;not null"`
-	Type   string `gorm:"not null"`
-	Status string `gorm:"not null"`
+	Type   string `gorm:"default:null"`
+	Status string `gorm:"default:null"`
+
+	DeploymentRequest  string `gorm:"default:null"`
+	DeploymentStatus   string `gorm:"default:null"`
+	DeploymentFeedback string `gorm:"default:null;type:text"`
+	DeploymentCount    int64  `gorm:"default:null"`
 
 	Favicon   string `gorm:"default:null"`
 	Logo      string `gorm:"default:null"`
@@ -33,6 +38,11 @@ func (item *School) ToResponse() *data.SchoolResponse {
 	resp.Name = item.Name
 	resp.Type = item.Type
 	resp.Status = item.Status
+
+	resp.DeploymentRequest = item.DeploymentRequest
+	resp.DeploymentStatus = item.DeploymentStatus
+	resp.DeploymentFeedback = item.DeploymentFeedback
+	resp.DeploymentCount = item.DeploymentCount
 
 	resp.Favicon = item.Favicon
 	resp.Logo = item.Logo

@@ -30,6 +30,21 @@ func (controller *Controller) Create(
 	return
 }
 
+func (controller *Controller) UpdateDeploymentStatus(
+	ctx *context.Context,
+	input *struct {
+		data.SchoolID
+		Body data.SchoolDeploymentStatusRequest
+	},
+) (errCode int, err error) {
+	errCode, err = controller.Service.UpdateDeploymentStatus(
+		helpers.GetJwtContext(ctx),
+		input.ID,
+		&input.Body,
+	)
+	return
+}
+
 func (controller *Controller) Update(
 	ctx *context.Context,
 	input *struct {

@@ -14,7 +14,7 @@ type Contact struct {
 
 	Subject string `gorm:"default:null"`
 	Email   string `gorm:"default:null"`
-	Message string `gorm:"default:null"`
+	Message string `gorm:"default:null;type:text"`
 }
 
 func (item *Contact) ToResponse() *data.ContactResponse {

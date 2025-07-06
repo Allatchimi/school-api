@@ -6,12 +6,15 @@ const (
 )
 
 const (
-	SECONDARY_EXAM_WRITTEN  = "secondary_written"
-	SECONDARY_EXAM_PRACTICE = "secondary_practice"
+	SCHOOL_DEPLOYMENT_STATUS_INITIATED       = "initiated"
+	SCHOOL_DEPLOYMENT_STATUS_PENDING         = "pending"
+	SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES = "done-no-changes"
+	SCHOOL_DEPLOYMENT_STATUS_DONE            = "done"
+	SCHOOL_DEPLOYMENT_STATUS_FAILED          = "failed"
 )
 
 const (
-	UNIVERSITY_EXAM_TYPE_CC = "university_cc"
-	UNIVERSITY_EXAM_TYPE_SN = "university_sn"
-	UNIVERSITY_EXAM_TYPE_EE = "university_ee"
+	SCHOOL_DEPLOYMENT_REQUEST_CREATE = "create"
+	SCHOOL_DEPLOYMENT_REQUEST_UPDATE = "update"
+	SCHOOL_DEPLOYMENT_REQUEST_DELETE = "delete"
 )

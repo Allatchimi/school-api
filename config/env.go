@@ -8,9 +8,9 @@ import (
 
 type Environment struct {
 	// Application config
-	AppPort  int    `mapstructure:"APP_PORT"`
-	AppName  string `mapstructure:"APP_NAME"`
-	Hostname string `mapstructure:"HOST_NAME"`
+	AppPort         int    `mapstructure:"APP_PORT"`
+	AppName         string `mapstructure:"APP_NAME"`
+	AdminWebsiteUrl string `mapstructure:"ADMIN_WEBSITE_URL"`
 
 	// API config
 	ApiGroup     string `mapstructure:"API_GROUP"`
@@ -88,6 +88,19 @@ type Environment struct {
 	GoogleReCAPTCHASiteKey string  `mapstructure:"GOOGLE_RECAPTCHA_SITE_KEY"`
 	GoogleReCAPTCHAScore   float32 `mapstructure:"GOOGLE_RECAPTCHA_SCORE"`
 
+	UserAdminEmail    string `mapstructure:"USER_ADMIN_EMAIL"`
+	UserAdminPassword string `mapstructure:"USER_ADMIN_PASSWORD"`
+
+	// School api secret
+	SchoolApiSecret  string `mapstructure:"SCHOOL_API_SECRET"`
+	SchoolApiBaseURL string `mapstructure:"SCHOOL_API_BASE_URL"`
+	SchoolCdnUrl     string `mapstructure:"SCHOOL_CDN_URL"`
+	SchoolCdnKey     string `mapstructure:"SCHOOL_CDN_KEY"`
+
+	// GIT
+	GitRepoSshUrl               string `mapstructure:"GIT_DEPLOY_REPO_SSH_URL"`
+	GitRepoSshEd25519PrivateKey string `mapstructure:"GIT_DEPLOY_REPO_SSH_ED25519_PRIVATE_KEY"`
+
 	// Database fixtures
 	RoleDefault  string `mapstructure:"ROLE_DEFAULT"`
 	RoleAdmin    string `mapstructure:"ROLE_ADMIN"`
@@ -95,9 +108,6 @@ type Environment struct {
 	RoleTeacher  string `mapstructure:"ROLE_TEACHER"`
 	RoleStudent  string `mapstructure:"ROLE_STUDENT"`
 	RoleParent   string `mapstructure:"ROLE_PARENT"`
-
-	UserAdminEmail    string `mapstructure:"USER_ADMIN_EMAIL"`
-	UserAdminPassword string `mapstructure:"USER_ADMIN_PASSWORD"`
 }
 
 var Env = &Environment{}

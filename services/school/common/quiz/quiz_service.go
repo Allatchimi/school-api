@@ -114,8 +114,8 @@ func (service *Service) CreateAnswer(inputJwtToken *types.JwtToken, id int64, re
 		return
 	}
 	if foundAnswer != nil && foundAnswer.ID > 0 {
-		errCode = http.StatusForbidden
-		err = constants.Http409ConflictErrorMessage()
+		errCode = http.StatusLocked
+		err = constants.Http423LockedErrorMessage()
 		return
 	}
 

@@ -32,10 +32,10 @@ type Request struct {
 	Student   *modelStudent.Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Status         string `gorm:"default:null"`
-	StatusFeedback string `gorm:"default:null"`
+	StatusFeedback string `gorm:"default:null;type:text"`
 	Audience       string `gorm:"default:null"`
 	Title          string `gorm:"default:null"`
-	Message        string `gorm:"default:null"`
+	Message        string `gorm:"default:null;type:text"`
 
 	Document1 string `gorm:"default:null"`
 	Document2 string `gorm:"default:null"`

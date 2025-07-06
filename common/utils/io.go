@@ -5,6 +5,7 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"time"
 )
@@ -83,4 +84,9 @@ func SaveFile(buffer []byte, path string) (fileName string, err error) {
 	// Retrieve the new file name
 	fileName = tempFile.Name()[len(absPath)+1:]
 	return
+}
+
+// CopyDir copies a whole directory recursively.
+func CopyDir(src string, dst string) error {
+	return exec.Command("cp", "-r", src, dst).Run()
 }

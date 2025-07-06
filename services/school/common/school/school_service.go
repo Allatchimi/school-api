@@ -1,11 +1,13 @@
 package school
 
 import (
+	"fmt"
 	"net/http"
 
 	"api/common/constants"
 	"api/common/types"
 	"api/common/utils"
+	configDeploy "api/config/deployment"
 	"api/services/school/common/school/data"
 	"api/services/school/common/school/model"
 )
@@ -116,6 +118,10 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 		Type:   item.Type,
 		Status: item.Status,
 
+		DeploymentRequest: constants.SCHOOL_DEPLOYMENT_REQUEST_CREATE,
+		DeploymentStatus:  constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED,
+		DeploymentCount:   1,
+
 		Favicon:   item.Favicon,
 		Logo:      item.Logo,
 		LogoWhite: item.LogoWhite,
@@ -139,6 +145,28 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+
+	// Deploy school
+	go func() {
+		ok, err := configDeploy.DeploySchool(result)
+		if err != nil {
+			service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
+				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_FAILED,
+				Feedback: fmt.Sprintf("Failed to deploy school! Error: %s", err.Error()),
+			})
+			return
+		}
+		if !ok {
+			service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
+				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES,
+				Feedback: "School deployment skipped! No changes detected.",
+			})
+		}
+		service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
+			Status:   constants.SCHOOL_DEPLOYMENT_STATUS_PENDING,
+			Feedback: "School deployment pushed to GitHub! Now waiting for deployment to complete.",
+		})
+	}()
 	return
 }
 
@@ -156,11 +184,23 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 		return
 	}
 
+	// Check if the deployment status is pending
+	if foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED ||
+		foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_PENDING {
+		errCode = http.StatusLocked
+		err = constants.Http423LockedErrorMessage()
+		return
+	}
+
 	// Format request
 	item := &model.School{
 		Name:   request.Name,
 		Type:   request.Type,
 		Status: request.Status,
+
+		DeploymentRequest: constants.SCHOOL_DEPLOYMENT_REQUEST_UPDATE,
+		DeploymentStatus:  constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED,
+		DeploymentCount:   foundItem.DeploymentCount + 1,
 
 		Favicon:   request.Favicon,
 		Logo:      request.Logo,
@@ -224,6 +264,66 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 		return
 	}
 	result.Info = newInfo
+
+	// Deploy school
+	go func() {
+		ok, err := configDeploy.DeploySchool(result)
+		if err != nil {
+			service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
+				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_FAILED,
+				Feedback: fmt.Sprintf("Failed to deploy school! Error: %s", err.Error()),
+			})
+			return
+		}
+		if !ok {
+			service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
+				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES,
+				Feedback: "School deployment skipped! No changes detected.",
+			})
+		}
+		service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
+			Status:   constants.SCHOOL_DEPLOYMENT_STATUS_PENDING,
+			Feedback: "School deployment pushed to GitHub! Now waiting for deployment to complete.",
+		})
+	}()
+	return
+}
+
+func (service *Service) UpdateDeploymentStatus(inputJwtToken *types.JwtToken, id int64, request *data.SchoolDeploymentStatusRequest) (errCode int, err error) {
+	// Check if school exists
+	foundItem, err := service.Repository.GetByID(id)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundItem == nil || foundItem.ID != id {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Delete school if deployment request is delete
+	if foundItem.DeploymentRequest == constants.SCHOOL_DEPLOYMENT_REQUEST_DELETE &&
+		foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_PENDING &&
+		(request.Status == constants.SCHOOL_DEPLOYMENT_STATUS_DONE ||
+			request.Status == constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES) {
+		_, err = service.Repository.DeleteByID(id)
+		if err != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
+		return
+	}
+
+	// Update status
+	_, err = service.Repository.UpdateDeploymentStatusByID(id, request)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
 	return
 }
 
@@ -276,31 +376,57 @@ func (service *Service) UpdateConfig(inputJwtToken *types.JwtToken, id int64, it
 }
 
 func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteByID(id)
+	// Check if school exists
+	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if affectedRows <= 0 {
+	if foundItem == nil || foundItem.ID < 1 || foundItem.ID != id {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
+
+	// Check if the deployment status is pending
+	if foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED ||
+		foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_PENDING {
+		errCode = http.StatusLocked
+		err = constants.Http423LockedErrorMessage()
+		return
+	}
+
+	// Delete school deployment
+	go func() {
+		ok, err := configDeploy.DeleteSchoolDeployment(id)
+		if err != nil {
+			service.Repository.UpdateDeploymentStatusByID(id, &data.SchoolDeploymentStatusRequest{
+				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_FAILED,
+				Feedback: fmt.Sprintf("Failed to delete school! %s", err.Error()),
+			})
+			return
+		}
+		if !ok {
+			service.Repository.UpdateDeploymentStatusByID(id, &data.SchoolDeploymentStatusRequest{
+				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES,
+				Feedback: "Deleted school deployment skipped! No changes detected.",
+			})
+		}
+		service.Repository.UpdateDeploymentStatusByID(id, &data.SchoolDeploymentStatusRequest{
+			Status:   constants.SCHOOL_DEPLOYMENT_STATUS_PENDING,
+			Feedback: "Deleted school deployment pushed to GitHub! Now waiting for deletion to complete.",
+		})
+	}()
 	return
 }
 
 func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteMultipleByID(list)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if affectedRows <= 0 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
+	for _, id := range list {
+		total, _, err := service.Delete(inputJwtToken, id)
+		if err != nil && total > 0 {
+			affectedRows++
+		}
 	}
 	return
 }

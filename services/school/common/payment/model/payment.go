@@ -21,7 +21,7 @@ type Payment struct {
 	PaymentDate   *time.Time `gorm:"default:null"`
 	PaymentMethod string     `gorm:"default:null"`
 	PaymentStatus string     `gorm:"default:null"`
-	PaymentNote   string     `gorm:"default:null"`
+	PaymentNote   string     `gorm:"default:null;type:text"`
 }
 
 func (item *Payment) ToResponse() *data.PaymentResponse {

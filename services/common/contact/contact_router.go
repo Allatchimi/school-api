@@ -62,7 +62,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
@@ -102,7 +102,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,

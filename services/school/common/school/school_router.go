@@ -34,7 +34,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
 						), // Features scope
@@ -73,7 +73,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
 						), // Features scope
@@ -101,6 +101,41 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Update school deployment status with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "update-school-deployment-status",
+			Summary:     "Update school deployment status",
+			Description: "Update existing school deployment status with matching id and return the new school object.",
+			Method:      http.MethodPut,
+			Path:        fmt.Sprintf("%s/deployment/status", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.SchoolID
+				Body data.SchoolDeploymentStatusRequest
+			},
+		) (*struct{ Body types.DefaultResponse }, error) {
+			errCode, err := controller.UpdateDeploymentStatus(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DefaultResponse }{Body: types.DefaultResponse{Message: "School deployment status updated successfully"}}, nil
+		},
+	)
+
 	// Delete school with id
 	huma.Register(
 		*humaApi,
@@ -113,7 +148,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
 						), // Features scope
@@ -152,7 +187,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
 						), // Features scope
@@ -191,7 +226,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
 						), // Features scope
@@ -259,7 +294,7 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecurityAuthName: { // Authentication
+					constants.SecuritySchemeBearerToken: { // Authentication
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
 						), // Features scope
