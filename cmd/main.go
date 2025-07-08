@@ -29,10 +29,7 @@ func main() {
 		Logo:      "https://www.gstatic.com/marketing-cms/assets/images/c5/3a/200414104c669203c62270f7884f/google-wordmarks-2x.webp=n-w100-h32-fcrop64=1,00000000ffffffff-rw",
 		LogoWhite: "https://www.gstatic.com/marketing-cms/assets/images/c5/3a/200414104c669203c62270f7884f/google-wordmarks-2x.webp=n-w100-h32-fcrop64=1,00000000ffffffff-rw",
 		Config: &model.SchoolConfig{
-			Protocol:            "https",
 			DomainName:          "www.uy1.cm",
-			DomainCert:          "CERT\nAAA",
-			DomainKey:           "KEY\nBBB",
 			WebsiteTitle:        "UY1",
 			WebsiteDescription:  "School management app",
 			ColorPrimary:        "#111111",
@@ -41,9 +38,9 @@ func main() {
 		},
 	}
 	school.ID = 2
-	// configDeploy.DeploySchool(school)
+	configDeploy.DeploySchool(school)
 	configDeploy.DeleteSchoolDeployment(1)
-	configDeploy.DeleteSchoolDeployment(2)
+	// configDeploy.DeleteSchoolDeployment(2)
 
 	/*
 		// Migrate

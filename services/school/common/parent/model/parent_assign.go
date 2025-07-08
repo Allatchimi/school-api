@@ -35,30 +35,12 @@ func (item *ParentAssign) ToResponse() *data.ParentAssignResponse {
 	resp.Status = item.Status
 	resp.StatusFeedback = item.StatusFeedback
 
-	resp.Parent = item.Parent.ToParentPublicResponse()
-	resp.ParentAssignStudents = ToParentAssignStudentPublicResponseList(item.ParentAssignStudents)
+	resp.Parent = item.Parent.ToParentResponse()
+	resp.ParentAssignStudents = ToParentAssignStudentResponseList(item.ParentAssignStudents)
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-	return resp
-}
-
-func (item *ParentAssign) ToPublicResponse() *data.ParentAssignPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.ParentAssignPublicResponse{}
-	resp.FirstName = item.FirstName
-	resp.LastName = item.LastName
-	resp.IDCard = item.IDCard
-	resp.Document1 = item.Document1
-	resp.Document2 = item.Document2
-	resp.Status = item.Status
-	resp.StatusFeedback = item.StatusFeedback
-
-	resp.Parent = item.Parent.ToParentPublicResponse()
-	resp.ParentAssignStudents = ToParentAssignStudentPublicResponseList(item.ParentAssignStudents)
 	return resp
 }
 

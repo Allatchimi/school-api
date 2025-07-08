@@ -33,9 +33,6 @@ export const COLORS = [COLOR_PRIMARY, COLOR_PRIMARY_BG, COLOR_PRIMARY_BG_HOVER];
 
 	// Deployment templates
 	domainNameDeploymentTemplateContent = `{{ .DomainName }}`
-	protocolDeploymentTemplateContent   = `{{ .Protocol }}`
-	domainCertDeploymentTemplateContent = `{{ .DomainCert }}`
-	domainKeyDeploymentTemplateContent  = `{{ .DomainKey }}`
 )
 
 type AppEnvData struct {
@@ -63,7 +60,4 @@ type AppColorData struct {
 
 type DeploymentData struct {
 	DomainName string
-	Protocol   string
-	DomainCert string
-	DomainKey  string
 }

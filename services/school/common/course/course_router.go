@@ -232,9 +232,9 @@ func RegisterEndpoints(
 			}
 
 			// Generate items
-			tempResults := make([]data.CoursePublicResponse, 10)
+			tempResults := make([]data.CourseResponse, 10)
 			for i := range tempResults {
-				tmpModel := data.CoursePublicResponse{}
+				tmpModel := data.CourseResponse{}
 				tmpModel.ID = int64(i)
 				tempResults[i] = tmpModel
 			}

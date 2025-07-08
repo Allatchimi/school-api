@@ -76,10 +76,10 @@ func (item *StudentEnroll) ToStudentEnrollResponse() *data.StudentEnrollResponse
 	resp.Document5 = item.Document5
 
 	resp.School = item.School.ToPublicResponse()
-	resp.Year = item.Year.ToPublicResponse()
-	resp.LevelDomain = item.LevelDomain.ToLevelDomainPublicResponse()
-	resp.Class = item.Class.ToPublicResponse()
-	resp.Student = item.Student.ToStudentPublicResponse()
+	resp.Year = item.Year.ToResponse()
+	resp.LevelDomain = item.LevelDomain.ToLevelDomainResponse()
+	resp.Class = item.Class.ToResponse()
+	resp.Student = item.Student.ToStudentResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -113,10 +113,14 @@ func (item *StudentEnroll) ToStudentEnrollPublicResponse() *data.StudentEnrollPu
 	resp.Document5 = item.Document5
 
 	resp.School = item.School.ToPublicResponse()
-	resp.Year = item.Year.ToPublicResponse()
-	resp.LevelDomain = item.LevelDomain.ToLevelDomainPublicResponse()
-	resp.Class = item.Class.ToPublicResponse()
+	resp.Year = item.Year.ToResponse()
+	resp.LevelDomain = item.LevelDomain.ToLevelDomainResponse()
+	resp.Class = item.Class.ToResponse()
 	resp.Student = item.Student.ToStudentPublicResponse()
+
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

@@ -30,25 +30,13 @@ func (item *TeacherClassSubjectUnit) ToTeacherClassSubjectUnitResponse() *data.T
 	}
 	resp := &data.TeacherClassSubjectUnitResponse{}
 	resp.Teacher = item.Teacher.ToTeacherPublicResponse()
-	resp.Year = item.Year.ToPublicResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
-	resp.Unit = item.Unit.ToPublicResponse()
+	resp.Year = item.Year.ToResponse()
+	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.Unit = item.Unit.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-	return resp
-}
-
-func (item *TeacherClassSubjectUnit) ToTeacherClassSubjectUnitPublicResponse() *data.TeacherClassSubjectUnitPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.TeacherClassSubjectUnitPublicResponse{}
-	resp.Teacher = item.Teacher.ToTeacherPublicResponse()
-	resp.Year = item.Year.ToPublicResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
-	resp.Unit = item.Unit.ToPublicResponse()
 	return resp
 }
 

@@ -62,41 +62,15 @@ func (item *Request) ToResponse() *data.RequestResponse {
 	resp.Document5 = item.Document5
 
 	resp.School = item.School.ToPublicResponse()
-	resp.Year = item.Year.ToPublicResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
-	resp.Sequence = item.Sequence.ToPublicResponse()
-	resp.Unit = item.Unit.ToPublicResponse()
+	resp.Year = item.Year.ToResponse()
+	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.Sequence = item.Sequence.ToResponse()
+	resp.Unit = item.Unit.ToResponse()
 	resp.Student = item.Student.ToStudentPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-	return resp
-}
-
-func (item *Request) ToPublicResponse() *data.RequestPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.RequestPublicResponse{}
-	resp.Status = item.Status
-	resp.StatusFeedback = item.StatusFeedback
-	resp.Audience = item.Audience
-	resp.Title = item.Title
-	resp.Message = item.Message
-
-	resp.Document1 = item.Document1
-	resp.Document2 = item.Document2
-	resp.Document3 = item.Document3
-	resp.Document4 = item.Document4
-	resp.Document5 = item.Document5
-
-	resp.School = item.School.ToPublicResponse()
-	resp.Year = item.Year.ToPublicResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
-	resp.Sequence = item.Sequence.ToPublicResponse()
-	resp.Unit = item.Unit.ToPublicResponse()
-	resp.Student = item.Student.ToStudentPublicResponse()
 	return resp
 }
 

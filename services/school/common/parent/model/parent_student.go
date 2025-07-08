@@ -30,16 +30,6 @@ func (item *ParentStudent) ToParentStudentResponse() *data.ParentStudentResponse
 	return resp
 }
 
-func (item *ParentStudent) ToParentStudentPublicResponse() *data.ParentStudentPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.ParentStudentPublicResponse{}
-	resp.Parent = item.Parent.ToParentPublicResponse()
-	resp.Student = item.Student.ToStudentPublicResponse()
-	return resp
-}
-
 func ToParentStudentResponseList(itemList []ParentStudent) []data.ParentStudentResponse {
 	resp := make([]data.ParentStudentResponse, len(itemList))
 	for index, item := range itemList {

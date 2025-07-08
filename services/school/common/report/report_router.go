@@ -18,18 +18,18 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/schools/reports",
-		Tag:   []string{"Reports"},
+		Group: "/schools/reportentries",
+		Tag:   []string{"Report entries"},
 	}
-	const tableName = "reports"
+	const tableName = "report_entries"
 
-	// Create report
+	// Create report entry
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-report",
-			Summary:     "Create report",
-			Description: "Create new report and return created object.",
+			OperationID: "post-report-entry",
+			Summary:     "Create report entry",
+			Description: "Create new report entry and return created object.",
 			Method:      http.MethodPost,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,
@@ -52,14 +52,14 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.ReportRequest
+				Body data.ReportEntryRequest
 			},
-		) (*struct{ Body data.ReportResponse }, error) {
-			result, errCode, err := controller.Create(&ctx, input)
+		) (*struct{ Body data.ReportEntryResponse }, error) {
+			result, errCode, err := controller.CreateEntry(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ReportResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.ReportEntryResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -134,12 +134,16 @@ func RegisterEndpoints(
 			input *struct {
 				Body data.ReportConfigRequest
 			},
-		) (*struct{ Body data.ReportConfigResponse }, error) {
+		) (*struct {
+			Body data.ReportConfigResponse
+		}, error) {
 			result, errCode, err := controller.CreateConfig(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ReportConfigResponse }{Body: *result.ToReportConfigResponse()}, nil
+			return &struct {
+				Body data.ReportConfigResponse
+			}{Body: *result.ToReportConfigResponse()}, nil
 		},
 	)
 
@@ -216,12 +220,16 @@ func RegisterEndpoints(
 				data.ReportConfigID
 				Body data.ReportConfigRequest
 			},
-		) (*struct{ Body data.ReportConfigResponse }, error) {
+		) (*struct {
+			Body data.ReportConfigResponse
+		}, error) {
 			result, errCode, err := controller.UpdateConfig(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ReportConfigResponse }{Body: *result.ToReportConfigResponse()}, nil
+			return &struct {
+				Body data.ReportConfigResponse
+			}{Body: *result.ToReportConfigResponse()}, nil
 		},
 	)
 
@@ -254,10 +262,10 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.ReportID
+				data.ReportEntryID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.Delete(&ctx, input)
+			result, errCode, err := controller.DeleteEntry(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -377,7 +385,7 @@ func RegisterEndpoints(
 				Body types.DeleteMultipleRequest
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteMultiple(&ctx, input)
+			result, errCode, err := controller.DeleteMultipleEntry(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -497,14 +505,14 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.ReportID
+				data.ReportEntryID
 			},
-		) (*struct{ Body data.ReportResponse }, error) {
-			result, errCode, err := controller.Get(&ctx, input)
+		) (*struct{ Body data.ReportEntryResponse }, error) {
+			result, errCode, err := controller.GetEntry(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ReportResponse }{Body: *result.ToResponse()}, nil
+			return &struct{ Body data.ReportEntryResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -585,12 +593,16 @@ func RegisterEndpoints(
 			input *struct {
 				data.ReportConfigID
 			},
-		) (*struct{ Body data.ReportConfigResponse }, error) {
+		) (*struct {
+			Body data.ReportConfigResponse
+		}, error) {
 			result, errCode, err := controller.GetConfig(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ReportConfigResponse }{Body: *result.ToReportConfigResponse()}, nil
+			return &struct {
+				Body data.ReportConfigResponse
+			}{Body: *result.ToReportConfigResponse()}, nil
 		},
 	)
 
@@ -628,26 +640,26 @@ func RegisterEndpoints(
 			input *struct {
 				types.Filter
 				types.PaginationRequest
-				data.GetAllRequest
+				data.GetAllReportEntryRequest
 			},
 		) (*struct {
-			Body data.ReportResponseList
+			Body data.ReportEntryResponseList
 		}, error) {
-			result, errCode, err := controller.GetAll(&ctx, input)
+			result, errCode, err := controller.GetAllEntry(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			tempReports := make([]model.Report, 10)
-			for i := range tempReports {
-				tmpModel := model.Report{}
+			tempReportEntrys := make([]model.ReportEntry, 10)
+			for i := range tempReportEntrys {
+				tmpModel := model.ReportEntry{}
 				tmpModel.ID = int64(i)
-				tempReports[i] = tmpModel
+				tempReportEntrys[i] = tmpModel
 			}
-			result.Data = model.ToReportResponseList(tempReports)
+			result.Data = model.ToReportEntryResponseList(tempReportEntrys)
 
 			return &struct {
-				Body data.ReportResponseList
+				Body data.ReportEntryResponseList
 			}{Body: *result}, nil
 		},
 	)
@@ -696,13 +708,13 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			tempReports := make([]model.ReportGrade, 10)
-			for i := range tempReports {
+			tempReportEntrys := make([]model.ReportGrade, 10)
+			for i := range tempReportEntrys {
 				tmpModel := model.ReportGrade{}
 				tmpModel.ID = int64(i)
-				tempReports[i] = tmpModel
+				tempReportEntrys[i] = tmpModel
 			}
-			result.Data = model.ToReportGradeResponseList(tempReports)
+			result.Data = model.ToReportGradeResponseList(tempReportEntrys)
 
 			return &struct {
 				Body data.ReportGradeResponseList
@@ -754,13 +766,13 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			tempReports := make([]model.ReportConfig, 10)
-			for i := range tempReports {
+			tempReportEntrys := make([]model.ReportConfig, 10)
+			for i := range tempReportEntrys {
 				tmpModel := model.ReportConfig{}
 				tmpModel.ID = int64(i)
-				tempReports[i] = tmpModel
+				tempReportEntrys[i] = tmpModel
 			}
-			result.Data = model.ToReportConfigResponseList(tempReports)
+			result.Data = model.ToReportConfigResponseList(tempReportEntrys)
 
 			return &struct {
 				Body data.ReportConfigResponseList

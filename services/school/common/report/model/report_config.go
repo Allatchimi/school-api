@@ -23,23 +23,11 @@ func (item *ReportConfig) ToReportConfigResponse() *data.ReportConfigResponse {
 	resp.Notation = item.Notation
 	resp.NotationMinimumSuccess = item.NotationMinimumSuccess
 
-	resp.School = item.School.ToResponse()
+	resp.School = item.School.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-	return resp
-}
-
-func (item *ReportConfig) ToReportConfigPublicResponse() *data.ReportConfigPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.ReportConfigPublicResponse{}
-	resp.Notation = item.Notation
-	resp.NotationMinimumSuccess = item.NotationMinimumSuccess
-
-	resp.School = item.School.ToResponse()
 	return resp
 }
 

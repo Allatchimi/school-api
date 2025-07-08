@@ -627,7 +627,7 @@ func RegisterEndpoints(
 				tempModel := data.StudentEnrollResponse{}
 				tempModel.ID = int64(i)
 				tempModel.Email = "example@example.com"
-				tempModel.Student = &data.StudentPublicResponse{}
+				tempModel.Student = &data.StudentResponse{}
 				tempModel.Student.UID = fmt.Sprintf("UID-%d", i)
 
 				tempResult[i] = tempModel

@@ -27,17 +27,6 @@ func (item *Role) ToResponse() *data.RoleResponse {
 	return resp
 }
 
-func (item *Role) ToPublicResponse() *data.RolePublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.RolePublicResponse{}
-	resp.Name = item.Name
-	resp.Feature = item.Feature
-	resp.Description = item.Description
-	return resp
-}
-
 func ToResponseList(itemList []Role) []data.RoleResponse {
 	resp := make([]data.RoleResponse, len(itemList))
 	for index, item := range itemList {

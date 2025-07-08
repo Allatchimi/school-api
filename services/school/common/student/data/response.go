@@ -12,42 +12,60 @@ import (
 
 type StudentResponse struct {
 	types.BaseGormModelResponse
-	StudentPublicResponse
-}
-
-type StudentPublicResponse struct {
 	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
+	User   *dataUser.UserResponse           `json:"user" required:"false" doc:"User"`
 
 	UID string `json:"uid" required:"false" doc:"Student UID"`
 }
 
+type StudentPublicResponse struct {
+	types.BaseGormModelResponse
+	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
+}
+
 type StudentEnrollResponse struct {
 	types.BaseGormModelResponse
-	StudentEnrollPublicResponse
+	School      *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	Year        *dataYear.YearResponse           `json:"year" required:"false" doc:"Year"`
+	Class       *dataClass.ClassResponse         `json:"class" required:"false" doc:"Class"`
+	LevelDomain *dataLevel.LevelDomainResponse   `json:"levelDomain" required:"false" doc:"Level for domain"`
+	Student     *StudentResponse                 `json:"student" required:"false" doc:"Student"`
+
+	studentEnrollDataResponse
+	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number"`
+
+	Birthday      *time.Time `json:"birthday" required:"false" doc:"Birthday date time"`
+	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
 }
 
 type StudentEnrollPublicResponse struct {
-	School      *dataSchool.SchoolPublicResponse     `json:"school" required:"false" doc:"School"`
-	Year        *dataYear.YearPublicResponse         `json:"year" required:"false" doc:"Year"`
-	Class       *dataClass.ClassPublicResponse       `json:"class" required:"false" doc:"Class"`
-	LevelDomain *dataLevel.LevelDomainPublicResponse `json:"levelDomain" required:"false" doc:"Level for domain"`
-	Student     *StudentPublicResponse               `json:"student" required:"false" doc:"Student"`
+	types.BaseGormModelResponse
+	School      *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	Year        *dataYear.YearResponse           `json:"year" required:"false" doc:"Year"`
+	Class       *dataClass.ClassResponse         `json:"class" required:"false" doc:"Class"`
+	LevelDomain *dataLevel.LevelDomainResponse   `json:"levelDomain" required:"false" doc:"Level for domain"`
+	Student     *StudentPublicResponse           `json:"student" required:"false" doc:"Student"`
 
+	studentEnrollDataResponse
 	Email       string `json:"email" required:"false" doc:"Email"`
 	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number"`
 
+	Birthday      *time.Time `json:"birthday" required:"false" doc:"Birthday date time"`
+	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
+}
+
+type studentEnrollDataResponse struct {
+	Email          string `json:"email" required:"false" doc:"Email"`
 	Origin         string `json:"origin" required:"false" doc:"Origin"`
 	Status         string `json:"status" required:"false" doc:"Status"`
 	StatusFeedback string `json:"statusFeedback" required:"false" doc:"Status feedback"`
 
 	Message string `json:"Message" required:"false" doc:"Message"`
 
-	Gender        string     `json:"gender" required:"false" doc:"Gender"`
-	FirstName     string     `json:"firstName" required:"false" doc:"First name"`
-	LastName      string     `json:"lastName" required:"false" doc:"Last name or family name"`
-	Birthday      *time.Time `json:"birthday" required:"false" doc:"Birthday date time"`
-	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
+	Gender    string `json:"gender" required:"false" doc:"Gender"`
+	FirstName string `json:"firstName" required:"false" doc:"First name"`
+	LastName  string `json:"lastName" required:"false" doc:"Last name or family name"`
 
 	Document1 string `json:"file1" required:"false" doc:"Document1"`
 	Document2 string `json:"file2" required:"false" doc:"Document2"`

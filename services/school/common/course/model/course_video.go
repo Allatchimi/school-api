@@ -24,7 +24,7 @@ func (item *CourseVideo) ToResponse() *data.CourseVideoResponse {
 	resp.Description = item.Description
 	resp.URL = item.URL
 
-	resp.Course = item.Course.ToPublicResponse()
+	resp.Course = item.Course.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

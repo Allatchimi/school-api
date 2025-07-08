@@ -12,10 +12,6 @@ import (
 
 type RequestResponse struct {
 	types.BaseGormModelResponse
-	RequestPublicResponse
-}
-
-type RequestPublicResponse struct {
 	Status         string `json:"status" required:"false" doc:"Status"`
 	StatusFeedback string `json:"statusFeedback" required:"false" doc:"Status feedback"`
 	Audience       string `json:"audience" required:"false" doc:"Audience"`
@@ -28,12 +24,12 @@ type RequestPublicResponse struct {
 	Document4 string `json:"document4" required:"false" doc:"Document4"`
 	Document5 string `json:"document5" required:"false" doc:"Document5"`
 
-	School       *schoolData.SchoolPublicResponse      `json:"school" required:"false" doc:"School"`
-	Year         *yearData.YearPublicResponse          `json:"Year" required:"false" doc:"Year"`
-	ClassSubject *classData.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Class subject"`
-	Sequence     *sequenceData.SequencePublicResponse  `json:"semester" required:"false" doc:"Sequence"`
-	Unit         *unitData.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
-	Student      *studentData.StudentPublicResponse    `json:"student" required:"false" doc:"Student"`
+	School       *schoolData.SchoolPublicResponse   `json:"school" required:"false" doc:"School"`
+	Year         *yearData.YearResponse             `json:"year" required:"false" doc:"Year"`
+	ClassSubject *classData.ClassSubjectResponse    `json:"classSubject" required:"false" doc:"Class subject"`
+	Sequence     *sequenceData.SequenceResponse     `json:"semester" required:"false" doc:"Sequence"`
+	Unit         *unitData.UnitResponse             `json:"unit" required:"false" doc:"Unit"`
+	Student      *studentData.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
 }
 
 type RequestResponseList struct {

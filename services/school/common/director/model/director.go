@@ -26,7 +26,7 @@ func (item *Director) ToDirectorResponse() *data.DirectorResponse {
 	resp.UID = item.UID
 
 	resp.School = item.School.ToPublicResponse()
-	resp.User = item.User.ToPublicResponse()
+	resp.User = item.User.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -34,15 +34,18 @@ func (item *Director) ToDirectorResponse() *data.DirectorResponse {
 	return resp
 }
 
-func (item *Director) ToDirectorPublicResponse() *data.DirectorPublicResponse {
+func (item *Director) ToDirectorPublicResponse() *data.DirectorpublicResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.DirectorPublicResponse{}
-	resp.UID = item.UID
+	resp := &data.DirectorpublicResponse{}
 
 	resp.School = item.School.ToPublicResponse()
 	resp.User = item.User.ToPublicResponse()
+
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

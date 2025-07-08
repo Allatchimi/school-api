@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	"api/common/helpers"
 	"api/common/utils"
@@ -38,7 +37,7 @@ func DeploySchool(school *model.School) (ok bool, err error) {
 	defer os.RemoveAll(tempDir)
 
 	// Generate website URL
-	websiteURL := fmt.Sprintf("%s://%s", school.Config.Protocol, school.Config.DomainName)
+	websiteURL := fmt.Sprintf("https://%s", school.Config.DomainName)
 	// Generate API key using HMAC SHA256
 	apiKey, err := security.GenerateHMAC_SHA256_Base64URL(
 		fmt.Sprintf("%d", school.ID),
@@ -77,9 +76,6 @@ func DeploySchool(school *model.School) (ok bool, err error) {
 	// Generate deployment data
 	deploymentData := DeploymentData{
 		DomainName: school.Config.DomainName,
-		Protocol:   school.Config.Protocol,
-		DomainCert: strings.ReplaceAll(school.Config.DomainCert, `\n`, "\n"),
-		DomainKey:  strings.ReplaceAll(school.Config.DomainKey, `\n`, "\n"),
 	}
 	// Define output directory structure
 	outputDir := filepath.Join(tempDir, fmt.Sprintf("%d", school.ID))
@@ -111,21 +107,6 @@ func DeploySchool(school *model.School) (ok bool, err error) {
 	if err = helpers.RenderTemplate(filepath.Join(deploymentDir, "domainname.txt"), domainNameDeploymentTemplateContent, deploymentData); err != nil {
 		errMsg := "Failed to render template!"
 		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentDir, "domainname.txt"), domainNameDeploymentTemplateContent, err)
-		return
-	}
-	if err = helpers.RenderTemplate(filepath.Join(deploymentDir, "protocol.txt"), protocolDeploymentTemplateContent, deploymentData); err != nil {
-		errMsg := "Failed to render template!"
-		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentDir, "protocol.txt"), protocolDeploymentTemplateContent, err)
-		return
-	}
-	if err = helpers.RenderTemplate(filepath.Join(deploymentDir, "domain.cert"), domainCertDeploymentTemplateContent, deploymentData); err != nil {
-		errMsg := "Failed to render template!"
-		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentDir, "domain.cert"), domainCertDeploymentTemplateContent, err)
-		return
-	}
-	if err = helpers.RenderTemplate(filepath.Join(deploymentDir, "domain.key"), domainKeyDeploymentTemplateContent, deploymentData); err != nil {
-		errMsg := "Failed to render template!"
-		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentDir, "domain.key"), domainKeyDeploymentTemplateContent, err)
 		return
 	}
 	// Download favicon if available

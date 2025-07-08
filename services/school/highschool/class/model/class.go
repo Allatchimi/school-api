@@ -30,25 +30,11 @@ func (item *HighschoolClass) ToResponse() *data.ClassResponse {
 	resp.Description = item.Description
 
 	resp.School = item.School.ToPublicResponse()
-	resp.Specialty = item.Specialty.ToPublicResponse()
+	resp.Specialty = item.Specialty.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-	return resp
-}
-
-func (item *HighschoolClass) ToPublicResponse() *data.ClassPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.ClassPublicResponse{}
-	resp.Fees = item.Fees
-	resp.Name = item.Name
-	resp.Description = item.Description
-
-	resp.School = item.School.ToPublicResponse()
-	resp.Specialty = item.Specialty.ToPublicResponse()
 	return resp
 }
 

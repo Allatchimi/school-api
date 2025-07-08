@@ -28,7 +28,7 @@ func (item *CourseComment) ToResponse() *data.CourseCommentResponse {
 	resp.Rate = item.Rate
 	resp.IsDeleted = item.IsDeleted
 
-	resp.Course = item.Course.ToPublicResponse()
+	resp.Course = item.Course.ToResponse()
 	resp.User = item.User.ToPublicResponse()
 
 	resp.ID = item.ID

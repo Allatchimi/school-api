@@ -122,11 +122,7 @@ func (repository *Repository) UpdateSchoolConfigByID(id int64, item *model.Schoo
 	result := &model.SchoolConfig{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
-			"protocol": item.Protocol,
-
 			"domain_name": item.DomainName,
-			"domain_cert": item.DomainCert,
-			"domain_key":  item.DomainKey,
 
 			"smtp_host":           item.SmtpHost,
 			"smtp_port":           item.SmtpPort,

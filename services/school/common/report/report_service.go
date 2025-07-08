@@ -20,7 +20,7 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "report"
 const DEFAULT_ERROR_MESSAGE = "interact with report model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.ReportRequest) (result *model.Report, errCode int, err error) {
+func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.ReportEntryRequest) (result *model.ReportEntry, errCode int, err error) {
 	// TODO
 	return
 }
@@ -133,7 +133,7 @@ func (service *Service) UpdateGrade(inputJwtToken *types.JwtToken, id int64, req
 	}
 
 	// Update
-	result, err = service.Repository.UpdateReportGrade(id, item)
+	result, err = service.Repository.UpdateReportGradeByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -178,7 +178,7 @@ func (service *Service) UpdateConfig(inputJwtToken *types.JwtToken, id int64, re
 	}
 
 	// Update
-	result, err = service.Repository.UpdateReportConfig(id, item)
+	result, err = service.Repository.UpdateReportConfigByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -188,7 +188,7 @@ func (service *Service) UpdateConfig(inputJwtToken *types.JwtToken, id int64, re
 }
 
 func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteByID(id)
+	affectedRows, err = service.Repository.DeleteReportEntryByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -233,7 +233,7 @@ func (service *Service) DeleteConfig(inputJwtToken *types.JwtToken, id int64) (a
 }
 
 func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteMultipleByID(list)
+	affectedRows, err = service.Repository.DeleteMultipleReportEntryByID(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -277,8 +277,8 @@ func (service *Service) DeleteMultipleConfig(inputJwtToken *types.JwtToken, list
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Report, errCode int, err error) {
-	result, err = service.Repository.GetByID(id)
+func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.ReportEntry, errCode int, err error) {
+	result, err = service.Repository.GetReportEntryByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -322,8 +322,8 @@ func (service *Service) GetConfig(inputJwtToken *types.JwtToken, id int64) (resu
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Report, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, request)
+func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllReportEntryRequest) (result []model.ReportEntry, errCode int, err error) {
+	result, err = service.Repository.GetAllReportEntry(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

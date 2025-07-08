@@ -17,12 +17,12 @@ func NewController(service *Service) *Controller {
 	return &Controller{Service: service}
 }
 
-func (controller *Controller) Create(
+func (controller *Controller) CreateEntry(
 	ctx *context.Context,
 	input *struct {
-		Body data.ReportRequest
+		Body data.ReportEntryRequest
 	},
-) (result *model.Report, errCode int, err error) {
+) (result *model.ReportEntry, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
 		helpers.GetJwtContext(ctx),
 		&input.Body,
@@ -86,10 +86,10 @@ func (controller *Controller) UpdateConfig(
 	return
 }
 
-func (controller *Controller) Delete(
+func (controller *Controller) DeleteEntry(
 	ctx *context.Context,
 	input *struct {
-		data.ReportID
+		data.ReportEntryID
 	},
 ) (result int64, errCode int, err error) {
 	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
@@ -128,7 +128,7 @@ func (controller *Controller) DeleteConfig(
 	return
 }
 
-func (controller *Controller) DeleteMultiple(
+func (controller *Controller) DeleteMultipleEntry(
 	ctx *context.Context,
 	input *struct {
 		Body types.DeleteMultipleRequest
@@ -170,12 +170,12 @@ func (controller *Controller) DeleteMultipleConfig(
 	return
 }
 
-func (controller *Controller) Get(
+func (controller *Controller) GetEntry(
 	ctx *context.Context,
 	input *struct {
-		data.ReportID
+		data.ReportEntryID
 	},
-) (result *model.Report, errCode int, err error) {
+) (result *model.ReportEntry, errCode int, err error) {
 	result, errCode, err = controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
 	return
 }
@@ -200,21 +200,21 @@ func (controller *Controller) GetConfig(
 	return
 }
 
-func (controller *Controller) GetAll(
+func (controller *Controller) GetAllEntry(
 	ctx *context.Context,
 	input *struct {
 		types.Filter
 		types.PaginationRequest
-		data.GetAllRequest
+		data.GetAllReportEntryRequest
 	},
-) (result *data.ReportResponseList, errCode int, err error) {
+) (result *data.ReportEntryResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	resultList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
+	resultList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllReportEntryRequest)
 	if err != nil {
 		return
 	}
-	result = &data.ReportResponseList{
-		Data: model.ToReportResponseList(resultList),
+	result = &data.ReportEntryResponseList{
+		Data: model.ToReportEntryResponseList(resultList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

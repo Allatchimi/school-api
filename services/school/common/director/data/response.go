@@ -8,14 +8,16 @@ import (
 
 type DirectorResponse struct {
 	types.BaseGormModelResponse
-	DirectorPublicResponse
-}
-
-type DirectorPublicResponse struct {
 	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
+	User   *dataUser.UserResponse           `json:"user" required:"false" doc:"User"`
 
 	UID string `json:"uid" required:"false" doc:"Director UID"`
+}
+
+type DirectorpublicResponse struct {
+	types.BaseGormModelResponse
+	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
 }
 
 type DirectorResponseList struct {

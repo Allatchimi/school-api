@@ -59,11 +59,7 @@ type SchoolInfoRequest struct {
 }
 
 type SchoolConfigRequest struct {
-	Protocol string `json:"protocol" required:"true" enum:"http,https" doc:"Protocol"`
-
 	DomainName string `json:"domainName" required:"true" minLength:"3" maxLength:"150" doc:"Domain name" example:"google.com"`
-	DomainCert string `json:"domainCert" required:"true" minLength:"3" maxLength:"150" doc:"SSL cert"`
-	DomainKey  string `json:"domainKey" required:"true" minLength:"3" maxLength:"150" doc:"SSL key"`
 
 	SmtpHost         string `json:"smtpHost" required:"true" minLength:"3" maxLength:"150" doc:"SMTP host" example:"smtp.google.com"`
 	SmtpPort         int    `json:"smtpPort" required:"true" min:"1" max:"65535" doc:"SMTP port" example:"587"`

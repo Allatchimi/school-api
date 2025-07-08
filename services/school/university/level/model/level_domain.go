@@ -38,29 +38,12 @@ func (item *UniversityLevelDomain) ToLevelDomainResponse() *data.LevelDomainResp
 	resp.InvalidDate = item.InvalidDate
 
 	resp.School = item.School.ToPublicResponse()
-	resp.Domain = item.Domain.ToPublicResponse()
-	resp.Level = item.Level.ToPublicResponse()
+	resp.Domain = item.Domain.ToResponse()
+	resp.Level = item.Level.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-	return resp
-}
-
-func (item *UniversityLevelDomain) ToLevelDomainPublicResponse() *data.LevelDomainPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.LevelDomainPublicResponse{}
-	resp.Fees = item.Fees
-	resp.Program = item.Program
-	resp.Requirements = item.Requirements
-	resp.IsValid = item.IsValid
-	resp.InvalidDate = item.InvalidDate
-
-	resp.School = item.School.ToPublicResponse()
-	resp.Domain = item.Domain.ToPublicResponse()
-	resp.Level = item.Level.ToPublicResponse()
 	return resp
 }
 

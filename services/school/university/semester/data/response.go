@@ -8,12 +8,8 @@ import (
 
 type SemesterResponse struct {
 	types.BaseGormModelResponse
-	SemesterPublicResponse
-}
-
-type SemesterPublicResponse struct {
-	School      *dataSchool.SchoolPublicResponse `json:"school" doc:"School"`
-	Domain      *dataDomain.DomainPublicResponse `json:"domain" doc:"Domain"`
+	School      *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	Domain      *dataDomain.DomainResponse       `json:"domain" required:"false" doc:"Domain"`
 	Name        string                           `json:"name" required:"false" doc:"Semester name"`
 	Description string                           `json:"description" required:"false" doc:"Semester description"`
 }

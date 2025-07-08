@@ -41,30 +41,11 @@ func (item *ScheduleGeneric) ToResponse() *data.ScheduleResponse {
 	resp.InvalidDate = item.InvalidDate
 
 	resp.School = item.School.ToPublicResponse()
-	resp.Year = item.Year.ToPublicResponse()
+	resp.Year = item.Year.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-	return resp
-}
-
-func (item *ScheduleGeneric) ToPublicResponse() *data.SchedulePublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.SchedulePublicResponse{}
-	resp.Type = item.Type
-	resp.DayOfTheWeek = item.DayOfTheWeek
-	resp.RepeatCount = item.RepeatCount
-	resp.RepeatType = item.RepeatType
-	resp.StartTime = item.StartTime
-	resp.EndTime = item.EndTime
-	resp.IsValid = item.IsValid
-	resp.InvalidDate = item.InvalidDate
-
-	resp.School = item.School.ToPublicResponse()
-	resp.Year = item.Year.ToPublicResponse()
 	return resp
 }
 

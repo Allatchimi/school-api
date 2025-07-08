@@ -6,10 +6,6 @@ import (
 
 type RoleResponse struct {
 	types.BaseGormModelResponse
-	RolePublicResponse
-}
-
-type RolePublicResponse struct {
 	Name        string `json:"name" required:"false" doc:"Role name"`
 	Feature     string `json:"feature" required:"false" doc:"Feature name"`
 	Description string `json:"description" required:"false" doc:"Role description"`

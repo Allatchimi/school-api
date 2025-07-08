@@ -6,7 +6,6 @@ import (
 )
 
 type SchoolResponse struct {
-	types.BaseGormModelResponse
 	SchoolPublicResponse
 
 	DeploymentRequest  string `json:"deploymentRequest" required:"false" doc:"Deployment request"`
@@ -18,6 +17,7 @@ type SchoolResponse struct {
 }
 
 type SchoolPublicResponse struct {
+	types.BaseGormModelResponse
 	Name   string `json:"name" required:"false" doc:"School name"`
 	Type   string `json:"type" required:"false" doc:"Type"`
 	Status string `json:"status" required:"false" doc:"Status"`
@@ -67,11 +67,7 @@ type SchoolInfoResponse struct {
 }
 
 type SchoolConfigResponse struct {
-	Protocol string `json:"protocol" required:"false" doc:"Protocol"`
-
 	DomainName string `json:"domainName" required:"false" doc:"Domain name"`
-	DomainCert string `json:"domainCert" required:"false" doc:"Domain cert"`
-	DomainKey  string `json:"domainKey" required:"false" doc:"Domain key"`
 
 	SmtpHost         string `json:"smtpHost" required:"false" doc:"SMTP host"`
 	SmtpPort         int    `json:"smtpPort" required:"false" doc:"SMTP port"`

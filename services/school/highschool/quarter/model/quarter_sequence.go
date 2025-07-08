@@ -20,22 +20,12 @@ func (item *HighschoolQuarterSequence) ToQuarterSequenceResponse() *data.Quarter
 		return nil
 	}
 	resp := &data.QuarterSequenceResponse{}
-	resp.Quarter = item.Quarter.ToPublicResponse()
-	resp.Sequence = item.Sequence.ToPublicResponse()
+	resp.Quarter = item.Quarter.ToResponse()
+	resp.Sequence = item.Sequence.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-	return resp
-}
-
-func (item *HighschoolQuarterSequence) ToQuarterSequencePublicResponse() *data.QuarterSequencePublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.QuarterSequencePublicResponse{}
-	resp.Quarter = item.Quarter.ToPublicResponse()
-	resp.Sequence = item.Sequence.ToPublicResponse()
 	return resp
 }
 

@@ -26,7 +26,7 @@ func (item *Teacher) ToTeacherResponse() *data.TeacherResponse {
 	resp.UID = item.UID
 
 	resp.School = item.School.ToPublicResponse()
-	resp.User = item.User.ToPublicResponse()
+	resp.User = item.User.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -39,10 +39,13 @@ func (item *Teacher) ToTeacherPublicResponse() *data.TeacherPublicResponse {
 		return nil
 	}
 	resp := &data.TeacherPublicResponse{}
-	resp.UID = item.UID
 
 	resp.School = item.School.ToPublicResponse()
 	resp.User = item.User.ToPublicResponse()
+
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

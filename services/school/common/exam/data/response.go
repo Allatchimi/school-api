@@ -12,10 +12,7 @@ import (
 
 type ExamResponse struct {
 	types.BaseGormModelResponse
-	ExamPublicResponse
-}
-
-type ExamPublicResponse struct {
+	Status          string     `json:"status" required:"false" doc:"Status"`
 	Percentage      int        `json:"percentage" required:"false" doc:"Percentage"`
 	Description     string     `json:"description" required:"false" doc:"Description"`
 	LocationType    string     `json:"locationType" required:"false" doc:"Location type"`
@@ -25,20 +22,16 @@ type ExamPublicResponse struct {
 	StartDate       *time.Time `json:"startDate" required:"false" doc:"Start date"`
 	EndDate         *time.Time `json:"endDate" required:"false" doc:"End date"`
 
-	School       *schoolData.SchoolPublicResponse      `json:"school" required:"false" doc:"School"`
-	Year         *yearData.YearPublicResponse          `json:"Year" required:"false" doc:"Year"`
-	Type         *ExamTypePublicResponse               `json:"type" required:"false" doc:"Type"`
-	ClassSubject *classData.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Class subject"`
-	Sequence     *sequenceData.SequencePublicResponse  `json:"semester" required:"false" doc:"Sequence"`
-	Unit         *unitData.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
+	School       *schoolData.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	Year         *yearData.YearResponse           `json:"Year" required:"false" doc:"Year"`
+	Type         *ExamTypeResponse                `json:"type" required:"false" doc:"Type"`
+	ClassSubject *classData.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Class subject"`
+	Sequence     *sequenceData.SequenceResponse   `json:"semester" required:"false" doc:"Sequence"`
+	Unit         *unitData.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
 }
 
 type ExamTypeResponse struct {
 	types.BaseGormModelResponse
-	ExamTypePublicResponse
-}
-
-type ExamTypePublicResponse struct {
 	Name        string `json:"name" required:"false" doc:"Name"`
 	Description string `json:"description" required:"false" doc:"Description"`
 

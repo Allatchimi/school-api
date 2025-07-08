@@ -9,10 +9,6 @@ import (
 
 type PaymentResponse struct {
 	types.BaseGormModelResponse
-	PaymentPublicResponse
-}
-
-type PaymentPublicResponse struct {
 	Amount        float64    `json:"amount" required:"false" doc:"Amount"`
 	Currency      string     `json:"currency" required:"false" doc:"Currency"`
 	PaymentDate   *time.Time `json:"paymentDate" required:"false" doc:"Payment date"`

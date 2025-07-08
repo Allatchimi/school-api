@@ -21,6 +21,7 @@ type ExamRequest struct {
 	SequenceID     int64 `json:"sequenceID" required:"true" doc:"Sequence id"`
 	UnitID         int64 `json:"unitID" required:"true" doc:"Unit id"`
 
+	Status          string     `json:"status" required:"true" enum:"draft,published,results" doc:"Status"`
 	Percentage      int        `json:"percentage" required:"true" minimum:"1" maximum:"100" doc:"Percentage"`
 	Description     string     `json:"description" required:"false" doc:"Description"`
 	LocationType    string     `json:"locationType" required:"true" enum:"online,onsite" doc:"Location type"`

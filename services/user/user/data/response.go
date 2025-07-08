@@ -24,9 +24,10 @@ type UserResponse struct {
 }
 
 type UserPublicResponse struct {
-	Email string                       `json:"email" required:"false" doc:"Email"`
-	Role  *dataRole.RolePublicResponse `json:"role" required:"false" doc:"Role"`
-	Info  *UserInfoPublicResponse      `json:"info" required:"false" doc:"Additional user info(e.g. address, first name, last name, ...)" `
+	types.BaseGormModelResponse
+	Email string                  `json:"email" required:"false" doc:"Email"`
+	Role  *dataRole.RoleResponse  `json:"role" required:"false" doc:"Role"`
+	Info  *UserInfoPublicResponse `json:"info" required:"false" doc:"Additional user info(e.g. address, first name, last name, ...)" `
 }
 
 type UserInfoResponse struct {

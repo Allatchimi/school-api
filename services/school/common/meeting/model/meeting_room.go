@@ -31,25 +31,12 @@ func (item *MeetingRoom) ToResponse() *data.MeetingRoomResponse {
 	resp.ApiRoomID = item.ApiRoomID
 
 	resp.School = item.School.ToPublicResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
-	resp.Unit = item.Unit.ToPublicResponse()
+	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.Unit = item.Unit.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-	return resp
-}
-
-func (item *MeetingRoom) ToPublicResponse() *data.MeetingRoomPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.MeetingRoomPublicResponse{}
-	resp.ApiRoomID = item.ApiRoomID
-
-	resp.School = item.School.ToPublicResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
-	resp.Unit = item.Unit.ToPublicResponse()
 	return resp
 }
 

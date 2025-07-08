@@ -7,11 +7,7 @@ import (
 
 type SchoolConfig struct {
 	types.BaseGormModel
-	Protocol string `gorm:"default:null"`
-
 	DomainName string `gorm:"default:null"`
-	DomainCert string `gorm:"default:null;type:text"`
-	DomainKey  string `gorm:"default:null;type:text"`
 
 	SmtpHost         string `gorm:"default:null"`
 	SmtpPort         int    `gorm:"default:null"`
@@ -37,10 +33,7 @@ func (item *SchoolConfig) ToResponse() *data.SchoolConfigResponse {
 		return nil
 	}
 	resp := &data.SchoolConfigResponse{}
-	resp.Protocol = item.Protocol
 	resp.DomainName = item.DomainName
-	resp.DomainCert = item.DomainCert
-	resp.DomainKey = item.DomainKey
 	resp.SmtpHost = item.SmtpHost
 	resp.SmtpPort = item.SmtpPort
 	resp.SmtpUsername = item.SmtpUsername
@@ -59,10 +52,7 @@ func (item *SchoolConfig) ToResponse() *data.SchoolConfigResponse {
 
 func FromConfigRequest(item *data.SchoolConfigRequest) *SchoolConfig {
 	resp := &SchoolConfig{
-		Protocol:            item.Protocol,
 		DomainName:          item.DomainName,
-		DomainCert:          item.DomainCert,
-		DomainKey:           item.DomainKey,
 		SmtpHost:            item.SmtpHost,
 		SmtpPort:            item.SmtpPort,
 		SmtpUsername:        item.SmtpUsername,

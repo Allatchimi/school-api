@@ -31,18 +31,6 @@ func (item *HighschoolSequence) ToResponse() *data.SequenceResponse {
 	return resp
 }
 
-func (item *HighschoolSequence) ToPublicResponse() *data.SequencePublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.SequencePublicResponse{}
-	resp.Name = item.Name
-	resp.Description = item.Description
-
-	resp.School = item.School.ToPublicResponse()
-	return resp
-}
-
 func ToResponseList(itemList []HighschoolSequence) []data.SequenceResponse {
 	resp := make([]data.SequenceResponse, len(itemList))
 	for index, item := range itemList {

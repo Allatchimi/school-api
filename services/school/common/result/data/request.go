@@ -6,7 +6,7 @@ type ResultID struct {
 
 type ResultRequest struct {
 	StudentID int64 `json:"studentID" required:"true" doc:"Student id"`
-	ExamID    int64 `json:"resultID" required:"true" doc:"Result id"`
+	ExamID    int64 `json:"examID" required:"true" doc:"Exam id"`
 
 	Value  float64 `json:"value" required:"true" doc:"Value"`
 	Status string  `json:"status" required:"true" doc:"Status"`

@@ -11,14 +11,10 @@ import (
 
 type UnitResponse struct {
 	types.BaseGormModelResponse
-	UnitPublicResponse
-}
-
-type UnitPublicResponse struct {
-	School      *dataSchool.SchoolPublicResponse     `json:"school" required:"false" doc:"School"`
-	Domain      *dataDomain.DomainPublicResponse     `json:"domain" required:"false" doc:"Domain"`
-	LevelDomain *dataLevel.LevelDomainPublicResponse `json:"levelDomain" required:"false" doc:"Level domain"`
-	Semester    *dataSemester.SemesterPublicResponse `json:"semester" required:"false" doc:"Semester"`
+	School      *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	Domain      *dataDomain.DomainResponse       `json:"domain" required:"false" doc:"Domain"`
+	LevelDomain *dataLevel.LevelDomainResponse   `json:"levelDomain" required:"false" doc:"Level domain"`
+	Semester    *dataSemester.SemesterResponse   `json:"semester" required:"false" doc:"Semester"`
 
 	Name         string `json:"name" required:"false" doc:"Name"`
 	Description  string `json:"description" required:"false" doc:"Description"`

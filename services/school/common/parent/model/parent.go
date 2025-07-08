@@ -23,16 +23,14 @@ func (item *Parent) ToParentResponse() *data.ParentResponse {
 		return nil
 	}
 	resp := &data.ParentResponse{
-		ParentPublicResponse: data.ParentPublicResponse{
-			School: &dataSchool.SchoolPublicResponse{},
-			User:   &dataUser.UserPublicResponse{},
-		},
+		School: &dataSchool.SchoolPublicResponse{},
+		User:   &dataUser.UserResponse{},
 	}
 	if item.School != nil {
 		resp.School = item.School.ToPublicResponse()
 	}
 	if item.User != nil {
-		resp.User = item.User.ToPublicResponse()
+		resp.User = item.User.ToResponse()
 	}
 
 	resp.ID = item.ID
@@ -55,6 +53,10 @@ func (item *Parent) ToParentPublicResponse() *data.ParentPublicResponse {
 	if item.User != nil {
 		resp.User = item.User.ToPublicResponse()
 	}
+
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

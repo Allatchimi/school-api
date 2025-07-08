@@ -42,9 +42,9 @@ func (item *Course) ToResponse() *data.CourseResponse {
 	resp.Content = item.Content
 
 	resp.School = item.School.ToPublicResponse()
-	resp.Year = item.Year.ToPublicResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
-	resp.Unit = item.Unit.ToPublicResponse()
+	resp.Year = item.Year.ToResponse()
+	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.Unit = item.Unit.ToResponse()
 	resp.Documents = ToCourseDocumentResponseList(item.Documents)
 	resp.Videos = ToCourseVideoResponseList(item.Videos)
 
@@ -54,27 +54,10 @@ func (item *Course) ToResponse() *data.CourseResponse {
 	return resp
 }
 
-func (item *Course) ToPublicResponse() *data.CoursePublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.CoursePublicResponse{}
-	resp.Title = item.Title
-	resp.Description = item.Description
-	resp.Content = item.Content
-
-	resp.School = item.School.ToPublicResponse()
-	resp.Year = item.Year.ToPublicResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectPublicResponse()
-	resp.Unit = item.Unit.ToPublicResponse()
-
-	return resp
-}
-
-func ToResponseList(itemList []Course) []data.CoursePublicResponse {
-	resp := make([]data.CoursePublicResponse, len(itemList))
+func ToResponseList(itemList []Course) []data.CourseResponse {
+	resp := make([]data.CourseResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToPublicResponse()
+		resp[index] = *item.ToResponse()
 	}
 	return resp
 }

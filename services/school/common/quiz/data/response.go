@@ -11,11 +11,11 @@ import (
 
 type QuizResponse struct {
 	types.BaseGormModelResponse
-	School       *dataSchool.SchoolPublicResponse      `json:"school" required:"false" doc:"School"`
-	Year         *dataYear.YearPublicResponse          `json:"year" required:"false" doc:"Year"`
-	ClassSubject *dataClass.ClassSubjectPublicResponse `json:"classSubject" required:"false" doc:"Subject for specific class"`
-	Unit         *dataUnit.UnitPublicResponse          `json:"unit" required:"false" doc:"Unit"`
-	Questions    []QuizQuestionResponseV2              `json:"questions" required:"false" doc:"Questions"`
+	School       *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	Year         *dataYear.YearResponse           `json:"year" required:"false" doc:"Year"`
+	ClassSubject *dataClass.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Subject for specific class"`
+	Unit         *dataUnit.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
+	Questions    []QuizQuestionResponseV2         `json:"questions" required:"false" doc:"Questions"`
 
 	Title       string `json:"title" required:"false" doc:"Title"`
 	Description string `json:"description" required:"false" doc:"Description"`

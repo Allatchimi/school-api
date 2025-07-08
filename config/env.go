@@ -8,9 +8,8 @@ import (
 
 type Environment struct {
 	// Application config
-	AppPort         int    `mapstructure:"APP_PORT"`
-	AppName         string `mapstructure:"APP_NAME"`
-	AdminWebsiteUrl string `mapstructure:"ADMIN_WEBSITE_URL"`
+	AppPort int    `mapstructure:"APP_PORT"`
+	AppName string `mapstructure:"APP_NAME"`
 
 	// API config
 	ApiGroup     string `mapstructure:"API_GROUP"`
@@ -62,11 +61,8 @@ type Environment struct {
 	SmtpPassword string `mapstructure:"SMTP_PASSWORD"`
 	SmtpSender   string `mapstructure:"SMTP_SENDER"`
 
-	// Twilio SMS
-	TwilioAccountSid   string `mapstructure:"TWILIO_ACCOUNT_SID"`
-	TwilioApiKey       string `mapstructure:"TWILIO_API_KEY"`
-	TwilioApiSecret    string `mapstructure:"TWILIO_API_SECRET"`
-	TwilioSenderNumber string `mapstructure:"TWILIO_SENDER_NUMBER"`
+	// SMS
+	SmsAfrikaTalkingApiKey string `mapstructure:"SMS_AFRIKA_TALKING_API_KEY"`
 
 	// Login with Google
 	GooglePlusClientID string `mapstructure:"GOOGLE_PLUS_CLIENT_ID"`
@@ -84,13 +80,6 @@ type Environment struct {
 	MeetingApiKey    string `mapstructure:"MEETING_API_KEY"`
 	MeetingApiSecret string `mapstructure:"MEETING_API_SECRET"`
 
-	// GOOGLE reCAPTCHA
-	GoogleReCAPTCHASiteKey string  `mapstructure:"GOOGLE_RECAPTCHA_SITE_KEY"`
-	GoogleReCAPTCHAScore   float32 `mapstructure:"GOOGLE_RECAPTCHA_SCORE"`
-
-	UserAdminEmail    string `mapstructure:"USER_ADMIN_EMAIL"`
-	UserAdminPassword string `mapstructure:"USER_ADMIN_PASSWORD"`
-
 	// School api secret
 	SchoolApiSecret  string `mapstructure:"SCHOOL_API_SECRET"`
 	SchoolApiBaseURL string `mapstructure:"SCHOOL_API_BASE_URL"`
@@ -99,6 +88,7 @@ type Environment struct {
 
 	// GIT
 	GitRepoSshUrl               string `mapstructure:"GIT_DEPLOY_REPO_SSH_URL"`
+	GitRepoBranch               string `mapstructure:"GIT_DEPLOY_REPO_BRANCH"`
 	GitRepoSshEd25519PrivateKey string `mapstructure:"GIT_DEPLOY_REPO_SSH_ED25519_PRIVATE_KEY"`
 
 	// Database fixtures
@@ -108,6 +98,9 @@ type Environment struct {
 	RoleTeacher  string `mapstructure:"ROLE_TEACHER"`
 	RoleStudent  string `mapstructure:"ROLE_STUDENT"`
 	RoleParent   string `mapstructure:"ROLE_PARENT"`
+
+	UserAdminEmail    string `mapstructure:"USER_ADMIN_EMAIL"`
+	UserAdminPassword string `mapstructure:"USER_ADMIN_PASSWORD"`
 }
 
 var Env = &Environment{}

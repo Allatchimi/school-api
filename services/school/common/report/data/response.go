@@ -10,12 +10,12 @@ import (
 	dataUnit "api/services/school/university/unit/data"
 )
 
-type ReportResponse struct {
+type ReportEntryResponse struct {
 	types.BaseGormModelResponse
-	ReportPublicResponse
+	ReportEntryPublicResponse
 }
 
-type ReportPublicResponse struct {
+type ReportEntryPublicResponse struct {
 	School       *dataSchool.SchoolResponse      `json:"school" required:"false" doc:"School"`
 	Year         *dataYear.YearResponse          `json:"year" required:"false" doc:"Year"`
 	ClassSubject *dataClass.ClassSubjectResponse `json:"classSubject" required:"false" doc:"Subject for specific class"`
@@ -48,19 +48,21 @@ type ReportGradePublicResponse struct {
 
 type ReportConfigResponse struct {
 	types.BaseGormModelResponse
-	ReportConfigPublicResponse
-}
-
-type ReportConfigPublicResponse struct {
-	School *dataSchool.SchoolResponse `json:"school" required:"false" doc:"School"`
+	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
 
 	Notation               float64 `json:"notation" required:"false" doc:"Notation"`
 	NotationMinimumSuccess float64 `json:"notationMinimumSuccess" required:"false" doc:"Notation minimum success"`
 }
 
-type ReportResponseList struct {
+type ReportStudentResponse struct {
+	types.BaseGormModelResponse
+	Student *dataStudent.StudentResponse `json:"student" required:"false" doc:"Student"`
+	Report  []ReportEntryResponse        `json:"report" required:"false" doc:"List of report entries for the student"`
+}
+
+type ReportEntryResponseList struct {
 	types.PaginatedResponse
-	Data []ReportResponse `json:"data" required:"false" doc:"List of reports" example:"[]"`
+	Data []ReportEntryResponse `json:"data" required:"false" doc:"List of report entries" example:"[]"`
 }
 
 type ReportGradeResponseList struct {
@@ -71,4 +73,9 @@ type ReportGradeResponseList struct {
 type ReportConfigResponseList struct {
 	types.PaginatedResponse
 	Data []ReportConfigResponse `json:"data" required:"false" doc:"List of report configs" example:"[]"`
+}
+
+type ReportStudentResponseList struct {
+	types.PaginatedResponse
+	Data []ReportStudentResponse `json:"data" required:"false" doc:"List of report students" example:"[]"`
 }

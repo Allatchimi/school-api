@@ -37,21 +37,6 @@ func (item *Permission) ToResponse() *data.PermissionResponse {
 	return resp
 }
 
-func (item *Permission) ToPublicResponse() *data.PermissionPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.PermissionPublicResponse{}
-	resp.TableName = item.TableName
-	resp.Create = item.Create
-	resp.Read = item.Read
-	resp.Update = item.Update
-	resp.Delete = item.Delete
-
-	resp.Role = item.Role.ToPublicResponse()
-	return resp
-}
-
 func ToResponseList(itemList []Permission) []data.PermissionResponse {
 	resp := make([]data.PermissionResponse, len(itemList))
 	for index, item := range itemList {

@@ -26,23 +26,11 @@ func (item *Result) ToResponse() *data.ResultResponse {
 	resp.Value = item.Value
 
 	resp.Student = item.Student.ToStudentPublicResponse()
-	resp.Exam = item.Exam.ToPublicResponse()
+	resp.Exam = item.Exam.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-	return resp
-}
-
-func (item *Result) ToPublicResponse() *data.ResultPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.ResultPublicResponse{}
-	resp.Value = item.Value
-
-	resp.Student = item.Student.ToStudentPublicResponse()
-	resp.Exam = item.Exam.ToPublicResponse()
 	return resp
 }
 

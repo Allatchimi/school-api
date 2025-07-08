@@ -8,14 +8,10 @@ import (
 
 type ResultResponse struct {
 	types.BaseGormModelResponse
-	ResultPublicResponse
-}
-
-type ResultPublicResponse struct {
 	Value float64 `json:"value" required:"false" doc:"Value"`
 
-	Student *studentData.StudentPublicResponse `json:"Student" required:"true" doc:"Student"`
-	Exam    *examData.ExamPublicResponse       `json:"Exam" required:"true" doc:"Exam"`
+	Student *studentData.StudentPublicResponse `json:"student" required:"true" doc:"Student"`
+	Exam    *examData.ExamResponse             `json:"exam" required:"true" doc:"Exam"`
 }
 
 type ResultResponseList struct {

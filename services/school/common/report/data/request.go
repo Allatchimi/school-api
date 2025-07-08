@@ -2,7 +2,7 @@ package data
 
 import "api/common/types"
 
-type ReportID struct {
+type ReportEntryID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Report id"`
 }
 
@@ -14,7 +14,7 @@ type ReportConfigID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Report config id"`
 }
 
-type ReportRequest struct {
+type ReportEntryRequest struct {
 	SchoolID      int64 `json:"schoolID" required:"true" doc:"School id"`
 	YearID        int64 `json:"yearID" required:"true" doc:"Year id"`
 	ClassID       int64 `json:"classID" required:"false" doc:"Class id"`
@@ -39,7 +39,7 @@ type ReportConfigRequest struct {
 	NotationMinimumSuccess float64 `json:"notationMinimumSuccess" required:"true" doc:"Notation minimum success"`
 }
 
-type GetAllRequest struct {
+type GetAllReportEntryRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
 	SequenceID int64 `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
 	SemesterID int64 `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id"`

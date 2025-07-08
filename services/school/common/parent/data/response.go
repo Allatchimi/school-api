@@ -9,30 +9,24 @@ import (
 
 type ParentResponse struct {
 	types.BaseGormModelResponse
-	ParentPublicResponse
+	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	User   *dataUser.UserResponse           `json:"user" required:"false" doc:"User"`
 }
 
 type ParentPublicResponse struct {
+	types.BaseGormModelResponse
 	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
 	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
 }
 
 type ParentStudentResponse struct {
 	types.BaseGormModelResponse
-	ParentStudentPublicResponse
-}
-
-type ParentStudentPublicResponse struct {
 	Parent  *ParentPublicResponse              `json:"parent" required:"false" doc:"Parent"`
 	Student *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
 }
 
 type ParentAssignResponse struct {
 	types.BaseGormModelResponse
-	ParentAssignPublicResponse
-}
-
-type ParentAssignPublicResponse struct {
 	FirstName      string `json:"firstName" required:"false" doc:"First name"`
 	LastName       string `json:"lastName" required:"false" doc:"Last name"`
 	IDCard         string `json:"IDCard" required:"false" doc:"ID Card"`
@@ -41,18 +35,14 @@ type ParentAssignPublicResponse struct {
 	Status         string `json:"status" required:"false" doc:"Status"`
 	StatusFeedback string `json:"statusFeedback" required:"false" doc:"Status feedback"`
 
-	Parent               *ParentPublicResponse               `json:"parent" required:"false" doc:"Parent"`
-	ParentAssignStudents []ParentAssignStudentPublicResponse `json:"parentAssignStudents" required:"false" doc:"Parent assign students"`
+	Parent               *ParentResponse               `json:"parent" required:"false" doc:"Parent"`
+	ParentAssignStudents []ParentAssignStudentResponse `json:"parentAssignStudents" required:"false" doc:"Parent assign students"`
 }
 
 type ParentAssignStudentResponse struct {
 	types.BaseGormModelResponse
-	ParentAssignStudentPublicResponse
-}
-
-type ParentAssignStudentPublicResponse struct {
-	ParentAssign *ParentAssignPublicResponse        `json:"parentAssign" required:"false" doc:"Parent assign request"`
-	Student      *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
+	ParentAssign *ParentAssignResponse        `json:"parentAssign" required:"false" doc:"Parent assign request"`
+	Student      *dataStudent.StudentResponse `json:"student" required:"false" doc:"Student"`
 }
 
 type ParentResponseList struct {

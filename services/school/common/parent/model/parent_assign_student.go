@@ -20,8 +20,8 @@ func (item *ParentAssignStudent) ToResponse() *data.ParentAssignStudentResponse 
 		return nil
 	}
 	resp := &data.ParentAssignStudentResponse{}
-	resp.ParentAssign = item.ParentAssign.ToPublicResponse()
-	resp.Student = item.Student.ToStudentPublicResponse()
+	resp.ParentAssign = item.ParentAssign.ToResponse()
+	resp.Student = item.Student.ToStudentResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
@@ -29,28 +29,10 @@ func (item *ParentAssignStudent) ToResponse() *data.ParentAssignStudentResponse 
 	return resp
 }
 
-func (item *ParentAssignStudent) ToPublicResponse() *data.ParentAssignStudentPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.ParentAssignStudentPublicResponse{}
-	resp.ParentAssign = item.ParentAssign.ToPublicResponse()
-	resp.Student = item.Student.ToStudentPublicResponse()
-	return resp
-}
-
 func ToParentAssignStudentResponseList(itemList []ParentAssignStudent) []data.ParentAssignStudentResponse {
 	resp := make([]data.ParentAssignStudentResponse, len(itemList))
 	for index, item := range itemList {
 		resp[index] = *item.ToResponse()
-	}
-	return resp
-}
-
-func ToParentAssignStudentPublicResponseList(itemList []ParentAssignStudent) []data.ParentAssignStudentPublicResponse {
-	resp := make([]data.ParentAssignStudentPublicResponse, len(itemList))
-	for index, item := range itemList {
-		resp[index] = *item.ToPublicResponse()
 	}
 	return resp
 }

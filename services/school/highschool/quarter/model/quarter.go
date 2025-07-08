@@ -31,18 +31,6 @@ func (item *HighschoolQuarter) ToResponse() *data.QuarterResponse {
 	return resp
 }
 
-func (item *HighschoolQuarter) ToPublicResponse() *data.QuarterPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.QuarterPublicResponse{}
-	resp.Name = item.Name
-	resp.Description = item.Description
-
-	resp.School = item.School.ToPublicResponse()
-	return resp
-}
-
 func ToResponseList(itemList []HighschoolQuarter) []data.QuarterResponse {
 	resp := make([]data.QuarterResponse, len(itemList))
 	for index, item := range itemList {

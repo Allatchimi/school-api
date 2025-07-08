@@ -31,18 +31,6 @@ func (item *UniversityLevel) ToResponse() *data.LevelResponse {
 	return resp
 }
 
-func (item *UniversityLevel) ToPublicResponse() *data.LevelPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.LevelPublicResponse{}
-	resp.Name = item.Name
-	resp.Description = item.Description
-
-	resp.School = item.School.ToPublicResponse()
-	return resp
-}
-
 func ToResponseList(itemList []UniversityLevel) []data.LevelResponse {
 	resp := make([]data.LevelResponse, len(itemList))
 	for index, item := range itemList {

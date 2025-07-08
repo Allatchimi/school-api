@@ -45,23 +45,6 @@ func (item *Payment) ToResponse() *data.PaymentResponse {
 	return resp
 }
 
-func (item *Payment) ToPublicResponse() *data.PaymentPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.PaymentPublicResponse{}
-	resp.Amount = item.Amount
-	resp.Currency = item.Currency
-	resp.PaymentDate = item.PaymentDate
-	resp.PaymentMethod = item.PaymentMethod
-	resp.PaymentStatus = item.PaymentStatus
-	resp.PaymentNote = item.PaymentNote
-
-	resp.School = item.School.ToPublicResponse()
-	resp.StudentEnroll = item.StudentEnroll.ToStudentEnrollPublicResponse()
-	return resp
-}
-
 func ToResponseList(itemList []Payment) []data.PaymentResponse {
 	resp := make([]data.PaymentResponse, len(itemList))
 	for index, item := range itemList {

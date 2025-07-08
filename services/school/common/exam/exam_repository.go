@@ -47,6 +47,7 @@ func (repository *Repository) Update(id int64, data *model.Exam) (*model.Exam, e
 			"class_subject_id": data.ClassSubjectID,
 			"sequence_id":      data.SequenceID,
 
+			"status":           data.Status,
 			"percentage":       data.Percentage,
 			"description":      data.Description,
 			"location_type":    data.LocationType,

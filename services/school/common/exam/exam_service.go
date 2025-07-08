@@ -30,6 +30,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Exam
 		ClassSubjectID: request.ClassSubjectID,
 		SequenceID:     request.SequenceID,
 
+		Status:          request.Status,
 		Percentage:      request.Percentage,
 		Description:     request.Description,
 		LocationType:    request.LocationType,
@@ -117,6 +118,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 		ClassSubjectID: request.ClassSubjectID,
 		SequenceID:     request.SequenceID,
 
+		Status:          request.Status,
 		Percentage:      request.Percentage,
 		Description:     request.Description,
 		LocationType:    request.LocationType,

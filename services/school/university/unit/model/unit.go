@@ -44,31 +44,12 @@ func (item *UniversityUnit) ToResponse() *data.UnitResponse {
 	resp.InvalidDate = item.InvalidDate
 
 	resp.School = item.School.ToPublicResponse()
-	resp.LevelDomain = item.LevelDomain.ToLevelDomainPublicResponse()
-	resp.Semester = item.Semester.ToPublicResponse()
+	resp.LevelDomain = item.LevelDomain.ToLevelDomainResponse()
+	resp.Semester = item.Semester.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-	return resp
-}
-
-func (item *UniversityUnit) ToPublicResponse() *data.UnitPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.UnitPublicResponse{}
-	resp.Name = item.Name
-	resp.Description = item.Description
-	resp.Credit = item.Credit
-	resp.Program = item.Program
-	resp.Requirements = item.Requirements
-	resp.IsValid = item.IsValid
-	resp.InvalidDate = item.InvalidDate
-
-	resp.School = item.School.ToPublicResponse()
-	resp.LevelDomain = item.LevelDomain.ToLevelDomainPublicResponse()
-	resp.Semester = item.Semester.ToPublicResponse()
 	return resp
 }
 

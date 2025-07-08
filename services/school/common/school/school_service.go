@@ -82,11 +82,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 
 	// Create config
 	newConfig, err := service.Repository.CreateSchoolConfig(&model.SchoolConfig{
-		Protocol: item.Config.Protocol,
-
 		DomainName: item.Config.DomainName,
-		DomainCert: item.Config.DomainCert,
-		DomainKey:  item.Config.DomainKey,
 
 		SmtpHost:         item.Config.SmtpHost,
 		SmtpPort:         item.Config.SmtpPort,

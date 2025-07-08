@@ -34,19 +34,6 @@ func (item *Year) ToResponse() *data.YearResponse {
 	return resp
 }
 
-func (item *Year) ToPublicResponse() *data.YearPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.YearPublicResponse{}
-	resp.Name = item.Name
-	resp.StartDate = item.StartDate
-	resp.EndDate = item.EndDate
-
-	resp.School = item.School.ToPublicResponse()
-	return resp
-}
-
 func ToResponseList(itemList []Year) []data.YearResponse {
 	resp := make([]data.YearResponse, len(itemList))
 	for index, item := range itemList {

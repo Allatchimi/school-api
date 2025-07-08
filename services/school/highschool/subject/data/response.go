@@ -7,10 +7,6 @@ import (
 
 type SubjectResponse struct {
 	types.BaseGormModelResponse
-	SubjectPublicResponse
-}
-
-type SubjectPublicResponse struct {
 	School *dataSchool.SchoolPublicResponse `json:"school" doc:"School"`
 
 	Name        string `json:"name" required:"false" doc:"Name"`
