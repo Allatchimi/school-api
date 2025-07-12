@@ -2,16 +2,12 @@ package httpHelper
 
 import (
 	"context"
-	"fmt"
 
 	"api/common/constants"
 	"api/common/types"
-	securityUtil "api/common/utils/security"
-
-	"github.com/gin-gonic/gin"
 )
 
-// GetJwtContext Returns JWT token from context
+// GetJwtContext Returns JWT token from standard context (idem Gin)
 func GetJwtContext(ctx *context.Context) *types.JwtToken {
 	result := &types.JwtToken{}
 	if id, okID := (*ctx).Value(constants.UserIDKey).(int64); okID {
@@ -35,22 +31,7 @@ func GetJwtContext(ctx *context.Context) *types.JwtToken {
 	return result
 }
 
-// GetJwtContextFromQuery Extracts JWT token from query
-func GetJwtContextFromQuery(c *gin.Context) (*types.JwtToken, error) {
-	token := c.Query("token")
-	if len(token) < 1 {
-		errMsg := "No token found! Please enter valid information."
-		return nil, fmt.Errorf("%s", errMsg)
-	}
-	jwtToken, _, err := securityUtil.ValidateAuthToken(token)
-	if err != nil || jwtToken == nil || jwtToken.UserID < 1 {
-		errMsg := "Invalid token! Please enter valid information."
-		return nil, fmt.Errorf("%s", errMsg)
-	}
-	return jwtToken, nil
-}
-
-// ExtractBearerContext Extracts Bearer token from context
+// ExtractBearerContext Extracts Bearer token from standard context
 func ExtractBearerContext(ctx *context.Context) string {
 	if token, ok := (*ctx).Value(constants.TokenKey).(string); ok {
 		return token

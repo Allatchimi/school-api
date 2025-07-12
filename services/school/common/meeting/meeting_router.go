@@ -290,10 +290,15 @@ func RegisterEndpoints(
 				return nil, huma.NewError(http.StatusNotFound, "Invalid url!")
 			}
 
-			ginCtx := ctx.Value(middlewares.GIN_CONTEXT_KEY).(*gin.Context)
-			if ginCtx != nil {
-				ginCtx.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/?access_token=%s", config.Env.MeetingApiUrl, result))
+			ctxRaw := ctx.Value(middlewares.GIN_CONTEXT_KEY)
+			ginCtx, ok := ctxRaw.(*gin.Context)
+			if !ok || ginCtx == nil {
+				return nil, huma.NewError(http.StatusInternalServerError, "Missing Gin context")
 			}
+
+			redirectURL := fmt.Sprintf("%s/?access_token=%s", config.Env.MeetingApiUrl, result)
+			ginCtx.Redirect(http.StatusTemporaryRedirect, redirectURL)
+
 			return nil, nil
 		},
 	)

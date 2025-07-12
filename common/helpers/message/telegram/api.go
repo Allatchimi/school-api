@@ -8,7 +8,7 @@ import (
 
 func postHttpMessage(job *TelegramJob) (data any, err error) {
 	payload := map[string]any{
-		"chat_id": job.UserID,
+		"chat_id": job.ChatID,
 		"text":    job.Message,
 	}
 	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", job.BotToken)

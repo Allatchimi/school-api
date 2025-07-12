@@ -7,6 +7,7 @@ import (
 	googleMailHelper "api/common/helpers/message/mail/google"
 	smtpMailHelper "api/common/helpers/message/mail/smtp"
 	telegramHelper "api/common/helpers/message/telegram"
+	whatsappHelper "api/common/helpers/message/whatsapp"
 	"api/services/user/user/model"
 
 	"go.uber.org/zap"
@@ -14,7 +15,7 @@ import (
 
 func Testssssss() {
 	// Send Telegram message
-	err := telegramHelper.SendMessage(
+	telegramHelper.SendMessage(
 		"7676549051:AAF4u-ElGxwzarPY2EAul6YSdCwwKjxLItk",
 		"Welcome Prosper! Nice to see you.",
 		[]model.User{
@@ -25,12 +26,20 @@ func Testssssss() {
 			},
 		},
 	)
-	if err != nil {
-		helpers.Logger.Warn(
-			"Failed to send Telegram message!",
-			zap.Error(err))
-	}
-	helpers.Logger.Info("Telegram message sent!")
+
+	// Send WhatsApp message
+	whatsappHelper.SendMessage(
+		"ElGxwzarPY2EAul6YSdCwwKjxLItk",
+		"7676549051",
+		"Welcome Prosper! Nice to see you.",
+		[]model.User{
+			{
+				Config: &model.UserConfig{
+					WhatsappPhoneNumber: 237696666666,
+				},
+			},
+		},
+	)
 
 	// Create Google user
 	ctx := context.Background()
@@ -45,11 +54,11 @@ func Testssssss() {
 			Gender:    "male",
 		},
 	}
-	err = googleMailHelper.CreateGoogleWorkspaceUser(&ctx, "", admin, user, "Cpasbien123!")
-	if err != nil {
+	errGoogle := googleMailHelper.CreateGoogleWorkspaceUser(&ctx, "", admin, user, "Cpasbien123!")
+	if errGoogle != nil {
 		helpers.Logger.Warn(
 			"Failed to create Google user!",
-			zap.Error(err))
+			zap.Error(errGoogle))
 	}
 
 	// Sent mail
@@ -63,17 +72,17 @@ func Testssssss() {
 		Code:            "728491",
 		DurationMinutes: 10,
 	}
-	htmlBody, err := data.LoadTemplate()
-	if err != nil {
+	htmlBody, errMail := data.LoadTemplate()
+	if errMail != nil {
 		helpers.Logger.Warn(
 			"Failed to load template!",
-			zap.Error(err))
+			zap.Error(errMail))
 	}
-	err = smtpMailHelper.SendEmailTo("support@emfi.cm", "EMFI support", "prosper.abouar@gmail.com", "Account verification", htmlBody)
-	if err != nil {
+	errMail = smtpMailHelper.SendEmailTo("support@emfi.cm", "EMFI support", "prosper.abouar@gmail.com", "Account verification", htmlBody)
+	if errMail != nil {
 		helpers.Logger.Warn(
 			"Failed to send email!",
-			zap.Error(err))
+			zap.Error(errMail))
 	}
 	helpers.Logger.Info("Email sent!")
 

@@ -12,35 +12,35 @@ import (
 	"go.uber.org/zap"
 )
 
-var upgrader = websocket.Upgrader{
+var upgraderGin = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
 }
 
 // Listen to websocket connection
-func (m *WSManager) Listen(c *gin.Context) {
+func (m *WSManager) GinWSListener(ctx *gin.Context) {
 	if m == nil {
 		helpers.Logger.Error("No available WS manager!")
 		return
 	}
 
 	// Check if the user is authenticated
-	jwtToken, err := httpHelper.GetJwtContextFromQuery(c)
+	jwtToken, err := httpHelper.GetJwtContextFromQueryGin(ctx)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Get user id from query
 	userID := fmt.Sprintf("%d", jwtToken.UserID)
 	if len(userID) < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID! Please enter valid information."})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID! Please enter valid information."})
 		return
 	}
 
 	// Upgrade to websocket
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	conn, err := upgraderGin.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
 		helpers.Logger.Error("Error upgrading websocket!", zap.String("Error", err.Error()))
 		return

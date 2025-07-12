@@ -19,9 +19,9 @@ func SendMessage(botToken string, message string, users []model.User) (err error
 
 	for _, user := range users {
 		job := &TelegramJob{
-			UserID:     user.Config.TelegramChatID,
-			Message:    message,
 			BotToken:   botToken,
+			ChatID:     user.Config.TelegramChatID,
+			Message:    message,
 			Attempts:   0,
 			MaxAttempt: 3,
 		}

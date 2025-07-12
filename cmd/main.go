@@ -40,7 +40,7 @@ func main() {
 	test.Testssssss()
 
 	di.InjectDependencies()
-	api.Start()
+	api.StartGin()
 }
 
 // Called before the main entry point. It's useful for setting up

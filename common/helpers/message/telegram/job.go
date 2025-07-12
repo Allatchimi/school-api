@@ -12,11 +12,11 @@ import (
 )
 
 type TelegramJob struct {
-	UserID     int64
-	Message    string
 	BotToken   string
-	Attempts   int // NEW: number of attempts
-	MaxAttempt int // NEW: max number of retries allowed
+	ChatID     int64
+	Message    string
+	Attempts   int
+	MaxAttempt int
 }
 
 func (job *TelegramJob) serialize() ([]byte, error) {
@@ -40,15 +40,15 @@ func safeStartWorker(redisClient *goredislib.Client, botToken string) {
 	// Attempt to acquire lock
 	acquired, err := redisClient.SetNX(ctx, lockKey, lockValue, lockTTL).Result()
 	if err != nil {
-		helpers.Logger.Error("Error acquiring lock:", zap.Error(err))
+		helpers.Logger.Error("Telegram error acquiring lock:", zap.Error(err))
 		return
 	}
 	if !acquired {
-		helpers.Logger.Error("Worker already running for token:", zap.String("Token", botToken))
+		helpers.Logger.Error("Telegram worker already running for token:", zap.String("Token", botToken))
 		return
 	}
 
-	helpers.Logger.Info("Lock acquired. Starting worker.")
+	helpers.Logger.Info("Telegram lock acquired. Starting worker.")
 
 	// Start a goroutine to auto-refresh the lock
 	stopRenewal := make(chan struct{})
@@ -88,14 +88,14 @@ func startRetryWorker(redisClient *goredislib.Client, botToken string) {
 	for {
 		data, err := redisClient.BLPop(ctx, 0, retryQueue).Result()
 		if err != nil {
-			helpers.Logger.Error("Failed to pop from retry queue", zap.Error(err))
+			helpers.Logger.Error("Telegram failed to pop from retry queue", zap.Error(err))
 			continue
 		}
 
 		jobData := []byte(data[1])
 		job, err := deserialize(jobData)
 		if err != nil {
-			helpers.Logger.Error("Failed to parse retry job", zap.Error(err))
+			helpers.Logger.Error("Telegram failed to parse retry job", zap.Error(err))
 			continue
 		}
 
@@ -103,7 +103,7 @@ func startRetryWorker(redisClient *goredislib.Client, botToken string) {
 		if err != nil {
 			job.Attempts++
 			if job.Attempts >= job.MaxAttempt {
-				helpers.Logger.Error("Retry failed - max attempts exceeded", zap.Int64("User ID", job.UserID))
+				helpers.Logger.Error("Telegram retry failed - max attempts exceeded", zap.Int64("Chat ID", job.ChatID))
 				// Optionally: push to dead-letter queue
 				continue
 			}
@@ -111,7 +111,7 @@ func startRetryWorker(redisClient *goredislib.Client, botToken string) {
 			newData, _ := job.serialize()
 			_ = redisClient.RPush(ctx, retryQueue, newData).Err()
 		} else {
-			helpers.Logger.Info("Retry succeeded", zap.Int64("User ID", job.UserID))
+			helpers.Logger.Info("Telegram retry succeeded", zap.Int64("Chat ID", job.ChatID))
 		}
 
 		// Always respect Telegram rate limit

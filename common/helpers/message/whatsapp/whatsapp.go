@@ -1,56 +1,36 @@
 package whatsappHelper
 
 import (
-	httpHelper "api/common/helpers/http"
+	"api/common/helpers"
+	"api/config"
 	"api/services/user/user/model"
 	"fmt"
+
+	"go.uber.org/zap"
 )
 
-type WhatsAppClient struct {
-	Token   string
-	PhoneID string
-}
-
-var instances map[string]*WhatsAppClient
-
-func NewClient(token, phoneID string) *WhatsAppClient {
-	if instances == nil {
-		instances = make(map[string]*WhatsAppClient)
+func SendMessage(accessToken, phoneID string, message string, users []model.User) error {
+	if len(accessToken) < 1 || len(phoneID) < 1 {
+		errMsg := "Invalid WhatsApp access token or phone ID"
+		return fmt.Errorf("%s", errMsg)
 	}
-	if _, ok := instances[phoneID]; !ok {
-		instances[phoneID] = &WhatsAppClient{
-			Token:   token,
-			PhoneID: phoneID,
-		}
-	}
-	return instances[phoneID]
-}
 
-func (w *WhatsAppClient) SendMessage(users []model.User, message string) (data any, err error) {
-	if w == nil {
-		errMsg := "Whatsapp client is not instanced!"
-		return nil, fmt.Errorf("%s", errMsg)
-	}
+	go safeStartWorker(config.RedisClient, accessToken, phoneID)
+
 	for _, user := range users {
-		payload := map[string]any{
-			"messaging_product": "whatsapp",
-			"to":                user.Config.WhatsappPhoneNumber,
-			"type":              "text",
-			"text": map[string]string{
-				"body": message,
-			},
+		job := &WhatsAppJob{
+			ReceiverPhoneNumber: fmt.Sprintf("%d", user.Config.WhatsappPhoneNumber),
+			Message:             message,
+			AccessToken:         accessToken,
+			PhoneID:             phoneID,
+			Attempts:            0,
+			MaxAttempt:          3,
 		}
-		url := fmt.Sprintf("https://graph.facebook.com/v18.0/%s/messages", w.PhoneID)
-		headers := []httpHelper.HttpHeader{
-			{Label: "Authorization", Value: "Bearer " + w.Token},
-			{Label: "Content-Type", Value: "application/json"},
-		}
-		data = nil
-		err := httpHelper.HttpPost(url, headers, payload, data)
+
+		err := pushJob(config.RedisClient, job)
 		if err != nil {
-			errMsg := "Failed to send message!"
-			return nil, fmt.Errorf("%s: %d %w", errMsg, user.Config.WhatsappPhoneNumber, err)
+			helpers.Logger.Error("Queue error WhatsApp", zap.Int64("User ID", user.ID), zap.Int64("Phone Number", user.Config.WhatsappPhoneNumber), zap.Error(err))
 		}
 	}
-	return nil, nil
+	return nil
 }
