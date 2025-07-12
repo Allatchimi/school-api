@@ -81,6 +81,7 @@ func (service *Service) Create(
 		return
 	}
 	var item = &dataUser.UserRequest{
+		SchoolID:    request.SchoolID,
 		RoleID:      userRole.ID,
 		Email:       newEmail,
 		PhoneNumber: request.PhoneNumber,
@@ -208,6 +209,7 @@ func (service *Service) Update(
 
 	// Update
 	userRequest := dataUser.UserRequest{
+		SchoolID:    request.SchoolID,
 		RoleID:      userRole.ID,
 		Email:       request.Email,
 		PhoneNumber: request.PhoneNumber,
