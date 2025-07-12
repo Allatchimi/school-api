@@ -6,15 +6,19 @@ import (
 	"gorm.io/gorm"
 
 	"api/common/types"
-	"api/common/utils/security"
-	"api/services/user/role/model"
+	securityUtil "api/common/utils/security"
+	modelSchool "api/services/school/common/school/model"
+	modelRole "api/services/user/role/model"
 	"api/services/user/user/data"
 )
 
 type User struct {
 	types.BaseGormModel
-	RoleID int64       `gorm:"default:null"`
-	Role   *model.Role `gorm:"default:null;foreignKey:RoleID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	SchoolID int64               `gorm:"default:null"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	RoleID int64           `gorm:"default:null"`
+	Role   *modelRole.Role `gorm:"default:null;foreignKey:RoleID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	UserInfoID int64     `gorm:"default:null"`
 	Info       *UserInfo `gorm:"default:null;foreignKey:UserInfoID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -25,6 +29,7 @@ type User struct {
 	Email       string `gorm:"default:null"`
 	PhoneNumber uint64 `gorm:"default:null"`
 	Password    string `gorm:"default:null"`
+	Status      string `gorm:"default:null"`
 
 	LoginMethod    string     `gorm:"default:null"`
 	Provider       string     `gorm:"default:null"`
@@ -34,12 +39,12 @@ type User struct {
 }
 
 func (item *User) BeforeCreate(db *gorm.DB) (err error) {
-	item.Password, err = security.EncodeArgon2id(item.Password)
+	item.Password, err = securityUtil.EncodeArgon2id(item.Password)
 	return
 }
 
 func (item *User) BeforeUpdate(db *gorm.DB) (err error) {
-	item.Password, err = security.EncodeArgon2id(item.Password)
+	item.Password, err = securityUtil.EncodeArgon2id(item.Password)
 	return
 }
 
@@ -50,6 +55,7 @@ func (item *User) ToResponse() *data.UserResponse {
 	resp := &data.UserResponse{}
 	resp.Email = item.Email
 	resp.PhoneNumber = item.PhoneNumber
+	resp.Status = item.Status
 
 	resp.LoginMethod = item.LoginMethod
 	resp.Provider = item.Provider
@@ -57,6 +63,7 @@ func (item *User) ToResponse() *data.UserResponse {
 	resp.IsActivated = item.IsActivated
 	resp.ActivatedAt = item.ActivatedAt
 
+	resp.School = item.School.ToPublicResponse()
 	resp.Role = item.Role.ToResponse()
 	resp.Info = item.Info.ToResponse()
 	resp.Config = item.Config.ToResponse()
@@ -73,7 +80,9 @@ func (item *User) ToPublicResponse() *data.UserPublicResponse {
 	}
 	resp := &data.UserPublicResponse{}
 	resp.Email = item.Email
+	resp.Status = item.Status
 
+	resp.School = item.School.ToPublicResponse()
 	resp.Role = item.Role.ToResponse()
 	resp.Info = item.Info.ToPublicResponse()
 	return resp

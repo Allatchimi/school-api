@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"api/common/helpers"
+	httpHelper "api/common/helpers/http"
 	"api/common/utils"
 	"api/services/user/auth/data"
 )
@@ -40,6 +40,7 @@ func (controller *Controller) LoginWithEmail(
 			Email:         input.Body.Email,
 			Password:      input.Body.Password,
 			StayConnected: input.Body.StayConnected,
+			SchoolID:      input.Body.SchoolID,
 		},
 		&input.LoginDevice,
 	)
@@ -209,7 +210,7 @@ func (controller *Controller) ForgotPasswordNewPassword(
 func (controller *Controller) Logout(
 	ctx *context.Context,
 ) (result *data.LogoutResponse, errCode int, err error) {
-	errCode, err = controller.Service.Logout(helpers.GetJwtContext(ctx), helpers.ExtractBearerContext(ctx))
+	errCode, err = controller.Service.Logout(httpHelper.GetJwtContext(ctx), httpHelper.ExtractBearerContext(ctx))
 	if err != nil {
 		return
 	}

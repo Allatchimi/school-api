@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"api/common/constants"
+	deploymentHelper "api/common/helpers/deployment"
 	"api/common/types"
 	"api/common/utils"
-	configDeploy "api/config/deployment"
 	"api/services/school/common/school/data"
 	"api/services/school/common/school/model"
 )
@@ -82,18 +82,16 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 
 	// Create config
 	newConfig, err := service.Repository.CreateSchoolConfig(&model.SchoolConfig{
-		DomainName: item.Config.DomainName,
+		DomainName:   item.Config.DomainName,
+		SupportEmail: item.Config.SupportEmail,
 
-		SmtpHost:         item.Config.SmtpHost,
-		SmtpPort:         item.Config.SmtpPort,
-		SmtpUsername:     item.Config.SmtpUsername,
-		SmtpPassword:     item.Config.SmtpPassword,
-		SmtpNoReplyEmail: item.Config.SmtpNoReplyEmail,
-		SmtpSupportEmail: item.Config.SmtpSupportEmail,
+		GoogleWorkspaceCredentials:     item.Config.GoogleWorkspaceCredentials,
+		GoogleWorkspaceUserEmailDomain: item.Config.GoogleWorkspaceUserEmailDomain,
 
-		SmsUserID: item.Config.SmsUserID,
-
-		UserEmailDomain: item.Config.UserEmailDomain,
+		SmsUserID:        item.Config.SmsUserID,
+		WhatsappToken:    item.Config.WhatsappToken,
+		WhatsappPhoneID:  item.Config.WhatsappPhoneID,
+		TelegramBotToken: item.Config.TelegramBotToken,
 
 		WebsiteTitle:       item.Config.WebsiteTitle,
 		WebsiteDescription: item.Config.WebsiteDescription,
@@ -144,7 +142,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 
 	// Deploy school
 	go func() {
-		ok, err := configDeploy.DeploySchool(result)
+		ok, err := deploymentHelper.DeploySchool(result)
 		if err != nil {
 			service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
 				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_FAILED,
@@ -263,7 +261,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 
 	// Deploy school
 	go func() {
-		ok, err := configDeploy.DeploySchool(result)
+		ok, err := deploymentHelper.DeploySchool(result)
 		if err != nil {
 			service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
 				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_FAILED,
@@ -395,7 +393,7 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 
 	// Delete school deployment
 	go func() {
-		ok, err := configDeploy.DeleteSchoolDeployment(id)
+		ok, err := deploymentHelper.DeleteSchoolDeployment(id)
 		if err != nil {
 			service.Repository.UpdateDeploymentStatusByID(id, &data.SchoolDeploymentStatusRequest{
 				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_FAILED,

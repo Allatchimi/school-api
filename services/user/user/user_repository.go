@@ -44,6 +44,8 @@ func (repository *Repository) UpdateByID(id int64, item *model.User) (*model.Use
 		map[string]any{
 			"email":        item.Email,
 			"phone_number": item.PhoneNumber,
+			"status":       item.Status,
+			"school_id":    item.SchoolID,
 			"role_id":      item.RoleID,
 			"is_activated": item.IsActivated,
 		},
@@ -119,6 +121,15 @@ func (repository *Repository) UpdateUserInfoByID(id int64, item *model.UserInfo)
 		},
 	).Error
 }
+func (repository *Repository) UpdateUserConfigByID(id int64, item *model.UserConfig) (*model.UserConfig, error) {
+	result := &model.UserConfig{}
+	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+		map[string]any{
+			"whatsapp_phone_number": item.WhatsappPhoneNumber,
+			"telegram_chat_id":      item.TelegramChatID,
+		},
+	).Error
+}
 
 func (repository *Repository) UpdateUserConfigWebPushSubscriptionByID(userID int64, endpoint string, KeyP256dh string, keyAuth string) (*model.UserConfig, error) {
 	result := &model.UserConfig{}
@@ -171,6 +182,18 @@ func (repository *Repository) GetByEmail(email string) (*model.User, error) {
 	).Limit(1).Find(result).Error
 }
 
+func (repository *Repository) GetByEmailSchoolID(email string, schoolID int64) (*model.User, error) {
+	result := &model.User{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where(
+			"login_method = ?", constants.AuthLoginMethodDefault,
+		).Where(
+		"email = ?", email,
+	).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
+}
+
 func (repository *Repository) GetByPhoneNumber(phoneNumber uint64) (*model.User, error) {
 	result := &model.User{}
 	return result, repository.Db.Preload(clause.Associations).
@@ -179,6 +202,18 @@ func (repository *Repository) GetByPhoneNumber(phoneNumber uint64) (*model.User,
 		).Where(
 		"phone_number = ?", phoneNumber,
 	).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByPhoneNumberSchoolID(phoneNumber uint64, schoolID int64) (*model.User, error) {
+	result := &model.User{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where(
+			"login_method = ?", constants.AuthLoginMethodDefault,
+		).Where(
+		"phone_number = ?", phoneNumber,
+	).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByProvider(provider string, providerUserID string) (*model.User, error) {
@@ -191,6 +226,20 @@ func (repository *Repository) GetByProvider(provider string, providerUserID stri
 	).Where(
 		"provider_user_id = ?", providerUserID,
 	).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByProviderSchoolID(provider string, providerUserID string, schoolID int64) (*model.User, error) {
+	result := &model.User{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where(
+			"login_method = ?", constants.AuthLoginMethodProvider,
+		).Where(
+		"provider = ?", provider,
+	).Where(
+		"provider_user_id = ?", providerUserID,
+	).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.User, err error) {

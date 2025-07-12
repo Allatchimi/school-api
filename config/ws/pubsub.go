@@ -1,4 +1,4 @@
-package configWS
+package wsConfig
 
 import (
 	"api/common/helpers"

@@ -47,20 +47,20 @@ type ParentAssignStudentResponse struct {
 
 type ParentResponseList struct {
 	types.PaginatedResponse
-	Data []ParentResponse `json:"data" required:"false" doc:"List of parents" example:"[]"`
+	Data []ParentResponse `json:"data" required:"false" doc:"List of parents"`
 }
 
 type ParentStudentResponseList struct {
 	types.PaginatedResponse
-	Data []ParentStudentResponse `json:"data" required:"false" doc:"List of parents levels/classes" example:"[]"`
+	Data []ParentStudentResponse `json:"data" required:"false" doc:"List of parents levels/classes"`
 }
 
 type ParentAssignResponseList struct {
 	types.PaginatedResponse
-	Data []ParentAssignResponse `json:"data" required:"false" doc:"List of parent assign requests" example:"[]"`
+	Data []ParentAssignResponse `json:"data" required:"false" doc:"List of parent assign requests"`
 }
 
 type ParentAssignStudentResponseList struct {
 	types.PaginatedResponse
-	Data []ParentAssignStudentResponse `json:"data" required:"false" doc:"List of parent assign student" example:"[]"`
+	Data []ParentAssignStudentResponse `json:"data" required:"false" doc:"List of parent assign student"`
 }

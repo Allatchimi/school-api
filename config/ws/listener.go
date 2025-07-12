@@ -1,7 +1,8 @@
-package configWS
+package wsConfig
 
 import (
 	"api/common/helpers"
+	httpHelper "api/common/helpers/http"
 	"fmt"
 	"net/http"
 	"time"
@@ -25,7 +26,7 @@ func (m *WSManager) Listen(c *gin.Context) {
 	}
 
 	// Check if the user is authenticated
-	jwtToken, err := helpers.GetJwtContextFromQuery(c)
+	jwtToken, err := httpHelper.GetJwtContextFromQuery(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return

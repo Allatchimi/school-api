@@ -6,10 +6,9 @@ import (
 	"time"
 
 	"api/common/constants"
+	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
-	"api/common/utils/mail"
-	"api/common/utils/password"
 	"api/config"
 	"api/services/school/common/school"
 	"api/services/school/common/teacher/data"
@@ -49,7 +48,7 @@ func (service *Service) Create(
 	request *data.TeacherRequest,
 ) (result *model.Teacher, errCode int, err error) {
 	// Get role
-	userRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleStudent)
+	userRole, errRole := service.RoleService.Repository.GetByName(config.Env.FixtureRoleTeacher)
 	if errRole != nil || userRole == nil || userRole.ID < 1 {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -72,10 +71,10 @@ func (service *Service) Create(
 	// Check email
 	newEmail := request.Email
 	if request.AutoGenerateEmail {
-		newEmail = mail.GenerateEmailFromFullName(
+		newEmail = helpers.GenerateEmailFromFullName(
 			request.Info.FirstName,
 			request.Info.LastName,
-			foundSchool.Config.UserEmailDomain,
+			foundSchool.Config.DomainName,
 		)
 	}
 
@@ -104,7 +103,7 @@ func (service *Service) Create(
 	}
 
 	// Generate password
-	password := password.GeneratePasswordFromUserInfo(
+	password := helpers.GeneratePasswordFromUser(
 		item.Info.FirstName,
 		item.Info.LastName,
 		item.Info.Birthday,
@@ -272,7 +271,7 @@ func (service *Service) Update(
 	}
 
 	// Get role
-	teacherRole, errRole := service.RoleService.Repository.GetByName(config.Env.RoleTeacher)
+	teacherRole, errRole := service.RoleService.Repository.GetByName(config.Env.FixtureRoleTeacher)
 	if errRole != nil || teacherRole == nil || teacherRole.ID < 1 {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

@@ -8,7 +8,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
-	"api/common/utils/security"
+	securityUtil "api/common/utils/security"
 	"api/config"
 )
 
@@ -59,7 +59,7 @@ func AuthMiddleware(api huma.API) func(huma.Context, func(huma.Context)) {
 		// Check school authorization
 		if isAuthorizationSchoolTokenRequired {
 			schoolToken, schoolIDStr := ExtractSchoolTokenHeaders(&ctx)
-			ok, errSecretProof := security.VerifyHMAC_SHA256_Base64URL(
+			ok, errSecretProof := securityUtil.VerifyHMAC_SHA256_Base64URL(
 				schoolIDStr,
 				schoolToken,
 				config.Env.SchoolApiSecret,
@@ -89,7 +89,7 @@ func AuthMiddleware(api huma.API) func(huma.Context, func(huma.Context)) {
 		// Now check bearer authorization
 		// Parse and decode the token
 		token := ExtractBearerTokenHeader(&ctx)
-		jwtToken, errCode, err := security.ValidateAuthToken(token)
+		jwtToken, errCode, err := securityUtil.ValidateAuthToken(token)
 		if err != nil {
 			_ = huma.WriteErr(
 				api,

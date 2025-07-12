@@ -7,18 +7,16 @@ import (
 
 type SchoolConfig struct {
 	types.BaseGormModel
-	DomainName string `gorm:"default:null"`
+	DomainName   string `gorm:"default:null"`
+	SupportEmail string `gorm:"default:null"`
 
-	SmtpHost         string `gorm:"default:null"`
-	SmtpPort         int    `gorm:"default:null"`
-	SmtpUsername     string `gorm:"default:null"`
-	SmtpPassword     string `gorm:"default:null"`
-	SmtpNoReplyEmail string `gorm:"default:null"`
-	SmtpSupportEmail string `gorm:"default:null"`
+	GoogleWorkspaceCredentials     string `gorm:"default:null"`
+	GoogleWorkspaceUserEmailDomain string `gorm:"default:null"`
 
-	SmsUserID string `gorm:"default:null"`
-
-	UserEmailDomain string `gorm:"default:null"`
+	SmsUserID        string `gorm:"default:null"`
+	WhatsappToken    string `gorm:"default:null"`
+	WhatsappPhoneID  string `gorm:"default:null"`
+	TelegramBotToken string `gorm:"default:null"`
 
 	WebsiteTitle       string `gorm:"default:null"`
 	WebsiteDescription string `gorm:"default:null"`
@@ -34,14 +32,13 @@ func (item *SchoolConfig) ToResponse() *data.SchoolConfigResponse {
 	}
 	resp := &data.SchoolConfigResponse{}
 	resp.DomainName = item.DomainName
-	resp.SmtpHost = item.SmtpHost
-	resp.SmtpPort = item.SmtpPort
-	resp.SmtpUsername = item.SmtpUsername
-	resp.SmtpPassword = item.SmtpPassword
-	resp.SmtpNoReplyEmail = item.SmtpNoReplyEmail
-	resp.SmtpSupportEmail = item.SmtpSupportEmail
+	resp.SupportEmail = item.SupportEmail
+	resp.GoogleWorkspaceCredentials = item.GoogleWorkspaceCredentials
+	resp.GoogleWorkspaceUserEmailDomain = item.GoogleWorkspaceUserEmailDomain
 	resp.SmsUserID = item.SmsUserID
-	resp.UserEmailDomain = item.UserEmailDomain
+	resp.WhatsappToken = item.WhatsappToken
+	resp.WhatsappPhoneID = item.WhatsappPhoneID
+	resp.TelegramBotToken = item.TelegramBotToken
 	resp.WebsiteTitle = item.WebsiteTitle
 	resp.WebsiteDescription = item.WebsiteDescription
 	resp.ColorPrimary = item.ColorPrimary
@@ -52,20 +49,19 @@ func (item *SchoolConfig) ToResponse() *data.SchoolConfigResponse {
 
 func FromConfigRequest(item *data.SchoolConfigRequest) *SchoolConfig {
 	resp := &SchoolConfig{
-		DomainName:          item.DomainName,
-		SmtpHost:            item.SmtpHost,
-		SmtpPort:            item.SmtpPort,
-		SmtpUsername:        item.SmtpUsername,
-		SmtpPassword:        item.SmtpPassword,
-		SmtpNoReplyEmail:    item.SmtpNoReplyEmail,
-		SmtpSupportEmail:    item.SmtpSupportEmail,
-		SmsUserID:           item.SmsUserID,
-		UserEmailDomain:     item.UserEmailDomain,
-		WebsiteTitle:        item.WebsiteTitle,
-		WebsiteDescription:  item.WebsiteDescription,
-		ColorPrimary:        item.ColorPrimary,
-		ColorPrimaryBg:      item.ColorPrimaryBg,
-		ColorPrimaryBgHover: item.ColorPrimaryBgHover,
+		DomainName:                     item.DomainName,
+		SupportEmail:                   item.SupportEmail,
+		GoogleWorkspaceCredentials:     item.GoogleWorkspaceCredentials,
+		GoogleWorkspaceUserEmailDomain: item.GoogleWorkspaceUserEmailDomain,
+		SmsUserID:                      item.SmsUserID,
+		WhatsappToken:                  item.WhatsappToken,
+		WhatsappPhoneID:                item.WhatsappPhoneID,
+		TelegramBotToken:               item.TelegramBotToken,
+		WebsiteTitle:                   item.WebsiteTitle,
+		WebsiteDescription:             item.WebsiteDescription,
+		ColorPrimary:                   item.ColorPrimary,
+		ColorPrimaryBg:                 item.ColorPrimaryBg,
+		ColorPrimaryBgHover:            item.ColorPrimaryBgHover,
 	}
 	return resp
 }

@@ -2,6 +2,8 @@ package model
 
 import (
 	"api/common/types"
+	"api/common/utils"
+	"api/config"
 	"api/services/school/common/school/data"
 )
 
@@ -86,4 +88,32 @@ func ToSchoolResponseList(itemList []School) []data.SchoolResponse {
 		resp[index] = *item.ToResponse()
 	}
 	return resp
+}
+
+func (item *School) SMTPNoReplySender() (senderEmail string, senderName string) {
+	if item == nil {
+		senderEmail = config.Env.SmtpUserNoReply + "@" + config.Env.SmtpDomainName
+		senderName = config.Env.AppName
+		return
+	}
+	senderEmail = config.Env.SmtpUserNoReply + "@" + item.Config.DomainName
+	senderName = item.Name
+	return
+}
+
+func (item *School) SMTPSupportSender() (senderEmail string, senderName string) {
+	if item == nil {
+		senderEmail = config.Env.SmtpUserSupport + "@" + config.Env.SmtpDomainName
+		senderName = "Support " + config.Env.AppName
+		return
+	}
+
+	if utils.IsEmailValid(item.Config.SupportEmail) {
+		senderEmail = item.Config.SupportEmail
+		senderName = "Support " + item.Name
+		return
+	}
+	senderEmail = config.Env.SmtpUserSupport + "@" + item.Config.DomainName
+	senderName = "Support " + item.Name
+	return
 }

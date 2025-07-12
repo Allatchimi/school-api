@@ -47,9 +47,9 @@ type GetAllReportEntryRequest struct {
 }
 
 type GetAllReportGradeRequest struct {
-	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
+	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
 }
 
 type GetAllReportConfigRequest struct {
-	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id" example:"1"`
+	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
 }

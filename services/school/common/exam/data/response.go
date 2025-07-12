@@ -40,10 +40,10 @@ type ExamTypeResponse struct {
 
 type ExamResponseList struct {
 	types.PaginatedResponse
-	Data []ExamResponse `json:"data" required:"false" doc:"List of exams" example:"[]"`
+	Data []ExamResponse `json:"data" required:"false" doc:"List of exams"`
 }
 
 type ExamTypeResponseList struct {
 	types.PaginatedResponse
-	Data []ExamTypeResponse `json:"data" required:"false" doc:"List of exam types" example:"[]"`
+	Data []ExamTypeResponse `json:"data" required:"false" doc:"List of exam types"`
 }

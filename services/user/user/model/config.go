@@ -7,6 +7,9 @@ import (
 
 type UserConfig struct {
 	types.BaseGormModel
+	WhatsappPhoneNumber int64 `gorm:"default:null"`
+	TelegramChatID      int64 `gorm:"default:null"`
+
 	AllowNotifications bool `gorm:"default:true"`
 
 	MfaEmail         bool `gorm:"default:false"`
@@ -22,6 +25,8 @@ func (item *UserConfig) ToResponse() *data.UserConfigResponse {
 		return nil
 	}
 	resp := &data.UserConfigResponse{}
+	resp.WhatsappPhoneNumber = item.WhatsappPhoneNumber
+	resp.TelegramChatID = item.TelegramChatID
 	resp.AllowNotifications = item.AllowNotifications
 	resp.MfaEmail = item.MfaEmail
 	resp.MfaAuthenticator = item.MfaAuthenticator

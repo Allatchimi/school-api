@@ -25,9 +25,11 @@ const DEFAULT_ERROR_MESSAGE = "interact with user model"
 func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.UserRequest, password *string) (result *model.User, errCode int, err error) {
 	// Format item
 	item := &model.User{
+		SchoolID:    request.SchoolID,
 		RoleID:      request.RoleID,
 		Email:       request.Email,
 		PhoneNumber: request.PhoneNumber,
+		Status:      request.Status,
 		IsActivated: request.IsActivated,
 		Info: &model.UserInfo{
 			Username:  request.Info.Username,
@@ -88,6 +90,16 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.User
 		return
 	}
 
+	// Create user config
+	tempConfig, err := service.Repository.CreateUserConfig(&model.UserConfig{
+		AllowNotifications: true,
+	})
+	if err != nil || tempConfig == nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+
 	// Create user
 	var randomPassword string = ""
 	if password == nil || len(*password) < 1 {
@@ -101,14 +113,17 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.User
 		activatedAt = &tmpTime
 	}
 	result, err = service.Repository.Create(&model.User{
-		RoleID:      item.RoleID,
-		Email:       item.Email,
-		PhoneNumber: item.PhoneNumber,
-		IsActivated: item.IsActivated,
-		ActivatedAt: activatedAt,
-		LoginMethod: constants.AuthLoginMethodDefault,
-		Password:    randomPassword,
-		UserInfoID:  tempInfo.ID,
+		RoleID:       item.RoleID,
+		SchoolID:     item.SchoolID,
+		Email:        item.Email,
+		PhoneNumber:  item.PhoneNumber,
+		Status:       item.Status,
+		IsActivated:  item.IsActivated,
+		ActivatedAt:  activatedAt,
+		LoginMethod:  constants.AuthLoginMethodDefault,
+		Password:     randomPassword,
+		UserInfoID:   tempInfo.ID,
+		UserConfigID: tempConfig.ID,
 	})
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -121,9 +136,11 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.User
 func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.UserRequest) (result *model.User, errCode int, err error) {
 	// Format item
 	item := &model.User{
+		SchoolID:    request.SchoolID,
 		RoleID:      request.RoleID,
 		Email:       request.Email,
 		PhoneNumber: request.PhoneNumber,
+		Status:      request.Status,
 		IsActivated: request.IsActivated,
 		Info: &model.UserInfo{
 			Username:  request.Info.Username,

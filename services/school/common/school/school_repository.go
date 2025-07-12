@@ -122,18 +122,18 @@ func (repository *Repository) UpdateSchoolConfigByID(id int64, item *model.Schoo
 	result := &model.SchoolConfig{}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
-			"domain_name": item.DomainName,
+			"domain_name":   item.DomainName,
+			"support_email": item.SupportEmail,
 
-			"smtp_host":           item.SmtpHost,
-			"smtp_port":           item.SmtpPort,
-			"smtp_username":       item.SmtpUsername,
-			"smtp_password":       item.SmtpPassword,
-			"smtp_no_reply_email": item.SmtpNoReplyEmail,
-			"smtp_support_email":  item.SmtpSupportEmail,
+			"google_workspace_credentials":       item.GoogleWorkspaceCredentials,
+			"google_workspace_user_email_domain": item.GoogleWorkspaceUserEmailDomain,
 
-			"sms_user_id": item.SmsUserID,
+			"sms_user_id":        item.SmsUserID,
+			"whatsapp_token":     item.WhatsappToken,
+			"whatsapp_phone_id":  item.WhatsappPhoneID,
+			"telegram_bot_token": item.TelegramBotToken,
 
-			"user_email_domain": item.UserEmailDomain,
+			"user_email_domain": item.DomainName,
 
 			"website_title":       item.WebsiteTitle,
 			"website_description": item.WebsiteDescription,

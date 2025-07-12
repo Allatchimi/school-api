@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"api/common/helpers"
+	httpHelper "api/common/helpers/http"
 	"api/common/types"
 	"api/services/common/communication/data"
 	"api/services/common/communication/model"
@@ -24,7 +25,7 @@ func (controller *Controller) Create(
 	},
 ) (result *model.Communication, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		&input.Body,
 	)
 	return
@@ -36,7 +37,7 @@ func (controller *Controller) Get(
 		data.CommunicationID
 	},
 ) (result *model.Communication, errCode int, err error) {
-	communication, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+	communication, errCode, err := controller.Service.Get(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -53,7 +54,7 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.CommunicationResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	communicationList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
+	communicationList, errCode, err := controller.Service.GetAll(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}

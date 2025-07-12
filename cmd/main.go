@@ -1,11 +1,14 @@
 package main
 
 import (
+	"api/cmd/api"
+	"api/cmd/di"
+	"api/cmd/fixture"
+	"api/cmd/migrate"
+	"api/cmd/test"
 	"api/common/helpers"
-	"api/common/utils/security"
+	securityUtil "api/common/utils/security"
 	"api/config"
-	configDeploy "api/config/deployment"
-	"api/services/school/common/school/model"
 
 	"go.uber.org/zap"
 )
@@ -23,40 +26,21 @@ func main() {
 		panic(errInit)
 	}
 
-	school := &model.School{
-		Type:      "university",
-		Favicon:   "https://www.google.com/favicon.ico",
-		Logo:      "https://www.gstatic.com/marketing-cms/assets/images/c5/3a/200414104c669203c62270f7884f/google-wordmarks-2x.webp=n-w100-h32-fcrop64=1,00000000ffffffff-rw",
-		LogoWhite: "https://www.gstatic.com/marketing-cms/assets/images/c5/3a/200414104c669203c62270f7884f/google-wordmarks-2x.webp=n-w100-h32-fcrop64=1,00000000ffffffff-rw",
-		Config: &model.SchoolConfig{
-			DomainName:          "www.uy1.cm",
-			WebsiteTitle:        "UY1",
-			WebsiteDescription:  "School management app",
-			ColorPrimary:        "#111111",
-			ColorPrimaryBg:      "#F1F1F1",
-			ColorPrimaryBgHover: "#D1D1D1",
-		},
+	// Migrate
+	err := migrate.Apply()
+	if err != nil {
+		panic(err)
 	}
-	school.ID = 2
-	configDeploy.DeploySchool(school)
-	configDeploy.DeleteSchoolDeployment(1)
-	// configDeploy.DeleteSchoolDeployment(2)
+	// Load fixtures
+	err = fixture.Load()
+	if err != nil {
+		panic(err)
+	}
 
-	/*
-		// Migrate
-		err := migrate.Apply()
-		if err != nil {
-			panic(err)
-		}
-		// Load fixtures
-		err = fixture.Load()
-		if err != nil {
-			panic(err)
-		}
+	test.Testssssss()
 
-		di.InjectDependencies()
-		api.Start()
-	*/
+	di.InjectDependencies()
+	api.Start()
 }
 
 // Called before the main entry point. It's useful for setting up
@@ -89,7 +73,7 @@ func init() {
 	}
 
 	// Test Argon 2id with an empty password to ensure that everything works as expected
-	_, errArgon2id := security.EncodeArgon2id("Testing")
+	_, errArgon2id := securityUtil.EncodeArgon2id("Testing")
 	if errArgon2id != nil {
 		errInit = errArgon2id
 		helpers.Logger.Warn(
@@ -122,18 +106,6 @@ func init() {
 		)
 	} else {
 		helpers.Logger.Info("Connected to database!")
-	}
-
-	// Setup SMS
-	errSms := config.SetupSMS()
-	if errSms != nil {
-		errInit = errSms
-		helpers.Logger.Warn(
-			"Failed to setup SMS!",
-			zap.String("Error", errSms.Error()),
-		)
-	} else {
-		helpers.Logger.Info("SMS configured!")
 	}
 
 	// Load OpenAPI templates

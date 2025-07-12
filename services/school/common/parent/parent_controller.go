@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"api/common/helpers"
+	httpHelper "api/common/helpers/http"
 	"api/common/types"
 	"api/services/school/common/parent/data"
 	"api/services/school/common/parent/model"
@@ -24,7 +25,7 @@ func (controller *Controller) Create(
 	},
 ) (result *model.Parent, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		&input.Body,
 	)
 	return
@@ -37,7 +38,7 @@ func (controller *Controller) CreateParentStudent(
 	},
 ) (result *model.ParentStudent, errCode int, err error) {
 	result, errCode, err = controller.Service.CreateParentStudent(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		&input.Body,
 	)
 	return
@@ -51,7 +52,7 @@ func (controller *Controller) Update(
 	},
 ) (result *model.Parent, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		input.ID,
 		&input.Body,
 	)
@@ -66,7 +67,7 @@ func (controller *Controller) UpdateParentStudent(
 	},
 ) (result *model.ParentStudent, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateParentStudent(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		input.ID,
 		&input.Body,
 	)
@@ -79,7 +80,7 @@ func (controller *Controller) Delete(
 		data.ParentID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.Delete(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -93,7 +94,7 @@ func (controller *Controller) DeleteParentStudent(
 		data.ParentStudentID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteParentStudent(helpers.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.DeleteParentStudent(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -107,7 +108,7 @@ func (controller *Controller) DeleteMultiple(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultiple(helpers.GetJwtContext(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetJwtContext(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -121,7 +122,7 @@ func (controller *Controller) Get(
 		data.ParentID
 	},
 ) (result *model.Parent, errCode int, err error) {
-	parent, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+	parent, errCode, err := controller.Service.Get(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -135,7 +136,7 @@ func (controller *Controller) GetParentStudent(
 		data.ParentStudentID
 	},
 ) (result *model.ParentStudent, errCode int, err error) {
-	parent, errCode, err := controller.Service.GetParentStudent(helpers.GetJwtContext(ctx), input.ID)
+	parent, errCode, err := controller.Service.GetParentStudent(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -152,7 +153,7 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.ParentResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	parentList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
+	parentList, errCode, err := controller.Service.GetAll(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}
@@ -173,7 +174,7 @@ func (controller *Controller) GetAllParentStudent(
 	},
 ) (result *data.ParentStudentResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	parentList, errCode, err := controller.Service.GetAllParentStudent(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllParentStudentRequest)
+	parentList, errCode, err := controller.Service.GetAllParentStudent(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllParentStudentRequest)
 	if err != nil {
 		return
 	}

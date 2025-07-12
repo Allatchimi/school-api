@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"api/common/helpers"
+	httpHelper "api/common/helpers/http"
 	"api/common/types"
 	"api/services/school/highschool/specialty/data"
 	"api/services/school/highschool/specialty/model"
@@ -24,7 +25,7 @@ func (controller *Controller) Create(
 	},
 ) (result *model.HighschoolSpecialty, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		&input.Body,
 	)
 	return
@@ -38,7 +39,7 @@ func (controller *Controller) Update(
 	},
 ) (result *model.HighschoolSpecialty, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		input.ID,
 		&input.Body,
 	)
@@ -51,7 +52,7 @@ func (controller *Controller) Delete(
 		data.SpecialtyID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.Delete(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -65,7 +66,7 @@ func (controller *Controller) DeleteMultiple(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultiple(helpers.GetJwtContext(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetJwtContext(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -79,7 +80,7 @@ func (controller *Controller) Get(
 		data.SpecialtyID
 	},
 ) (result *model.HighschoolSpecialty, errCode int, err error) {
-	specialty, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+	specialty, errCode, err := controller.Service.Get(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -96,7 +97,7 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.SpecialtyResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	specialtyList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
+	specialtyList, errCode, err := controller.Service.GetAll(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}

@@ -18,7 +18,7 @@ type QuizRequest struct {
 
 	Title       string `json:"title" required:"true" doc:"Title"`
 	Description string `json:"description" required:"false" doc:"Description"`
-	Status      string `json:"status" required:"false" enum:"default,active,closed" doc:"Status"`
+	Status      string `json:"status" required:"false" enum:"draft,published,closed,result" doc:"Status"`
 
 	Questions []QuizQuestionRequest `json:"questions" required:"false" doc:"Questions"`
 }

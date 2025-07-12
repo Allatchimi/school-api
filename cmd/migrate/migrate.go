@@ -55,7 +55,7 @@ func Apply() error {
 
 	// Migrate models with foreign key
 	err = config.DB.AutoMigrate(
-		// ----------- Others models -----------
+		// ----------- Common -----------
 		// Communication
 		&communicationModel.Communication{},
 		// Contact
@@ -73,7 +73,7 @@ func Apply() error {
 		// Role
 		&roleModel.Role{},
 
-		// ----------- Common school models -----------
+		// ----------- School -----------
 		// School
 		&schoolModel.School{},
 		&schoolModel.SchoolInfo{},
@@ -122,7 +122,7 @@ func Apply() error {
 		// Payment
 		&paymentModel.Payment{},
 
-		// ----------- Highschool models -----------
+		// ----------- Highschool -----------
 		// Section
 		&sectionModel.HighschoolSection{},
 		// Specialty
@@ -138,7 +138,7 @@ func Apply() error {
 		// Subject
 		&subjectModel.HighschoolSubject{},
 
-		// ----------- University models -----------
+		// ----------- University -----------
 		// Faculty
 		&facultyModel.UniversityFaculty{},
 		// Department

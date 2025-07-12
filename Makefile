@@ -1,5 +1,5 @@
 # ------------------ Golang commands ------------------
-.PHONY: clean install update test build run
+.PHONY: clean install update test build build-linux run
 clean:
 	@go clean -cache
 	@go clean -testcache
@@ -12,6 +12,8 @@ test:
 	@go test -v ./cmd/test/...
 build:
 	@go build -a -installsuffix cgo -o ./.build/main ./cmd/main.go
+build-linux:
+	@GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o ./.build/main ./cmd/main.go
 run:
 	@./.build/main
 
@@ -44,7 +46,7 @@ docker-ghcr-push-specific:
 	@echo "" ;\
 	echo "Tag - GitHub Docker Registry" ;\
 	gCorp="emenec-finance" ;\
-	gRepo="school-api" ;\
+	gRepo="digitcore-api" ;\
 	read -p "Enter your package name(redis, postgres, api): " gPackage; gTag=$${gPackage:-"api"} ;\
 	read -p "Enter your tag(default is 1): " gTag; gTag=$${gTag:-"1"} ;\
 	docker tag go-api-$$gPackage ghcr.io/$$gCorp/$$gRepo/$$gPackage:$$gTag ;\
@@ -55,7 +57,7 @@ docker-ghcr-pull-specific:
 	@echo "" ;\
 	echo "Tag - GitHub Docker Registry" ;\
 	gCorp="emenec-finance" ;\
-	gRepo="school-api" ;\
+	gRepo="digitcore-api" ;\
 	read -p "Enter your package name(redis, postgres, api): " gPackage; gTag=$${gPackage:-"api"} ;\
 	read -p "Enter your tag(default is 1): " gTag; gTag=$${gTag:-"1"} ;\
 	echo "" ;\

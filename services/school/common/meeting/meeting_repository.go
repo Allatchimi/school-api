@@ -8,9 +8,9 @@ import (
 	"gorm.io/gorm/clause"
 
 	"api/common/helpers"
+	httpHelper "api/common/helpers/http"
 	"api/common/types"
 	"api/common/utils"
-	"api/common/utils/meeting"
 	"api/config"
 	"api/services/school/common/meeting/data"
 	"api/services/school/common/meeting/model"
@@ -104,11 +104,14 @@ func (repository *Repository) ApiCreateRoom() (*data.ApiCreateRoomResponse, erro
 			},
 		},
 	}
-	var apiResp = &data.ApiCreateRoomResponse{}
-	err := utils.HttpPost(
-		fmt.Sprintf("%s/room/create", config.Env.MeetingApiUrl),
-		"application/json",
-		meeting.GetPlugnMeetPostHeaders(meeting.GetPlugnMeetSignature(fmt.Sprintf("{\"room_id\":\"%s\"}", roomID))),
+	apiResp := &data.ApiCreateRoomResponse{}
+	url := fmt.Sprintf("%s/room/create", config.Env.MeetingApiUrl)
+	headers := []httpHelper.HttpHeader{
+		{Label: "Content-Type", Value: "application/json"},
+	}
+	err := httpHelper.HttpPost(
+		url,
+		headers,
 		room,
 		apiResp,
 	)
@@ -224,10 +227,13 @@ func (repository *Repository) ApiJoinRoom(roomID string, user *modelUser.User, i
 			},
 		},
 	}
-	err := utils.HttpPost(
-		fmt.Sprintf("%s/room/getJoinToken", config.Env.MeetingApiUrl),
-		"application/json",
-		meeting.GetPlugnMeetPostHeaders(meeting.GetPlugnMeetSignature(fmt.Sprintf("{\"room_id\":\"%s\"}", roomID))),
+	url := fmt.Sprintf("%s/room/getJoinToken", config.Env.MeetingApiUrl)
+	headers := []httpHelper.HttpHeader{
+		{Label: "Content-Type", Value: "application/json"},
+	}
+	err := httpHelper.HttpPost(
+		url,
+		headers,
 		join,
 		apiResp,
 	)

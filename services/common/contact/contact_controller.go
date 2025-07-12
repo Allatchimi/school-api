@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"api/common/helpers"
+	httpHelper "api/common/helpers/http"
 	"api/common/types"
 	"api/services/common/contact/data"
 	"api/services/common/contact/model"
@@ -24,7 +25,7 @@ func (controller *Controller) Create(
 	},
 ) (result *model.Contact, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		&input.Body,
 	)
 	return
@@ -36,7 +37,7 @@ func (controller *Controller) Get(
 		data.ContactID
 	},
 ) (result *model.Contact, errCode int, err error) {
-	contact, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+	contact, errCode, err := controller.Service.Get(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -53,7 +54,7 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.ContactResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	contactList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
+	contactList, errCode, err := controller.Service.GetAll(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}

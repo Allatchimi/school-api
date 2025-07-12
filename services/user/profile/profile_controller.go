@@ -3,7 +3,7 @@ package profile
 import (
 	"context"
 
-	"api/common/helpers"
+	httpHelper "api/common/helpers/http"
 	"api/services/user/profile/data"
 	"api/services/user/user/model"
 )
@@ -24,7 +24,21 @@ func (controller *Controller) UpdateProfileInfo(
 	},
 ) (result *model.UserInfo, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateProfileInfo(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
+		&input.Body,
+	)
+	return
+}
+
+// ----------------- Config -----------------
+func (controller *Controller) UpdateProfileConfigMessage(
+	ctx *context.Context,
+	input *struct {
+		Body data.UpdateProfileMessageRequest
+	},
+) (result *model.UserConfig, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateProfileConfigMessage(
+		httpHelper.GetJwtContext(ctx),
 		&input.Body,
 	)
 	return
@@ -36,7 +50,7 @@ func (controller *Controller) UpdateProfilePasswordInit(
 	input *struct {
 	},
 ) (result string, errCode int, err error) {
-	result, errCode, err = controller.Service.UpdateProfilePasswordInit(helpers.GetJwtContext(ctx))
+	result, errCode, err = controller.Service.UpdateProfilePasswordInit(httpHelper.GetJwtContext(ctx))
 	return
 }
 func (controller *Controller) UpdateProfilePasswordCheckCode(
@@ -45,7 +59,7 @@ func (controller *Controller) UpdateProfilePasswordCheckCode(
 		Body data.UpdateProfilePasswordCheckCodeRequest
 	},
 ) (result string, errCode int, err error) {
-	result, errCode, err = controller.Service.UpdateProfilePasswordCheckCode(helpers.GetJwtContext(ctx), input.Body.Token, input.Body.Code)
+	result, errCode, err = controller.Service.UpdateProfilePasswordCheckCode(httpHelper.GetJwtContext(ctx), input.Body.Token, input.Body.Code)
 	return
 }
 func (controller *Controller) UpdateProfilePasswordNewPassword(
@@ -54,7 +68,7 @@ func (controller *Controller) UpdateProfilePasswordNewPassword(
 		Body data.UpdateProfilePasswordNewPasswordRequest
 	},
 ) (errCode int, err error) {
-	errCode, err = controller.Service.UpdateProfilePasswordNewPassword(helpers.GetJwtContext(ctx), input.Body.Token, input.Body.CurrentPassword, input.Body.NewPassword)
+	errCode, err = controller.Service.UpdateProfilePasswordNewPassword(httpHelper.GetJwtContext(ctx), input.Body.Token, input.Body.CurrentPassword, input.Body.NewPassword)
 	return
 }
 
@@ -64,7 +78,7 @@ func (controller *Controller) UpdateProfilePhoneNumberInit(
 	input *struct {
 	},
 ) (result string, errCode int, err error) {
-	result, errCode, err = controller.Service.UpdateProfilePhoneNumberInit(helpers.GetJwtContext(ctx))
+	result, errCode, err = controller.Service.UpdateProfilePhoneNumberInit(httpHelper.GetJwtContext(ctx))
 	return
 }
 func (controller *Controller) UpdateProfilePhoneNumberCheckCode(
@@ -73,7 +87,7 @@ func (controller *Controller) UpdateProfilePhoneNumberCheckCode(
 		Body data.UpdateProfilePhoneNumberCheckCodeRequest
 	},
 ) (result string, errCode int, err error) {
-	result, errCode, err = controller.Service.UpdateProfilePhoneNumberCheckCode(helpers.GetJwtContext(ctx), input.Body.Token, input.Body.Code)
+	result, errCode, err = controller.Service.UpdateProfilePhoneNumberCheckCode(httpHelper.GetJwtContext(ctx), input.Body.Token, input.Body.Code)
 	return
 }
 func (controller *Controller) UpdateProfilePhoneNumberNewPhoneNumber(
@@ -82,7 +96,7 @@ func (controller *Controller) UpdateProfilePhoneNumberNewPhoneNumber(
 		Body data.UpdateProfilePhoneNumberNewPhoneNumberRequest
 	},
 ) (errCode int, err error) {
-	errCode, err = controller.Service.UpdateProfilePhoneNumberNewPhoneNumber(helpers.GetJwtContext(ctx), input.Body.Token, input.Body.PhoneNumber)
+	errCode, err = controller.Service.UpdateProfilePhoneNumberNewPhoneNumber(httpHelper.GetJwtContext(ctx), input.Body.Token, input.Body.PhoneNumber)
 	return
 }
 
@@ -91,7 +105,7 @@ func (controller *Controller) UpdateProfileMfaEmailInit(
 	ctx *context.Context,
 	input *struct{},
 ) (result string, errCode int, err error) {
-	result, errCode, err = controller.Service.UpdateProfileMfaEmailInit(helpers.GetJwtContext(ctx))
+	result, errCode, err = controller.Service.UpdateProfileMfaEmailInit(httpHelper.GetJwtContext(ctx))
 	return
 }
 func (controller *Controller) UpdateProfileMfaEmailCheckCode(
@@ -100,7 +114,7 @@ func (controller *Controller) UpdateProfileMfaEmailCheckCode(
 		Body data.UpdateProfileMfaEmailCheckCodeRequest
 	},
 ) (errCode int, err error) {
-	errCode, err = controller.Service.UpdateProfileMfaEmailCheckCode(helpers.GetJwtContext(ctx), input.Body.Token, input.Body.Code)
+	errCode, err = controller.Service.UpdateProfileMfaEmailCheckCode(httpHelper.GetJwtContext(ctx), input.Body.Token, input.Body.Code)
 	return
 }
 
@@ -111,7 +125,7 @@ func (controller *Controller) UpdateProfileNotification(
 		Body data.UpdateProfileSettingNotificationRequest
 	},
 ) (result *model.User, errCode int, err error) {
-	result, errCode, err = controller.Service.UpdateProfileNotification(helpers.GetJwtContext(ctx), input.Body.IsEnabled)
+	result, errCode, err = controller.Service.UpdateProfileNotification(httpHelper.GetJwtContext(ctx), input.Body.IsEnabled)
 	return
 }
 
@@ -122,7 +136,7 @@ func (controller *Controller) UpdateWebPushSubscription(
 		Body data.UpdateProfileWebPushSubscriptionRequest
 	},
 ) (errCode int, err error) {
-	errCode, err = controller.Service.UpdateProfileWebPushSubscription(helpers.GetJwtContext(ctx), &input.Body)
+	errCode, err = controller.Service.UpdateProfileWebPushSubscription(httpHelper.GetJwtContext(ctx), &input.Body)
 	if err != nil {
 		return
 	}
@@ -134,7 +148,7 @@ func (controller *Controller) GetProfile(
 	ctx *context.Context,
 	input *struct{},
 ) (result *model.User, errCode int, err error) {
-	result, errCode, err = controller.Service.GetProfile(helpers.GetJwtContext(ctx))
+	result, errCode, err = controller.Service.GetProfile(httpHelper.GetJwtContext(ctx))
 	if err != nil {
 		return
 	}
@@ -144,7 +158,7 @@ func (controller *Controller) GetWebPushSubscriptionPublicKey(
 	ctx *context.Context,
 	input *struct{},
 ) (result string, errCode int, err error) {
-	result, errCode, err = controller.Service.GetWebPushSubscriptionPublicKey(helpers.GetJwtContext(ctx))
+	result, errCode, err = controller.Service.GetWebPushSubscriptionPublicKey(httpHelper.GetJwtContext(ctx))
 	if err != nil {
 		return
 	}

@@ -13,6 +13,7 @@ type Environment struct {
 
 	// API config
 	ApiGroup     string `mapstructure:"API_GROUP"`
+	ApiBaseURL   string `mapstructure:"API_BASE_URL"`
 	GinMode      string `mapstructure:"GIN_MODE"`
 	AllowedHosts string `mapstructure:"ALLOWED_HOSTS"`
 
@@ -55,14 +56,18 @@ type Environment struct {
 	WebPushVapidPrivateKey string `mapstructure:"WEB_PUSH_VAPID_PRIVATE_KEY"`
 
 	// SMTP
-	SmtpHost     string `mapstructure:"SMTP_HOST"`
-	SmtpPort     int    `mapstructure:"SMTP_PORT"`
-	SmtpUsername string `mapstructure:"SMTP_USERNAME"`
-	SmtpPassword string `mapstructure:"SMTP_PASSWORD"`
-	SmtpSender   string `mapstructure:"SMTP_SENDER"`
+	SmtpHost        string `mapstructure:"SMTP_HOST"`
+	SmtpPort        int    `mapstructure:"SMTP_PORT"`
+	SmtpUsername    string `mapstructure:"SMTP_USERNAME"`
+	SmtpPassword    string `mapstructure:"SMTP_PASSWORD"`
+	SmtpDomainName  string `mapstructure:"SMTP_DOMAIN_NAME"`
+	SmtpUserNoReply string `mapstructure:"SMTP_USER_NO_REPLY"`
+	SmtpUserSupport string `mapstructure:"SMTP_USER_SUPPORT"`
 
 	// SMS
-	SmsAfrikaTalkingApiKey string `mapstructure:"SMS_AFRIKA_TALKING_API_KEY"`
+	SmsAfrikaTalkingApiKey   string `mapstructure:"SMS_AFRIKA_TALKING_API_KEY"`
+	SmsAfrikaTalkingUserName string `mapstructure:"SMS_AFRIKA_TALKING_USER_NAME"`
+	SmsAfrikaTalkingSenderId string `mapstructure:"SMS_AFRIKA_TALKING_SENDER_ID"`
 
 	// Login with Google
 	GooglePlusClientID string `mapstructure:"GOOGLE_PLUS_CLIENT_ID"`
@@ -92,15 +97,15 @@ type Environment struct {
 	GitRepoSshEd25519PrivateKey string `mapstructure:"GIT_DEPLOY_REPO_SSH_ED25519_PRIVATE_KEY"`
 
 	// Database fixtures
-	RoleDefault  string `mapstructure:"ROLE_DEFAULT"`
-	RoleAdmin    string `mapstructure:"ROLE_ADMIN"`
-	RoleDirector string `mapstructure:"ROLE_DIRECTOR"`
-	RoleTeacher  string `mapstructure:"ROLE_TEACHER"`
-	RoleStudent  string `mapstructure:"ROLE_STUDENT"`
-	RoleParent   string `mapstructure:"ROLE_PARENT"`
-
-	UserAdminEmail    string `mapstructure:"USER_ADMIN_EMAIL"`
-	UserAdminPassword string `mapstructure:"USER_ADMIN_PASSWORD"`
+	FixtureRoleDefault  string `mapstructure:"FIXTURE_ROLE_DEFAULT"`
+	FixtureRoleAdmin    string `mapstructure:"FIXTURE_ROLE_ADMIN"`
+	FixtureRoleDirector string `mapstructure:"FIXTURE_ROLE_DIRECTOR"`
+	FixtureRoleTeacher  string `mapstructure:"FIXTURE_ROLE_TEACHER"`
+	FixtureRoleStudent  string `mapstructure:"FIXTURE_ROLE_STUDENT"`
+	FixtureRoleParent   string `mapstructure:"FIXTURE_ROLE_PARENT"`
+	// Fixture user admin
+	FixtureUserAdminEmail    string `mapstructure:"FIXTURE_USER_ADMIN_EMAIL"`
+	FixtureUserAdminPassword string `mapstructure:"FIXTURE_USER_ADMIN_PASSWORD"`
 }
 
 var Env = &Environment{}

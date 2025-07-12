@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"api/common/constants"
+	authHelper "api/common/helpers/auth"
+	smtpHelper "api/common/helpers/message/mail/smtp"
 	"api/common/types"
 	"api/common/utils"
-	"api/common/utils/auth"
-	"api/common/utils/mail"
-	"api/common/utils/security"
+	securityUtil "api/common/utils/security"
 	"api/config"
 	"api/services/user/auth/data"
 	"api/services/user/role"
@@ -33,11 +33,11 @@ const MODEL_NAME = "user"
 const DEFAULT_ERROR_MESSAGE = "interact with auth service"
 
 func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice) (accessToken string, accessExpires *time.Time, activateAccountToken string, errCode int, err error) {
-	// Check if user exists
+	// Find user
 	var userFound *model.User
 	var errMsg string
 	if utils.IsEmailValid(input.Email) {
-		userFound, err = service.UserService.Repository.GetByEmail(input.Email)
+		userFound, err = service.UserService.Repository.GetByEmailSchoolID(input.Email, input.SchoolID)
 		errMsg = "Invalid email or password! Please enter valid information."
 	}
 	if err != nil || userFound == nil || userFound.Email != input.Email {
@@ -45,10 +45,16 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 		err = fmt.Errorf("%s", errMsg)
 		return
 	}
-	isPasswordMatches, err := security.CompareArgon2id(input.Password, userFound.Password)
+	isPasswordMatches, err := securityUtil.CompareArgon2id(input.Password, userFound.Password)
 	if err != nil || !isPasswordMatches {
 		errCode = http.StatusNotFound
 		err = fmt.Errorf("%s", errMsg)
+		return
+	}
+	// Check if the status is enabled
+	if userFound.Status != constants.USER_STATUS_ENABLED {
+		errCode = http.StatusUnavailableForLegalReasons
+		err = fmt.Errorf("%s", "User account is disabled! Please contact support.")
 		return
 	}
 
@@ -56,7 +62,7 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	if userFound.IsActivated {
 		// Generate new token
 		var accessJwtToken *types.JwtToken
-		accessJwtToken, accessToken, err = security.EncodeJWTToken(
+		accessJwtToken, accessToken, err = securityUtil.EncodeJWTToken(
 			&types.JwtToken{
 				UserID:   userFound.ID,
 				Platform: device.Platform,
@@ -64,7 +70,7 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 				App:      device.App,
 			},
 			constants.JwtIssuerSession,
-			security.NewExpiresDateLogin(input.StayConnected),
+			securityUtil.NewExpiresDateLogin(input.StayConnected),
 			config.Keys.JwtPrivateKey,
 			config.AppendToRedisStringList,
 		)
@@ -90,7 +96,7 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 
 	// Generate new token
 	var activateAccountJwtToken *types.JwtToken
-	activateAccountJwtToken, activateAccountToken, err = security.EncodeJWTToken(
+	activateAccountJwtToken, activateAccountToken, err = securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
 			Platform: "*",
@@ -99,7 +105,7 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 			Code:     randomCode,
 		},
 		constants.JwtIssuerAuthActivate,
-		security.NewExpiresDateDefault(),
+		securityUtil.NewExpiresDateDefault(),
 		config.Keys.JwtPrivateKey,
 		config.SetRedisString,
 	)
@@ -114,10 +120,27 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	// Send code to email
 	if utils.IsEmailValid(input.Email) {
 		go func() {
-			err := mail.SendMail(
-				fmt.Sprintf("%s - Activate your account", config.Env.AppName),
-				fmt.Sprintf("The code to activate your account is %d", randomCode),
-				input.Email,
+			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
+			data := &smtpHelper.EmailDataCheckCode{
+				EmailData: smtpHelper.EmailData{
+					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.DomainName),
+					Logo:         userFound.School.Logo,
+					Title:        constants.MailVerifyEmailCheckCode.Title,
+					Message:      constants.MailVerifyEmailCheckCode.Message,
+				},
+				Code:            fmt.Sprintf("%d", randomCode),
+				DurationMinutes: 10,
+			}
+			body, err := data.LoadTemplate()
+			if err != nil {
+				return
+			}
+			err = smtpHelper.SendEmailTo(
+				fromEmail,
+				fromUsername,
+				userFound.Email,
+				constants.MailVerifyEmailCheckCode.Subject,
+				body,
 			)
 			if err != nil {
 				return
@@ -130,6 +153,7 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, device *data.LoginDevice) (accessToken string, accessExpires *time.Time, errCode int, err error) {
 	// Validate provider token and update user
 	var newUser = &model.User{
+		SchoolID: input.SchoolID,
 		Provider: input.Provider,
 		Info:     &model.UserInfo{},
 		Config:   &model.UserConfig{},
@@ -137,7 +161,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 	var expires int64 = 0
 	switch input.Provider {
 	case constants.AuthProviderGoogle:
-		googleUser, errGoogleUser := auth.VerifyGoogleIDToken(input.Token)
+		googleUser, errGoogleUser := authHelper.VerifyGoogleIDToken(input.Token)
 		if errGoogleUser != nil || googleUser == nil || len(googleUser.ID) <= 0 {
 			errCode = http.StatusUnprocessableEntity
 			err = fmt.Errorf("%s", "Invalid provider or token! Please enter valid information.")
@@ -151,7 +175,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 		expires = googleUser.Expires
 		newUser.FromGoogleUser(googleUser)
 	case constants.AuthProviderFacebook:
-		facebookUser, errFacebookUser := auth.VerifyFacebookToken(input.Token)
+		facebookUser, errFacebookUser := authHelper.VerifyFacebookToken(input.Token)
 		if errFacebookUser != nil || facebookUser == nil || len(facebookUser.ID) <= 0 {
 			errCode = http.StatusUnprocessableEntity
 			err = fmt.Errorf("%s", "Invalid provider or token! Please enter valid information.")
@@ -171,7 +195,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 	}
 
 	// Save user if it's not in database
-	userFound, err := service.UserService.Repository.GetByProvider(input.Provider, newUser.ProviderUserID)
+	userFound, err := service.UserService.Repository.GetByProviderSchoolID(input.Provider, newUser.ProviderUserID, input.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -197,7 +221,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 
 		// Get the default role
 		var defaultRole *modelRole.Role
-		defaultRole, err = service.RoleService.Repository.GetByName(config.Env.RoleDefault)
+		defaultRole, err = service.RoleService.Repository.GetByName(config.Env.FixtureRoleDefault)
 		if err != nil {
 			errCode = http.StatusInternalServerError
 			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -208,7 +232,9 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 		tmpActivatedAt := time.Now()
 		userFound, err = service.UserService.Repository.Create(
 			&model.User{
+				SchoolID:       input.SchoolID,
 				Email:          newUser.Email,
+				Status:         constants.USER_STATUS_ENABLED,
 				Provider:       input.Provider,
 				ProviderUserID: newUser.ProviderUserID,
 				LoginMethod:    constants.AuthLoginMethodProvider,
@@ -226,9 +252,16 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 		}
 	}
 
+	// Check if the status is enabled
+	if userFound.Status != constants.USER_STATUS_ENABLED {
+		errCode = http.StatusUnavailableForLegalReasons
+		err = fmt.Errorf("%s", "User account is disabled! Please contact support.")
+		return
+	}
+
 	// Generate new token
 	expiresTime := time.Unix(expires, 0)
-	jwtToken, accessToken, err := security.EncodeJWTToken(
+	jwtToken, accessToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
 			Platform: device.Platform,
@@ -254,7 +287,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	var userFound *model.User
 	var errMsg string
 	if utils.IsEmailValid(input.Email) {
-		userFound, err = service.UserService.Repository.GetByEmail(input.Email)
+		userFound, err = service.UserService.Repository.GetByEmailSchoolID(input.Email, input.SchoolID)
 		errMsg = "user email"
 	}
 	if err != nil {
@@ -270,7 +303,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 
 	// Get the default role
 	var defaultRole *modelRole.Role
-	defaultRole, err = service.RoleService.Repository.GetByName(config.Env.RoleDefault)
+	defaultRole, err = service.RoleService.Repository.GetByName(config.Env.FixtureRoleDefault)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -280,6 +313,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	userFound.Email = input.Email
 	userFound.Password = input.Password
 	userFound.LoginMethod = constants.AuthLoginMethodDefault
+	userFound.SchoolID = input.SchoolID
 	userFound.RoleID = defaultRole.ID
 	createdUser, err := service.UserService.Repository.Create(userFound)
 	if err != nil {
@@ -300,7 +334,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 
 	// Generate new token
 	var activateAccountJwtToken *types.JwtToken
-	activateAccountJwtToken, activateAccountToken, err = security.EncodeJWTToken(
+	activateAccountJwtToken, activateAccountToken, err = securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   createdUser.ID,
 			Platform: "*",
@@ -309,7 +343,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 			Code:     randomCode,
 		},
 		constants.JwtIssuerAuthActivate,
-		security.NewExpiresDateDefault(),
+		securityUtil.NewExpiresDateDefault(),
 		config.Keys.JwtPrivateKey,
 		config.SetRedisString,
 	)
@@ -321,10 +355,27 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	// Send code to email
 	if utils.IsEmailValid(input.Email) {
 		go func() {
-			err := mail.SendMail(
-				fmt.Sprintf("%s - Activate your account", config.Env.AppName),
-				fmt.Sprintf("The code to activate your account is %d", randomCode),
-				input.Email,
+			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
+			data := &smtpHelper.EmailDataCheckCode{
+				EmailData: smtpHelper.EmailData{
+					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.DomainName),
+					Logo:         userFound.School.Logo,
+					Title:        constants.MailVerifyEmailCheckCode.Title,
+					Message:      constants.MailVerifyEmailCheckCode.Message,
+				},
+				Code:            fmt.Sprintf("%d", randomCode),
+				DurationMinutes: 10,
+			}
+			body, err := data.LoadTemplate()
+			if err != nil {
+				return
+			}
+			err = smtpHelper.SendEmailTo(
+				fromEmail,
+				fromUsername,
+				userFound.Email,
+				constants.MailVerifyEmailCheckCode.Subject,
+				body,
 			)
 			if err != nil {
 				return
@@ -337,7 +388,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (activatedAt *time.Time, errCode int, err error) {
 	// Extract token information and validate the token
 	errMsg := "Invalid or expired token! Please enter valid information."
-	jwtToken, err := security.DecodeJWTToken(input.Token, config.Keys.JwtPublicKey)
+	jwtToken, err := securityUtil.DecodeJWTToken(input.Token, config.Keys.JwtPublicKey)
 	if err != nil {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", errMsg)
@@ -348,7 +399,7 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 		err = fmt.Errorf("%s", errMsg)
 		return
 	}
-	isTokenValid := security.ValidateJWTToken(input.Token, jwtToken, config.GetRedisString)
+	isTokenValid := securityUtil.ValidateJWTToken(input.Token, jwtToken, config.GetRedisString)
 	if !isTokenValid {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", errMsg)
@@ -404,15 +455,28 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	activatedAt = updatedUser.ActivatedAt
 
 	// Invalidate the token
-	_, _ = config.DeleteRedisString(security.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
+	_, _ = config.DeleteRedisString(securityUtil.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
 
 	// Send welcome message
 	if utils.IsEmailValid(updatedUser.Email) {
 		go func() {
-			err := mail.SendMail(
-				fmt.Sprintf("%s - Welcome", config.Env.AppName),
-				"Welcome",
+			fromEmail, fromUsername := updatedUser.School.SMTPNoReplySender()
+			data := &smtpHelper.EmailData{
+				HomePageLink: fmt.Sprintf("https://%s", updatedUser.School.Config.DomainName),
+				Logo:         updatedUser.School.Logo,
+				Title:        constants.MailWelcomeVerifiedEmail.Title,
+				Message:      constants.MailWelcomeVerifiedEmail.Message,
+			}
+			body, err := data.LoadTemplate()
+			if err != nil {
+				return
+			}
+			err = smtpHelper.SendEmailTo(
+				fromEmail,
+				fromUsername,
 				updatedUser.Email,
+				constants.MailWelcomeVerifiedEmail.Subject,
+				body,
 			)
 			if err != nil {
 				return
@@ -456,8 +520,8 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	expires := security.NewExpiresDateDefault()
-	newJwtToken, newToken, err := security.EncodeJWTToken(
+	expires := securityUtil.NewExpiresDateDefault()
+	newJwtToken, newToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
 			Platform: "*",
@@ -480,10 +544,27 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 	// Send code to email
 	if utils.IsEmailValid(input.Email) {
 		go func() {
-			err := mail.SendMail(
-				fmt.Sprintf("%s - Forgot your password", config.Env.AppName),
-				fmt.Sprintf("The code to reset your password is %d", randomCode),
-				input.Email,
+			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
+			data := &smtpHelper.EmailDataCheckCode{
+				EmailData: smtpHelper.EmailData{
+					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.DomainName),
+					Logo:         userFound.School.Logo,
+					Title:        constants.MailForgotPasswordCheckCode.Title,
+					Message:      constants.MailForgotPasswordCheckCode.Message,
+				},
+				Code:            fmt.Sprintf("%d", randomCode),
+				DurationMinutes: 10,
+			}
+			body, err := data.LoadTemplate()
+			if err != nil {
+				return
+			}
+			err = smtpHelper.SendEmailTo(
+				fromEmail,
+				fromUsername,
+				userFound.Email,
+				constants.MailForgotPasswordCheckCode.Subject,
+				body,
 			)
 			if err != nil {
 				return
@@ -513,7 +594,7 @@ func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest
 
 	// Extract token information and validate the token
 	errMsg := "Invalid or expired token! Please enter valid information."
-	jwtToken, err := security.DecodeJWTToken(input.Token, config.Keys.JwtPublicKey)
+	jwtToken, err := securityUtil.DecodeJWTToken(input.Token, config.Keys.JwtPublicKey)
 	if err != nil {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", errMsg)
@@ -524,7 +605,7 @@ func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest
 		err = fmt.Errorf("%s", errMsg)
 		return
 	}
-	isTokenValid := security.ValidateJWTToken(input.Token, jwtToken, config.GetRedisString)
+	isTokenValid := securityUtil.ValidateJWTToken(input.Token, jwtToken, config.GetRedisString)
 	if !isTokenValid {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", errMsg)
@@ -547,10 +628,10 @@ func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest
 	}
 
 	// Invalidate the token
-	_, _ = config.DeleteRedisString(security.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
+	_, _ = config.DeleteRedisString(securityUtil.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
 
 	// Generate new token
-	newJwtToken, newToken, err := security.EncodeJWTToken(
+	newJwtToken, newToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
 			Platform: "*",
@@ -558,7 +639,7 @@ func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest
 			App:      "*",
 		},
 		constants.JwtIssuerAuthForgotPasswordNewPassword,
-		security.NewExpiresDateDefault(),
+		securityUtil.NewExpiresDateDefault(),
 		config.Keys.JwtPrivateKey,
 		config.SetRedisString,
 	)
@@ -580,7 +661,7 @@ func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewP
 
 	// Extract token information and validate the token
 	errMsg := "Invalid or expired token! Please enter valid information."
-	jwtToken, err := security.DecodeJWTToken(input.Token, config.Keys.JwtPublicKey)
+	jwtToken, err := securityUtil.DecodeJWTToken(input.Token, config.Keys.JwtPublicKey)
 	if err != nil {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", errMsg)
@@ -591,7 +672,7 @@ func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewP
 		err = fmt.Errorf("%s", errMsg)
 		return
 	}
-	isTokenValid := security.ValidateJWTToken(input.Token, jwtToken, config.GetRedisString)
+	isTokenValid := securityUtil.ValidateJWTToken(input.Token, jwtToken, config.GetRedisString)
 	if !isTokenValid {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", errMsg)
@@ -615,13 +696,13 @@ func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewP
 	}
 
 	// Invalidate the token
-	_, _ = config.DeleteRedisString(security.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
+	_, _ = config.DeleteRedisString(securityUtil.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
 	return
 }
 
 func (service *Service) Logout(jwtToken *types.JwtToken, bearerToken string) (errCode int, err error) {
 	// Invalidate the token
-	sessions, err := config.GetRedisStringList(security.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
+	sessions, err := config.GetRedisStringList(securityUtil.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
 	if err != nil {
 		errCode = http.StatusUnauthorized
 		err = constants.Http401InvalidTokenErrorMessage()

@@ -19,63 +19,63 @@ func Load() (err error) {
 	var permissionRepo = permission.NewRepository(config.DB)
 
 	// Add role admin
-	roleAdmin, _ := roleRepo.GetByName(config.Env.RoleAdmin)
-	if !(roleAdmin != nil && roleAdmin.Name == config.Env.RoleAdmin) {
+	roleAdmin, _ := roleRepo.GetByName(config.Env.FixtureRoleAdmin)
+	if !(roleAdmin != nil && roleAdmin.Name == config.Env.FixtureRoleAdmin) {
 		roleAdmin, _ = roleRepo.Create(&roleModel.Role{
-			Name:        config.Env.RoleAdmin,
+			Name:        config.Env.FixtureRoleAdmin,
 			Feature:     constants.FeatureAdmin,
 			Description: "Administrator role",
 		})
 	}
 	// Add role default
-	roleDefault, _ := roleRepo.GetByName(config.Env.RoleDefault)
-	if !(roleDefault != nil && roleDefault.Name == config.Env.RoleDefault) {
+	roleDefault, _ := roleRepo.GetByName(config.Env.FixtureRoleDefault)
+	if !(roleDefault != nil && roleDefault.Name == config.Env.FixtureRoleDefault) {
 		_, _ = roleRepo.Create(&roleModel.Role{
-			Name:        config.Env.RoleDefault,
+			Name:        config.Env.FixtureRoleDefault,
 			Feature:     constants.FeatureDefault,
 			Description: "Default role",
 		})
 	}
 	// Add role director
-	roleDirector, _ := roleRepo.GetByName(config.Env.RoleDirector)
-	if !(roleDirector != nil && roleDirector.Name == config.Env.RoleDirector) {
+	roleDirector, _ := roleRepo.GetByName(config.Env.FixtureRoleDirector)
+	if !(roleDirector != nil && roleDirector.Name == config.Env.FixtureRoleDirector) {
 		_, _ = roleRepo.Create(&roleModel.Role{
-			Name:        config.Env.RoleDirector,
+			Name:        config.Env.FixtureRoleDirector,
 			Feature:     constants.FeatureDirector,
 			Description: "Director role",
 		})
 	}
 	// Add role teacher
-	roleTeacher, _ := roleRepo.GetByName(config.Env.RoleTeacher)
-	if !(roleTeacher != nil && roleTeacher.Name == config.Env.RoleTeacher) {
+	roleTeacher, _ := roleRepo.GetByName(config.Env.FixtureRoleTeacher)
+	if !(roleTeacher != nil && roleTeacher.Name == config.Env.FixtureRoleTeacher) {
 		_, _ = roleRepo.Create(&roleModel.Role{
-			Name:        config.Env.RoleTeacher,
+			Name:        config.Env.FixtureRoleTeacher,
 			Feature:     constants.FeatureTeacher,
 			Description: "Teacher role",
 		})
 	}
 	// Add role student
-	roleStudent, _ := roleRepo.GetByName(config.Env.RoleStudent)
-	if !(roleStudent != nil && roleStudent.Name == config.Env.RoleStudent) {
+	roleStudent, _ := roleRepo.GetByName(config.Env.FixtureRoleStudent)
+	if !(roleStudent != nil && roleStudent.Name == config.Env.FixtureRoleStudent) {
 		_, _ = roleRepo.Create(&roleModel.Role{
-			Name:        config.Env.RoleStudent,
+			Name:        config.Env.FixtureRoleStudent,
 			Feature:     constants.FeatureStudent,
 			Description: "Student role",
 		})
 	}
 	// Add role parent
-	roleParent, _ := roleRepo.GetByName(config.Env.RoleParent)
-	if !(roleParent != nil && roleParent.Name == config.Env.RoleParent) {
+	roleParent, _ := roleRepo.GetByName(config.Env.FixtureRoleParent)
+	if !(roleParent != nil && roleParent.Name == config.Env.FixtureRoleParent) {
 		_, _ = roleRepo.Create(&roleModel.Role{
-			Name:        config.Env.RoleParent,
+			Name:        config.Env.FixtureRoleParent,
 			Feature:     constants.FeatureParent,
 			Description: "Parent role",
 		})
 	}
 
 	// Add user admin
-	userAdmin, _ := userRepo.GetByEmail(config.Env.UserAdminEmail)
-	if !(userAdmin != nil && userAdmin.Email == config.Env.UserAdminEmail) {
+	userAdmin, _ := userRepo.GetByEmail(config.Env.FixtureUserAdminEmail)
+	if !(userAdmin != nil && userAdmin.Email == config.Env.FixtureUserAdminEmail) {
 		userInfoAdmin, _ := userRepo.CreateUserInfo(&userModel.UserInfo{
 			Username: "Admin",
 			Language: "en",
@@ -84,8 +84,8 @@ func Load() (err error) {
 
 		tmpActivatedAt := time.Now()
 		userAdmin, _ = userRepo.Create(&userModel.User{
-			Email:    config.Env.UserAdminEmail,
-			Password: config.Env.UserAdminPassword,
+			Email:    config.Env.FixtureUserAdminEmail,
+			Password: config.Env.FixtureUserAdminPassword,
 
 			LoginMethod: constants.AuthLoginMethodDefault,
 			IsActivated: true,

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"api/common/helpers"
+	httpHelper "api/common/helpers/http"
 	"api/common/types"
 	"api/services/school/common/teacher/data"
 	"api/services/school/common/teacher/model"
@@ -24,7 +25,7 @@ func (controller *Controller) Create(
 	},
 ) (result *model.Teacher, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		&input.Body,
 	)
 	return
@@ -37,7 +38,7 @@ func (controller *Controller) CreateTeacherClassSubjectUnit(
 	},
 ) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
 	result, errCode, err = controller.Service.CreateTeacherClassSubjectUnit(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		&input.Body,
 	)
 	return
@@ -51,7 +52,7 @@ func (controller *Controller) Update(
 	},
 ) (result *model.Teacher, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		input.ID,
 		&input.Body,
 	)
@@ -66,7 +67,7 @@ func (controller *Controller) UpdateTeacherClassSubjectUnit(
 	},
 ) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateTeacherClassSubjectUnit(
-		helpers.GetJwtContext(ctx), input.ID,
+		httpHelper.GetJwtContext(ctx), input.ID,
 		&input.Body,
 	)
 	return
@@ -78,7 +79,7 @@ func (controller *Controller) Delete(
 		data.TeacherID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.Delete(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -92,7 +93,7 @@ func (controller *Controller) DeleteTeacherClassSubjectUnit(
 		data.UnitSubjectID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteTeacherClassSubjectUnit(helpers.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.DeleteTeacherClassSubjectUnit(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -106,7 +107,7 @@ func (controller *Controller) DeleteMultiple(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultiple(helpers.GetJwtContext(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetJwtContext(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -120,7 +121,7 @@ func (controller *Controller) Get(
 		data.TeacherID
 	},
 ) (result *model.Teacher, errCode int, err error) {
-	teacher, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+	teacher, errCode, err := controller.Service.Get(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -134,7 +135,7 @@ func (controller *Controller) GetTeacherClassSubjectUnit(
 		data.UnitSubjectID
 	},
 ) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
-	teacher, errCode, err := controller.Service.GetTeacherClassSubjectUnit(helpers.GetJwtContext(ctx), input.ID)
+	teacher, errCode, err := controller.Service.GetTeacherClassSubjectUnit(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -152,7 +153,7 @@ func (controller *Controller) GetAll(
 ) (result *data.TeacherResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
 	teacherList, errCode, err := controller.Service.GetAll(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		newFilter,
 		newPagination,
 		input.GetAllRequest.SchoolID,
@@ -178,7 +179,7 @@ func (controller *Controller) GetAllTeacherClassSubjectUnit(
 ) (result *data.TeacherClassSubjectUnitResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
 	teacherList, errCode, err := controller.Service.GetAllTeacherClassSubjectUnit(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		newFilter,
 		newPagination,
 		&input.GetAllTeacherClassSubjectUnitRequest,

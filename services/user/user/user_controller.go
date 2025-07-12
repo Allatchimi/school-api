@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"api/common/helpers"
+	httpHelper "api/common/helpers/http"
 	"api/common/types"
 	"api/services/user/user/data"
 	"api/services/user/user/model"
@@ -25,7 +26,7 @@ func (controller *Controller) Create(
 ) (result *model.User, errCode int, err error) {
 
 	result, errCode, err = controller.Service.Create(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		&input.Body,
 		nil,
 	)
@@ -40,7 +41,7 @@ func (controller *Controller) Update(
 	},
 ) (result *model.User, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		input.UserID.ID,
 		&input.Body,
 	)
@@ -54,7 +55,7 @@ func (controller *Controller) Delete(
 	},
 ) (result int64, errCode int, err error) {
 	result, errCode, err = controller.Service.Delete(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		input.ID,
 	)
 	return
@@ -66,7 +67,7 @@ func (controller *Controller) DeleteMultiple(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultiple(helpers.GetJwtContext(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetJwtContext(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -81,7 +82,7 @@ func (controller *Controller) Get(
 	},
 ) (result *model.User, errCode int, err error) {
 	result, errCode, err = controller.Service.Get(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		input.ID,
 	)
 	return
@@ -97,7 +98,7 @@ func (controller *Controller) GetAll(
 ) (result *data.UserResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
 	userList, errCode, err := controller.Service.GetAll(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		newFilter,
 		newPagination,
 		&input.GetAllRequest,

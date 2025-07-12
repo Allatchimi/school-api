@@ -1,12 +1,11 @@
 package utils
 
 import (
+	"api/common/constants"
 	"fmt"
 	"net/mail"
 	"slices"
 	"unicode"
-
-	"api/common/constants"
 )
 
 // IsAuthProviderValid Validates the authentication provider (e.g., Google, Facebook, ...)

@@ -7,12 +7,15 @@ type UserID struct {
 }
 
 type UserRequest struct {
-	RoleID int64 `json:"roleID" required:"true" doc:"Role id"`
+	RoleID   int64 `json:"roleID" required:"true" doc:"Role id"`
+	SchoolID int64 `json:"schoolID" required:"false" doc:"School id"`
 
-	Email       string           `json:"email" required:"false" format:"email" doc:"Email"`
-	PhoneNumber uint64           `json:"phoneNumber" required:"false" minimum:"10000000" doc:"Phone number"`
-	IsActivated bool             `json:"isActivated" required:"true" doc:"Is activated"`
-	Info        *UserInfoRequest `json:"info" required:"true" doc:"Information"`
+	Email       string `json:"email" required:"false" format:"email" doc:"Email"`
+	PhoneNumber uint64 `json:"phoneNumber" required:"false" minimum:"10000000" doc:"Phone number"`
+	IsActivated bool   `json:"isActivated" required:"true" doc:"Is activated"`
+	Status      string `json:"status" required:"true" enum:"enabled,disabled" doc:"Status"`
+
+	Info *UserInfoRequest `json:"info" required:"true" doc:"Information"`
 }
 
 type UserInfoRequest struct {

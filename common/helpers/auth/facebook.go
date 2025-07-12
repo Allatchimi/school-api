@@ -1,10 +1,11 @@
-package auth
+package authHelper
 
 import (
 	"api/common/constants"
+	httpHelper "api/common/helpers/http"
 	"api/common/types"
 	"api/common/utils"
-	"api/common/utils/security"
+	securityUtil "api/common/utils/security"
 	"api/config"
 	"fmt"
 )
@@ -22,7 +23,7 @@ func VerifyFacebookToken(token string) (*types.FacebookUserProfileResponse, erro
 		return nil, fmt.Errorf("%s", invalidTokenErrMessage)
 	}
 	debugResp := &types.FacebookDebugAccessTokenResponse{}
-	errDebug := utils.HttpGet(
+	errDebug := httpHelper.HttpGet(
 		fmt.Sprintf(
 			"%s%s&access_token=%s|%s",
 			config.Env.FacebookDebugTokenUrl,
@@ -50,11 +51,11 @@ func VerifyFacebookToken(token string) (*types.FacebookUserProfileResponse, erro
 
 	// Retrieve user info
 	userResp := &types.FacebookUserProfileResponse{}
-	secretProof, errSecretProof := security.GenerateHMAC_SHA256_Hex(token, config.Env.FacebookClientSecret)
+	secretProof, errSecretProof := securityUtil.GenerateHMAC_SHA256_Hex(token, config.Env.FacebookClientSecret)
 	if errSecretProof != nil {
 		return nil, constants.Http500ErrorMessage("encode Facebook HMAC HS256 secret proof")
 	}
-	errUser := utils.HttpGet(
+	errUser := httpHelper.HttpGet(
 		fmt.Sprintf(
 			"%s%s&appsecret_proof=%s",
 			config.Env.FacebookProfileUrl,

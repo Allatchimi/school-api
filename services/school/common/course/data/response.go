@@ -54,20 +54,20 @@ type CourseCommentResponse struct {
 
 type CourseResponseList struct {
 	types.PaginatedResponse
-	Data []CourseResponse `json:"data" required:"false" doc:"List of courses" example:"[]"`
+	Data []CourseResponse `json:"data" required:"false" doc:"List of courses"`
 }
 
 type CourseDocumentResponseList struct {
 	types.PaginatedResponse
-	Data []CourseDocumentResponse `json:"data" required:"false" doc:"List of documents" example:"[]"`
+	Data []CourseDocumentResponse `json:"data" required:"false" doc:"List of documents"`
 }
 
 type CourseVideoResponseList struct {
 	types.PaginatedResponse
-	Data []CourseDocumentResponse `json:"data" required:"false" doc:"List of videos" example:"[]"`
+	Data []CourseDocumentResponse `json:"data" required:"false" doc:"List of videos"`
 }
 
 type CourseCpmmentResponseList struct {
 	types.PaginatedResponse
-	Data []CourseCommentResponse `json:"data" required:"false" doc:"List of comments" example:"[]"`
+	Data []CourseCommentResponse `json:"data" required:"false" doc:"List of comments"`
 }

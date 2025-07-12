@@ -62,20 +62,20 @@ type ReportStudentResponse struct {
 
 type ReportEntryResponseList struct {
 	types.PaginatedResponse
-	Data []ReportEntryResponse `json:"data" required:"false" doc:"List of report entries" example:"[]"`
+	Data []ReportEntryResponse `json:"data" required:"false" doc:"List of report entries"`
 }
 
 type ReportGradeResponseList struct {
 	types.PaginatedResponse
-	Data []ReportGradeResponse `json:"data" required:"false" doc:"List of report grades" example:"[]"`
+	Data []ReportGradeResponse `json:"data" required:"false" doc:"List of report grades"`
 }
 
 type ReportConfigResponseList struct {
 	types.PaginatedResponse
-	Data []ReportConfigResponse `json:"data" required:"false" doc:"List of report configs" example:"[]"`
+	Data []ReportConfigResponse `json:"data" required:"false" doc:"List of report configs"`
 }
 
 type ReportStudentResponseList struct {
 	types.PaginatedResponse
-	Data []ReportStudentResponse `json:"data" required:"false" doc:"List of report students" example:"[]"`
+	Data []ReportStudentResponse `json:"data" required:"false" doc:"List of report students"`
 }

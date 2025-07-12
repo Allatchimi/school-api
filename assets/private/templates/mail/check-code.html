@@ -1,0 +1,19 @@
+{{ define "content" }}
+<div>
+  <div style="font-weight: bold; text-align: center; padding: 0px 24px 0px 24px">
+    Verification code
+  </div>
+  <h1 style="
+      font-weight: bold;
+      text-align: center;
+      margin: 0;
+      font-size: 32px;
+      padding: 4px 24px 4px 24px;
+    ">
+    {{ .Code }}
+  </h1>
+  <div style="font-weight: normal; text-align: center; padding: 0px 24px 0px 24px">
+    (This code is valid for {{ .DurationMinutes }} minutes)
+  </div>
+</div>
+{{ end }}

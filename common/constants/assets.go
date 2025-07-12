@@ -4,8 +4,9 @@ const (
 	AssetPrivatePath = "assets/private"
 	AssetPublicPath  = "assets/public"
 
-	AssetKeysPath      = AssetPrivatePath + "/keys"
-	AssetTemplatesPath = AssetPrivatePath + "/templates"
+	AssetKeysPath    = AssetPrivatePath + "/keys"
+	AssetOpenAPIPath = AssetPrivatePath + "/templates/openapi"
+	AssetMailPath    = AssetPrivatePath + "/templates/mail"
 
 	AssetAppPath = AssetPublicPath + "/app"
 )

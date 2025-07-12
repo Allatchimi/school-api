@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"api/common/helpers"
+	httpHelper "api/common/helpers/http"
 	"api/common/types"
 	"api/services/school/university/level/data"
 	"api/services/school/university/level/model"
@@ -24,7 +25,7 @@ func (controller *Controller) Create(
 	},
 ) (result *model.UniversityLevel, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		&input.Body,
 	)
 	return
@@ -37,7 +38,7 @@ func (controller *Controller) CreateLevelDomain(
 	},
 ) (result *model.UniversityLevelDomain, errCode int, err error) {
 	result, errCode, err = controller.Service.CreateLevelDomain(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		&input.Body,
 	)
 	return
@@ -51,7 +52,7 @@ func (controller *Controller) Update(
 	},
 ) (result *model.UniversityLevel, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		input.ID,
 		&input.Body,
 	)
@@ -66,7 +67,7 @@ func (controller *Controller) UpdateLevelDomain(
 	},
 ) (result *model.UniversityLevelDomain, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateLevelDomain(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		input.ID,
 		&input.Body,
 	)
@@ -79,7 +80,7 @@ func (controller *Controller) Delete(
 		data.LevelID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.Delete(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -93,7 +94,7 @@ func (controller *Controller) DeleteLevelDomain(
 		data.LevelDomainID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteLevelDomain(helpers.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.DeleteLevelDomain(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -107,7 +108,7 @@ func (controller *Controller) DeleteMultiple(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultiple(helpers.GetJwtContext(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetJwtContext(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -121,7 +122,7 @@ func (controller *Controller) DeleteMultipleLevelDomain(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultipleLevelDomain(helpers.GetJwtContext(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultipleLevelDomain(httpHelper.GetJwtContext(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -135,7 +136,7 @@ func (controller *Controller) Get(
 		data.LevelID
 	},
 ) (result *model.UniversityLevel, errCode int, err error) {
-	level, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+	level, errCode, err := controller.Service.Get(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -149,7 +150,7 @@ func (controller *Controller) GetLevelDomain(
 		data.LevelDomainID
 	},
 ) (result *model.UniversityLevelDomain, errCode int, err error) {
-	levelDomain, errCode, err := controller.Service.GetLevelDomain(helpers.GetJwtContext(ctx), input.ID)
+	levelDomain, errCode, err := controller.Service.GetLevelDomain(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -166,7 +167,7 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.LevelResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	levelList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
+	levelList, errCode, err := controller.Service.GetAll(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}
@@ -187,7 +188,7 @@ func (controller *Controller) GetAllLevelDomain(
 	},
 ) (result *data.LevelDomainResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	levelList, errCode, err := controller.Service.GetAllLevelDomain(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllLevelDomainRequest)
+	levelList, errCode, err := controller.Service.GetAllLevelDomain(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllLevelDomainRequest)
 	if err != nil {
 		return
 	}

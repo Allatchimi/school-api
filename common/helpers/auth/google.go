@@ -1,4 +1,4 @@
-package auth
+package authHelper
 
 import (
 	"context"

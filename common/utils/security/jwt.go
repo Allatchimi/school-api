@@ -1,4 +1,4 @@
-package security
+package securityUtil
 
 import (
 	"api/common/constants"

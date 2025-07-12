@@ -59,32 +59,30 @@ type SchoolInfoRequest struct {
 }
 
 type SchoolConfigRequest struct {
-	DomainName string `json:"domainName" required:"true" minLength:"3" maxLength:"150" doc:"Domain name" example:"google.com"`
+	DomainName   string `json:"domainName" required:"true" doc:"Domain name" example:".digitschool.cm"`
+	SupportEmail string `json:"supportEmail" required:"false" doc:"Support email" example:"support@digitschool.cm"`
 
-	SmtpHost         string `json:"smtpHost" required:"true" minLength:"3" maxLength:"150" doc:"SMTP host" example:"smtp.google.com"`
-	SmtpPort         int    `json:"smtpPort" required:"true" min:"1" max:"65535" doc:"SMTP port" example:"587"`
-	SmtpUsername     string `json:"smtpUsername" required:"true" minLength:"3" maxLength:"150" doc:"SMTP username" example:"user@gmail.com"`
-	SmtpPassword     string `json:"smtpPassword" required:"true" minLength:"3" maxLength:"150" doc:"SMTP password" example:"password"`
-	SmtpNoReplyEmail string `json:"smtpNoReplyEmail" required:"true" minLength:"3" maxLength:"150" doc:"No reply email" example:"noreply@gmail.com"`
-	SmtpSupportEmail string `json:"smtpSupportEmail" required:"true" minLength:"3" maxLength:"150" doc:"Support email" example:"support@gmail.com"`
+	GoogleWorkspaceCredentials     string `json:"googleWorkspaceCredentials" required:"false" doc:"Google workspace credentials" example:"googleWorkspaceCredentials"`
+	GoogleWorkspaceUserEmailDomain string `json:"googleWorkspaceUserEmailDomain" required:"false" doc:"Google workspace user email domain" example:"googleWorkspaceUserEmailDomain"`
 
-	SmsUserID string `json:"smsUserID" required:"true" minLength:"3" maxLength:"150" doc:"Sms user ID" example:"SMS user id"`
+	SmsUserID        string `json:"smsUserID" required:"false" doc:"Sms user ID" example:"smsUserID"`
+	WhatsappToken    string `json:"whatsappToken" required:"false" doc:"Whatsapp token" example:"whatsappToken"`
+	WhatsappPhoneID  string `json:"whatsappPhoneID" required:"false" doc:"Whatsapp phone ID" example:"whatsappPhoneID"`
+	TelegramBotToken string `json:"telegramBotToken" required:"false" doc:"Telegram bot token" example:"telegramBotToken"`
 
-	UserEmailDomain string `json:"userEmailDomain" required:"true" minLength:"3" maxLength:"150" doc:"User email domain" example:"google.com"`
+	WebsiteTitle       string `json:"websiteTitle" required:"true" doc:"Website title" example:"websiteTitle"`
+	WebsiteDescription string `json:"websiteDescription" required:"true" doc:"Website description" example:"websiteDescription"`
 
-	WebsiteTitle       string `json:"websiteTitle" required:"true" minLength:"3" maxLength:"150" doc:"Website title" example:"School"`
-	WebsiteDescription string `json:"websiteDescription" required:"true" minLength:"3" maxLength:"500" doc:"Website description" example:"School description"`
-
-	ColorPrimary        string `json:"colorPrimary" required:"true" minLength:"4" maxLength:"7" doc:"Primary color in HEX" example:"#FFFFFF"`
-	ColorPrimaryBg      string `json:"colorPrimaryBg" required:"true" minLength:"4" maxLength:"7" doc:"Primary color in HEX" example:"#FFFFFF"`
-	ColorPrimaryBgHover string `json:"colorPrimaryBgHover" required:"true" minLength:"4" maxLength:"7" doc:"Primary color in HEX" example:"#FFFFFF"`
+	ColorPrimary        string `json:"colorPrimary" required:"true" doc:"Primary color in HEX" example:"#FFFFFF"`
+	ColorPrimaryBg      string `json:"colorPrimaryBg" required:"true" doc:"Primary color in HEX" example:"#FFFFFF"`
+	ColorPrimaryBgHover string `json:"colorPrimaryBgHover" required:"true" doc:"Primary color in HEX" example:"#FFFFFF"`
 }
 
 type SchoolDeploymentStatusRequest struct {
-	Status   string `json:"status" required:"true" enum:"done,failed" doc:"Deployment status" example:"done"`
-	Feedback string `json:"feedback" required:"false" doc:"Deployment feedback" example:"Deployment feedback"`
+	Status   string `json:"status" required:"true" enum:"done,failed" doc:"Deployment status"`
+	Feedback string `json:"feedback" required:"false" doc:"Deployment feedback"`
 }
 
 type GetAllRequest struct {
-	Type string `json:"type" query:"type" required:"false" enum:"highschool,university" doc:"School type" example:"university"`
+	Type string `json:"type" query:"type" required:"false" enum:"highschool,university" doc:"School type"`
 }

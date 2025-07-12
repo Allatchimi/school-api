@@ -16,6 +16,12 @@ type UpdateProfilePhoneNumberCheckCodeResponse struct {
 	Token string `json:"token" required:"false" doc:"Token"`
 }
 
+// Update profile message
+type UpdateProfileConfigMessageResponse struct {
+	WhatsappPhoneNumber int64 `json:"whatsappPhoneNumber" required:"false" doc:"Whatsapp phone number"`
+	TelegramChatID      int64 `json:"telegramChatID" required:"false" doc:"Telegram chat id"`
+}
+
 // Update MFA for email
 type UpdateProfileMfaEmailInitResponse struct {
 	Token string `json:"token" required:"false" doc:"Token"`

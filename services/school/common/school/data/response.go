@@ -67,28 +67,26 @@ type SchoolInfoResponse struct {
 }
 
 type SchoolConfigResponse struct {
-	DomainName string `json:"domainName" required:"false" doc:"Domain name"`
+	DomainName   string `json:"domainName" required:"false" doc:"Domain name"`
+	SupportEmail string `json:"supportEmail" required:"false" doc:"Support email"`
 
-	SmtpHost         string `json:"smtpHost" required:"false" doc:"SMTP host"`
-	SmtpPort         int    `json:"smtpPort" required:"false" doc:"SMTP port"`
-	SmtpUsername     string `json:"smtpUsername" required:"false" doc:"SMTP username"`
-	SmtpPassword     string `json:"smtpPassword" required:"false" doc:"SMTP password"`
-	SmtpNoReplyEmail string `json:"smtpNoReplyEmail" required:"false" doc:"No reply email"`
-	SmtpSupportEmail string `json:"smtpSupportEmail" required:"false" doc:"Support email"`
+	GoogleWorkspaceCredentials     string `json:"googleWorkspaceCredentials" required:"false" doc:"Google workspace credentials"`
+	GoogleWorkspaceUserEmailDomain string `json:"googleWorkspaceUserEmailDomain" required:"false" doc:"Google workspace user email domain"`
 
-	SmsUserID string `json:"smsUserID" required:"false" doc:"Sms user ID"`
-
-	UserEmailDomain string `json:"userEmailDomain" required:"false" doc:"User email domain"`
+	SmsUserID        string `json:"smsUserID" required:"false" doc:"Sms user ID"`
+	WhatsappToken    string `json:"whatsappToken" required:"false" doc:"Whatsapp token"`
+	WhatsappPhoneID  string `json:"whatsappPhoneID" required:"false" doc:"Whatsapp phone ID"`
+	TelegramBotToken string `json:"telegramBotToken" required:"false" doc:"Telegram bot token"`
 
 	WebsiteTitle       string `json:"websiteTitle" required:"false" doc:"Website title"`
 	WebsiteDescription string `json:"websiteDescription" required:"false" doc:"Website description"`
 
-	ColorPrimary        string `json:"colorPrimary" required:"false" doc:"Color primary"`
-	ColorPrimaryBg      string `json:"colorPrimaryBg" required:"false" doc:"Color primary bg"`
-	ColorPrimaryBgHover string `json:"colorPrimaryBgHover" required:"false" doc:"Color primary bg hover"`
+	ColorPrimary        string `json:"colorPrimary" required:"false" doc:"Primary color in HEX"`
+	ColorPrimaryBg      string `json:"colorPrimaryBg" required:"false" doc:"Primary color in HEX"`
+	ColorPrimaryBgHover string `json:"colorPrimaryBgHover" required:"false" doc:"Primary color in HEX"`
 }
 
 type SchoolResponseList struct {
 	types.PaginatedResponse
-	Data []SchoolResponse `json:"data" required:"false" doc:"List of schools" example:"[]"`
+	Data []SchoolResponse `json:"data" required:"false" doc:"List of schools"`
 }

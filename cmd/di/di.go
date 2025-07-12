@@ -9,6 +9,7 @@ import (
 	"api/services/common/monitoring"
 	"api/services/common/notification"
 	"api/services/common/permissionchecker"
+	"api/services/common/telegram"
 	"api/services/school/common/course"
 	"api/services/school/common/director"
 	"api/services/school/common/exam"
@@ -45,7 +46,7 @@ import (
 
 // InjectDependencies Inject all dependencies
 func InjectDependencies() {
-	// Others
+	// Common
 	var communicationRepo = communication.NewRepository(config.DB)
 	var contactRepo = contact.NewRepository(config.DB)
 	var notificationRepo = notification.NewRepository(config.DB)
@@ -307,7 +308,14 @@ func InjectDependencies() {
 		),
 	)
 
-	// Helpers
+	// Telegram
+	api.AllControllers.TelegramController = telegram.NewController(
+		telegram.NewService(
+			api.AllControllers.SchoolController.Service,
+		),
+	)
+
+	// Permissions checker
 	permissionchecker.InjectServices(
 		api.AllControllers.UserController.Service,
 		api.AllControllers.SchoolController.Service,

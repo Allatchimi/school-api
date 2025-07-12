@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"api/common/helpers"
+	httpHelper "api/common/helpers/http"
 	"api/common/types"
 	"api/services/school/common/meeting/data"
 	"api/services/school/common/meeting/model"
@@ -24,7 +25,7 @@ func (controller *Controller) Create(
 	},
 ) (result *model.MeetingRoom, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
-		helpers.GetJwtContext(ctx),
+		httpHelper.GetJwtContext(ctx),
 		&input.Body,
 	)
 	return
@@ -36,7 +37,7 @@ func (controller *Controller) Delete(
 		data.MeetingRoomID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.Delete(helpers.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.Delete(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -50,7 +51,7 @@ func (controller *Controller) DeleteMultiple(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultiple(helpers.GetJwtContext(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetJwtContext(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -64,7 +65,7 @@ func (controller *Controller) Get(
 		data.MeetingRoomID
 	},
 ) (result *model.MeetingRoom, errCode int, err error) {
-	meeting, errCode, err := controller.Service.Get(helpers.GetJwtContext(ctx), input.ID)
+	meeting, errCode, err := controller.Service.Get(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -81,7 +82,7 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.MeetingRoomResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	meetingList, errCode, err := controller.Service.GetAll(helpers.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
+	meetingList, errCode, err := controller.Service.GetAll(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}
@@ -99,7 +100,7 @@ func (controller *Controller) Join(
 		data.MeetingRoomID
 	},
 ) (result string, errCode int, err error) {
-	meeting, errCode, err := controller.Service.Join(helpers.GetJwtContext(ctx), input.ID)
+	meeting, errCode, err := controller.Service.Join(httpHelper.GetJwtContext(ctx), input.ID)
 	if err != nil {
 		return
 	}

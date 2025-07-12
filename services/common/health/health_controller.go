@@ -3,7 +3,7 @@ package health
 import (
 	"context"
 
-	"api/common/helpers"
+	httpHelper "api/common/helpers/http"
 	"api/services/common/health/data"
 )
 
@@ -21,7 +21,7 @@ func (controller *Controller) HealthLive(
 		data.HealthRequest
 	},
 ) (result bool, errCode int, err error) {
-	health, errCode, err := controller.Service.HealthLive(helpers.GetJwtContext(ctx))
+	health, errCode, err := controller.Service.HealthLive(httpHelper.GetJwtContext(ctx))
 	if err != nil {
 		return
 	}
@@ -35,7 +35,7 @@ func (controller *Controller) HealthDepencencies(
 		data.HealthRequest
 	},
 ) (result bool, errCode int, err error) {
-	health, errCode, err := controller.Service.HealthDepencencies(helpers.GetJwtContext(ctx))
+	health, errCode, err := controller.Service.HealthDepencencies(httpHelper.GetJwtContext(ctx))
 	if err != nil {
 		return
 	}

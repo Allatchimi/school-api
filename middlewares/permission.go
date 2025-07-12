@@ -1,9 +1,10 @@
 package middlewares
 
 import (
-	"api/common/helpers"
+	httpHelper "api/common/helpers/http"
 	"api/services/user/permission"
 	"api/services/user/user"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -17,9 +18,28 @@ func PermissionMiddleware(api huma.API, userRepo *user.Repository, permissionRep
 	return func(ctx huma.Context, next func(huma.Context)) {
 		// Retrieve jwtToken
 		ctxContext := ctx.Context()
-		jwtToken := helpers.GetJwtContext(&ctxContext)
+		jwtToken := httpHelper.GetJwtContext(&ctxContext)
 		if jwtToken == nil || jwtToken.UserID <= 0 {
 			next(ctx)
+			return
+		}
+
+		// Find user
+		foundUser, errFound := userRepo.GetByID(jwtToken.UserID)
+		if errFound != nil {
+			tempErr := constants.Http500ErrorMessage("interact with user model")
+			_ = huma.WriteErr(api, ctx, http.StatusInternalServerError, tempErr.Error(), tempErr)
+			return
+		}
+		if foundUser == nil {
+			tempErr := constants.Http403InvalidPermissionErrorMessage()
+			_ = huma.WriteErr(api, ctx, http.StatusForbidden, tempErr.Error(), tempErr)
+			return
+		}
+		// Check if the status is enabled
+		if foundUser.Status != constants.USER_STATUS_ENABLED {
+			tempErr := fmt.Errorf("%s", "User account is disabled! Please contact support.")
+			_ = huma.WriteErr(api, ctx, http.StatusUnavailableForLegalReasons, tempErr.Error(), tempErr)
 			return
 		}
 
@@ -42,21 +62,8 @@ func PermissionMiddleware(api huma.API, userRepo *user.Repository, permissionRep
 
 		// Check for required permissions
 		if len(featuresScope) > 0 {
-			// Retrieve user data
-			foundUser, errFound := userRepo.GetByID(jwtToken.UserID)
-			if errFound != nil {
-				tempErr := constants.Http500ErrorMessage("interact with role model")
-				_ = huma.WriteErr(api, ctx, http.StatusInternalServerError, tempErr.Error(), tempErr)
-				return
-			}
-			if foundUser == nil {
-				tempErr := constants.Http403InvalidPermissionErrorMessage()
-				_ = huma.WriteErr(api, ctx, http.StatusForbidden, tempErr.Error(), tempErr)
-				return
-			}
-
-			// Check if the use have feature
-			var haveFeature = false
+			// Check if the user has feature
+			var haveFeature bool = false
 			for _, feat := range strings.Split(featuresScope, ",") {
 				if feat == foundUser.Role.Feature {
 					haveFeature = true
@@ -68,7 +75,7 @@ func PermissionMiddleware(api huma.API, userRepo *user.Repository, permissionRep
 				return
 			}
 
-			// Check if the user have table name permission
+			// Check if the user has table name permission
 			if len(tableName) > 0 {
 				// Retrieve permission
 				userPermission, errPerm := permissionRepo.GetByRoleIDTableNameMultiple(foundUser.RoleID, tableName, "*")

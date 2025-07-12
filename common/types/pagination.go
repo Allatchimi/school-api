@@ -3,8 +3,8 @@ package types
 import "api/common/constants"
 
 type PaginationRequest struct {
-	Page  int `json:"page" query:"page" required:"false" doc:"Current page" example:"1"`
-	Limit int `json:"limit" query:"limit" min:"1" required:"false" doc:"Max items per page" example:"20"`
+	Page  int `json:"page" query:"page" required:"false" doc:"Current page"`
+	Limit int `json:"limit" query:"limit" minimum:"1" required:"false" doc:"Max items per page"`
 }
 
 type Pagination struct {

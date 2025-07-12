@@ -10,25 +10,30 @@ type LoginWithEmailRequest struct {
 	Email         string `json:"email" required:"true" format:"email" doc:"Email"`
 	Password      string `json:"password" required:"true" minLength:"8" maxLength:"30" doc:"Base64 encoded password"`
 	StayConnected bool   `json:"stayConnected" required:"false" doc:"Stay connected"`
+	SchoolID      int64  `json:"schoolID" required:"false" doc:"School ID"`
 }
 type LoginWithProviderRequest struct {
 	Provider string `json:"provider" required:"true" doc:"Provider" minLength:"2" maxLength:"30"`
 	Token    string `json:"token" required:"true" doc:"Token" minLength:"3"`
+	SchoolID int64  `json:"schoolID" required:"false" doc:"School ID"`
 }
 type LoginRequest struct {
 	Email         string `json:"email" required:"true" format:"email" doc:"Email"`
 	Password      string `json:"password" required:"true" minLength:"8" maxLength:"30" doc:"Base64 encoded password"`
 	StayConnected bool   `json:"stayConnected" required:"false" doc:"Stay connected"`
+	SchoolID      int64  `json:"schoolID" required:"false" doc:"School ID"`
 }
 
 // Register
 type RegisterWithEmailRequest struct {
 	Email    string `json:"email" required:"true" format:"email" doc:"Email"`
 	Password string `json:"password" required:"true" minLength:"8" maxLength:"30" doc:"Base64 encoded password"`
+	SchoolID int64  `json:"schoolID" required:"false" doc:"School ID"`
 }
 type RegisterRequest struct {
 	Email    string `json:"email" required:"true" format:"email" doc:"Email"`
 	Password string `json:"password" required:"true" minLength:"8" maxLength:"30" doc:"Base64 encoded password"`
+	SchoolID int64  `json:"schoolID" required:"false" doc:"School ID"`
 }
 
 // Activate account

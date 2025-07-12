@@ -56,6 +56,47 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Update profile config message
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "update-profile-config-message",
+			Summary:     "Update profile config message",
+			Description: "Update profile configuration for whatsapp and telegram",
+			Method:      http.MethodPut,
+			Path:        fmt.Sprintf("%s/config/message", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeBearerToken: { // Authentication
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body data.UpdateProfileMessageRequest
+			},
+		) (*struct {
+			Body data.UpdateProfileConfigMessageResponse
+		}, error) {
+			result, errCode, err := controller.UpdateProfileConfigMessage(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct {
+				Body data.UpdateProfileConfigMessageResponse
+			}{Body: data.UpdateProfileConfigMessageResponse{
+				WhatsappPhoneNumber: result.WhatsappPhoneNumber,
+				TelegramChatID:      result.TelegramChatID,
+			}}, nil
+		},
+	)
+
 	// Update password init
 	huma.Register(
 		*humaApi,

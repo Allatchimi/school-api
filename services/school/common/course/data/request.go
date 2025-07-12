@@ -3,11 +3,11 @@ package data
 import "api/common/types"
 
 type CourseID struct {
-	ID int64 `json:"id" path:"id" required:"true" doc:"Course id" example:"1"`
+	ID int64 `json:"id" path:"id" required:"true" doc:"Course id"`
 }
 
 type CourseDocumentID struct {
-	ID int64 `json:"id" path:"id" required:"true" doc:"Course document id" example:"1"`
+	ID int64 `json:"id" path:"id" required:"true" doc:"Course document id"`
 }
 
 type CourseRequest struct {
@@ -23,14 +23,14 @@ type CourseRequest struct {
 	Documents []struct {
 		Title       string `json:"title" required:"true" doc:"Title"`
 		Description string `json:"description" required:"false" doc:"Description"`
-		Url         string `json:"url" required:"false" doc:"Url" example:"[]"`
-	} `json:"documents" required:"false" doc:"Documents" example:"[]"`
+		Url         string `json:"url" required:"false" doc:"Url"`
+	} `json:"documents" required:"false" doc:"Documents"`
 
 	Videos []struct {
 		Title       string `json:"title" required:"true" doc:"Title"`
 		Description string `json:"description" required:"false" doc:"Description"`
-		Url         string `json:"url" required:"false" doc:"Url" example:"[]"`
-	} `json:"videos" required:"false" doc:"Videos" example:"[]"`
+		Url         string `json:"url" required:"false" doc:"Url"`
+	} `json:"videos" required:"false" doc:"Videos"`
 }
 
 type CourseDocumentRequest struct {

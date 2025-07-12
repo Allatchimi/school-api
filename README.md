@@ -22,7 +22,7 @@ Others information such configurations are on ```app.env```
 ### 2. Clone the repository
 
 ```
-git clone https://github.com/EMENEC-FINANCE/school-api.git
+git clone https://github.com/EMENEC-FINANCE/digitcore-api.git
 ```
 
 ```

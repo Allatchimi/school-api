@@ -37,6 +37,12 @@ type UpdateProfilePhoneNumberNewPhoneNumberRequest struct {
 	PhoneNumber uint64 `json:"phoneNumber" required:"true" minimum:"10000000" doc:"Phone number"`
 }
 
+// Update message
+type UpdateProfileMessageRequest struct {
+	WhatsappPhoneNumber int64 `json:"whatsappPhoneNumber" required:"false" doc:"Whatsapp phone number"`
+	TelegramChatID      int64 `json:"telegramChatID" required:"false" doc:"Telegram chat id"`
+}
+
 // Update MFA for email
 type UpdateProfileMfaEmailCheckCodeRequest struct {
 	Token string `json:"token" required:"true" minLength:"3" doc:"Received token on previous step"`

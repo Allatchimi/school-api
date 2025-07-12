@@ -15,7 +15,7 @@ var RedisClient *goredislib.Client
 var redsyncInstance *redsync.Redsync
 
 const (
-	deployLockKey = "deploy-lock"
+	gitDeployLockKey = "git-deploy-lock"
 )
 
 // Establishes a connection to the Redis server.
@@ -44,7 +44,7 @@ func CheckRedis() (err error) {
 
 // GitDistributedLock acquires a distributed lock to prevent multiple git operations at the same time.
 func GitDistributedLock(operation func() error) error {
-	mutex := redsyncInstance.NewMutex(deployLockKey,
+	mutex := redsyncInstance.NewMutex(gitDeployLockKey,
 		redsync.WithExpiry(30*time.Second),
 		redsync.WithTries(5),
 	)

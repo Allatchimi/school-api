@@ -17,6 +17,7 @@ import (
 	"api/services/common/health"
 	"api/services/common/monitoring"
 	"api/services/common/notification"
+	"api/services/common/telegram"
 	"api/services/school/common/course"
 	"api/services/school/common/director"
 	"api/services/school/common/exam"
@@ -52,7 +53,7 @@ import (
 )
 
 type Controllers struct {
-	// Others service
+	// Common service
 	CommunicationController *communication.Controller
 	ContactController       *contact.Controller
 	NotificationController  *notification.Controller
@@ -96,13 +97,16 @@ type Controllers struct {
 	LevelController      *level.Controller
 	SemesterController   *semester.Controller
 	UnitController       *unit.Controller
+
+	// Telegram
+	TelegramController *telegram.Controller
 }
 
 var AllControllers = &Controllers{}
 
 // Register all API endpoints
 func registerEndpoints(humaApi *huma.API) {
-	// Others service
+	// Common service
 	communication.RegisterEndpoints(humaApi, AllControllers.CommunicationController)
 	contact.RegisterEndpoints(humaApi, AllControllers.ContactController)
 	notification.RegisterEndpoints(humaApi, AllControllers.NotificationController)
@@ -146,6 +150,9 @@ func registerEndpoints(humaApi *huma.API) {
 	domain.RegisterEndpoints(humaApi, AllControllers.DomainController)
 	level.RegisterEndpoints(humaApi, AllControllers.LevelController)
 	unit.RegisterEndpoints(humaApi, AllControllers.UnitController)
+
+	// Telegram
+	telegram.RegisterEndpoints(humaApi, AllControllers.TelegramController)
 }
 
 // Start Set up and start the API: set up API documentation,
