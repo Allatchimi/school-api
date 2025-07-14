@@ -142,19 +142,13 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 
 	// Deploy school
 	go func() {
-		ok, err := deploymentHelper.DeploySchool(result)
+		err := deploymentHelper.DeploySchool(result)
 		if err != nil {
 			service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
 				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_FAILED,
 				Feedback: fmt.Sprintf("Failed to deploy school! Error: %s", err.Error()),
 			})
 			return
-		}
-		if !ok {
-			service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
-				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES,
-				Feedback: "School deployment skipped! No changes detected.",
-			})
 		}
 		service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
 			Status:   constants.SCHOOL_DEPLOYMENT_STATUS_PENDING,
@@ -261,24 +255,20 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 
 	// Deploy school
 	go func() {
-		ok, err := deploymentHelper.DeploySchool(result)
-		if err != nil {
+		if !newConfig.IsSameAsRequest(request.Config) {
+			err := deploymentHelper.DeploySchool(result)
+			if err != nil {
+				service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
+					Status:   constants.SCHOOL_DEPLOYMENT_STATUS_FAILED,
+					Feedback: fmt.Sprintf("Failed to deploy school! Error: %s", err.Error()),
+				})
+				return
+			}
 			service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
-				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_FAILED,
-				Feedback: fmt.Sprintf("Failed to deploy school! Error: %s", err.Error()),
-			})
-			return
-		}
-		if !ok {
-			service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
-				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES,
-				Feedback: "School deployment skipped! No changes detected.",
+				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_PENDING,
+				Feedback: "School deployment pushed to GitHub! Now waiting for deployment to complete.",
 			})
 		}
-		service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
-			Status:   constants.SCHOOL_DEPLOYMENT_STATUS_PENDING,
-			Feedback: "School deployment pushed to GitHub! Now waiting for deployment to complete.",
-		})
 	}()
 	return
 }
@@ -393,19 +383,13 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 
 	// Delete school deployment
 	go func() {
-		ok, err := deploymentHelper.DeleteSchoolDeployment(id)
+		err := deploymentHelper.DeleteSchoolDeployment(id)
 		if err != nil {
 			service.Repository.UpdateDeploymentStatusByID(id, &data.SchoolDeploymentStatusRequest{
 				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_FAILED,
 				Feedback: fmt.Sprintf("Failed to delete school! %s", err.Error()),
 			})
 			return
-		}
-		if !ok {
-			service.Repository.UpdateDeploymentStatusByID(id, &data.SchoolDeploymentStatusRequest{
-				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES,
-				Feedback: "Deleted school deployment skipped! No changes detected.",
-			})
 		}
 		service.Repository.UpdateDeploymentStatusByID(id, &data.SchoolDeploymentStatusRequest{
 			Status:   constants.SCHOOL_DEPLOYMENT_STATUS_PENDING,

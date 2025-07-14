@@ -17,6 +17,10 @@ import (
 var errInit error
 
 func main() {
+	// Enable logger
+	helpers.EnableLogger()
+	defer helpers.Logger.Sync()
+
 	// Check if there are any errors when initializing the app
 	if errInit != nil {
 		helpers.Logger.Warn(
@@ -46,7 +50,9 @@ func main() {
 // Called before the main entry point. It's useful for setting up
 // configurations before starting the application.
 func init() {
+	// Enable logger
 	helpers.EnableLogger()
+	defer helpers.Logger.Sync()
 
 	// Load env
 	errEnv := config.LoadEnv()

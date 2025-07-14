@@ -8,8 +8,14 @@ var Logger *zap.Logger
 
 // EnableLogger Enables the logger to print beautiful log messages.
 func EnableLogger() {
-	Logger, _ = zap.NewProduction()
-	defer Logger.Sync()
+	if Logger != nil {
+		return
+	}
+	var err error
+	Logger, err = zap.NewProduction()
+	if err != nil {
+		panic(err)
+	}
 }
 
 // LogMigrationsWithoutFk Shows custom log message for migrations without foreign key.

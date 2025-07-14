@@ -4,51 +4,26 @@ import (
 	"context"
 
 	"api/common/helpers"
+	configDeploy "api/common/helpers/deployment"
 	googleMailHelper "api/common/helpers/message/mail/google"
 	smtpMailHelper "api/common/helpers/message/mail/smtp"
 	telegramHelper "api/common/helpers/message/telegram"
 	whatsappHelper "api/common/helpers/message/whatsapp"
-	"api/services/user/user/model"
+	modelSchool "api/services/school/common/school/model"
+	modelUser "api/services/user/user/model"
 
 	"go.uber.org/zap"
 )
 
 func Testssssss() {
-	// Send Telegram message
-	telegramHelper.SendMessage(
-		"7676549051:AAF4u-ElGxwzarPY2EAul6YSdCwwKjxLItk",
-		"Welcome Prosper! Nice to see you.",
-		[]model.User{
-			{
-				Config: &model.UserConfig{
-					TelegramChatID: 123456789,
-				},
-			},
-		},
-	)
-
-	// Send WhatsApp message
-	whatsappHelper.SendMessage(
-		"ElGxwzarPY2EAul6YSdCwwKjxLItk",
-		"7676549051",
-		"Welcome Prosper! Nice to see you.",
-		[]model.User{
-			{
-				Config: &model.UserConfig{
-					WhatsappPhoneNumber: 237696666666,
-				},
-			},
-		},
-	)
-
 	// Create Google user
 	ctx := context.Background()
-	admin := &model.User{
+	admin := &modelUser.User{
 		Email: "admin@emfi.cm",
 	}
-	user := &model.User{
+	user := &modelUser.User{
 		Email: "prosper.abouar@gmail.com",
-		Info: &model.UserInfo{
+		Info: &modelUser.UserInfo{
 			FirstName: "Prosper",
 			LastName:  "Abouar",
 			Gender:    "male",
@@ -86,22 +61,54 @@ func Testssssss() {
 	}
 	helpers.Logger.Info("Email sent!")
 
-	// school := &model.School{
-	// 	Type:      "university",
-	// 	Favicon:   "https://www.google.com/favicon.ico",
-	// 	Logo:      "https://www.gstatic.com/marketing-cms/assets/images/c5/3a/200414104c669203c62270f7884f/google-wordmarks-2x.webp=n-w100-h32-fcrop64=1,00000000ffffffff-rw",
-	// 	LogoWhite: "https://www.gstatic.com/marketing-cms/assets/images/c5/3a/200414104c669203c62270f7884f/google-wordmarks-2x.webp=n-w100-h32-fcrop64=1,00000000ffffffff-rw",
-	// 	Config: &model.SchoolConfig{
-	// 		DomainName:          "www.uy1.cm",
-	// 		WebsiteTitle:        "UY1",
-	// 		WebsiteDescription:  "School management app",
-	// 		ColorPrimary:        "#111111",
-	// 		ColorPrimaryBg:      "#F1F1F1",
-	// 		ColorPrimaryBgHover: "#D1D1D1",
-	// 	},
-	// }
-	// school.ID = 2
-	// configDeploy.DeploySchool(school)
+	// Deploy school
+	school := &modelSchool.School{
+		Type:      "university",
+		Favicon:   "https://www.google.com/favicon.ico",
+		Logo:      "https://www.gstatic.com/marketing-cms/assets/images/c5/3a/200414104c669203c62270f7884f/google-wordmarks-2x.webp=n-w100-h32-fcrop64=1,00000000ffffffff-rw",
+		LogoWhite: "https://www.gstatic.com/marketing-cms/assets/images/c5/3a/200414104c669203c62270f7884f/google-wordmarks-2x.webp=n-w100-h32-fcrop64=1,00000000ffffffff-rw",
+		Config: &modelSchool.SchoolConfig{
+			DomainName:          "www.uy1.cm",
+			WebsiteTitle:        "UY1",
+			WebsiteDescription:  "School management app",
+			ColorPrimary:        "#111111",
+			ColorPrimaryBg:      "#F1F1F1",
+			ColorPrimaryBgHover: "#D1D1D1",
+		},
+	}
+	school.ID = 1
+	configDeploy.DeploySchool(school)
 	// configDeploy.DeleteSchoolDeployment(1)
 	// configDeploy.DeleteSchoolDeployment(2)
+
+	// Send Telegram message
+	go func() {
+		telegramHelper.SendMessage(
+			"7676549051:AAF4u-ElGxwzarPY2EAul6YSdCwwKjxLItk",
+			"Welcome Prosper! Nice to see you.",
+			[]modelUser.User{
+				{
+					Config: &modelUser.UserConfig{
+						TelegramChatID: 123456789,
+					},
+				},
+			},
+		)
+	}()
+
+	// Send WhatsApp message
+	go func() {
+		whatsappHelper.SendMessage(
+			"ElGxwzarPY2EAul6YSdCwwKjxLItk",
+			"7676549051",
+			"Welcome Prosper! Nice to see you.",
+			[]modelUser.User{
+				{
+					Config: &modelUser.UserConfig{
+						WhatsappPhoneNumber: 237696666666,
+					},
+				},
+			},
+		)
+	}()
 }

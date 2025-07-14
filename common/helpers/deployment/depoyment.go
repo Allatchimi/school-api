@@ -21,7 +21,7 @@ const (
 )
 
 // DeploySchool generates configuration files and pushes them to the repository.
-func DeploySchool(school *model.School) (ok bool, err error) {
+func DeploySchool(school *model.School) (err error) {
 	if school == nil || school.ID < 1 || school.Config == nil || len(school.Config.DomainName) < 1 {
 		errMsg := "School is nil or have invalid fields!"
 		err = fmt.Errorf("%s", errMsg)
@@ -139,21 +139,17 @@ func DeploySchool(school *model.School) (ok bool, err error) {
 	}
 
 	// Push deployment
-	ok, err = helpers.GitPushSchoolDeployment(fmt.Sprintf("%d", school.ID), tempDir, outputDir)
+	err = helpers.GitPushSchoolDeployment(fmt.Sprintf("%d", school.ID), tempDir, outputDir)
 	if err != nil {
 		helpers.Logger.Error("Failed to push school deployment!", zap.String("Error", err.Error()))
-		return false, err
+		return
 	}
-	if !ok {
-		helpers.Logger.Warn(fmt.Sprintf("School deployment skipped! No changes detected for school %d!", school.ID))
-	} else {
-		helpers.Logger.Info(fmt.Sprintf("School deployment successfully added for school %d!", school.ID))
-	}
+	helpers.Logger.Info(fmt.Sprintf("School deployment successfully added for school %d!", school.ID))
 	return
 }
 
 // DeleteSchoolDeployment deletes a school deployment from the repository.
-func DeleteSchoolDeployment(schoolID int64) (ok bool, err error) {
+func DeleteSchoolDeployment(schoolID int64) (err error) {
 	if schoolID < 1 {
 		errMsg := "School ID is invalid!"
 		err = fmt.Errorf("%s", errMsg)
@@ -180,15 +176,11 @@ func DeleteSchoolDeployment(schoolID int64) (ok bool, err error) {
 	}
 
 	// Push deployment to delete school
-	ok, err = helpers.GitPushDeletedSchoolDeployment(fmt.Sprintf("%d", schoolID), tempDir)
+	err = helpers.GitPushDeletedSchoolDeployment(fmt.Sprintf("%d", schoolID), tempDir)
 	if err != nil {
 		helpers.Logger.Error("Failed to push deleted school deployment!", zap.String("Error", err.Error()))
-		return false, err
+		return
 	}
-	if !ok {
-		helpers.Logger.Warn(fmt.Sprintf("School deployment deletion skipped! No changes detected for school %d!", schoolID))
-	} else {
-		helpers.Logger.Info(fmt.Sprintf("School deployment successfully deleted for school %d!", schoolID))
-	}
+	helpers.Logger.Info(fmt.Sprintf("School deployment successfully deleted for school %d!", schoolID))
 	return
 }

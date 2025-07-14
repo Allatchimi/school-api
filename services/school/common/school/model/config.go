@@ -65,3 +65,15 @@ func FromConfigRequest(item *data.SchoolConfigRequest) *SchoolConfig {
 	}
 	return resp
 }
+
+func (item *SchoolConfig) IsSameAsRequest(itemRequest *data.SchoolConfigRequest) bool {
+	if item == nil || itemRequest == nil {
+		return false
+	}
+	return (item.DomainName == itemRequest.DomainName) &&
+		(item.WebsiteTitle == itemRequest.WebsiteTitle) &&
+		(item.WebsiteDescription == itemRequest.WebsiteDescription) &&
+		(item.ColorPrimary == itemRequest.ColorPrimary) &&
+		(item.ColorPrimaryBg == itemRequest.ColorPrimaryBg) &&
+		(item.ColorPrimaryBgHover == itemRequest.ColorPrimaryBgHover)
+}
