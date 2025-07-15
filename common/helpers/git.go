@@ -104,6 +104,7 @@ func GitPushSchoolDeployment(schoolID string, baseDir string, filesDir string) (
 	if err = config.GitDistributedLock(func() error {
 		return gitClone(repoDir, config.Env.GitRepoBranch, false)
 	}); err != nil {
+		Logger.Error("Failed to clone repo!", zap.Error(err))
 		return
 	}
 
