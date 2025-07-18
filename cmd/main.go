@@ -5,7 +5,6 @@ import (
 	"api/cmd/di"
 	"api/cmd/fixture"
 	"api/cmd/migrate"
-	"api/cmd/test"
 	"api/common/helpers"
 	securityUtil "api/common/utils/security"
 	"api/config"
@@ -40,8 +39,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	test.Testssssss()
 
 	di.InjectDependencies()
 	api.StartGin()

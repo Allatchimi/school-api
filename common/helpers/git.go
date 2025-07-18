@@ -108,9 +108,9 @@ func GitPushSchoolDeployment(schoolID string, baseDir string, filesDir string) (
 		return
 	}
 
-	// Pull the changes from GitHub
+	// Pull the changes from main branch
 	if err = config.GitDistributedLock(func() error {
-		return gitPull(repoDir, config.Env.GitRepoBranch)
+		return gitPull(repoDir, "main")
 	}); err != nil {
 		Logger.Warn("Failed to pull git changes! Skipping...")
 	}

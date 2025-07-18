@@ -2,11 +2,13 @@ package test
 
 import (
 	"context"
+	"fmt"
 
+	"api/common/constants"
 	"api/common/helpers"
 	configDeploy "api/common/helpers/deployment"
 	googleMailHelper "api/common/helpers/message/mail/google"
-	smtpMailHelper "api/common/helpers/message/mail/smtp"
+	smtpHelper "api/common/helpers/message/mail/smtp"
 	telegramHelper "api/common/helpers/message/telegram"
 	whatsappHelper "api/common/helpers/message/whatsapp"
 	modelSchool "api/services/school/common/school/model"
@@ -37,29 +39,33 @@ func Testssssss() {
 	}
 
 	// Sent mail
-	data := &smtpMailHelper.EmailDataCheckCode{
-		EmailData: smtpMailHelper.EmailData{
-			HomePageLink: "https://digitcore.cm",
+	data := &smtpHelper.EmailDataCheckCode{
+		EmailData: smtpHelper.EmailData{
+			HomePageLink: fmt.Sprintf("https://%s", "digitcore.cm"),
 			Logo:         "https://static-cdn.jtvnw.net/growth-assets/email_twitch_logo_uv",
-			Title:        "Welcome to EMFI!",
-			Message:      "Thank you for signing up. Use the code below to verify your account.",
+			Title:        constants.MailVerifyEmailCheckCode.Title,
+			Message:      constants.MailVerifyEmailCheckCode.Message,
 		},
-		Code:            "728491",
+		Code:            fmt.Sprintf("%d", 234589),
 		DurationMinutes: 10,
 	}
-	htmlBody, errMail := data.LoadTemplate()
-	if errMail != nil {
-		helpers.Logger.Warn(
-			"Failed to load template!",
-			zap.Error(errMail))
+	body, err := data.LoadTemplate()
+	if err != nil {
+		helpers.Logger.Error("Failed to load email template", zap.Error(err))
+		return
 	}
-	errMail = smtpMailHelper.SendEmailTo("support@emfi.cm", "EMFI support", "prosper.abouar@gmail.com", "Account verification", htmlBody)
-	if errMail != nil {
-		helpers.Logger.Warn(
-			"Failed to send email!",
-			zap.Error(errMail))
+	err = smtpHelper.SendEmailTo(
+		"support@digitcore.cm",
+		"Digitcore support",
+		"prosper.abouar@gmail.com",
+		constants.MailVerifyEmailCheckCode.Subject,
+		body,
+	)
+	if err != nil {
+		helpers.Logger.Error("Failed to send email", zap.Error(err))
+		return
 	}
-	helpers.Logger.Info("Email sent!")
+	helpers.Logger.Info("Email sent successfully")
 
 	// Deploy school
 	school := &modelSchool.School{
@@ -68,12 +74,12 @@ func Testssssss() {
 		Logo:      "https://www.gstatic.com/marketing-cms/assets/images/c5/3a/200414104c669203c62270f7884f/google-wordmarks-2x.webp=n-w100-h32-fcrop64=1,00000000ffffffff-rw",
 		LogoWhite: "https://www.gstatic.com/marketing-cms/assets/images/c5/3a/200414104c669203c62270f7884f/google-wordmarks-2x.webp=n-w100-h32-fcrop64=1,00000000ffffffff-rw",
 		Config: &modelSchool.SchoolConfig{
-			DomainName:          "www.uy1.cm",
-			WebsiteTitle:        "UY1",
-			WebsiteDescription:  "School management app",
-			ColorPrimary:        "#111111",
-			ColorPrimaryBg:      "#F1F1F1",
-			ColorPrimaryBgHover: "#D1D1D1",
+			DomainName:          "www.digitschool.cm",
+			WebsiteTitle:        "Digitschool",
+			WebsiteDescription:  "Welcome to Digitschool! The future of education. With Digitschool, you can learn anything you want, whenever you want, from anywhere you want. Just enroll and start now.",
+			ColorPrimary:        "#3c6989",
+			ColorPrimaryBg:      "#e4e8ea",
+			ColorPrimaryBgHover: "#a3b6c6",
 		},
 	}
 	school.ID = 1

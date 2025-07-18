@@ -82,9 +82,9 @@ func DeploySchool(school *model.School) (err error) {
 	outputDir := filepath.Join(tempDir, fmt.Sprintf("%d", school.ID))
 	deploymentDir := filepath.Join(outputDir, "deployment")
 	websiteDir := filepath.Join(outputDir, "website")
-	colorDir := filepath.Join(websiteDir, "src", "lib", "api", "constants", "common")
+	colorDir := filepath.Join(websiteDir, "src", "lib", "constants", "common")
 	faviconDir := filepath.Join(websiteDir, "src", "app")
-	logosDir := filepath.Join(websiteDir, "public", "images", "logos")
+	logosDir := filepath.Join(websiteDir, "public", "assets", "images", "logos")
 	// Create required directories
 	for _, dir := range []string{outputDir, deploymentDir, websiteDir, colorDir, faviconDir, logosDir} {
 		if err = os.MkdirAll(dir, os.ModePerm); err != nil {

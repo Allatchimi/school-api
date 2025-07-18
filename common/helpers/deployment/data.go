@@ -14,9 +14,6 @@ CDN_KEY="{{ .CdnKey }}"
 NEXT_AUTH_URL="{{ .NextAuthUrl }}"
 NEXT_AUTH_SECRET="{{ .NextAuthSecret }}"
 
-GOOGLE_CLIENT_ID="459098306223-7b9ln9s1s6ccv67r9mr2vp2o52j0f7hv.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET="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"
-
 SCHOOL_ID={{ .SchoolID }}
 SCHOOL_TYPE="{{ .SchoolType }}"
 SCHOOL_API_KEY="{{ .SchoolApiKey }}"
