@@ -25,12 +25,18 @@ func RegisterEndpoints(
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID:   "login-email",
-			Summary:       "Login with email",
-			Description:   "Login user with email and password. Account need to be activated to retrieve OK response.",
-			Method:        http.MethodPost,
-			Path:          fmt.Sprintf("%s/login/email", endpointConfig.Group),
-			Tags:          endpointConfig.Tag,
+			OperationID: "login-email",
+			Summary:     "Login with email",
+			Description: "Login user with email and password. Account need to be activated to retrieve OK response.",
+			Method:      http.MethodPost,
+			Path:        fmt.Sprintf("%s/login/email", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+				},
+			},
 			MaxBodyBytes:  constants.DefaultBodySize,
 			DefaultStatus: http.StatusOK,
 			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusForbidden, http.StatusNotFound},
@@ -54,12 +60,18 @@ func RegisterEndpoints(
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID:   "login-provider",
-			Summary:       "Login with provider",
-			Description:   "Login user with a provider(Google, Facebook, ...) and token.",
-			Method:        http.MethodPost,
-			Path:          fmt.Sprintf("%s/login/provider", endpointConfig.Group),
-			Tags:          endpointConfig.Tag,
+			OperationID: "login-provider",
+			Summary:     "Login with provider",
+			Description: "Login user with a provider(Google, Facebook, ...) and token.",
+			Method:      http.MethodPost,
+			Path:        fmt.Sprintf("%s/login/provider", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+				},
+			},
 			MaxBodyBytes:  constants.DefaultBodySize,
 			DefaultStatus: http.StatusOK,
 			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusForbidden, http.StatusNotFound},
@@ -83,13 +95,19 @@ func RegisterEndpoints(
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			Hidden:        true,
-			OperationID:   "register-email",
-			Summary:       "Register with email",
-			Description:   "Register new user with email and password.",
-			Method:        http.MethodPost,
-			Path:          fmt.Sprintf("%s/register/email", endpointConfig.Group),
-			Tags:          endpointConfig.Tag,
+			Hidden:      true,
+			OperationID: "register-email",
+			Summary:     "Register with email",
+			Description: "Register new user with email and password.",
+			Method:      http.MethodPost,
+			Path:        fmt.Sprintf("%s/register/email", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+				},
+			},
 			MaxBodyBytes:  constants.DefaultBodySize,
 			DefaultStatus: http.StatusOK,
 			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
@@ -112,12 +130,18 @@ func RegisterEndpoints(
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID:   "activate",
-			Summary:       "Activate",
-			Description:   "Activate user account.",
-			Method:        http.MethodPost,
-			Path:          fmt.Sprintf("%s/activate", endpointConfig.Group),
-			Tags:          endpointConfig.Tag,
+			OperationID: "activate",
+			Summary:     "Activate",
+			Description: "Activate user account.",
+			Method:      http.MethodPost,
+			Path:        fmt.Sprintf("%s/activate", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+				},
+			},
 			MaxBodyBytes:  constants.DefaultBodySize,
 			DefaultStatus: http.StatusOK,
 			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
@@ -140,12 +164,18 @@ func RegisterEndpoints(
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID:   "forgot-password-init-email",
-			Summary:       "Forgot step 1 - email",
-			Description:   "Forgot password step 1 initialize request with email.",
-			Method:        http.MethodPost,
-			Path:          fmt.Sprintf("%s/forgot/initemail", endpointConfig.Group),
-			Tags:          endpointConfig.Tag,
+			OperationID: "forgot-password-init-email",
+			Summary:     "Forgot step 1 - email",
+			Description: "Forgot password step 1 initialize request with email.",
+			Method:      http.MethodPost,
+			Path:        fmt.Sprintf("%s/forgot/initemail", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+				},
+			},
 			MaxBodyBytes:  constants.DefaultBodySize,
 			DefaultStatus: http.StatusOK,
 			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusForbidden, http.StatusNotFound},
@@ -172,12 +202,18 @@ func RegisterEndpoints(
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID:   "forgot-password-code",
-			Summary:       "Forgot step 2",
-			Description:   "Forgot password step 2 validate your request with your received(email) code and token from step 1.",
-			Method:        http.MethodPost,
-			Path:          fmt.Sprintf("%s/forgot/checkcode", endpointConfig.Group),
-			Tags:          endpointConfig.Tag,
+			OperationID: "forgot-password-code",
+			Summary:     "Forgot step 2",
+			Description: "Forgot password step 2 validate your request with your received(email) code and token from step 1.",
+			Method:      http.MethodPost,
+			Path:        fmt.Sprintf("%s/forgot/checkcode", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+				},
+			},
 			MaxBodyBytes:  constants.DefaultBodySize,
 			DefaultStatus: http.StatusOK,
 			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusForbidden, http.StatusNotFound},
@@ -204,12 +240,18 @@ func RegisterEndpoints(
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID:   "forgot-password-new-password",
-			Summary:       "Forgot step 3",
-			Description:   "Forgot password step 3 set your new password by providing a token received from step 2.",
-			Method:        http.MethodPost,
-			Path:          fmt.Sprintf("%s/forgot/newpassword", endpointConfig.Group),
-			Tags:          endpointConfig.Tag,
+			OperationID: "forgot-password-new-password",
+			Summary:     "Forgot step 3",
+			Description: "Forgot password step 3 set your new password by providing a token received from step 2.",
+			Method:      http.MethodPost,
+			Path:        fmt.Sprintf("%s/forgot/newpassword", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+				},
+			},
 			MaxBodyBytes:  constants.DefaultBodySize,
 			DefaultStatus: http.StatusOK,
 			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusForbidden, http.StatusNotFound},
@@ -243,7 +285,11 @@ func RegisterEndpoints(
 			Path:        fmt.Sprintf("%s/logout", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
-				{constants.SecuritySchemeBearerToken: {}}, // Used to require authentication
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {},
+				},
 			},
 			MaxBodyBytes:  constants.DefaultBodySize,
 			DefaultStatus: http.StatusOK,

@@ -15,12 +15,12 @@ import (
 
 // PermissionMiddleware Checks resource permissions
 func PermissionMiddleware(api huma.API, userRepo *user.Repository, permissionRepo *permission.Repository) func(huma.Context, func(huma.Context)) {
-	return func(ctx huma.Context, next func(huma.Context)) {
+	return func(humaCtx huma.Context, next func(huma.Context)) {
 		// Retrieve jwtToken
-		ctxContext := ctx.Context()
-		jwtToken := httpHelper.GetJwtContext(&ctxContext)
+		ctx := humaCtx.Context()
+		jwtToken := httpHelper.GetJwtContext(&ctx)
 		if jwtToken == nil || jwtToken.UserID <= 0 {
-			next(ctx)
+			next(humaCtx)
 			return
 		}
 
@@ -28,24 +28,24 @@ func PermissionMiddleware(api huma.API, userRepo *user.Repository, permissionRep
 		foundUser, errFound := userRepo.GetByID(jwtToken.UserID)
 		if errFound != nil {
 			tempErr := constants.Http500ErrorMessage("interact with user model")
-			_ = huma.WriteErr(api, ctx, http.StatusInternalServerError, tempErr.Error(), tempErr)
+			_ = huma.WriteErr(api, humaCtx, http.StatusInternalServerError, tempErr.Error(), tempErr)
 			return
 		}
 		if foundUser == nil {
 			tempErr := constants.Http403InvalidPermissionErrorMessage()
-			_ = huma.WriteErr(api, ctx, http.StatusForbidden, tempErr.Error(), tempErr)
+			_ = huma.WriteErr(api, humaCtx, http.StatusForbidden, tempErr.Error(), tempErr)
 			return
 		}
 		// Check if the status is enabled
 		if foundUser.Status != constants.USER_STATUS_ENABLED {
 			tempErr := fmt.Errorf("%s", "User account is disabled! Please contact support.")
-			_ = huma.WriteErr(api, ctx, http.StatusUnavailableForLegalReasons, tempErr.Error(), tempErr)
+			_ = huma.WriteErr(api, humaCtx, http.StatusUnavailableForLegalReasons, tempErr.Error(), tempErr)
 			return
 		}
 
 		// Retrieve feature permissions
 		var featuresScope, tableName, tableOperation string
-		for _, opScheme := range ctx.Operation().Security {
+		for _, opScheme := range humaCtx.Operation().Security {
 			if securityScheme, ok := opScheme[constants.SecuritySchemeBearerToken]; ok {
 				if len(securityScheme) > 0 {
 					featuresScope = securityScheme[0]
@@ -71,7 +71,7 @@ func PermissionMiddleware(api huma.API, userRepo *user.Repository, permissionRep
 			}
 			if !haveFeature {
 				tempErr := constants.Http403InvalidPermissionErrorMessage()
-				_ = huma.WriteErr(api, ctx, http.StatusForbidden, tempErr.Error(), tempErr)
+				_ = huma.WriteErr(api, humaCtx, http.StatusForbidden, tempErr.Error(), tempErr)
 				return
 			}
 
@@ -81,34 +81,34 @@ func PermissionMiddleware(api huma.API, userRepo *user.Repository, permissionRep
 				userPermission, errPerm := permissionRepo.GetByRoleIDTableNameMultiple(foundUser.RoleID, tableName, "*")
 				if errPerm != nil {
 					tempErr := constants.Http500ErrorMessage("interact with permission model")
-					_ = huma.WriteErr(api, ctx, http.StatusInternalServerError, tempErr.Error(), tempErr)
+					_ = huma.WriteErr(api, humaCtx, http.StatusInternalServerError, tempErr.Error(), tempErr)
 					return
 				}
 				tempErr := constants.Http403InvalidPermissionErrorMessage()
 				if !(userPermission != nil && (userPermission.TableName == tableName || userPermission.TableName == "*")) {
-					_ = huma.WriteErr(api, ctx, http.StatusForbidden, tempErr.Error(), tempErr)
+					_ = huma.WriteErr(api, humaCtx, http.StatusForbidden, tempErr.Error(), tempErr)
 					return
 				}
 
 				if len(tableOperation) >= 1 {
 					if tableOperation == constants.PermissionCreate && !userPermission.Create {
-						_ = huma.WriteErr(api, ctx, http.StatusForbidden, tempErr.Error(), tempErr)
+						_ = huma.WriteErr(api, humaCtx, http.StatusForbidden, tempErr.Error(), tempErr)
 						return
 					} else if tableOperation == constants.PermissionRead && !userPermission.Read {
-						_ = huma.WriteErr(api, ctx, http.StatusForbidden, tempErr.Error(), tempErr)
+						_ = huma.WriteErr(api, humaCtx, http.StatusForbidden, tempErr.Error(), tempErr)
 						return
 					} else if tableOperation == constants.PermissionUpdate && !userPermission.Update {
-						_ = huma.WriteErr(api, ctx, http.StatusForbidden, tempErr.Error(), tempErr)
+						_ = huma.WriteErr(api, humaCtx, http.StatusForbidden, tempErr.Error(), tempErr)
 						return
 					} else if tableOperation == constants.PermissionDelete && !userPermission.Delete {
-						_ = huma.WriteErr(api, ctx, http.StatusForbidden, tempErr.Error(), tempErr)
+						_ = huma.WriteErr(api, humaCtx, http.StatusForbidden, tempErr.Error(), tempErr)
 						return
 					}
 				}
 			}
 		}
 
-		next(ctx)
+		next(humaCtx)
 
 	}
 }

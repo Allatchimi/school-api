@@ -35,10 +35,8 @@ func RegisterEndpoints(
 
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
-						fmt.Sprintf("%s",
-							constants.FeatureAdmin,
-						), // Features scope
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s", constants.FeatureAdmin), // Feature
 						tableName,                  // Table name
 						constants.PermissionUpdate, // Operation
 					},
@@ -81,10 +79,8 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
-						fmt.Sprintf("%s",
-							constants.FeatureAdmin,
-						), // Features scope
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s", constants.FeatureAdmin), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -120,10 +116,8 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
-						fmt.Sprintf("%s",
-							constants.FeatureAdmin,
-						), // Features scope
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s", constants.FeatureAdmin), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -159,10 +153,8 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
-						fmt.Sprintf("%s",
-							constants.FeatureAdmin,
-						), // Features scope
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s", constants.FeatureAdmin), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},

@@ -31,6 +31,21 @@ func (controller *Controller) Create(
 	return
 }
 
+func (controller *Controller) Update(
+	ctx *context.Context,
+	input *struct {
+		data.CourseID
+		Body data.CourseRequest
+	},
+) (result *model.Course, errCode int, err error) {
+	result, errCode, err = controller.Service.Update(
+		httpHelper.GetJwtContext(ctx),
+		input.ID,
+		&input.Body,
+	)
+	return
+}
+
 func (controller *Controller) Delete(
 	ctx *context.Context,
 	input *struct {

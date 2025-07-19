@@ -153,6 +153,7 @@ func (service *Service) UpdateProfilePasswordInit(inputJwtToken *types.JwtToken)
 	newJwtToken, newToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
+			SchoolID: userFound.SchoolID,
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -268,6 +269,7 @@ func (service *Service) UpdateProfilePasswordCheckCode(inputJwtToken *types.JwtT
 	newJwtToken, newToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
+			SchoolID: userFound.SchoolID,
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -417,6 +419,7 @@ func (service *Service) UpdateProfilePhoneNumberInit(inputJwtToken *types.JwtTok
 	newJwtToken, newToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
+			SchoolID: userFound.SchoolID,
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -532,6 +535,7 @@ func (service *Service) UpdateProfilePhoneNumberCheckCode(inputJwtToken *types.J
 	newJwtToken, newToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
+			SchoolID: userFound.SchoolID,
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -645,6 +649,7 @@ func (service *Service) UpdateProfileMfaEmailInit(inputJwtToken *types.JwtToken)
 	newJwtToken, newToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
+			SchoolID: userFound.SchoolID,
 			Platform: "*",
 			Device:   "*",
 			App:      "*",

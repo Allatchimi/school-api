@@ -10,8 +10,11 @@ import (
 // GetJwtContext Returns JWT token from standard context (idem Gin)
 func GetJwtContext(ctx *context.Context) *types.JwtToken {
 	result := &types.JwtToken{}
-	if id, okID := (*ctx).Value(constants.UserIDKey).(int64); okID {
-		result.UserID = id
+	if userID, okUserID := (*ctx).Value(constants.UserIDKey).(int64); okUserID {
+		result.UserID = userID
+	}
+	if schoolID, okSchoolID := (*ctx).Value(constants.SchoolIDKey).(int64); okSchoolID {
+		result.SchoolID = schoolID
 	}
 	if iss, okIss := (*ctx).Value(constants.IssuerKey).(string); okIss {
 		result.Issuer = iss
@@ -27,6 +30,15 @@ func GetJwtContext(ctx *context.Context) *types.JwtToken {
 	}
 	if code, okCode := (*ctx).Value(constants.CodeKey).(int); okCode {
 		result.Code = code
+	}
+	return result
+}
+
+// GetSchoolContext Returns the school id
+func GetSchoolContext(ctx *context.Context) int64 {
+	var result int64 = 0
+	if schoolID, okSchoolID := (*ctx).Value(constants.SchoolIDKey).(int64); okSchoolID {
+		result = schoolID
 	}
 	return result
 }

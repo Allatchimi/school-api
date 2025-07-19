@@ -30,7 +30,8 @@ func ReadMultipartFile(file multipart.File) ([]byte, error) {
 // It returns a pointer to the string for potential performance
 // optimization when dealing with large files content.
 func ReadFileToString(path string) (*string, error) {
-	buffer, err := ReadFile(path)
+	absPath, _ := filepath.Abs(path)
+	buffer, err := ReadFile(absPath)
 	if err != nil {
 		return nil, err
 	}

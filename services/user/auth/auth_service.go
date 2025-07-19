@@ -32,12 +32,12 @@ func NewAuthService(userService *user.Service, roleService *role.Service) *Servi
 const MODEL_NAME = "user"
 const DEFAULT_ERROR_MESSAGE = "interact with auth service"
 
-func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice) (accessToken string, accessExpires *time.Time, activateAccountToken string, errCode int, err error) {
+func (service *Service) Login(schoolID int64, input *data.LoginRequest, device *data.LoginDevice) (accessToken string, accessExpires *time.Time, activateAccountToken string, errCode int, err error) {
 	// Find user
 	var userFound *model.User
 	var errMsg string
 	if utils.IsEmailValid(input.Email) {
-		userFound, err = service.UserService.Repository.GetByEmailSchoolID(input.Email, input.SchoolID)
+		userFound, err = service.UserService.Repository.GetByEmailSchoolID(input.Email, schoolID)
 		errMsg = "Invalid email or password! Please enter valid information."
 	}
 	if err != nil || userFound == nil || userFound.Email != input.Email {
@@ -65,6 +65,7 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 		accessJwtToken, accessToken, err = securityUtil.EncodeJWTToken(
 			&types.JwtToken{
 				UserID:   userFound.ID,
+				SchoolID: userFound.SchoolID,
 				Platform: device.Platform,
 				Device:   device.DeviceName,
 				App:      device.App,
@@ -99,6 +100,7 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	activateAccountJwtToken, activateAccountToken, err = securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
+			SchoolID: userFound.SchoolID,
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -150,10 +152,16 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	return
 }
 
-func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, device *data.LoginDevice) (accessToken string, accessExpires *time.Time, errCode int, err error) {
+func (service *Service) LoginWithProvider(schoolID int64, input *data.LoginWithProviderRequest, device *data.LoginDevice) (accessToken string, accessExpires *time.Time, errCode int, err error) {
 	// Validate provider token and update user
+	isProviderValid := utils.IsAuthProviderValid(input.Provider)
+	if !isProviderValid {
+		errCode = http.StatusBadRequest
+		err = fmt.Errorf("%s", "Invalid or empty provider! Please enter valid information.")
+		return
+	}
 	var newUser = &model.User{
-		SchoolID: input.SchoolID,
+		SchoolID: schoolID,
 		Provider: input.Provider,
 		Info:     &model.UserInfo{},
 		Config:   &model.UserConfig{},
@@ -195,7 +203,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 	}
 
 	// Save user if it's not in database
-	userFound, err := service.UserService.Repository.GetByProviderSchoolID(input.Provider, newUser.ProviderUserID, input.SchoolID)
+	userFound, err := service.UserService.Repository.GetByProviderSchoolID(input.Provider, newUser.ProviderUserID, schoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -232,7 +240,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 		tmpActivatedAt := time.Now()
 		userFound, err = service.UserService.Repository.Create(
 			&model.User{
-				SchoolID:       input.SchoolID,
+				SchoolID:       schoolID,
 				Email:          newUser.Email,
 				Status:         constants.USER_STATUS_ENABLED,
 				Provider:       input.Provider,
@@ -264,6 +272,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 	jwtToken, accessToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
+			SchoolID: userFound.SchoolID,
 			Platform: device.Platform,
 			Device:   device.DeviceName,
 			App:      device.App,
@@ -282,12 +291,37 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 	return
 }
 
-func (service *Service) Register(input *data.RegisterRequest) (activateAccountToken string, errCode int, err error) {
+func (service *Service) Register(schoolID int64, input *data.RegisterRequest) (activateAccountToken string, errCode int, err error) {
+	// Check inputs
+	isEmailValid := utils.IsEmailValid(input.Email)
+	isPasswordValid, missingPasswordChars := utils.IsPasswordValid(input.Password)
+	if !isEmailValid && !isPasswordValid {
+		errCode = http.StatusBadRequest
+		err = fmt.Errorf("%s %s",
+			"Invalid email and password! Password missing",
+			missingPasswordChars,
+		)
+		return
+	}
+	if !isEmailValid {
+		errCode = http.StatusBadRequest
+		err = fmt.Errorf("%s", "Invalid email! Please enter valid information.")
+		return
+	}
+	if !isPasswordValid {
+		errCode = http.StatusBadRequest
+		err = fmt.Errorf("%s %s",
+			"Invalid password! Password missing",
+			missingPasswordChars,
+		)
+		return
+	}
+
 	// Check if user exists
 	var userFound *model.User
 	var errMsg string
 	if utils.IsEmailValid(input.Email) {
-		userFound, err = service.UserService.Repository.GetByEmailSchoolID(input.Email, input.SchoolID)
+		userFound, err = service.UserService.Repository.GetByEmailSchoolID(input.Email, schoolID)
 		errMsg = "user email"
 	}
 	if err != nil {
@@ -313,7 +347,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	userFound.Email = input.Email
 	userFound.Password = input.Password
 	userFound.LoginMethod = constants.AuthLoginMethodDefault
-	userFound.SchoolID = input.SchoolID
+	userFound.SchoolID = schoolID
 	userFound.RoleID = defaultRole.ID
 	createdUser, err := service.UserService.Repository.Create(userFound)
 	if err != nil {
@@ -337,6 +371,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	activateAccountJwtToken, activateAccountToken, err = securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   createdUser.ID,
+			SchoolID: userFound.SchoolID,
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -524,6 +559,7 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 	newJwtToken, newToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
+			SchoolID: userFound.SchoolID,
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -634,6 +670,7 @@ func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest
 	newJwtToken, newToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
+			SchoolID: userFound.SchoolID,
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
