@@ -8,8 +8,8 @@ import (
 	"api/services/common/health"
 	"api/services/common/monitoring"
 	"api/services/common/notification"
-	"api/services/common/permissionchecker"
 	"api/services/common/telegram"
+	serviceHelper "api/services/helper"
 	"api/services/school/common/course"
 	"api/services/school/common/director"
 	"api/services/school/common/exam"
@@ -316,12 +316,7 @@ func InjectDependencies() {
 	)
 
 	// Permissions checker
-	permissionchecker.InjectServices(
+	serviceHelper.InjectServices(
 		api.AllControllers.UserController.Service,
-		api.AllControllers.SchoolController.Service,
-		api.AllControllers.DirectorController.Service,
-		api.AllControllers.TeacherController.Service,
-		api.AllControllers.StudentController.Service,
-		api.AllControllers.ParentController.Service,
 	)
 }

@@ -117,6 +117,7 @@ func (controller *Controller) ForgotPasswordEmailInit(
 	},
 ) (result *data.ForgotPasswordInitResponse, errCode int, err error) {
 	token, errCode, err := controller.Service.ForgotPasswordInit(
+		httpHelper.GetJwtContext(ctx),
 		&data.ForgotPasswordInitRequest{
 			Email: input.Body.Email,
 		},

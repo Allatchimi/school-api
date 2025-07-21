@@ -21,11 +21,23 @@ SCHOOL_API_KEY="{{ .SchoolApiKey }}"
 
 	// App colors templates
 	colorTemplateContent = `
-export const COLOR_PRIMARY = "{{ .Primary }}";
-export const COLOR_PRIMARY_BG = "{{ .PrimaryBg }}";
-export const COLOR_PRIMARY_BG_HOVER = "{{ .PrimaryBgHover }}";
+interface ColorScheme {
+  primary: string;
+  primaryBg: string;
+  primaryBgHover: string;
+}
 
-export const COLORS = [COLOR_PRIMARY, COLOR_PRIMARY_BG, COLOR_PRIMARY_BG_HOVER];
+export const COLOR_SCHEME_DEFAULT: ColorScheme = {
+  primary: "{{ .Primary }}",
+  primaryBg: "{{ .PrimaryBg }}",
+  primaryBgHover: "{{ .PrimaryBgHover }}",
+};
+
+export const COLOR_SCHEME = COLOR_SCHEME_DEFAULT;
+
+export const COLOR_SCHEMES = [
+  COLOR_SCHEME_DEFAULT,
+];
 `
 
 	// Deployment templates

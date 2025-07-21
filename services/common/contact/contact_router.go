@@ -26,12 +26,18 @@ func RegisterEndpoints(
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID:   "post-contact",
-			Summary:       "Create contact",
-			Description:   "Create new contact by providing name and description and return created object. The name contact should be unique.",
-			Method:        http.MethodPost,
-			Path:          endpointConfig.Group,
-			Tags:          endpointConfig.Tag,
+			OperationID: "post-contact",
+			Summary:     "Create contact",
+			Description: "Create new contact by providing name and description and return created object. The name contact should be unique.",
+			Method:      http.MethodPost,
+			Path:        endpointConfig.Group,
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+				},
+			},
 			MaxBodyBytes:  constants.DefaultBodySize,
 			DefaultStatus: http.StatusOK,
 			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
@@ -134,16 +140,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			// Generate items
-			tempResult := make([]data.ContactResponse, 10)
-			for i := range result.Data {
-				tempModel := data.ContactResponse{}
-				tempModel.ID = int64(i)
-
-				tempResult[i] = tempModel
-			}
-			result.Data = tempResult
 
 			return &struct {
 				Body data.ContactResponseList

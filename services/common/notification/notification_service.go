@@ -7,6 +7,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
+	"api/common/utils"
 	"api/services/common/notification/data"
 	"api/services/common/notification/model"
 )
@@ -26,6 +27,14 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *model.Not
 	// Create
 	result, err = service.Repository.Create(request)
 	if err != nil {
+		pgState, errPgState := utils.ExtractSQLState(err.Error())
+		if errPgState == nil {
+			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+				errCode = http.StatusConflict
+				err = constants.Http409ConflictErrorMessage()
+				return
+			}
+		}
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return

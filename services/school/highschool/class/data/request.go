@@ -1,7 +1,5 @@
 package data
 
-import "time"
-
 type ClassID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Class id"`
 }
@@ -11,10 +9,16 @@ type ClassSubjectID struct {
 }
 
 type ClassRequest struct {
-	SchoolID    int64  `json:"schoolID" required:"true" doc:"School id"`
-	SpecialtyID int64  `json:"specialtyID" required:"true" doc:"Specialty id"`
+	SchoolID    int64 `json:"schoolID" required:"true" doc:"School id"`
+	SpecialtyID int64 `json:"specialtyID" required:"true" doc:"Specialty id"`
+
 	Name        string `json:"name" required:"true" doc:"Class name"`
 	Description string `json:"description" required:"false" doc:"Class description"`
+
+	Fees         int64  `json:"fees" required:"false" doc:"Class fees"`
+	Program      string `json:"program" required:"true" doc:"Program"`
+	Requirements string `json:"requirements" required:"false" doc:"Requirements"`
+	IsValid      bool   `json:"isValid" required:"false" doc:"Is valid"`
 }
 type ClassSubjectRequest struct {
 	SchoolID  int64 `json:"schoolID" required:"true" doc:"School id"`
@@ -25,8 +29,7 @@ type ClassSubjectRequest struct {
 	Program      string `json:"program" required:"false" doc:"Program"`
 	Requirements string `json:"requirements" required:"false" doc:"Requirements"`
 
-	IsValid     bool       `json:"isValid" required:"false" doc:"Is valid"`
-	InvalidDate *time.Time `json:"invalidDate" required:"false" doc:"Invalid date"`
+	IsValid bool `json:"isValid" required:"false" doc:"Is valid"`
 }
 type GetAllRequest struct {
 	SchoolID    int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`

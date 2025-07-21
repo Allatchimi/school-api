@@ -120,6 +120,9 @@ func (service *Service) Login(schoolID int64, input *data.LoginRequest, device *
 	err = fmt.Errorf("%s", "Account found but not activated! Please activate your account to start using your services.")
 
 	// Send code to email
+	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+		return
+	}
 	if utils.IsEmailValid(input.Email) {
 		go func() {
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
@@ -254,6 +257,14 @@ func (service *Service) LoginWithProvider(schoolID int64, input *data.LoginWithP
 			},
 		)
 		if err != nil {
+			pgState, errPgState := utils.ExtractSQLState(err.Error())
+			if errPgState == nil {
+				if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+					errCode = http.StatusConflict
+					err = constants.Http409ConflictErrorMessage()
+					return
+				}
+			}
 			errCode = http.StatusInternalServerError
 			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
@@ -344,13 +355,23 @@ func (service *Service) Register(schoolID int64, input *data.RegisterRequest) (a
 		return
 	}
 	// Create new user
+	userFound = &model.User{}
 	userFound.Email = input.Email
 	userFound.Password = input.Password
 	userFound.LoginMethod = constants.AuthLoginMethodDefault
 	userFound.SchoolID = schoolID
 	userFound.RoleID = defaultRole.ID
+	userFound.Status = constants.USER_STATUS_ENABLED
 	createdUser, err := service.UserService.Repository.Create(userFound)
 	if err != nil {
+		pgState, errPgState := utils.ExtractSQLState(err.Error())
+		if errPgState == nil {
+			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+				errCode = http.StatusConflict
+				err = constants.Http409ConflictErrorMessage()
+				return
+			}
+		}
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
@@ -388,6 +409,9 @@ func (service *Service) Register(schoolID int64, input *data.RegisterRequest) (a
 	}
 
 	// Send code to email
+	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+		return
+	}
 	if utils.IsEmailValid(input.Email) {
 		go func() {
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
@@ -483,6 +507,14 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	userFound.IsActivated = true
 	updatedUser, err := service.UserService.Repository.UpdateActivationByID(userFound.ID, userFound)
 	if err != nil {
+		pgState, errPgState := utils.ExtractSQLState(err.Error())
+		if errPgState == nil {
+			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+				errCode = http.StatusConflict
+				err = constants.Http409ConflictErrorMessage()
+				return
+			}
+		}
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
@@ -493,6 +525,9 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	_, _ = config.DeleteRedisString(securityUtil.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
 
 	// Send welcome message
+	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+		return
+	}
 	if utils.IsEmailValid(updatedUser.Email) {
 		go func() {
 			fromEmail, fromUsername := updatedUser.School.SMTPNoReplySender()
@@ -521,7 +556,7 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	return
 }
 
-func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest) (token string, errCode int, err error) {
+func (service *Service) ForgotPasswordInit(jwtToken *types.JwtToken, input *data.ForgotPasswordInitRequest) (token string, errCode int, err error) {
 	// Check input
 	var errMsg string
 	var isInputValid bool
@@ -540,7 +575,7 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 	var userFound *model.User
 	if utils.IsEmailValid(input.Email) {
 		errMsg = "User with this email"
-		userFound, err = service.UserService.Repository.GetByEmail(input.Email)
+		userFound, err = service.UserService.Repository.GetByEmailSchoolID(input.Email, jwtToken.SchoolID)
 	}
 	if err != nil || userFound.ID <= 0 {
 		errCode = http.StatusNotFound
@@ -578,6 +613,9 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 	token = newToken
 
 	// Send code to email
+	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+		return
+	}
 	if utils.IsEmailValid(input.Email) {
 		go func() {
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
@@ -727,6 +765,14 @@ func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewP
 	// Update user password
 	userUpdated, err := service.UserService.Repository.UpdatePasswordByID(jwtToken.UserID, input.NewPassword)
 	if err != nil || userUpdated == nil {
+		pgState, errPgState := utils.ExtractSQLState(err.Error())
+		if errPgState == nil {
+			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+				errCode = http.StatusConflict
+				err = constants.Http409ConflictErrorMessage()
+				return
+			}
+		}
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return

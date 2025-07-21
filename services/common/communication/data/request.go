@@ -5,11 +5,11 @@ type CommunicationID struct {
 }
 
 type CommunicationRequest struct {
-	SchoolID int64 `json:"schoolID" required:"false" doc:"School id"`
+	SchoolID int64   `json:"schoolID" required:"false" doc:"School id"`
+	RoleIDs  []int64 `json:"roleIDs" required:"true" doc:"Role id list"`
 
-	Subject  string `json:"subject" required:"true" doc:"Subject"`
-	Message  string `json:"message" required:"true" doc:"Message"`
-	Audience string `json:"audience" required:"true" doc:"Audience"`
+	Subject string `json:"subject" required:"true" doc:"Subject"`
+	Message string `json:"message" required:"true" doc:"Message"`
 }
 
 type GetAllRequest struct {

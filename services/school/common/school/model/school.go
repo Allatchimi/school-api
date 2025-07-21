@@ -5,6 +5,7 @@ import (
 	"api/common/utils"
 	"api/config"
 	"api/services/school/common/school/data"
+	"fmt"
 )
 
 type School struct {
@@ -88,6 +89,24 @@ func ToSchoolResponseList(itemList []School) []data.SchoolResponse {
 		resp[index] = *item.ToResponse()
 	}
 	return resp
+}
+
+func (item *School) WebsiteUrl() (url string) {
+	if item == nil {
+		url = config.Env.WebsiteBaseURL
+		return
+	}
+	url = fmt.Sprintf("https://%s", item.Config.DomainName)
+	return
+}
+
+func (item *School) LogoUrl() (url string) {
+	if item == nil {
+		url = fmt.Sprintf("%s/assets/images/logos/logo.png", config.Env.WebsiteBaseURL)
+		return
+	}
+	url = item.Logo
+	return
 }
 
 func (item *School) SMTPNoReplySender() (senderEmail string, senderName string) {

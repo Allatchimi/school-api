@@ -107,7 +107,7 @@ func (service *Service) UpdateProfilePhoneNumber(inputJwtToken *types.JwtToken, 
 	}
 
 	// Check if this phone number is already taken
-	foundUser, err := service.UserService.Repository.GetByPhoneNumber(phoneNumber)
+	foundUser, err := service.UserService.Repository.GetByPhoneNumberSchoolID(phoneNumber, inputJwtToken.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -172,6 +172,9 @@ func (service *Service) UpdateProfilePasswordInit(inputJwtToken *types.JwtToken)
 	token = newToken
 
 	// Send code to email
+	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+		return
+	}
 	if utils.IsEmailValid(userFound.Email) {
 		go func() {
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
@@ -357,6 +360,14 @@ func (service *Service) UpdateProfilePasswordNewPassword(inputJwtToken *types.Jw
 	// Update user password
 	userUpdated, err := service.UserService.Repository.UpdatePasswordByID(jwtTokenDecoded.UserID, password)
 	if err != nil || userUpdated == nil {
+		pgState, errPgState := utils.ExtractSQLState(err.Error())
+		if errPgState == nil {
+			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+				errCode = http.StatusConflict
+				err = constants.Http409ConflictErrorMessage()
+				return
+			}
+		}
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
@@ -366,6 +377,9 @@ func (service *Service) UpdateProfilePasswordNewPassword(inputJwtToken *types.Jw
 	_, _ = config.DeleteRedisString(securityUtil.GetJWTCachedKey(jwtTokenDecoded.UserID, jwtTokenDecoded.Issuer))
 
 	// Send alert message to email
+	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+		return
+	}
 	if utils.IsEmailValid(userFound.Email) {
 		go func() {
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
@@ -438,6 +452,9 @@ func (service *Service) UpdateProfilePhoneNumberInit(inputJwtToken *types.JwtTok
 	token = newToken
 
 	// Send code to email or phone number
+	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+		return
+	}
 	if utils.IsEmailValid(userFound.Email) {
 		go func() {
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
@@ -614,6 +631,14 @@ func (service *Service) UpdateProfilePhoneNumberNewPhoneNumber(inputJwtToken *ty
 	// Update user phone number
 	userUpdated, err := service.UserService.Repository.UpdatePhoneNumberByID(jwtTokenDecoded.UserID, phoneNumber)
 	if err != nil || userUpdated == nil {
+		pgState, errPgState := utils.ExtractSQLState(err.Error())
+		if errPgState == nil {
+			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+				errCode = http.StatusConflict
+				err = constants.Http409ConflictErrorMessage()
+				return
+			}
+		}
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
@@ -667,23 +692,10 @@ func (service *Service) UpdateProfileMfaEmailInit(inputJwtToken *types.JwtToken)
 	}
 	token = newToken
 
-	// Send code to email or phone number
-	if utils.IsEmailValid(userFound.Email) {
-		go func() {
-			senderEmail, senderName := userFound.School.SMTPNoReplySender()
-			err := smtpHelper.SendEmailTo(
-				senderEmail,
-				senderName,
-				userFound.Email,
-				"You have requested to change Mfa settings for email",
-				[]byte("Your Mfa settings for email has been changed successfully."),
-			)
-			if err != nil {
-				return
-			}
-		}()
-	}
 	// Send code to email
+	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+		return
+	}
 	if utils.IsEmailValid(userFound.Email) {
 		go func() {
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
@@ -780,6 +792,14 @@ func (service *Service) UpdateProfileMfaEmailCheckCode(inputJwtToken *types.JwtT
 	// Toggle Mfa settings
 	mfaUpdated, err := service.UserService.Repository.UpdateUserConfigFieldByID(userFound.UserConfigID, "mfa_email", !userFound.Config.MfaEmail)
 	if err != nil || mfaUpdated == nil {
+		pgState, errPgState := utils.ExtractSQLState(err.Error())
+		if errPgState == nil {
+			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+				errCode = http.StatusConflict
+				err = constants.Http409ConflictErrorMessage()
+				return
+			}
+		}
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return

@@ -40,6 +40,18 @@ func (repository *Repository) CreateUserConfig(item *model.UserConfig) (*model.U
 
 func (repository *Repository) UpdateByID(id int64, item *model.User) (*model.User, error) {
 	result := &model.User{}
+	if item.SchoolID < 1 {
+		return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+			map[string]any{
+				"email":        item.Email,
+				"phone_number": item.PhoneNumber,
+				"status":       item.Status,
+				"school_id":    nil,
+				"role_id":      item.RoleID,
+				"is_activated": item.IsActivated,
+			},
+		).Error
+	}
 	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
 			"email":        item.Email,
@@ -172,6 +184,12 @@ func (repository *Repository) GetByID(id int64) (*model.User, error) {
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.User, error) {
+	result := &model.User{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Where("school_id = ?", schoolID).Limit(1).Find(result).Error
+}
+
 func (repository *Repository) GetByEmail(email string) (*model.User, error) {
 	result := &model.User{}
 	return result, repository.Db.Preload(clause.Associations).
@@ -184,6 +202,16 @@ func (repository *Repository) GetByEmail(email string) (*model.User, error) {
 
 func (repository *Repository) GetByEmailSchoolID(email string, schoolID int64) (*model.User, error) {
 	result := &model.User{}
+	if schoolID < 1 {
+		return result, repository.Db.Preload(clause.Associations).
+			Where(
+				"login_method = ?", constants.AuthLoginMethodDefault,
+			).Where(
+			"email = ?", email,
+		).
+			Or("school_id < ?", 1).Or("school_id = ?", nil).
+			Limit(1).Find(result).Error
+	}
 	return result, repository.Db.Preload(clause.Associations).
 		Where(
 			"login_method = ?", constants.AuthLoginMethodDefault,
@@ -206,6 +234,16 @@ func (repository *Repository) GetByPhoneNumber(phoneNumber uint64) (*model.User,
 
 func (repository *Repository) GetByPhoneNumberSchoolID(phoneNumber uint64, schoolID int64) (*model.User, error) {
 	result := &model.User{}
+	if schoolID < 1 {
+		return result, repository.Db.Preload(clause.Associations).
+			Where(
+				"login_method = ?", constants.AuthLoginMethodDefault,
+			).Where(
+			"phone_number = ?", phoneNumber,
+		).
+			Or("school_id < ?", 1).Or("school_id = ?", nil).
+			Limit(1).Find(result).Error
+	}
 	return result, repository.Db.Preload(clause.Associations).
 		Where(
 			"login_method = ?", constants.AuthLoginMethodDefault,
@@ -242,43 +280,67 @@ func (repository *Repository) GetByProviderSchoolID(provider string, providerUse
 		Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.User, err error) {
+func (repository *Repository) GetAll(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.User, err error) {
 	result = make([]model.User, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, "users.school_id = ?")
+			args = append(args, request.SchoolID)
+		}
+		if request.RoleID > 0 {
+			where = helpers.AppendWhereClause(where, "users.role_id = ?")
+			args = append(args, request.RoleID)
+		}
 		if len(request.RoleName) > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("roles.name = %s", request.RoleName))
+			where = helpers.AppendWhereClause(where, "roles.name = ?")
+			args = append(args, request.RoleName)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(users.id AS TEXT) = '%s' OR users.email ILIKE '%s' OR CAST(users.phone_number AS TEXT) ILIKE '%s' OR infos.first_name ILIKE '%s' OR infos.last_name ILIKE '%s' OR infos.username ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(users.id AS TEXT) = ? OR 
+			users.email ILIKE ? OR 
+			CAST(users.phone_number AS TEXT) ILIKE ? OR 
+			infos.first_name ILIKE ? OR 
+			infos.last_name ILIKE ? OR 
+			infos.username ILIKE ? OR 
+			roles.name ILIKE ? 
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like)
 	}
-	newFilter := filter
-	newFilter.OrderBy = "users." + newFilter.OrderBy
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT users.* "+
-					"FROM users "+
-					"LEFT JOIN user_infos AS infos ON users.user_info_id = infos.id "+
-					"LEFT JOIN roles ON users.role_id = roles.id",
+				`SELECT users.* 
+				FROM users 
+				LEFT JOIN user_infos AS infos ON users.user_info_id = infos.id 
+				LEFT JOIN roles ON users.role_id = roles.id`,
 				where,
 				pagination,
-				newFilter,
+				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }

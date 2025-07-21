@@ -10,12 +10,12 @@ type SchoolID struct {
 
 type SchoolRequest struct {
 	Name   string `json:"name" required:"true" minLength:"2" maxLength:"50" doc:"School name"`
-	Type   string `json:"type" required:"true" minLength:"2" maxLength:"50" enum:"highschool,university" doc:"School type"`
-	Status string `json:"status" required:"true" minLength:"2" maxLength:"50" enum:"enabled,disabled" doc:"School status"`
+	Type   string `json:"type" required:"true" enum:"highschool,university" doc:"School type"`
+	Status string `json:"status" required:"true" enum:"enabled,disabled" doc:"School status"`
 
-	Favicon   string `json:"favicon" required:"false" doc:"School favicon"`
-	Logo      string `json:"logo" required:"false" doc:"School logo"`
-	LogoWhite string `json:"logoWhite" required:"false" doc:"School logo white"`
+	Favicon   string `json:"favicon" required:"true" doc:"School favicon"`
+	Logo      string `json:"logo" required:"true" doc:"School logo"`
+	LogoWhite string `json:"logoWhite" required:"true" doc:"School logo white"`
 
 	Currency     string `json:"currency" required:"true" minLength:"2" maxLength:"20" doc:"Currency"`
 	PaymentCount int64  `json:"paymentCount" required:"true" min:"1" max:"10" doc:"Payment count"`
@@ -70,8 +70,8 @@ type SchoolConfigRequest struct {
 	WhatsappPhoneID  string `json:"whatsappPhoneID" required:"false" doc:"Whatsapp phone ID" example:"whatsappPhoneID"`
 	TelegramBotToken string `json:"telegramBotToken" required:"false" doc:"Telegram bot token" example:"telegramBotToken"`
 
-	WebsiteTitle       string `json:"websiteTitle" required:"true" doc:"Website title" example:"websiteTitle"`
-	WebsiteDescription string `json:"websiteDescription" required:"true" doc:"Website description" example:"websiteDescription"`
+	WebsiteTitle       string `json:"websiteTitle" required:"true" maxLength:"150" doc:"Website title" example:"websiteTitle"`
+	WebsiteDescription string `json:"websiteDescription" required:"true" maxLength:"500" doc:"Website description" example:"websiteDescription"`
 
 	ColorPrimary        string `json:"colorPrimary" required:"true" doc:"Primary color in HEX" example:"#FFFFFF"`
 	ColorPrimaryBg      string `json:"colorPrimaryBg" required:"true" doc:"Primary color in HEX" example:"#FFFFFF"`

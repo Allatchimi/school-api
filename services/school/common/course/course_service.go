@@ -5,6 +5,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
+	serviceHelper "api/services/helper"
 	"api/services/school/common/course/data"
 	"api/services/school/common/course/model"
 )
@@ -358,11 +359,26 @@ func (service *Service) GetAllComment(
 	pagination *types.Pagination,
 	request *data.GetAllCourseCommentRequest,
 ) (result []model.CourseComment, errCode int, err error) {
-	result, err = service.Repository.GetAllCourseComment(
-		filter,
-		pagination,
-		request,
-	)
+	// Get user
+	_, err = serviceHelper.GetUserByID(inputJwtToken.UserID)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+
+	// Proceed by feature
+	// if foundUser.Role.Feature != constants.FeatureAdmin {
+	// 	newRequest := *request
+	// 	newRequest.SchoolID = foundUser.SchoolID
+	// 	result, err = service.Repository.GetAll(filter, pagination, &newRequest)
+	// } else {
+	// 	result, err = service.Repository.GetAllCourseComment(
+	// 		filter,
+	// 		pagination,
+	// 		request,
+	// 	)
+	// }
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

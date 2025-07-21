@@ -231,6 +231,15 @@ func (service *Service) UpdateLevelDomain(inputJwtToken *types.JwtToken, id int6
 		return
 	}
 
+	// Check invalid date
+	if !item.IsValid && foundItem.IsValid {
+		invalidDate := new(time.Time)
+		*invalidDate = time.Now()
+		item.InvalidDate = invalidDate
+	} else if item.IsValid && !foundItem.IsValid {
+		item.InvalidDate = nil
+	}
+
 	// Update level
 	result, err = service.Repository.UpdateLevelDomain(id, item)
 	if err != nil {

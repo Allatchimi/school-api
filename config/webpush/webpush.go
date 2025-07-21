@@ -103,14 +103,14 @@ func SendPushNotificationToUser(
 // SendPushNotificationToUserBulk sends a push notification
 // to multiple users with a given payload and TTL
 func SendPushNotificationToUserBulk(
-	users []*model.User,
+	users []model.User,
 	payload *WebPushPayload,
 	ttl *int,
 	userRepository *user.Repository,
 ) (errs []error) {
 	errs = make([]error, 0, len(users))
 	for _, user := range users {
-		errs = append(errs, SendPushNotificationToUser(user, payload, ttl, userRepository))
+		errs = append(errs, SendPushNotificationToUser(&user, payload, ttl, userRepository))
 	}
 	return
 }

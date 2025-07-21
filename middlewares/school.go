@@ -39,37 +39,38 @@ func SchoolMiddleware(api huma.API) func(huma.Context, func(huma.Context)) {
 		}
 
 		schoolToken, schoolIDStr := ExtractSchoolTokenHeaders(&humaCtx)
-		if len(schoolToken) < 1 && len(schoolIDStr) < 1 {
-			next(humaCtx)
-			return
-		}
-		ok, errSecretProof := securityUtil.VerifyHMAC_SHA256_Base64URL(
-			schoolIDStr,
-			schoolToken,
-			config.Env.SchoolApiSecret,
-		)
-		if errSecretProof != nil {
-			_ = huma.WriteErr(
-				api,
-				humaCtx,
-				http.StatusInternalServerError,
-				constants.Http500ErrorMessage("verify HMAC SHA256 Base64URL").Error(),
-				constants.Http500ErrorMessage("verify HMAC SHA256 Base64URL"),
+		if len(schoolToken) > 0 && len(schoolIDStr) > 0 {
+			ok, errSecretProof := securityUtil.VerifyHMAC_SHA256_Base64URL(
+				schoolIDStr,
+				schoolToken,
+				config.Env.SchoolApiSecret,
 			)
+			if errSecretProof != nil {
+				_ = huma.WriteErr(
+					api,
+					humaCtx,
+					http.StatusInternalServerError,
+					constants.Http500ErrorMessage("verify HMAC SHA256 Base64URL").Error(),
+					constants.Http500ErrorMessage("verify HMAC SHA256 Base64URL"),
+				)
+				return
+			}
+			if !ok {
+				_ = huma.WriteErr(
+					api,
+					humaCtx,
+					http.StatusUnauthorized,
+					constants.Http401InvalidTokenErrorMessage().Error(),
+					constants.Http401InvalidTokenErrorMessage(),
+				)
+				return
+
+			}
+
+			next(*SetSchoolContext(&humaCtx, schoolIDStr))
 			return
 		}
-		if !ok {
-			_ = huma.WriteErr(
-				api,
-				humaCtx,
-				http.StatusUnauthorized,
-				constants.Http401InvalidTokenErrorMessage().Error(),
-				constants.Http401InvalidTokenErrorMessage(),
-			)
-			return
 
-		}
-
-		next(*SetSchoolContext(&humaCtx, schoolIDStr))
+		next(humaCtx)
 	}
 }

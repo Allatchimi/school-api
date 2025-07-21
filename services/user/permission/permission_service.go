@@ -5,6 +5,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
+	"api/common/utils"
 	"api/services/user/permission/data"
 	"api/services/user/permission/model"
 )
@@ -46,6 +47,14 @@ func (service *Service) Update(
 		// Create new ones
 		result, err = service.Repository.Create(item)
 		if err != nil {
+			pgState, errPgState := utils.ExtractSQLState(err.Error())
+			if errPgState == nil {
+				if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+					errCode = http.StatusConflict
+					err = constants.Http409ConflictErrorMessage()
+					return
+				}
+			}
 			errCode = http.StatusInternalServerError
 			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		}
@@ -57,6 +66,14 @@ func (service *Service) Update(
 		item.RoleID, item.TableName, item,
 	)
 	if err != nil {
+		pgState, errPgState := utils.ExtractSQLState(err.Error())
+		if errPgState == nil {
+			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+				errCode = http.StatusConflict
+				err = constants.Http409ConflictErrorMessage()
+				return
+			}
+		}
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}

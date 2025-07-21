@@ -77,9 +77,9 @@ func Testssssss() {
 			DomainName:          "www.digitschool.cm",
 			WebsiteTitle:        "Digitschool",
 			WebsiteDescription:  "Welcome to Digitschool! The future of education. With Digitschool, you can learn anything you want, whenever you want, from anywhere you want. Just enroll and start now.",
-			ColorPrimary:        "#3c6989",
-			ColorPrimaryBg:      "#e4e8ea",
-			ColorPrimaryBgHover: "#a3b6c6",
+			ColorPrimary:        "#b6b43b",
+			ColorPrimaryBg:      "#ebebe1",
+			ColorPrimaryBgHover: "#c5c6a3",
 		},
 	}
 	school.ID = 1

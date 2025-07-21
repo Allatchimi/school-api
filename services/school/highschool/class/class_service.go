@@ -31,8 +31,14 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Clas
 	item := &model.HighschoolClass{
 		SchoolID:    request.SchoolID,
 		SpecialtyID: request.SpecialtyID,
+
 		Name:        request.Name,
 		Description: request.Description,
+
+		Fees:         request.Fees,
+		Program:      request.Program,
+		Requirements: request.Requirements,
+		IsValid:      request.IsValid,
 	}
 
 	// Check if the school type is highschool
@@ -59,6 +65,13 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Clas
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
+	}
+
+	// Check invalid date
+	if !item.IsValid {
+		invalidDate := new(time.Time)
+		*invalidDate = time.Now()
+		item.InvalidDate = invalidDate
 	}
 
 	// Insert
@@ -120,8 +133,14 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	item := &model.HighschoolClass{
 		SchoolID:    request.SchoolID,
 		SpecialtyID: request.SpecialtyID,
+
 		Name:        request.Name,
 		Description: request.Description,
+
+		Fees:         request.Fees,
+		Program:      request.Program,
+		Requirements: request.Requirements,
+		IsValid:      request.IsValid,
 	}
 
 	// Check if the school type is highschool
@@ -167,6 +186,15 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
+	}
+
+	// Check invalid date
+	if !item.IsValid && foundItem.IsValid {
+		invalidDate := new(time.Time)
+		*invalidDate = time.Now()
+		item.InvalidDate = invalidDate
+	} else if item.IsValid && !foundItem.IsValid {
+		item.InvalidDate = nil
 	}
 
 	// Update class
@@ -236,6 +264,15 @@ func (service *Service) UpdateClassSubject(inputJwtToken *types.JwtToken, id int
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
+	}
+
+	// Check invalid date
+	if !item.IsValid && foundItem.IsValid {
+		invalidDate := new(time.Time)
+		*invalidDate = time.Now()
+		item.InvalidDate = invalidDate
+	} else if item.IsValid && !foundItem.IsValid {
+		item.InvalidDate = nil
 	}
 
 	// Update class

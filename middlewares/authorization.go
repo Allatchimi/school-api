@@ -62,10 +62,10 @@ func AuthMiddleware(api huma.API) func(huma.Context, func(huma.Context)) {
 			return
 		}
 		if jwtToken != nil {
-			// Get school context and compare school id
+			// Get school context and compare school id form server with jwt token
 			ctx := humaCtx.Context()
 			schoolID := httpHelper.GetSchoolContext(&ctx)
-			if jwtToken.SchoolID > 0 && schoolID > 0 && jwtToken.SchoolID == schoolID {
+			if jwtToken.SchoolID == schoolID {
 				next(*SetAuthContext(&humaCtx, token, jwtToken))
 				return
 			}

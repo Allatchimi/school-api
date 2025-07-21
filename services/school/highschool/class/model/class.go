@@ -5,6 +5,7 @@ import (
 	modelSchool "api/services/school/common/school/model"
 	"api/services/school/highschool/class/data"
 	modelSpecialty "api/services/school/highschool/specialty/model"
+	"time"
 )
 
 type HighschoolClass struct {
@@ -15,9 +16,14 @@ type HighschoolClass struct {
 	SpecialtyID int64                               `gorm:"default:null"`
 	Specialty   *modelSpecialty.HighschoolSpecialty `gorm:"default:null;foreignKey:SpecialtyID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Fees        int64  `gorm:"default:null"`
 	Name        string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
+
+	Fees         int64      `gorm:"default:null"`
+	Program      string     `gorm:"default:null"`
+	Requirements string     `gorm:"default:null"`
+	IsValid      bool       `gorm:"default:null"`
+	InvalidDate  *time.Time `gorm:"default:null"`
 }
 
 func (item *HighschoolClass) ToResponse() *data.ClassResponse {
@@ -25,9 +31,14 @@ func (item *HighschoolClass) ToResponse() *data.ClassResponse {
 		return nil
 	}
 	resp := &data.ClassResponse{}
-	resp.Fees = item.Fees
 	resp.Name = item.Name
 	resp.Description = item.Description
+
+	resp.Fees = item.Fees
+	resp.Program = item.Program
+	resp.Requirements = item.Requirements
+	resp.IsValid = item.IsValid
+	resp.InvalidDate = item.InvalidDate
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Specialty = item.Specialty.ToResponse()

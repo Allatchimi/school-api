@@ -22,7 +22,11 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "user"
 const DEFAULT_ERROR_MESSAGE = "interact with user model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.UserRequest, password *string) (result *model.User, errCode int, err error) {
+func (service *Service) Create(
+	inputJwtToken *types.JwtToken,
+	request *data.UserRequest,
+	password *string,
+) (result *model.User, errCode int, err error) {
 	// Format item
 	item := &model.User{
 		SchoolID:    request.SchoolID,
@@ -50,9 +54,9 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.User
 	var isEmailValid = utils.IsEmailValid(item.Email)
 	var isPhoneNumberValid = utils.IsPhoneNumberValid(item.PhoneNumber)
 	if isEmailValid {
-		foundItem, err = service.Repository.GetByEmail(item.Email)
+		foundItem, err = service.Repository.GetByEmailSchoolID(item.Email, request.SchoolID)
 	} else if isPhoneNumberValid {
-		foundItem, err = service.Repository.GetByPhoneNumber(item.PhoneNumber)
+		foundItem, err = service.Repository.GetByPhoneNumberSchoolID(item.PhoneNumber, request.SchoolID)
 	} else {
 		errCode = http.StatusBadRequest
 		err = constants.Http400BadRequestErrorMessage()
@@ -126,6 +130,14 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.User
 		UserConfigID: tempConfig.ID,
 	})
 	if err != nil {
+		pgState, errPgState := utils.ExtractSQLState(err.Error())
+		if errPgState == nil {
+			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+				errCode = http.StatusConflict
+				err = constants.Http409ConflictErrorMessage()
+				return
+			}
+		}
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
@@ -133,7 +145,11 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.User
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.UserRequest) (result *model.User, errCode int, err error) {
+func (service *Service) Update(
+	inputJwtToken *types.JwtToken,
+	id int64,
+	request *data.UserRequest,
+) (result *model.User, errCode int, err error) {
 	// Format item
 	item := &model.User{
 		SchoolID:    request.SchoolID,
@@ -161,9 +177,9 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	var isEmailValid = utils.IsEmailValid(item.Email)
 	var isPhoneNumberValid = utils.IsPhoneNumberValid(item.PhoneNumber)
 	if isEmailValid {
-		foundItem, err = service.Repository.GetByEmail(item.Email)
+		foundItem, err = service.Repository.GetByEmailSchoolID(item.Email, request.SchoolID)
 	} else if isPhoneNumberValid {
-		foundItem, err = service.Repository.GetByPhoneNumber(item.PhoneNumber)
+		foundItem, err = service.Repository.GetByPhoneNumberSchoolID(item.PhoneNumber, request.SchoolID)
 	} else {
 		errCode = http.StatusBadRequest
 		err = constants.Http400BadRequestErrorMessage()
@@ -196,6 +212,14 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	}
 	result, err = service.Repository.UpdateByID(id, item)
 	if err != nil {
+		pgState, errPgState := utils.ExtractSQLState(err.Error())
+		if errPgState == nil {
+			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+				errCode = http.StatusConflict
+				err = constants.Http409ConflictErrorMessage()
+				return
+			}
+		}
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
@@ -203,7 +227,10 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) Delete(
+	inputJwtToken *types.JwtToken,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -218,7 +245,10 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteMultiple(
+	inputJwtToken *types.JwtToken,
+	list []int64,
+) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultipleByID(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -233,26 +263,89 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.User, errCode int, err error) {
-	result, err = service.Repository.GetByID(id)
+func (service *Service) Get(
+	inputJwtToken *types.JwtToken,
+	id int64,
+) (result *model.User, errCode int, err error) {
+	// Get user
+	foundUser, err := service.Repository.GetByID(inputJwtToken.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if result == nil {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
+	if foundUser == nil || foundUser.ID < 1 || foundUser.ID != inputJwtToken.UserID {
+		errCode = http.StatusForbidden
+		err = constants.Http403InvalidPermissionErrorMessage()
+		return
+	}
+
+	// For admin
+	if foundUser.Role.Feature == constants.FeatureAdmin {
+		result, err = service.Repository.GetByID(id)
+		if err != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
+		return
+	}
+
+	// For director
+	if foundUser.Role.Feature == constants.FeatureDirector {
+		if foundUser.SchoolID > 0 {
+			result, err = service.Repository.GetByIDSchoolID(id, foundUser.SchoolID)
+			if err != nil {
+				errCode = http.StatusInternalServerError
+				err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			}
+		}
 		return
 	}
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.User, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, request)
+func (service *Service) GetAll(
+	inputJwtToken *types.JwtToken,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.User, errCode int, err error) {
+	// Get user
+	foundUser, err := service.Repository.GetByID(inputJwtToken.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundUser == nil || foundUser.ID < 1 || foundUser.ID != inputJwtToken.UserID {
+		errCode = http.StatusForbidden
+		err = constants.Http403InvalidPermissionErrorMessage()
+		return
+	}
+
+	// For admin
+	if foundUser.Role.Feature == constants.FeatureAdmin {
+		result, err = service.Repository.GetAll(filter, pagination, request)
+		if err != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		}
+		return
+	}
+
+	// For director
+	if foundUser.Role.Feature == constants.FeatureDirector {
+		if foundUser.SchoolID > 0 {
+			directorRequest := *request
+			directorRequest.SchoolID = foundUser.SchoolID
+			result, err = service.Repository.GetAll(filter, pagination, &directorRequest)
+			if err != nil {
+				errCode = http.StatusInternalServerError
+				err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			}
+		}
+		return
 	}
 	return
 }

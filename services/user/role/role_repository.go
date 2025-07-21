@@ -83,37 +83,55 @@ func (repository *Repository) GetByName(name string) (result *model.Role, err er
 	return
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Role, err error) {
+func (repository *Repository) GetAll(
+	inputJwtToken *types.JwtToken,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.Role, err error) {
 	result = make([]model.Role, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if len(request.Feature) > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("roles.feature = %s", request.Feature))
+			where = helpers.AppendWhereClause(where, "roles.feature = ?")
+			args = append(args, request.Feature)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(roles.id AS TEXT) = '%s' OR roles.name ILIKE '%s' OR roles.feature ILIKE '%s' OR roles.description ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(roles.id AS TEXT) = ? OR 
+			roles.name ILIKE ? OR 
+			infos.feature ILIKE ? OR 
+			infos.description ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT roles.* "+
-					"FROM roles ",
+				`SELECT roles.* 
+				FROM roles `,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }

@@ -39,6 +39,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	helpers.Logger.Info("Fixtures loaded!")
 
 	di.InjectDependencies()
 	api.StartGin()
