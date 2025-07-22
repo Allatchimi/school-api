@@ -74,7 +74,7 @@ func (service *Service) Create(
 		newEmail = helpers.GenerateEmailFromFullName(
 			request.Info.FirstName,
 			request.Info.LastName,
-			foundSchool.Config.DomainName,
+			foundSchool.Config.UserEmailDomainName,
 		)
 	}
 

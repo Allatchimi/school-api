@@ -40,8 +40,12 @@ export const COLOR_SCHEMES = [
 ];
 `
 
-	// Deployment templates
-	domainNameDeploymentTemplateContent = `{{ .DomainName }}`
+	// Kubernetes templates
+	kubernetesWebsiteDomainNameTemplateContent = `{{ .WebsiteDomainName }}`
+
+	// SMTP templates
+	smtpDomainNameDeploymentTemplateContent = `{{ .SmtpDomainName }}`
+	smtpSelectorDeploymentTemplateContent   = `{{ .SmtpSelector }}`
 )
 
 type AppEnvData struct {
@@ -67,6 +71,14 @@ type AppColorData struct {
 	PrimaryBgHover string
 }
 
-type DeploymentData struct {
-	DomainName string
+type KubernetesWebsiteDomainNameData struct {
+	WebsiteDomainName string
+}
+
+type SmtpDomainNameData struct {
+	SmtpDomainName string
+}
+
+type SmtpSelectorData struct {
+	SmtpSelector string
 }

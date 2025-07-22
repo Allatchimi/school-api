@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
+	"time"
 
 	"api/common/helpers"
 	htmlHelper "api/common/helpers/html"
@@ -22,7 +24,7 @@ const (
 
 // DeploySchool generates configuration files and pushes them to the repository.
 func DeploySchool(school *model.School) (err error) {
-	if school == nil || school.ID < 1 || school.Config == nil || len(school.Config.DomainName) < 1 {
+	if school == nil || school.ID < 1 || school.Config == nil || len(school.Config.WebsiteDomainName) < 1 {
 		errMsg := "School is nil or have invalid fields!"
 		err = fmt.Errorf("%s", errMsg)
 		return
@@ -38,7 +40,7 @@ func DeploySchool(school *model.School) (err error) {
 	defer os.RemoveAll(tempDir)
 
 	// Generate website URL
-	websiteURL := fmt.Sprintf("https://%s", school.Config.DomainName)
+	websiteURL := fmt.Sprintf("https://%s", school.Config.WebsiteDomainName)
 	// Generate API key using HMAC SHA256
 	apiKey, err := securityUtil.GenerateHMAC_SHA256_Base64URL(
 		fmt.Sprintf("%d", school.ID),
@@ -75,18 +77,31 @@ func DeploySchool(school *model.School) (err error) {
 		PrimaryBgHover: school.Config.ColorPrimaryBgHover,
 	}
 	// Generate deployment data
-	deploymentData := DeploymentData{
-		DomainName: school.Config.DomainName,
+	kubernetesDeploymentData := KubernetesWebsiteDomainNameData{
+		WebsiteDomainName: school.Config.WebsiteDomainName,
+	}
+	smtpDomainNameData := SmtpDomainNameData{
+		SmtpDomainName: school.Config.UserEmailDomainName,
+	}
+	var selector string = strings.ReplaceAll(strings.ToLower(strings.TrimSpace(school.Config.UserEmailDomainName)), ".", "")
+	if len(selector) > 100 {
+		selector = fmt.Sprintf("school%dselector", school.ID)
+	}
+	selector = fmt.Sprintf("%s%d", selector, time.Now().Year())
+	smtpSelectorData := SmtpSelectorData{
+		SmtpSelector: selector,
 	}
 	// Define output directory structure
 	outputDir := filepath.Join(tempDir, fmt.Sprintf("%d", school.ID))
 	deploymentDir := filepath.Join(outputDir, "deployment")
+	deploymentKubernetesDir := filepath.Join(deploymentDir, "kubernetes")
+	deploymentSmtpDir := filepath.Join(deploymentDir, "smtp")
 	websiteDir := filepath.Join(outputDir, "website")
 	colorDir := filepath.Join(websiteDir, "src", "lib", "constants", "common")
 	faviconDir := filepath.Join(websiteDir, "src", "app")
 	logosDir := filepath.Join(websiteDir, "public", "assets", "images", "logos")
 	// Create required directories
-	for _, dir := range []string{outputDir, deploymentDir, websiteDir, colorDir, faviconDir, logosDir} {
+	for _, dir := range []string{outputDir, deploymentDir, deploymentKubernetesDir, deploymentSmtpDir, websiteDir, colorDir, faviconDir, logosDir} {
 		if err = os.MkdirAll(dir, os.ModePerm); err != nil {
 			errMsg := "Failed to create directory!"
 			err = fmt.Errorf("%s: %s %w", errMsg, dir, err)
@@ -104,10 +119,21 @@ func DeploySchool(school *model.School) (err error) {
 		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(colorDir, "color.ts"), colorTemplateContent, err)
 		return
 	}
-	// Generate deployment files
-	if err = htmlHelper.RenderTemplate(filepath.Join(deploymentDir, "domainname.txt"), domainNameDeploymentTemplateContent, deploymentData); err != nil {
+	// Generate kubernetes deployment files
+	if err = htmlHelper.RenderTemplate(filepath.Join(deploymentKubernetesDir, "domainname.txt"), kubernetesWebsiteDomainNameTemplateContent, kubernetesDeploymentData); err != nil {
 		errMsg := "Failed to render template!"
-		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentDir, "domainname.txt"), domainNameDeploymentTemplateContent, err)
+		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentKubernetesDir, "domainname.txt"), kubernetesWebsiteDomainNameTemplateContent, err)
+		return
+	}
+	// Generate smtp deployment files
+	if err = htmlHelper.RenderTemplate(filepath.Join(deploymentSmtpDir, "domainname.txt"), smtpDomainNameDeploymentTemplateContent, smtpDomainNameData); err != nil {
+		errMsg := "Failed to render template!"
+		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentSmtpDir, "domainname.txt"), smtpDomainNameDeploymentTemplateContent, err)
+		return
+	}
+	if err = htmlHelper.RenderTemplate(filepath.Join(deploymentSmtpDir, "selector.txt"), smtpSelectorDeploymentTemplateContent, smtpSelectorData); err != nil {
+		errMsg := "Failed to render template!"
+		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentSmtpDir, "selector.txt"), smtpSelectorDeploymentTemplateContent, err)
 		return
 	}
 	// Download favicon if available

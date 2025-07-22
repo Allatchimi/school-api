@@ -82,8 +82,9 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 
 	// Create config
 	newConfig, err := service.Repository.CreateSchoolConfig(&model.SchoolConfig{
-		DomainName:   item.Config.DomainName,
-		SupportEmail: item.Config.SupportEmail,
+		WebsiteDomainName:   item.Config.WebsiteDomainName,
+		UserEmailDomainName: item.Config.UserEmailDomainName,
+		SupportEmail:        item.Config.SupportEmail,
 
 		GoogleWorkspaceCredentials:     item.Config.GoogleWorkspaceCredentials,
 		GoogleWorkspaceUserEmailDomain: item.Config.GoogleWorkspaceUserEmailDomain,
@@ -255,7 +256,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 
 	// Deploy school
 	go func() {
-		if !newConfig.IsSameAsRequest(request.Config) {
+		if !(result.IsSameDeploymentAsRequest(request) && newConfig.IsSameDeploymentAsRequest(request.Config)) {
 			err := deploymentHelper.DeploySchool(result)
 			if err != nil {
 				service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{

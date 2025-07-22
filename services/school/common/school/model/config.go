@@ -7,8 +7,9 @@ import (
 
 type SchoolConfig struct {
 	types.BaseGormModel
-	DomainName   string `gorm:"default:null"`
-	SupportEmail string `gorm:"default:null"`
+	WebsiteDomainName   string `gorm:"default:null"`
+	UserEmailDomainName string `gorm:"default:null"`
+	SupportEmail        string `gorm:"default:null"`
 
 	GoogleWorkspaceCredentials     string `gorm:"default:null"`
 	GoogleWorkspaceUserEmailDomain string `gorm:"default:null"`
@@ -31,7 +32,8 @@ func (item *SchoolConfig) ToResponse() *data.SchoolConfigResponse {
 		return nil
 	}
 	resp := &data.SchoolConfigResponse{}
-	resp.DomainName = item.DomainName
+	resp.WebsiteDomainName = item.WebsiteDomainName
+	resp.UserEmailDomainName = item.UserEmailDomainName
 	resp.SupportEmail = item.SupportEmail
 	resp.GoogleWorkspaceCredentials = item.GoogleWorkspaceCredentials
 	resp.GoogleWorkspaceUserEmailDomain = item.GoogleWorkspaceUserEmailDomain
@@ -49,7 +51,8 @@ func (item *SchoolConfig) ToResponse() *data.SchoolConfigResponse {
 
 func FromConfigRequest(item *data.SchoolConfigRequest) *SchoolConfig {
 	resp := &SchoolConfig{
-		DomainName:                     item.DomainName,
+		WebsiteDomainName:              item.WebsiteDomainName,
+		UserEmailDomainName:            item.UserEmailDomainName,
 		SupportEmail:                   item.SupportEmail,
 		GoogleWorkspaceCredentials:     item.GoogleWorkspaceCredentials,
 		GoogleWorkspaceUserEmailDomain: item.GoogleWorkspaceUserEmailDomain,
@@ -66,11 +69,12 @@ func FromConfigRequest(item *data.SchoolConfigRequest) *SchoolConfig {
 	return resp
 }
 
-func (item *SchoolConfig) IsSameAsRequest(itemRequest *data.SchoolConfigRequest) bool {
+func (item *SchoolConfig) IsSameDeploymentAsRequest(itemRequest *data.SchoolConfigRequest) bool {
 	if item == nil || itemRequest == nil {
 		return false
 	}
-	return (item.DomainName == itemRequest.DomainName) &&
+	return (item.WebsiteDomainName == itemRequest.WebsiteDomainName) &&
+		(item.UserEmailDomainName == itemRequest.UserEmailDomainName) &&
 		(item.WebsiteTitle == itemRequest.WebsiteTitle) &&
 		(item.WebsiteDescription == itemRequest.WebsiteDescription) &&
 		(item.ColorPrimary == itemRequest.ColorPrimary) &&

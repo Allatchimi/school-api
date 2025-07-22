@@ -180,7 +180,7 @@ func (service *Service) UpdateProfilePasswordInit(inputJwtToken *types.JwtToken)
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailDataCheckCode{
 				EmailData: smtpHelper.EmailData{
-					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.DomainName),
+					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
 					Logo:         userFound.School.Logo,
 					Title:        constants.MailUpdatePasswordCheckCode.Title,
 					Message:      constants.MailUpdatePasswordCheckCode.Message,
@@ -384,7 +384,7 @@ func (service *Service) UpdateProfilePasswordNewPassword(inputJwtToken *types.Jw
 		go func() {
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailData{
-				HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.DomainName),
+				HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
 				Logo:         userFound.School.Logo,
 				Title:        constants.MailUpdatePasswordSuccess.Title,
 				Message:      constants.MailUpdatePasswordSuccess.Message,
@@ -460,7 +460,7 @@ func (service *Service) UpdateProfilePhoneNumberInit(inputJwtToken *types.JwtTok
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailDataCheckCode{
 				EmailData: smtpHelper.EmailData{
-					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.DomainName),
+					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
 					Logo:         userFound.School.Logo,
 					Title:        constants.MailUpdatePhoneNumberCheckCode.Title,
 					Message:      constants.MailUpdatePhoneNumberCheckCode.Message,
@@ -701,7 +701,7 @@ func (service *Service) UpdateProfileMfaEmailInit(inputJwtToken *types.JwtToken)
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailDataCheckCode{
 				EmailData: smtpHelper.EmailData{
-					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.DomainName),
+					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
 					Logo:         userFound.School.Logo,
 					Title:        constants.MailUpdateMfaEmailCheckCode.Title,
 					Message:      constants.MailUpdateMfaEmailCheckCode.Message,

@@ -59,8 +59,9 @@ type SchoolInfoRequest struct {
 }
 
 type SchoolConfigRequest struct {
-	DomainName   string `json:"domainName" required:"true" doc:"Domain name" example:".digitschool.cm"`
-	SupportEmail string `json:"supportEmail" required:"false" doc:"Support email" example:"support@digitschool.cm"`
+	WebsiteDomainName   string `json:"websiteDomainName" required:"true" doc:"Website domain name" example:"app.digitschool.cm"`
+	UserEmailDomainName string `json:"userEmailDomainName" required:"true" doc:"User email domain name" example:"digitschool.cm"`
+	SupportEmail        string `json:"supportEmail" required:"false" doc:"Support email" example:"support@digitschool.cm"`
 
 	GoogleWorkspaceCredentials     string `json:"googleWorkspaceCredentials" required:"false" doc:"Google workspace credentials" example:"googleWorkspaceCredentials"`
 	GoogleWorkspaceUserEmailDomain string `json:"googleWorkspaceUserEmailDomain" required:"false" doc:"Google workspace user email domain" example:"googleWorkspaceUserEmailDomain"`

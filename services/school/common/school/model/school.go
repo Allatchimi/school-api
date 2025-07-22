@@ -96,7 +96,7 @@ func (item *School) WebsiteUrl() (url string) {
 		url = config.Env.WebsiteBaseURL
 		return
 	}
-	url = fmt.Sprintf("https://%s", item.Config.DomainName)
+	url = fmt.Sprintf("https://%s", item.Config.WebsiteDomainName)
 	return
 }
 
@@ -115,7 +115,7 @@ func (item *School) SMTPNoReplySender() (senderEmail string, senderName string) 
 		senderName = config.Env.AppName
 		return
 	}
-	senderEmail = config.Env.SmtpUserNoReply + "@" + item.Config.DomainName
+	senderEmail = config.Env.SmtpUserNoReply + "@" + item.Config.UserEmailDomainName
 	senderName = item.Name
 	return
 }
@@ -132,7 +132,16 @@ func (item *School) SMTPSupportSender() (senderEmail string, senderName string) 
 		senderName = "Support " + item.Name
 		return
 	}
-	senderEmail = config.Env.SmtpUserSupport + "@" + item.Config.DomainName
+	senderEmail = config.Env.SmtpUserSupport + "@" + item.Config.UserEmailDomainName
 	senderName = "Support " + item.Name
 	return
+}
+
+func (item *School) IsSameDeploymentAsRequest(itemRequest *data.SchoolRequest) bool {
+	if item == nil || itemRequest == nil {
+		return false
+	}
+	return (item.Favicon == itemRequest.Favicon) &&
+		(item.Logo == itemRequest.Logo) &&
+		(item.LogoWhite == itemRequest.LogoWhite)
 }

@@ -74,7 +74,7 @@ func Testssssss() {
 		Logo:      "https://www.gstatic.com/marketing-cms/assets/images/c5/3a/200414104c669203c62270f7884f/google-wordmarks-2x.webp=n-w100-h32-fcrop64=1,00000000ffffffff-rw",
 		LogoWhite: "https://www.gstatic.com/marketing-cms/assets/images/c5/3a/200414104c669203c62270f7884f/google-wordmarks-2x.webp=n-w100-h32-fcrop64=1,00000000ffffffff-rw",
 		Config: &modelSchool.SchoolConfig{
-			DomainName:          "www.digitschool.cm",
+			WebsiteDomainName:   "www.digitschool.cm",
 			WebsiteTitle:        "Digitschool",
 			WebsiteDescription:  "Welcome to Digitschool! The future of education. With Digitschool, you can learn anything you want, whenever you want, from anywhere you want. Just enroll and start now.",
 			ColorPrimary:        "#b6b43b",

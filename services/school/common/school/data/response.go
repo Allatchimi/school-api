@@ -67,8 +67,9 @@ type SchoolInfoResponse struct {
 }
 
 type SchoolConfigResponse struct {
-	DomainName   string `json:"domainName" required:"false" doc:"Domain name"`
-	SupportEmail string `json:"supportEmail" required:"false" doc:"Support email"`
+	WebsiteDomainName   string `json:"websiteDomainName" required:"false" doc:"Website domain name"`
+	UserEmailDomainName string `json:"userEmailDomainName" required:"false" doc:"User email domain name"`
+	SupportEmail        string `json:"supportEmail" required:"false" doc:"Support email"`
 
 	GoogleWorkspaceCredentials     string `json:"googleWorkspaceCredentials" required:"false" doc:"Google workspace credentials"`
 	GoogleWorkspaceUserEmailDomain string `json:"googleWorkspaceUserEmailDomain" required:"false" doc:"Google workspace user email domain"`

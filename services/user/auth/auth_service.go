@@ -128,7 +128,7 @@ func (service *Service) Login(schoolID int64, input *data.LoginRequest, device *
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailDataCheckCode{
 				EmailData: smtpHelper.EmailData{
-					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.DomainName),
+					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
 					Logo:         userFound.School.Logo,
 					Title:        constants.MailVerifyEmailCheckCode.Title,
 					Message:      constants.MailVerifyEmailCheckCode.Message,
@@ -417,7 +417,7 @@ func (service *Service) Register(schoolID int64, input *data.RegisterRequest) (a
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailDataCheckCode{
 				EmailData: smtpHelper.EmailData{
-					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.DomainName),
+					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
 					Logo:         userFound.School.Logo,
 					Title:        constants.MailVerifyEmailCheckCode.Title,
 					Message:      constants.MailVerifyEmailCheckCode.Message,
@@ -532,7 +532,7 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 		go func() {
 			fromEmail, fromUsername := updatedUser.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailData{
-				HomePageLink: fmt.Sprintf("https://%s", updatedUser.School.Config.DomainName),
+				HomePageLink: fmt.Sprintf("https://%s", updatedUser.School.Config.WebsiteDomainName),
 				Logo:         updatedUser.School.Logo,
 				Title:        constants.MailWelcomeVerifiedEmail.Title,
 				Message:      constants.MailWelcomeVerifiedEmail.Message,
@@ -621,7 +621,7 @@ func (service *Service) ForgotPasswordInit(jwtToken *types.JwtToken, input *data
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailDataCheckCode{
 				EmailData: smtpHelper.EmailData{
-					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.DomainName),
+					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
 					Logo:         userFound.School.Logo,
 					Title:        constants.MailForgotPasswordCheckCode.Title,
 					Message:      constants.MailForgotPasswordCheckCode.Message,
