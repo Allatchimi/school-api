@@ -318,5 +318,6 @@ func InjectDependencies() {
 	// Permissions checker
 	serviceHelper.InjectServices(
 		api.AllControllers.UserController.Service,
+		api.AllControllers.NotificationController.Service,
 	)
 }

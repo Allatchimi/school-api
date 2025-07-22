@@ -80,8 +80,8 @@ func StartGin() {
 		),
 	)
 
-	// Serve static files as favicon
-	engine.StaticFS("/assets", http.Dir(constants.AssetAppPath))
+	// Serve public static files as favicon
+	engine.StaticFS("/assets", http.Dir(constants.AssetPublicAppPath))
 
 	// Register websocket
 	wsManager := configWS.SetupWebsocket()

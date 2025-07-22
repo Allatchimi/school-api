@@ -18,6 +18,12 @@ func SendMessage(accessToken, phoneID string, message string, users []model.User
 	go safeStartWorker(config.RedisClient, accessToken, phoneID)
 
 	for _, user := range users {
+		if user.Config.WhatsappPhoneNumber < 1 {
+			continue
+		}
+
+		helpers.Logger.Info("Sending whatsapp message to user: ", zap.Int64("userID", user.ID), zap.String("email", user.Email))
+
 		job := &WhatsAppJob{
 			ReceiverPhoneNumber: fmt.Sprintf("%d", user.Config.WhatsappPhoneNumber),
 			Message:             message,

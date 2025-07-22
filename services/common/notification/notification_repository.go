@@ -22,6 +22,8 @@ func NewRepository(db *gorm.DB) *Repository {
 
 func (repository *Repository) Create(item *model.Notification) (*model.Notification, error) {
 	result := *item
+	result.Seen = false
+	result.SeenAt = nil
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
@@ -43,7 +45,6 @@ func (repository *Repository) UpdateSeenAllByUserID(userID int64, seen bool, see
 	return repository.Db.Preload(clause.Associations).
 		Model(&model.Notification{}).
 		Where("user_id = ?", userID).
-		Where("seen = ?", !seen).
 		Updates(
 			map[string]any{
 				"seen":    seen,
@@ -78,41 +79,61 @@ func (repository *Repository) GetByIDUserID(id int64, userID int64) (*model.Noti
 }
 
 func (repository *Repository) GetNotSeenCount(userID int64) (result int64, err error) {
-	return result, repository.Db.
-		Model(&model.Notification{}).
-		Where("user_id = ?", userID).
-		Where("seen = ?", false).
-		Count(&result).
-		Error
+	var count int64
+	countQuery := "SELECT COUNT(*) FROM notifications WHERE notifications.user_id = ? AND (notifications.seen = ? OR notifications.seen IS NULL)"
+	args := []any{}
+	args = append(args, userID, false)
+	repository.Db.Raw(countQuery, args...).Count(&count)
+	result = count
+
+	fmt.Print("Notifications not seen")
+	fmt.Println("")
+	fmt.Print(result)
+	fmt.Println("")
+	return
 }
 
 func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, userID int64) (result []model.Notification, err error) {
 	result = make([]model.Notification, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if userID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("notifications.user_id = %d", userID))
+		where = helpers.AppendWhereClause(where, "notifications.user_id = ?")
+		args = append(args, userID)
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(notifications.title ILIKE '%s')",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(notifications.id AS TEXT) = ? OR 
+			notifications.title ILIKE ? 
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT notifications.* "+
-					"FROM notifications "+
-					"LEFT JOIN users ON notifications.user_id = users.id ",
+				`SELECT notifications.* 
+				FROM notifications 
+				LEFT JOIN users ON notifications.user_id = users.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }

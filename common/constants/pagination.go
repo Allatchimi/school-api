@@ -1,3 +1,3 @@
 package constants
 
-const PaginationLimitDefault = 20
+const PaginationLimitDefault = 30

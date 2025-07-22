@@ -7,7 +7,6 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
-	"api/common/utils"
 	"api/services/common/notification/data"
 	"api/services/common/notification/model"
 )
@@ -22,25 +21,6 @@ func NewService(repository *Repository) *Service {
 
 const MODEL_NAME = "notification"
 const DEFAULT_ERROR_MESSAGE = "interact with notification model"
-
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *model.Notification) (result *model.Notification, errCode int, err error) {
-	// Create
-	result, err = service.Repository.Create(request)
-	if err != nil {
-		pgState, errPgState := utils.ExtractSQLState(err.Error())
-		if errPgState == nil {
-			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
-				errCode = http.StatusConflict
-				err = constants.Http409ConflictErrorMessage()
-				return
-			}
-		}
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	return
-}
 
 func (service *Service) UpdateSeen(inputJwtToken *types.JwtToken, id int64, request *data.NotificationSeenRequest) (result *model.Notification, errCode int, err error) {
 	// Check if exists

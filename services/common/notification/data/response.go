@@ -11,7 +11,7 @@ type NotificationResponse struct {
 	User    *dataUser.UserPublicResponse `json:"user" required:"false" doc:"User"`
 	Title   string                       `json:"title" required:"false" doc:"Title"`
 	Message string                       `json:"message" required:"false" doc:"Message"`
-	Seen    bool                         `json:"isReaded" required:"false" doc:"Seen"`
+	Seen    bool                         `json:"seen" required:"false" doc:"Seen"`
 	SeenAt  *time.Time                   `json:"seenAt" required:"false" doc:"Seen at"`
 }
 

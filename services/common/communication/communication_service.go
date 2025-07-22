@@ -2,22 +2,14 @@ package communication
 
 import (
 	"net/http"
-	"time"
 
 	"api/common/constants"
-	"api/common/helpers"
-	smtpHelper "api/common/helpers/message/mail/smtp"
-	telegramHelper "api/common/helpers/message/telegram"
-	whatsappHelper "api/common/helpers/message/whatsapp"
 	"api/common/types"
 	"api/common/utils"
-	webpushConfig "api/config/webpush"
 	"api/services/common/communication/data"
 	"api/services/common/communication/model"
 	serviceHelper "api/services/helper"
 	dataUser "api/services/user/user/data"
-
-	"go.uber.org/zap"
 )
 
 type Service struct {
@@ -75,7 +67,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Comm
 		}
 
 		// Get all user
-		if result == nil || result.School == nil || result.School.Config == nil {
+		if result == nil {
 			continue
 		}
 		users, _ := serviceHelper.UserService.Repository.GetAll(
@@ -87,64 +79,19 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Comm
 			},
 		)
 
-		// Send push notification
-		go func() {
-			createdAt := new(time.Time)
-			*createdAt = time.Now()
-			webpushConfig.SendPushNotificationToUserBulk(
-				users,
-				&webpushConfig.WebPushPayload{
-					Title:     request.Subject,
-					Body:      request.Message,
-					Icon:      result.School.LogoUrl(),
-					Url:       result.School.WebsiteUrl(),
-					CreatedAt: createdAt,
-				},
-				nil,
-				serviceHelper.UserService.Repository,
-			)
-		}()
-		// Send telegram
-		go func() {
-			telegramHelper.SendMessage(
-				result.School.Config.TelegramBotToken,
-				request.Message,
-				users,
-			)
-		}()
-		// Send whatsapp
-		go func() {
-			whatsappHelper.SendMessage(
-				result.School.Config.WhatsappToken,
-				result.School.Config.WhatsappPhoneID,
-				request.Message,
-				users,
-			)
-		}()
-		// Send mail
-		go func() {
-			mailData := &smtpHelper.EmailData{
-				HomePageLink: result.School.WebsiteUrl(),
-				Logo:         result.School.LogoUrl(),
-				Title:        request.Subject,
-				Message:      request.Message,
-			}
-			mailBody, errTemplate := mailData.LoadTemplate()
-			if errTemplate != nil {
-				helpers.Logger.Error("Failed to load email template!", zap.Error(errTemplate))
-			}
-			if len(mailBody) < 1 {
-				helpers.Logger.Warn("Empty message body!")
-			}
-			mailUsers := make([]string, len(users))
-			for i := range users {
-				mailUsers[i] = users[i].Email
-			}
-			errMail := smtpHelper.SendEmailBCC(mailUsers, request.Subject, mailBody)
-			if errMail != nil {
-				helpers.Logger.Error("Failed to send mail!", zap.Error(errMail))
-			}
-		}()
+		// Send message
+		serviceHelper.SendMessage(
+			&serviceHelper.MessageRequest{
+				PusNotification: true,
+				Telegram:        true,
+				Whatsapp:        true,
+				Mail:            true,
+			},
+			request.Subject,
+			request.Message,
+			result.School,
+			users,
+		)
 	}
 	return
 }

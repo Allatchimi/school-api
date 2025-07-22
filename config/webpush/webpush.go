@@ -3,8 +3,12 @@ package webpushConfig
 import (
 	"api/common/helpers"
 	"api/config"
+	wsConfig "api/config/ws"
+	"api/services/common/notification"
+	modelNotification "api/services/common/notification/model"
 	"api/services/user/user"
-	"api/services/user/user/model"
+	modelUser "api/services/user/user/model"
+
 	"encoding/json"
 	"fmt"
 	"time"
@@ -32,7 +36,7 @@ type WebPushPayload struct {
 // SendPushNotificationToUser sends a push notification
 // to a user with a given payload and TTL
 func SendPushNotificationToUser(
-	user *model.User,
+	user *modelUser.User,
 	payload *WebPushPayload,
 	ttl *int,
 	userRepository *user.Repository,
@@ -103,14 +107,54 @@ func SendPushNotificationToUser(
 // SendPushNotificationToUserBulk sends a push notification
 // to multiple users with a given payload and TTL
 func SendPushNotificationToUserBulk(
-	users []model.User,
+	users []modelUser.User,
 	payload *WebPushPayload,
 	ttl *int,
 	userRepository *user.Repository,
+	notificationRepository *notification.Repository,
 ) (errs []error) {
+	if payload == nil || userRepository == nil || notificationRepository == nil {
+		return
+	}
+
 	errs = make([]error, 0, len(users))
 	for _, user := range users {
-		errs = append(errs, SendPushNotificationToUser(&user, payload, ttl, userRepository))
+		if user.ID < 1 {
+			continue
+		}
+
+		helpers.Logger.Info("Sending notification message to user: ", zap.Int64("userID", user.ID), zap.String("email", user.Email))
+
+		// Save in database
+		notification, err := notificationRepository.Create(&modelNotification.Notification{
+			UserID:  user.ID,
+			Title:   payload.Title,
+			Message: payload.Body,
+		})
+		if err != nil {
+			errs = append(errs, err)
+			return
+		}
+
+		if notification != nil {
+			// Publish WS notification
+			wsConfig.PublishNotification(
+				fmt.Sprintf("%d", user.ID),
+				&wsConfig.WSNotificationResponse{
+					ID:        fmt.Sprintf("%d", notification.ID),
+					Title:     notification.Title,
+					Message:   notification.Message,
+					Seen:      notification.Seen,
+					CreatedAt: fmt.Sprintf("%s", notification.CreatedAt.String()),
+					Href:      "",
+				},
+			)
+		}
+
+		// Send push notification
+		if user.Config.AllowNotifications {
+			errs = append(errs, SendPushNotificationToUser(&user, payload, ttl, userRepository))
+		}
 	}
 	return
 }
