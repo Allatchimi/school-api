@@ -37,13 +37,13 @@ func (repository *Repository) UpdateByID(id int64, item *model.Student) (*model.
 		return nil, err
 	}
 	result := &model.Student{}
-	return result, repository.Db.Model(result).Where("id = ?", item.ID).Updates(
+	return result, repository.Db.Model(&model.Student{}).Where("id = ?", item.ID).Updates(
 		map[string]any{
 			"school_id": item.SchoolID,
 			"user_id":   item.UserID,
 			"uid":       item.UID,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) UpdateStudentEnrollByID(id int64, item *model.StudentEnroll) (*model.StudentEnroll, error) {
@@ -52,7 +52,7 @@ func (repository *Repository) UpdateStudentEnrollByID(id int64, item *model.Stud
 		return nil, err
 	}
 	result := &model.StudentEnroll{}
-	return result, repository.Db.Model(result).Where("id = ?", item.ID).Updates(
+	return result, repository.Db.Model(&model.StudentEnroll{}).Where("id = ?", item.ID).Updates(
 		map[string]any{
 			"school_id":       item.SchoolID,
 			"year_id":         item.YearID,
@@ -80,7 +80,7 @@ func (repository *Repository) UpdateStudentEnrollByID(id int64, item *model.Stud
 			"document4": item.Document4,
 			"document5": item.Document5,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -190,198 +190,141 @@ func (repository *Repository) AreStudentEnrollSameUniqueObjects(item1 *model.Stu
 	return false
 }
 
-func (repository *Repository) GetStudentEnrollByUserIDSchoolIDYearIDClassSubjectID(
-	userID int64, schoolID int64, yearID int64, classSubjectID int64,
-) (*model.StudentEnroll, error) {
-	result := &model.StudentEnroll{}
-
-	where := helpers.AppendWhereClause("", fmt.Sprintf("(students.user_id = %d AND students.school_id = %d AND student_enrolls.year_id = %d AND highschool_class_subjects.id = %d)", userID, schoolID, yearID, classSubjectID))
-
-	tmpErr := repository.Db.
-		Preload(clause.Associations).
-		Scopes(
-			helpers.PaginationScope(
-				repository.Db,
-				"SELECT student_enrolls.* "+
-					"FROM student_enrolls "+
-					"LEFT JOIN students ON student_enrolls.student_id = students.id "+
-					"LEFT JOIN highschool_class_subjects ON student_enrolls.class_id = highschool_class_subjects.class_id ",
-				where,
-				nil,
-				nil,
-			),
-		).Limit(1).Find(&result).Error
-
-	err := tmpErr
-	return result, err
-}
-
-func (repository *Repository) GetStudentEnrollByUserIDSchoolIDYearIDUnitID(userID int64, schoolID int64, yearID int64, unitID int64) (*model.StudentEnroll, error) {
-	result := &model.StudentEnroll{}
-
-	where := helpers.AppendWhereClause("", fmt.Sprintf("(students.user_id = %d AND students.school_id = %d AND student_enrolls.year_id = %d AND university_units.id = %d)", userID, schoolID, yearID, unitID))
-
-	tmpErr := repository.Db.
-		Preload(clause.Associations).
-		Scopes(
-			helpers.PaginationScope(
-				repository.Db,
-				"SELECT student_enrolls.* "+
-					"FROM student_enrolls "+
-					"LEFT JOIN students ON student_enrolls.student_id = students.id "+
-					"LEFT JOIN university_units ON student_enrolls.level_domain_id = university_units.level_domain_id ",
-				where,
-				nil,
-				nil,
-			),
-		).Limit(1).Find(&result).Error
-
-	err := tmpErr
-	return result, err
-}
-
-func (repository *Repository) GetStudentEnrollByUserIDSchoolIDYearIDClassID(
-	userID int64, schoolID int64, yearID int64, classID int64,
-) (*model.StudentEnroll, error) {
-	result := &model.StudentEnroll{}
-
-	where := helpers.AppendWhereClause("", fmt.Sprintf("(students.user_id = %d AND students.school_id = %d AND student_enrolls.year_id = %d AND student_enrolls.class_id = %d)", userID, schoolID, yearID, classID))
-
-	tmpErr := repository.Db.
-		Preload(clause.Associations).
-		Scopes(
-			helpers.PaginationScope(
-				repository.Db,
-				"SELECT student_enrolls.* "+
-					"FROM student_enrolls "+
-					"LEFT JOIN students ON student_enrolls.student_id = students.id ",
-				where,
-				nil,
-				nil,
-			),
-		).Limit(1).Find(&result).Error
-
-	err := tmpErr
-	return result, err
-}
-
-func (repository *Repository) GetStudentEnrollByUserIDSchoolIDYearIDLevelDomainID(userID int64, schoolID int64, yearID int64, levelDomainID int64) (*model.StudentEnroll, error) {
-	result := &model.StudentEnroll{}
-
-	where := helpers.AppendWhereClause("", fmt.Sprintf("(students.user_id = %d AND students.school_id = %d AND student_enrolls.year_id = %d AND student_enrolls.level_domain_id = %d)", userID, schoolID, yearID, levelDomainID))
-
-	tmpErr := repository.Db.
-		Preload(clause.Associations).
-		Scopes(
-			helpers.PaginationScope(
-				repository.Db,
-				"SELECT student_enrolls.* "+
-					"FROM student_enrolls "+
-					"LEFT JOIN students ON student_enrolls.student_id = students.id ",
-				where,
-				nil,
-				nil,
-			),
-		).Limit(1).Find(&result).Error
-
-	err := tmpErr
-	return result, err
-}
-
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Student, err error) {
+func (repository *Repository) GetAll(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.Student, err error) {
 	result = make([]model.Student, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("students.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "students.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(students.id AS TEXT) = '%s' OR students.uid ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR users.email ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(students.id AS TEXT) = ? OR 
+			students.uid ILIKE ? OR 
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			users.email ILIKE ? OR 
+			CAST(users.phone_number AS TEXT) ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Preload("User.Info").
+		Preload("User.Role").
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT students.* "+
-					"FROM students "+
-					"LEFT JOIN schools ON students.school_id = schools.id "+
-					"LEFT JOIN users ON students.user_id = users.id ",
+				`SELECT students.* 
+				FROM students 
+				LEFT JOIN schools ON students.school_id = schools.id 
+				LEFT JOIN users ON students.user_id = users.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }
 
-func (repository *Repository) GetAllStudentEnroll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllStudentEnrollRequest) (result []model.StudentEnroll, err error) {
+func (repository *Repository) GetAllStudentEnroll(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllStudentEnrollRequest,
+) (result []model.StudentEnroll, err error) {
 	result = make([]model.StudentEnroll, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "student_enrolls.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 		if request.YearID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.year_id = %d", request.YearID))
+			where = helpers.AppendWhereClause(where, "student_enrolls.year_id = ?")
+			args = append(args, request.YearID)
 		}
-		if request.ClassSubjectID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.class_id = %d", request.ClassSubjectID))
+		if request.ClassID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.class_id = ?")
+			args = append(args, request.ClassID)
 		}
-		if request.UnitID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.level_domain_id = %d", request.UnitID))
+		if request.LevelDomainID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.level_domain_id = ?")
+			args = append(args, request.LevelDomainID)
 		}
 		if request.StudentID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("student_enrolls.student_id = %d", request.StudentID))
+			where = helpers.AppendWhereClause(where, "student_enrolls.student_id = ?")
+			args = append(args, request.StudentID)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(student_enrolls.id AS TEXT) = '%s' OR years.name ILIKE '%s' OR highschool_classes.name ILIKE '%s' OR highschool_classes.description ILIKE '%s' OR university_level_domains.program ILIKE '%s' OR university_level_domains.requirements ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(student_enrolls.id AS TEXT) = ? OR 
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			years.name ILIKE ? OR 
+			highschool_classes.name ILIKE ? OR 
+			students.uid ILIKE ? 
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
-		Preload("Student.School").
+		Preload("Class.Specialty").
+		Preload("LevelDomain.Level").
+		Preload("LevelDomain.Domain").
+		Preload("LevelDomain.Domain.Department").
 		Preload("Student.User").
 		Preload("Student.User.Info").
-		Preload("Class.Specialty").
-		Preload("LevelDomain.Domain").
-		Preload("LevelDomain.Level").
+		Preload("Student.User.Role").
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT student_enrolls.* "+
-					"FROM student_enrolls "+
-					"LEFT JOIN students ON student_enrolls.student_id = students.id "+
-					"LEFT JOIN years ON student_enrolls.year_id = years.id "+
-					"LEFT JOIN highschool_classes ON student_enrolls.class_id = highschool_classes.id "+
-					"LEFT JOIN university_level_domains ON student_enrolls.level_domain_id = university_level_domains.id ",
+				`SELECT student_enrolls.* 
+				FROM student_enrolls 
+				LEFT JOIN schools ON student_enrolls.school_id = schools.id 
+				LEFT JOIN years ON student_enrolls.year_id = years.id 
+				LEFT JOIN highschool_classes ON student_enrolls.class_id = highschool_classes.id
+				LEFT JOIN students ON student_enrolls.student_id = students.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }

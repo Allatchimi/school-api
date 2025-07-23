@@ -24,10 +24,10 @@ type SchoolInfo struct {
 	Founder   string     `gorm:"default:null"`
 	FoundedAt *time.Time `gorm:"default:null"`
 
-	Address           string  `gorm:"default:null"`
-	PoBox             string  `gorm:"default:null"`
-	LocationLongitude float64 `gorm:"default:null"`
-	LocationLatitude  float64 `gorm:"default:null"`
+	Address           string `gorm:"default:null"`
+	PoBox             string `gorm:"default:null"`
+	LocationLongitude string `gorm:"default:null"`
+	LocationLatitude  string `gorm:"default:null"`
 
 	SocialMediaTelegram string `gorm:"default:null"`
 	SocialMediaWhasapp  string `gorm:"default:null"`

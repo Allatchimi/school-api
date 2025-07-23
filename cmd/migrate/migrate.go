@@ -76,8 +76,8 @@ func Apply() error {
 		// ----------- School -----------
 		// School
 		&schoolModel.School{},
-		&schoolModel.SchoolInfo{},
 		&schoolModel.SchoolConfig{},
+		&schoolModel.SchoolInfo{},
 		// Director
 		&directorModel.Director{},
 		// Teacher

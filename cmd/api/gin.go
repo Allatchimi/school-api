@@ -14,7 +14,7 @@ import (
 	"api/middlewares"
 )
 
-// Start Set up and start the API: set up API documentation,
+// StartGin Set up and start the API: set up API documentation,
 // configure middlewares, and security measures.
 func StartGin() {
 	// Set up gin for your API

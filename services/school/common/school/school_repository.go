@@ -38,7 +38,7 @@ func (repository *Repository) CreateSchoolConfig(item *model.SchoolConfig) (*mod
 
 func (repository *Repository) UpdateByID(id int64, item *model.School) (*model.School, error) {
 	result := &model.School{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.School{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"name":   item.Name,
 			"type":   item.Type,
@@ -56,32 +56,32 @@ func (repository *Repository) UpdateByID(id int64, item *model.School) (*model.S
 			"currency":      item.Currency,
 			"payment_count": item.PaymentCount,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) UpdateDeploymentStatusByID(id int64, request *data.SchoolDeploymentStatusRequest) (*model.School, error) {
 	result := &model.School{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.School{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"deployment_status":   request.Status,
 			"deployment_feedback": request.Feedback,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) UpdateConfigInfoByID(id int64, configID int64, infoID int64) (*model.School, error) {
 	result := &model.School{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.School{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"config_id": configID,
 			"info_id":   infoID,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) UpdateSchoolInfoByID(id int64, item *model.SchoolInfo) (*model.SchoolInfo, error) {
 	result := &model.SchoolInfo{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.SchoolInfo{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"full_name":   item.FullName,
 			"description": item.Description,
@@ -115,12 +115,12 @@ func (repository *Repository) UpdateSchoolInfoByID(id int64, item *model.SchoolI
 			"image4": item.Image4,
 			"image5": item.Image5,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) UpdateSchoolConfigByID(id int64, item *model.SchoolConfig) (*model.SchoolConfig, error) {
 	result := &model.SchoolConfig{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.SchoolConfig{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"website_domain_name":    item.WebsiteDomainName,
 			"user_email_domain_name": item.UserEmailDomainName,
@@ -141,11 +141,21 @@ func (repository *Repository) UpdateSchoolConfigByID(id int64, item *model.Schoo
 			"color_primary_bg":       item.ColorPrimaryBg,
 			"color_primary_bg_hover": item.ColorPrimaryBgHover,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.School{})
+	return result.RowsAffected, result.Error
+}
+
+func (repository *Repository) DeleteSchoolInfoByID(id int64) (int64, error) {
+	result := repository.Db.Where("id = ?", id).Delete(&model.SchoolInfo{})
+	return result.RowsAffected, result.Error
+}
+
+func (repository *Repository) DeleteSchoolConfigByID(id int64) (int64, error) {
+	result := repository.Db.Where("id = ?", id).Delete(&model.SchoolConfig{})
 	return result.RowsAffected, result.Error
 }
 
@@ -183,6 +193,24 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.School, item2 *m
 	return false
 }
 
+func (repository *Repository) GetSchoolConfigUniqueObject(item *model.SchoolConfig) (*model.SchoolConfig, error) {
+	result := &model.SchoolConfig{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.SchoolConfig{
+		WebsiteDomainName: item.WebsiteDomainName,
+	}).Or(&model.SchoolConfig{
+		UserEmailDomainName: item.UserEmailDomainName,
+	}).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) AreSchoolConfigSameUniqueObjects(item1 *model.SchoolConfig, item2 *model.SchoolConfig) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.WebsiteDomainName == item2.WebsiteDomainName ||
+			item1.UserEmailDomainName == item2.UserEmailDomainName) {
+		return true
+	}
+	return false
+}
+
 func (repository *Repository) GetSchoolInfoByID(id int64) (*model.SchoolInfo, error) {
 	result := &model.SchoolInfo{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
@@ -193,43 +221,59 @@ func (repository *Repository) GetSchoolConfigByID(id int64) (*model.SchoolConfig
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.School, err error) {
+func (repository *Repository) GetAll(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.School, err error) {
 	result = make([]model.School, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if len(request.Type) > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("schools.type = '%s'", request.Type))
+			where = helpers.AppendWhereClause(where, "schools.type = ?")
+			args = append(args, request.Type)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(schools.id AS TEXT) = '%s' OR schools.name ILIKE '%s' OR CAST(schools.type AS TEXT) ILIKE '%s' OR infos.full_name ILIKE '%s' OR infos.slogan ILIKE '%s' OR infos.founder ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(schools.id AS TEXT) = ? OR 
+			schools.name ILIKE ? OR 
+			schools.type ILIKE ? OR 
+			schools.status ILIKE ? OR 
+			infos.full_name ILIKE ? OR 
+			infos.description ILIKE ? OR 
+			infos.motto ILIKE ? OR 
+			infos.founder ILIKE ? 
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like, like, like)
 	}
-	newFilter := filter
-	newFilter.OrderBy = "schools." + newFilter.OrderBy
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT schools.* "+
-					"FROM schools "+
-					"LEFT JOIN school_infos as infos ON schools.info_id = infos.id "+
-					"LEFT JOIN school_configs as configs ON schools.config_id = configs.id ",
+				`SELECT schools.* 
+				FROM schools 
+				LEFT JOIN school_infos AS infos ON schools.info_id = infos.id`,
 				where,
 				pagination,
-				newFilter,
+				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }

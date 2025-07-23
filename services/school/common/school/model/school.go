@@ -10,7 +10,7 @@ import (
 
 type School struct {
 	types.BaseGormModel
-	Name   string `gorm:"unique;not null"`
+	Name   string `gorm:"unique;default:null"`
 	Type   string `gorm:"default:null"`
 	Status string `gorm:"default:null"`
 
@@ -80,6 +80,10 @@ func (item *School) ToPublicResponse() *data.SchoolPublicResponse {
 	resp.PaymentCount = item.PaymentCount
 
 	resp.Info = item.Info.ToResponse()
+
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

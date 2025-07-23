@@ -13,9 +13,9 @@ type SchoolRequest struct {
 	Type   string `json:"type" required:"true" enum:"highschool,university" doc:"School type"`
 	Status string `json:"status" required:"true" enum:"enabled,disabled" doc:"School status"`
 
-	Favicon   string `json:"favicon" required:"true" doc:"School favicon"`
-	Logo      string `json:"logo" required:"true" doc:"School logo"`
-	LogoWhite string `json:"logoWhite" required:"true" doc:"School logo white"`
+	Favicon   string `json:"favicon" required:"false" doc:"School favicon"`
+	Logo      string `json:"logo" required:"false" doc:"School logo"`
+	LogoWhite string `json:"logoWhite" required:"false" doc:"School logo white"`
 
 	Currency     string `json:"currency" required:"true" minLength:"2" maxLength:"20" doc:"Currency"`
 	PaymentCount int64  `json:"paymentCount" required:"true" min:"1" max:"10" doc:"Payment count"`
@@ -25,7 +25,7 @@ type SchoolRequest struct {
 }
 
 type SchoolInfoRequest struct {
-	FullName    string `json:"fullName" required:"true" minLength:"2" maxLength:"150" doc:"School name"`
+	FullName    string `json:"fullName" required:"true" maxLength:"500" doc:"School name"`
 	Description string `json:"description" required:"false" maxLength:"500" doc:"Description"`
 	Motto       string `json:"motto" required:"false" maxLength:"150" doc:"Motto"`
 
@@ -40,10 +40,10 @@ type SchoolInfoRequest struct {
 	Founder   string     `json:"founder" required:"false" maxLength:"150" doc:"Founder name"`
 	FoundedAt *time.Time `json:"foundedAt" required:"false" doc:"Founded date time"`
 
-	Address           string  `json:"address" required:"false" maxLength:"150" doc:"Address"`
-	PoBox             string  `json:"poBox" required:"false" doc:"PO Box"`
-	LocationLongitude float64 `json:"locationLongitude" required:"false" doc:"Location longitude"`
-	LocationLatitude  float64 `json:"locationLatitude" required:"false" doc:"Location latitude"`
+	Address           string `json:"address" required:"false" maxLength:"150" doc:"Address"`
+	PoBox             string `json:"poBox" required:"false" doc:"PO Box"`
+	LocationLongitude string `json:"locationLongitude" required:"false" doc:"Location longitude"`
+	LocationLatitude  string `json:"locationLatitude" required:"false" doc:"Location latitude"`
 
 	SocialMediaTelegram string `json:"socialMediaTelegram" required:"false" doc:"Social media telegram"`
 	SocialMediaWhasapp  string `json:"socialMediaWhasapp" required:"false" doc:"Social media whasapp"`

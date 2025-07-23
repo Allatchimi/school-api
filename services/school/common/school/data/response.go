@@ -48,10 +48,10 @@ type SchoolInfoResponse struct {
 	Founder   string     `json:"founder" required:"false" doc:"Founder name"`
 	FoundedAt *time.Time `json:"foundedAt" required:"false" doc:"Founded date time"`
 
-	Address           string  `json:"address" required:"false" doc:"Address"`
-	PoBox             string  `json:"poBox" required:"false" doc:"PO Box"`
-	LocationLongitude float64 `json:"locationLongitude" required:"false" doc:"Location longitude"`
-	LocationLatitude  float64 `json:"locationLatitude" required:"false" doc:"Location latitude"`
+	Address           string `json:"address" required:"false" doc:"Address"`
+	PoBox             string `json:"poBox" required:"false" doc:"PO Box"`
+	LocationLongitude string `json:"locationLongitude" required:"false" doc:"Location longitude"`
+	LocationLatitude  string `json:"locationLatitude" required:"false" doc:"Location latitude"`
 
 	SocialMediaTelegram string `json:"socialMediaTelegram" required:"false" doc:"Social media telegram"`
 	SocialMediaWhasapp  string `json:"socialMediaWhasapp" required:"false" doc:"Social media whasapp"`

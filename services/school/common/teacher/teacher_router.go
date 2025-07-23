@@ -466,16 +466,6 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			// Generate items
-			tempResult := make([]data.TeacherResponse, 10)
-			for i := range result.Data {
-				tempModel := data.TeacherResponse{}
-				tempModel.ID = int64(i)
-
-				tempResult[i] = tempModel
-			}
-			result.Data = tempResult
-
 			return &struct {
 				Body data.TeacherResponseList
 			}{Body: *result}, nil
@@ -527,16 +517,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			// Generate items
-			tempResult := make([]data.TeacherClassSubjectUnitResponse, 10)
-			for i := range result.Data {
-				tempModel := data.TeacherClassSubjectUnitResponse{}
-				tempModel.ID = int64(i)
-
-				tempResult[i] = tempModel
-			}
-			result.Data = tempResult
 
 			return &struct {
 				Body data.TeacherClassSubjectUnitResponseList

@@ -38,13 +38,13 @@ func (repository *Repository) Create(role *model.Role) (result *model.Role, err 
 
 func (repository *Repository) UpdateByID(id int64, role *model.Role) (result *model.Role, err error) {
 	result = &model.Role{}
-	tmpErr := repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	tmpErr := repository.Db.Preload(clause.Associations).Model(&model.Role{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"name":        role.Name,
 			"feature":     role.Feature,
 			"description": role.Description,
 		},
-	).Error
+	).Find(result).Error
 
 	err = tmpErr
 	return

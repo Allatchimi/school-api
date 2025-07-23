@@ -30,7 +30,7 @@ func (repository *Repository) Create(item *model.Notification) (*model.Notificat
 func (repository *Repository) UpdateSeenByIDUserID(id int64, userID int64, item *model.Notification) (*model.Notification, error) {
 	result := &model.Notification{}
 	return result, repository.Db.Preload(clause.Associations).
-		Model(result).
+		Model(&model.Notification{}).
 		Where("id = ?", id).
 		Where("user_id = ?", userID).
 		Updates(
@@ -38,7 +38,7 @@ func (repository *Repository) UpdateSeenByIDUserID(id int64, userID int64, item 
 				"seen":    item.Seen,
 				"seen_at": item.SeenAt,
 			},
-		).Error
+		).Find(result).Error
 }
 
 func (repository *Repository) UpdateSeenAllByUserID(userID int64, seen bool, seenAt *time.Time) error {

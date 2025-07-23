@@ -41,7 +41,7 @@ func (repository *Repository) CreateUserConfig(item *model.UserConfig) (*model.U
 func (repository *Repository) UpdateByID(id int64, item *model.User) (*model.User, error) {
 	result := &model.User{}
 	if item.SchoolID < 1 {
-		return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+		return result, repository.Db.Preload(clause.Associations).Model(&model.User{}).Where("id = ?", id).Updates(
 			map[string]any{
 				"email":        item.Email,
 				"phone_number": item.PhoneNumber,
@@ -50,9 +50,9 @@ func (repository *Repository) UpdateByID(id int64, item *model.User) (*model.Use
 				"role_id":      item.RoleID,
 				"is_activated": item.IsActivated,
 			},
-		).Error
+		).Find(result).Error
 	}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.User{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"email":        item.Email,
 			"phone_number": item.PhoneNumber,
@@ -61,25 +61,25 @@ func (repository *Repository) UpdateByID(id int64, item *model.User) (*model.Use
 			"role_id":      item.RoleID,
 			"is_activated": item.IsActivated,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) UpdateEmailByID(id int64, email string) (*model.User, error) {
 	result := &model.User{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.User{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"email": email,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) UpdatePhoneNumberByID(id int64, phoneNumber uint64) (*model.User, error) {
 	result := &model.User{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.User{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"phone_number": phoneNumber,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) UpdatePasswordByID(id int64, password string) (*model.User, error) {
@@ -89,36 +89,36 @@ func (repository *Repository) UpdatePasswordByID(id int64, password string) (*mo
 
 func (repository *Repository) UpdateActivationByID(id int64, item *model.User) (*model.User, error) {
 	result := &model.User{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.User{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"is_activated":   item.IsActivated,
 			"activated_at":   item.ActivatedAt,
 			"user_info_id":   item.UserInfoID,
 			"user_config_id": item.UserConfigID,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) UpdateUserConfigAllowNotificationByID(id int64, enabled bool) (*model.UserConfig, error) {
 	result := &model.UserConfig{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.UserConfig{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"allow_notifications": enabled,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) UpdateUserConfigFieldByID(id int64, column string, value bool) (*model.UserConfig, error) {
 	result := &model.UserConfig{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.UserConfig{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"" + column: value,
 		},
-	).Error
+	).Find(result).Error
 }
 func (repository *Repository) UpdateUserInfoByID(id int64, item *model.UserInfo) (*model.UserInfo, error) {
 	result := &model.UserInfo{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.UserInfo{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"username":   item.Username,
 			"first_name": item.FirstName,
@@ -131,27 +131,27 @@ func (repository *Repository) UpdateUserInfoByID(id int64, item *model.UserInfo)
 			"language":       item.Language,
 			"image":          item.Image,
 		},
-	).Error
+	).Find(result).Error
 }
 func (repository *Repository) UpdateUserConfigByID(id int64, item *model.UserConfig) (*model.UserConfig, error) {
 	result := &model.UserConfig{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.UserConfig{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"whatsapp_phone_number": item.WhatsappPhoneNumber,
 			"telegram_chat_id":      item.TelegramChatID,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) UpdateUserConfigWebPushSubscriptionByID(userID int64, endpoint string, KeyP256dh string, keyAuth string) (*model.UserConfig, error) {
 	result := &model.UserConfig{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", userID).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.UserConfig{}).Where("id = ?", userID).Updates(
 		map[string]any{
 			"web_push_subscription_endpoint":   endpoint,
 			"web_push_subscription_key_p256dh": KeyP256dh,
 			"web_push_subscription_key_auth":   keyAuth,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -318,11 +318,13 @@ func (repository *Repository) GetAll(
 			infos.first_name ILIKE ? OR 
 			infos.last_name ILIKE ? OR 
 			infos.username ILIKE ? OR 
-			roles.name ILIKE ? 
+			roles.name ILIKE ? OR 
+			schools.name ILIKE ? OR 
+			schools.type ILIKE ? 
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
-		args = append(args, search, like, like, like, like, like)
+		args = append(args, search, like, like, like, like, like, like, like, like)
 	}
 
 	// Perform query with preloads and custom pagination scope
@@ -334,7 +336,8 @@ func (repository *Repository) GetAll(
 				`SELECT users.* 
 				FROM users 
 				LEFT JOIN user_infos AS infos ON users.user_info_id = infos.id 
-				LEFT JOIN roles ON users.role_id = roles.id`,
+				LEFT JOIN roles ON users.role_id = roles.id 
+				LEFT JOIN schools ON users.school_id = schools.id`,
 				where,
 				pagination,
 				filter,

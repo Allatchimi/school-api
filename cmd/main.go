@@ -85,7 +85,7 @@ func init() {
 			zap.String("Error", errArgon2id.Error()),
 		)
 	} else {
-		helpers.Logger.Info("Argon2id initialized ok!")
+		helpers.Logger.Info("Argon2id initialized!")
 	}
 
 	// Connect redis

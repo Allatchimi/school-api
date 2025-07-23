@@ -85,6 +85,10 @@ func (item *User) ToPublicResponse() *data.UserPublicResponse {
 	resp.School = item.School.ToPublicResponse()
 	resp.Role = item.Role.ToResponse()
 	resp.Info = item.Info.ToPublicResponse()
+
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

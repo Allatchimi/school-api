@@ -68,9 +68,21 @@ func (service *Service) Create(
 		return
 	}
 
-	// Check email
+	// Check request
+	if request == nil || request.Info == nil {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessage()
+		return
+	}
+
+	// Generate the email
 	newEmail := request.Email
 	if request.AutoGenerateEmail {
+		if foundSchool.Config == nil {
+			errCode = http.StatusNotFound
+			err = constants.Http404ErrorMessage("school")
+			return
+		}
 		newEmail = helpers.GenerateEmailFromFullName(
 			request.Info.FirstName,
 			request.Info.LastName,
@@ -79,17 +91,13 @@ func (service *Service) Create(
 	}
 
 	// Format request
-	if request == nil || request.Info == nil {
-		errCode = http.StatusBadRequest
-		err = constants.Http400BadRequestErrorMessage()
-		return
-	}
 	var item = &dataUser.UserRequest{
 		SchoolID:    request.SchoolID,
 		RoleID:      userRole.ID,
 		Email:       newEmail,
 		PhoneNumber: request.PhoneNumber,
 		IsActivated: true,
+		Status:      request.Status,
 		Info: &dataUser.UserInfoRequest{
 			Gender:        request.Info.Gender,
 			Username:      request.Info.Username,
@@ -286,6 +294,7 @@ func (service *Service) Update(
 		Email:       request.Email,
 		PhoneNumber: request.PhoneNumber,
 		IsActivated: true,
+		Status:      request.Status,
 		Info: &dataUser.UserInfoRequest{
 			Gender:        request.Info.Gender,
 			Username:      request.Info.Username,

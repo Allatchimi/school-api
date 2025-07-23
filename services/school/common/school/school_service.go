@@ -37,43 +37,43 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 		Currency:     request.Currency,
 		PaymentCount: request.PaymentCount,
 
+		DeploymentRequest:  constants.SCHOOL_DEPLOYMENT_REQUEST_CREATE,
+		DeploymentStatus:   constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED,
+		DeploymentFeedback: "",
+		DeploymentCount:    1,
+
 		Info:   model.FromInfoRequest(request.Info),
 		Config: model.FromConfigRequest(request.Config),
 	}
 
+	// Check unique
+	foundUnique, err := service.Repository.GetUniqueObject(item)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if service.Repository.AreSameUniqueObjects(foundUnique, item) {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Check unique config
+	foundConfigUnique, err := service.Repository.GetSchoolConfigUniqueObject(item.Config)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if service.Repository.AreSchoolConfigSameUniqueObjects(foundConfigUnique, item.Config) {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage(MODEL_NAME)
+		return
+	}
+
 	// Create info
-	newInfo, err := service.Repository.CreateSchoolInfo(&model.SchoolInfo{
-		FullName:    item.Info.FullName,
-		Description: item.Info.Description,
-		Motto:       item.Info.Motto,
-
-		PhoneNumber1: item.Info.PhoneNumber1,
-		PhoneNumber2: item.Info.PhoneNumber2,
-		PhoneNumber3: item.Info.PhoneNumber3,
-
-		Email1: item.Info.Email1,
-		Email2: item.Info.Email2,
-		Email3: item.Info.Email3,
-
-		Founder:   item.Info.Founder,
-		FoundedAt: item.Info.FoundedAt,
-
-		Address:           item.Info.Address,
-		LocationLongitude: item.Info.LocationLongitude,
-		LocationLatitude:  item.Info.LocationLatitude,
-
-		SocialMediaTelegram: item.Info.SocialMediaTelegram,
-		SocialMediaWhasapp:  item.Info.SocialMediaWhasapp,
-		SocialMediaYoutube:  item.Info.SocialMediaYoutube,
-		SocialMediaTwitter:  item.Info.SocialMediaTwitter,
-		SocialMediaFacebook: item.Info.SocialMediaFacebook,
-
-		Image1: item.Info.Image1,
-		Image2: item.Info.Image2,
-		Image3: item.Info.Image3,
-		Image4: item.Info.Image4,
-		Image5: item.Info.Image5,
-	})
+	newInfo, err := service.Repository.CreateSchoolInfo(item.Info)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -81,26 +81,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 	}
 
 	// Create config
-	newConfig, err := service.Repository.CreateSchoolConfig(&model.SchoolConfig{
-		WebsiteDomainName:   item.Config.WebsiteDomainName,
-		UserEmailDomainName: item.Config.UserEmailDomainName,
-		SupportEmail:        item.Config.SupportEmail,
-
-		GoogleWorkspaceCredentials:     item.Config.GoogleWorkspaceCredentials,
-		GoogleWorkspaceUserEmailDomain: item.Config.GoogleWorkspaceUserEmailDomain,
-
-		SmsUserID:        item.Config.SmsUserID,
-		WhatsappToken:    item.Config.WhatsappToken,
-		WhatsappPhoneID:  item.Config.WhatsappPhoneID,
-		TelegramBotToken: item.Config.TelegramBotToken,
-
-		WebsiteTitle:       item.Config.WebsiteTitle,
-		WebsiteDescription: item.Config.WebsiteDescription,
-
-		ColorPrimary:        item.Config.ColorPrimary,
-		ColorPrimaryBg:      item.Config.ColorPrimaryBg,
-		ColorPrimaryBgHover: item.Config.ColorPrimaryBgHover,
-	})
+	newConfig, err := service.Repository.CreateSchoolConfig(item.Config)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -108,25 +89,9 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Scho
 	}
 
 	// Create school
-	result, err = service.Repository.Create(&model.School{
-		Name:   item.Name,
-		Type:   item.Type,
-		Status: item.Status,
-
-		DeploymentRequest: constants.SCHOOL_DEPLOYMENT_REQUEST_CREATE,
-		DeploymentStatus:  constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED,
-		DeploymentCount:   1,
-
-		Favicon:   item.Favicon,
-		Logo:      item.Logo,
-		LogoWhite: item.LogoWhite,
-
-		Currency:     item.Currency,
-		PaymentCount: item.PaymentCount,
-
-		ConfigID: newConfig.ID,
-		InfoID:   newInfo.ID,
-	})
+	item.InfoID = newInfo.ID
+	item.ConfigID = newConfig.ID
+	result, err = service.Repository.Create(item)
 	if err != nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
 		if errPgState == nil {
@@ -174,8 +139,9 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	}
 
 	// Check if the deployment status is pending
-	if foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED ||
-		foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_PENDING {
+	if (foundItem.DeploymentRequest == constants.SCHOOL_DEPLOYMENT_REQUEST_CREATE || foundItem.DeploymentRequest == constants.SCHOOL_DEPLOYMENT_REQUEST_UPDATE) &&
+		(foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED ||
+			foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_PENDING) {
 		errCode = http.StatusLocked
 		err = constants.Http423LockedErrorMessage()
 		return
@@ -187,9 +153,10 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 		Type:   request.Type,
 		Status: request.Status,
 
-		DeploymentRequest: constants.SCHOOL_DEPLOYMENT_REQUEST_UPDATE,
-		DeploymentStatus:  constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED,
-		DeploymentCount:   foundItem.DeploymentCount + 1,
+		DeploymentRequest:  constants.SCHOOL_DEPLOYMENT_REQUEST_UPDATE,
+		DeploymentStatus:   constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED,
+		DeploymentFeedback: "",
+		DeploymentCount:    foundItem.DeploymentCount + 1,
 
 		Favicon:   request.Favicon,
 		Logo:      request.Logo,
@@ -215,7 +182,39 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 		return
 	}
 
+	// Check unique config
+	foundConfigUnique, err := service.Repository.GetSchoolConfigUniqueObject(item.Config)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if service.Repository.AreSchoolConfigSameUniqueObjects(foundConfigUnique, item.Config) && !service.Repository.AreSchoolConfigSameUniqueObjects(foundConfigUnique, foundItem.Config) {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Update info
+	newInfo, errCode, err := service.UpdateInfo(inputJwtToken, foundItem.InfoID, item.Info)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+
+	// Update config
+	newConfig, _, err := service.UpdateConfig(inputJwtToken, foundItem.ConfigID, item.Config)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+
 	// Update school
+	if foundItem.IsSameDeploymentAsRequest(request) && foundItem.Config.IsSameDeploymentAsRequest(request.Config) {
+		item.DeploymentStatus = constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES
+	}
 	result, err = service.Repository.UpdateByID(id, item)
 	if err != nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
@@ -230,33 +229,17 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if result == nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-
-	// Update config
-	newConfig, _, err := service.UpdateConfig(inputJwtToken, foundItem.ConfigID, item.Config)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	result.Config = newConfig
-
-	// Update info
-	newInfo, errCode, err := service.UpdateInfo(inputJwtToken, foundItem.InfoID, item.Info)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+	if result == nil || result.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	result.Info = newInfo
+	result.Config = newConfig
 
 	// Deploy school
 	go func() {
-		if !(result.IsSameDeploymentAsRequest(request) && newConfig.IsSameDeploymentAsRequest(request.Config)) {
+		if !(foundItem.IsSameDeploymentAsRequest(request) && foundItem.Config.IsSameDeploymentAsRequest(request.Config)) {
 			err := deploymentHelper.DeploySchool(result)
 			if err != nil {
 				service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
@@ -293,7 +276,9 @@ func (service *Service) UpdateDeploymentStatus(inputJwtToken *types.JwtToken, id
 		foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_PENDING &&
 		(request.Status == constants.SCHOOL_DEPLOYMENT_STATUS_DONE ||
 			request.Status == constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES) {
-		_, err = service.Repository.DeleteByID(id)
+		_, err = service.Repository.DeleteByID(foundItem.ID)
+		_, err = service.Repository.DeleteSchoolInfoByID(foundItem.InfoID)
+		_, err = service.Repository.DeleteSchoolInfoByID(foundItem.ConfigID)
 		if err != nil {
 			errCode = http.StatusInternalServerError
 			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -375,12 +360,18 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	}
 
 	// Check if the deployment status is pending
-	if foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED ||
-		foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_PENDING {
+	if foundItem.DeploymentRequest == constants.SCHOOL_DEPLOYMENT_REQUEST_DELETE && (foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED ||
+		foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_PENDING) {
 		errCode = http.StatusLocked
 		err = constants.Http423LockedErrorMessage()
 		return
 	}
+
+	// Update deployment status
+	foundItem.DeploymentStatus = constants.SCHOOL_DEPLOYMENT_STATUS_PENDING
+	foundItem.DeploymentRequest = constants.SCHOOL_DEPLOYMENT_REQUEST_DELETE
+	foundItem.DeploymentFeedback = ""
+	service.Repository.UpdateByID(id, foundItem)
 
 	// Delete school deployment
 	go func() {

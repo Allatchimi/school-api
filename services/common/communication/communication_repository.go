@@ -77,11 +77,13 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 			communications.subject ILIKE ? OR 
 			communications.message ILIKE ? OR 
 			schools.name ILIKE ? OR 
-			schools.type ILIKE ?
+			schools.type ILIKE ? OR
+			roles.name ILIKE ? OR 
+			roles.feature ILIKE ? 
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
-		args = append(args, search, like, like, like, like)
+		args = append(args, search, like, like, like, like, like, like)
 	}
 
 	// Perform query with preloads and custom pagination scope
@@ -92,7 +94,8 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 				repository.Db,
 				`SELECT communications.* 
 				FROM communications 
-				LEFT JOIN schools ON communications.school_id = schools.id`,
+				LEFT JOIN schools ON communications.school_id = schools.id 
+				LEFT JOIN roles ON communications.role_id = roles.id`,
 				where,
 				pagination,
 				filter,

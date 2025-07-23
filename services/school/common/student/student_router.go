@@ -536,17 +536,6 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			// Generate items
-			tempResult := make([]data.StudentResponse, 10)
-			for i := range result.Data {
-				tempModel := data.StudentResponse{}
-				tempModel.ID = int64(i)
-				tempModel.UID = fmt.Sprintf("UID-%d", i)
-
-				tempResult[i] = tempModel
-			}
-			result.Data = tempResult
-
 			return &struct {
 				Body data.StudentResponseList
 			}{Body: *result}, nil
@@ -581,17 +570,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			// Generate items
-			tempResult := make([]data.StudentResponse, 10)
-			for i := range result.Data {
-				tempModel := data.StudentResponse{}
-				tempModel.ID = int64(i)
-				tempModel.UID = fmt.Sprintf("UID-%d", i)
-
-				tempResult[i] = tempModel
-			}
-			result.Data = tempResult
 
 			return &struct {
 				Body data.StudentResponseList
@@ -644,19 +622,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			// Generate items
-			tempResult := make([]data.StudentEnrollResponse, 10)
-			for i := range result.Data {
-				tempModel := data.StudentEnrollResponse{}
-				tempModel.ID = int64(i)
-				tempModel.Email = "example@example.com"
-				tempModel.Student = &data.StudentResponse{}
-				tempModel.Student.UID = fmt.Sprintf("UID-%d", i)
-
-				tempResult[i] = tempModel
-			}
-			result.Data = tempResult
 
 			return &struct {
 				Body data.StudentEnrollResponseList
