@@ -1,8 +1,6 @@
 package unit
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -26,13 +24,8 @@ func (repository *Repository) Create(item *model.UniversityUnit) (*model.Univers
 }
 
 func (repository *Repository) Update(id int64, item *model.UniversityUnit) (*model.UniversityUnit, error) {
-	tempUnit, err := repository.GetByID(id)
-	if err != nil || tempUnit == nil || tempUnit.ID != id {
-		return nil, err
-	}
-
 	result := &model.UniversityUnit{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.UniversityUnit{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"school_id":       item.SchoolID,
 			"level_domain_id": item.LevelDomainID,
@@ -47,7 +40,7 @@ func (repository *Repository) Update(id int64, item *model.UniversityUnit) (*mod
 			"is_valid":     item.IsValid,
 			"invalid_date": item.InvalidDate,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) Delete(id int64) (int64, error) {
@@ -87,48 +80,69 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.UniversityUnit, 
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.UniversityUnit, err error) {
+func (repository *Repository) GetAll(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.UniversityUnit, err error) {
 	result = make([]model.UniversityUnit, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("units.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "units.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 		if request.LevelDomainID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("units.level_domain_id = %d", request.LevelDomainID))
+			where = helpers.AppendWhereClause(where, "units.level_domain_id = ?")
+			args = append(args, request.LevelDomainID)
 		}
 		if request.SemesterID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("units.semester_id = %d", request.SemesterID))
+			where = helpers.AppendWhereClause(where, "units.semester_id = ?")
+			args = append(args, request.SemesterID)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(units.id AS TEXT) = '%s' OR units.name ILIKE '%s' OR units.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR university_semesters.name ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(units.id AS TEXT) = ? OR 
+			units.name ILIKE ? OR 
+			units.description ILIKE ? OR 
+			schools.name ILIKE ? OR 
+			schools.type ILIKE ? OR 
+			university_semesters.name ILIKE ? 
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("LevelDomain.Level").
+		Preload("LevelDomain.Domain.Department").
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT units.* "+
-					"FROM university_units units "+
-					"LEFT JOIN schools ON units.school_id = schools.id "+
-					"LEFT JOIN university_level_domains ON units.level_domain_id = university_level_domains.id "+
-					"LEFT JOIN university_semesters ON units.semester_id = university_semesters.id ",
+				`SELECT units.* 
+				FROM university_units units 
+				LEFT JOIN schools ON units.school_id = schools.id 
+				LEFT JOIN university_level_domains ON units.level_domain_id = university_level_domains.id 
+				LEFT JOIN university_semesters ON units.semester_id = university_semesters.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }

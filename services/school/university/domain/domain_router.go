@@ -282,16 +282,6 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			// Generate items
-			tempResult := make([]data.DomainResponse, 10)
-			for i := range result.Data {
-				tempModel := data.DomainResponse{}
-				tempModel.ID = int64(i)
-
-				tempResult[i] = tempModel
-			}
-			result.Data = tempResult
-
 			return &struct {
 				Body data.DomainResponseList
 			}{Body: *result}, nil

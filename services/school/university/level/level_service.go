@@ -76,6 +76,7 @@ func (service *Service) CreateLevelDomain(inputJwtToken *types.JwtToken, request
 		LevelID:  request.LevelID,
 		DomainID: request.DomainID,
 
+		Fees:         request.Fees,
 		Program:      request.Program,
 		Requirements: request.Requirements,
 		IsValid:      request.IsValid,
@@ -181,6 +182,7 @@ func (service *Service) UpdateLevelDomain(inputJwtToken *types.JwtToken, id int6
 		LevelID:  request.LevelID,
 		DomainID: request.DomainID,
 
+		Fees:         request.Fees,
 		Program:      request.Program,
 		Requirements: request.Requirements,
 		IsValid:      request.IsValid,

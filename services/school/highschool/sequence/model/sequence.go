@@ -3,6 +3,7 @@ package model
 import (
 	"api/common/types"
 	modelSchool "api/services/school/common/school/model"
+	modelQuarter "api/services/school/highschool/quarter/model"
 	"api/services/school/highschool/sequence/data"
 )
 
@@ -10,6 +11,9 @@ type HighschoolSequence struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
 	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	QuarterID int64                           `gorm:"default:null"`
+	Quarter   *modelQuarter.HighschoolQuarter `gorm:"default:null;foreignKey:QuarterID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Name        string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
@@ -24,6 +28,7 @@ func (item *HighschoolSequence) ToResponse() *data.SequenceResponse {
 	resp.Description = item.Description
 
 	resp.School = item.School.ToPublicResponse()
+	resp.Quarter = item.Quarter.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

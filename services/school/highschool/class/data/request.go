@@ -16,7 +16,7 @@ type ClassRequest struct {
 	Description string `json:"description" required:"false" doc:"Class description"`
 
 	Fees         int64  `json:"fees" required:"false" doc:"Class fees"`
-	Program      string `json:"program" required:"true" doc:"Program"`
+	Program      string `json:"program" required:"false" doc:"Program"`
 	Requirements string `json:"requirements" required:"false" doc:"Requirements"`
 	IsValid      bool   `json:"isValid" required:"false" doc:"Is valid"`
 }

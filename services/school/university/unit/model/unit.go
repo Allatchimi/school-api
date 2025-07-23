@@ -22,7 +22,7 @@ type UniversityUnit struct {
 
 	Name         string `gorm:"default:null"`
 	Description  string `gorm:"default:null"`
-	Credit       int    `gorm:"default:1"`
+	Credit       int    `gorm:"default:null"`
 	Program      string `gorm:"default null"`
 	Requirements string `gorm:"default null"`
 

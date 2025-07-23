@@ -132,7 +132,6 @@ func Apply() error {
 		&classModel.HighschoolClassSubject{},
 		// Quarter
 		&quarterModel.HighschoolQuarter{},
-		&quarterModel.HighschoolQuarterSequence{},
 		// Sequence
 		&sequenceModel.HighschoolSequence{},
 		// Subject

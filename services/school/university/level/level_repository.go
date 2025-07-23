@@ -33,13 +33,13 @@ func (repository *Repository) CreateLevelDomain(item *model.UniversityLevelDomai
 
 func (repository *Repository) Update(id int64, item *model.UniversityLevel) (*model.UniversityLevel, error) {
 	result := &model.UniversityLevel{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.UniversityLevel{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"school_id":   item.SchoolID,
 			"name":        item.Name,
 			"description": item.Description,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) UpdateLevelDomain(id int64, item *model.UniversityLevelDomain) (*model.UniversityLevelDomain, error) {
@@ -139,80 +139,120 @@ func (repository *Repository) GetAll(
 	request *data.GetAllRequest,
 ) (result []model.UniversityLevel, err error) {
 	result = make([]model.UniversityLevel, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("levels.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "levels.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 	}
-	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(levels.id AS TEXT) = '%s' OR levels.name ILIKE '%s' OR levels.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
-	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT levels.id, levels.name, levels.description, levels.school_id"+
-				", levels.created_at, levels.updated_at FROM university_levels levels "+
-				"LEFT JOIN schools ON levels.school_id = schools.id",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
 
-	err = tmpErr
-	return
-}
-
-func (repository *Repository) GetAllLevelDomain(filter *types.Filter, pagination *types.Pagination, request *data.GetAllLevelDomainRequest) (result []model.UniversityLevelDomain, err error) {
-	result = make([]model.UniversityLevelDomain, 0)
-	var where string = ""
-	if request != nil {
-		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("ld.school_id = %d", request.SchoolID))
-		}
-		if request.LevelID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("ld.level_id = %d", request.LevelID))
-		}
-		if request.DomainID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("ld.domain_id = %d", request.DomainID))
-		}
-	}
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(ld.id AS TEXT) = '%s' OR ld.name ILIKE '%s' OR ld.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(levels.id AS TEXT) = ? OR 
+			levels.name ILIKE ? OR 
+			levels.description ILIKE ? OR 
+			schools.name ILIKE ? OR 
+			schools.type ILIKE ? 
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT ld.* "+
-					"FROM university_level_domains ld "+
-					"LEFT JOIN university_levels ON ld.level_id = university_levels.id "+
-					"LEFT JOIN university_domains ON ld.domain_id = university_domains.id "+
-					"LEFT JOIN schools ON ld.school_id = schools.id ",
+				`SELECT levels.* 
+				FROM university_levels levels 
+				LEFT JOIN schools ON levels.school_id = schools.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
+	return
+}
+
+func (repository *Repository) GetAllLevelDomain(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllLevelDomainRequest,
+) (result []model.UniversityLevelDomain, err error) {
+	result = make([]model.UniversityLevelDomain, 0)
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, "ld.school_id = ?")
+			args = append(args, request.SchoolID)
+		}
+		if request.LevelID > 0 {
+			where = helpers.AppendWhereClause(where, "ld.level_id = ?")
+			args = append(args, request.LevelID)
+		}
+		if request.DomainID > 0 {
+			where = helpers.AppendWhereClause(where, "ld.domain_id = ?")
+			args = append(args, request.DomainID)
+		}
+	}
+
+	// Handle search filter securely
+	if filter != nil && len(filter.Search) > 0 {
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(ld.id AS TEXT) = ? OR 
+			university_levels.name ILIKE ? OR 
+			university_levels.description ILIKE ? OR 
+			university_domains.name ILIKE ? OR 
+			university_domains.description ILIKE ? OR 
+			schools.name ILIKE ? OR 
+			schools.type ILIKE ? 
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like, like)
+	}
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
+		Preload(clause.Associations).
+		Preload("Level.School").
+		Preload("Domain.Department").
+		Preload("Domain.Department.Faculty").
+		Preload("Domain.School").
+		Scopes(
+			helpers.PaginationScopeV2(
+				repository.Db,
+				`SELECT ld.* 
+				FROM university_level_domains ld  
+				LEFT JOIN university_levels ON ld.level_id = university_levels.id 
+				LEFT JOIN university_domains ON ld.domain_id = university_domains.id 
+				LEFT JOIN schools ON ld.school_id = schools.id`,
+				where,
+				pagination,
+				filter,
+				args...,
+			),
+		).Find(&result).Error
+
 	return
 }

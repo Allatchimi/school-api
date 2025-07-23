@@ -9,6 +9,7 @@ import (
 	"api/common/helpers"
 	"api/common/types"
 	"api/common/utils"
+	"api/services/school/highschool/section/data"
 	"api/services/school/highschool/section/model"
 )
 
@@ -27,13 +28,13 @@ func (repository *Repository) Create(item *model.HighschoolSection) (*model.High
 
 func (repository *Repository) Update(id int64, item *model.HighschoolSection) (*model.HighschoolSection, error) {
 	result := &model.HighschoolSection{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.HighschoolSection{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"school_id":   item.SchoolID,
 			"name":        item.Name,
 			"description": item.Description,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) Delete(id int64) (int64, error) {
@@ -72,35 +73,56 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.HighschoolSectio
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, schoolID int64) (result []model.HighschoolSection, err error) {
+func (repository *Repository) GetAll(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.HighschoolSection, err error) {
 	result = make([]model.HighschoolSection, 0)
-	var where string = ""
-	if schoolID > 0 {
-		where = helpers.AppendWhereClause(where, fmt.Sprintf("sections.school_id = %d", schoolID))
-	}
-	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(sections.id AS TEXT) = '%s' OR sections.name ILIKE '%s' OR sections.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
-	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT sections.* "+
-				"FROM highschool_sections sections "+
-				"LEFT JOIN schools ON sections.school_id = schools.id",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
 
-	err = tmpErr
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, "sections.school_id = ?")
+			args = append(args, request.SchoolID)
+		}
+	}
+
+	// Handle search filter securely
+	if filter != nil && len(filter.Search) > 0 {
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(sections.id AS TEXT) = ? OR 
+			sections.name ILIKE ? OR 
+			sections.description ILIKE ? OR 
+			schools.name ILIKE ? OR 
+			schools.type ILIKE ? 
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like)
+	}
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScopeV2(
+				repository.Db,
+				`SELECT sections.* 
+				FROM highschool_sections sections 
+				LEFT JOIN schools ON sections.school_id = schools.id`,
+				where,
+				pagination,
+				filter,
+				args...,
+			),
+		).Find(&result).Error
+
 	return
 }

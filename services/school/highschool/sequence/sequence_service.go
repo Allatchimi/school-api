@@ -28,7 +28,9 @@ const DEFAULT_ERROR_MESSAGE = "interact with sequence model"
 func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.SequenceRequest) (result *model.HighschoolSequence, errCode int, err error) {
 	// Format request
 	item := &model.HighschoolSequence{
-		SchoolID:    request.SchoolID,
+		SchoolID:  request.SchoolID,
+		QuarterID: request.QuarterID,
+
 		Name:        request.Name,
 		Description: request.Description,
 	}
@@ -72,7 +74,9 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Sequ
 func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.SequenceRequest) (result *model.HighschoolSequence, errCode int, err error) {
 	// Format request
 	item := &model.HighschoolSequence{
-		SchoolID:    request.SchoolID,
+		SchoolID:  request.SchoolID,
+		QuarterID: request.QuarterID,
+
 		Name:        request.Name,
 		Description: request.Description,
 	}

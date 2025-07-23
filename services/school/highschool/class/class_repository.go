@@ -33,15 +33,14 @@ func (repository *Repository) CreateClassSubject(item *model.HighschoolClassSubj
 
 func (repository *Repository) Update(id int64, item *model.HighschoolClass) (*model.HighschoolClass, error) {
 	result := &model.HighschoolClass{}
-	fmt.Println(item)
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.HighschoolClass{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"school_id":    item.SchoolID,
 			"specialty_id": item.SpecialtyID,
 			"name":         item.Name,
 			"description":  item.Description,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) UpdateClassSubject(id int64, item *model.HighschoolClassSubject) (*model.HighschoolClassSubject, error) {
@@ -141,88 +140,131 @@ func (repository *Repository) AreSameClassSubjectUniqueObjects(item1 *model.High
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.HighschoolClass, err error) {
+func (repository *Repository) GetAll(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.HighschoolClass, err error) {
 	result = make([]model.HighschoolClass, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("classes.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "classes.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 		if request.SpecialtyID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("classes.specialty_id = %d", request.SpecialtyID))
+			where = helpers.AppendWhereClause(where, "classes.specialty_id = ?")
+			args = append(args, request.SpecialtyID)
 		}
 	}
-	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(classes.id AS TEXT) = '%s' OR classes.name ILIKE '%s' OR classes.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR specialties.name ILIKE '%s' OR specialties.description ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
-	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT classes.* "+
-				"FROM highschool_classes classes "+
-				"LEFT JOIN schools ON classes.school_id = schools.id "+
-				"LEFT JOIN highschool_specialties AS specialties ON classes.specialty_id = specialties.id",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
 
-	err = tmpErr
+	// Handle search filter securely
+	if filter != nil && len(filter.Search) > 0 {
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(classes.id AS TEXT) = ? OR 
+			classes.name ILIKE ? OR 
+			classes.description ILIKE ? OR 
+			schools.name ILIKE ? OR 
+			schools.type ILIKE ? OR 
+			highschool_specialties.name ILIKE ? OR 
+			highschool_specialties.description ILIKE ? 
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like, like)
+	}
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScopeV2(
+				repository.Db,
+				`SELECT classes.* 
+				FROM highschool_classes classes 
+				LEFT JOIN schools ON classes.school_id = schools.id 
+				LEFT JOIN highschool_specialties ON classes.specialty_id = highschool_specialties.id`,
+				where,
+				pagination,
+				filter,
+				args...,
+			),
+		).Find(&result).Error
+
 	return
 }
 
-func (repository *Repository) GetAllClassSubject(filter *types.Filter, pagination *types.Pagination, request *data.GetAllClassSubjectRequest) (result []model.HighschoolClassSubject, err error) {
+func (repository *Repository) GetAllClassSubject(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllClassSubjectRequest,
+) (result []model.HighschoolClassSubject, err error) {
 	result = make([]model.HighschoolClassSubject, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("cs.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "cs.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 		if request.ClassID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("cs.class_id = %d", request.ClassID))
+			where = helpers.AppendWhereClause(where, "cs.class_id = ?")
+			args = append(args, request.ClassID)
 		}
 		if request.SubjectID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("cs.subject_id = %d", request.SubjectID))
+			where = helpers.AppendWhereClause(where, "cs.subkect_id = ?")
+			args = append(args, request.SubjectID)
 		}
 	}
-	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(cs.id AS TEXT) = '%s' OR highschool_classes.name ILIKE '%s' OR highschool_classes.description ILIKE '%s' OR highschool_subjects.name ILIKE '%s' OR highschool_subjects.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
-	}
-	tmpErr := repository.Db.Preload(clause.Associations).Scopes(
-		helpers.PaginationScope(
-			repository.Db,
-			"SELECT cs.* "+
-				"FROM highschool_class_subjects AS cs "+
-				"LEFT JOIN highschool_classes ON cs.class_id = highschool_classes.id "+
-				"LEFT JOIN highschool_subjects ON cs.subject_id = highschool_subjects.id "+
-				"LEFT JOIN schools ON cs.school_id = schools.id ",
-			where,
-			pagination,
-			filter,
-		),
-	).Find(&result).Error
 
-	err = tmpErr
+	// Handle search filter securely
+	if filter != nil && len(filter.Search) > 0 {
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(cs.id AS TEXT) = ? OR 
+			highschool_classes.name ILIKE ? OR 
+			highschool_classes.description ILIKE ? OR 
+			highschool_subjects.name ILIKE ? OR 
+			highschool_subjects.description ILIKE ? OR 
+			schools.name ILIKE ? OR 
+			schools.type ILIKE ? OR 
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like, like)
+	}
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
+		Preload(clause.Associations).
+		Preload("Class.Specialty").
+		Preload("Class.Specialty.Section").
+		Scopes(
+			helpers.PaginationScopeV2(
+				repository.Db,
+				`SELECT cs.* 
+				FROM highschool_class_subjects AS cs 
+				LEFT JOIN highschool_classes ON cs.class_id = highschool_classes.id 
+				LEFT JOIN highschool_subjects ON cs.subject_id = highschool_subjects.id 
+				LEFT JOIN schools ON cs.school_id = schools.id`,
+				where,
+				pagination,
+				filter,
+				args...,
+			),
+		).Find(&result).Error
+
 	return
 }

@@ -28,13 +28,13 @@ func (repository *Repository) Create(item *model.HighschoolQuarter) (*model.High
 
 func (repository *Repository) Update(id int64, item *model.HighschoolQuarter) (*model.HighschoolQuarter, error) {
 	result := &model.HighschoolQuarter{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.HighschoolQuarter{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"school_id":   item.SchoolID,
 			"name":        item.Name,
 			"description": item.Description,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) Delete(id int64) (int64, error) {
@@ -73,39 +73,56 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.HighschoolQuarte
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.HighschoolQuarter, err error) {
+func (repository *Repository) GetAll(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.HighschoolQuarter, err error) {
 	result = make([]model.HighschoolQuarter, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("quarters.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "quarters.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(quarters.id AS TEXT) = '%s' OR quarters.name ILIKE '%s' OR quarters.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(quarters.id AS TEXT) = ? OR 
+			quarters.name ILIKE ? OR 
+			quarters.description ILIKE ? OR 
+			schools.name ILIKE ? OR 
+			schools.type ILIKE ? 
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT quarters.* "+
-					"FROM highschool_quarters quarters "+
-					"LEFT JOIN schools ON quarters.school_id = schools.id",
+				`SELECT quarters.* 
+				FROM highschool_quarters quarters 
+				LEFT JOIN schools ON quarters.school_id = schools.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }

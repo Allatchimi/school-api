@@ -28,9 +28,10 @@ const DEFAULT_ERROR_MESSAGE = "interact with domain model"
 func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.DomainRequest) (result *model.UniversityDomain, errCode int, err error) {
 	// Format request
 	item := &model.UniversityDomain{
-		SchoolID:    request.SchoolID,
-		Name:        request.Name,
-		Description: request.Description,
+		SchoolID:     request.SchoolID,
+		DepartmentID: request.DepartmentID,
+		Name:         request.Name,
+		Description:  request.Description,
 	}
 
 	// Check if the school type is university
@@ -72,9 +73,10 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Doma
 func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.DomainRequest) (result *model.UniversityDomain, errCode int, err error) {
 	// Format request
 	item := &model.UniversityDomain{
-		SchoolID:    request.SchoolID,
-		Name:        request.Name,
-		Description: request.Description,
+		SchoolID:     request.SchoolID,
+		DepartmentID: request.DepartmentID,
+		Name:         request.Name,
+		Description:  request.Description,
 	}
 
 	// Check if the school type is university

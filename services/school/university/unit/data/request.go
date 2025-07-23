@@ -11,7 +11,7 @@ type UnitRequest struct {
 
 	Name         string `json:"name" required:"true" doc:"Name"`
 	Description  string `json:"description" required:"false" doc:"Description"`
-	Credit       int    `json:"credit" required:"true" min:"1" doc:"Credit"`
+	Credit       int    `json:"credit" required:"true" doc:"Credit"`
 	Program      string `json:"program" required:"false" doc:"Program"`
 	Requirements string `json:"requirements" required:"false" doc:"Requirements"`
 
