@@ -63,10 +63,10 @@ func (item *Request) ToResponse() *data.RequestResponse {
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Year = item.Year.ToResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.ClassSubject = item.ClassSubject.ToResponse()
 	resp.Sequence = item.Sequence.ToResponse()
 	resp.Unit = item.Unit.ToResponse()
-	resp.Student = item.Student.ToStudentPublicResponse()
+	resp.Student = item.Student.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

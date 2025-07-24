@@ -16,12 +16,12 @@ func NewService(repository *Repository) *Service {
 	return &Service{Repository: repository}
 }
 
-func (service *Service) HealthLive(inputJwtToken *types.JwtToken) (result bool, errCode int, err error) {
+func (service *Service) HealthLive(ctxData *types.ContextData) (result bool, errCode int, err error) {
 	result = true
 	return
 }
 
-func (service *Service) HealthDepencencies(inputJwtToken *types.JwtToken) (result bool, errCode int, err error) {
+func (service *Service) HealthDepencencies(ctxData *types.ContextData) (result bool, errCode int, err error) {
 	// Check postgres
 	_, err = service.Repository.GetRole()
 	if err != nil {

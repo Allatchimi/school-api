@@ -102,7 +102,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.LevelDomainResponse }{Body: *result.ToLevelDomainResponse()}, nil
+			return &struct{ Body data.LevelDomainResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -188,7 +188,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.LevelDomainResponse }{Body: *result.ToLevelDomainResponse()}, nil
+			return &struct{ Body data.LevelDomainResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -282,7 +282,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-level-multiple",
 			Summary:     "Delete multiple level",
-			Description: "Delete multiple level by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple level by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -324,7 +324,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-level-domain-multiple",
 			Summary:     "Delete multiple level domain",
-			Description: "Delete multiple level domain by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple level domain by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/domains/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -446,7 +446,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.LevelDomainResponse }{Body: *result.ToLevelDomainResponse()}, nil
+			return &struct{ Body data.LevelDomainResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 

@@ -44,7 +44,7 @@ const DEFAULT_ERROR_MESSAGE = "interact with director model"
 const uidAcceptedLetters = "D"
 
 func (service *Service) Create(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	request *data.DirectorRequest,
 ) (result *model.Director, errCode int, err error) {
 	// Get role
@@ -174,7 +174,7 @@ func (service *Service) Create(
 }
 
 func (service *Service) Update(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	id int64,
 	request *data.DirectorRequest,
 ) (result *model.Director, errCode int, err error) {
@@ -294,7 +294,7 @@ func (service *Service) Update(
 }
 
 func (service *Service) Delete(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	id int64,
 ) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteByID(id)
@@ -311,7 +311,7 @@ func (service *Service) Delete(
 	return
 }
 
-func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteMultiple(ctxData *types.ContextData, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultipleByID(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -326,7 +326,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Director, errCode int, err error) {
+func (service *Service) Get(ctxData *types.ContextData, id int64) (result *model.Director, errCode int, err error) {
 	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -342,7 +342,7 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 }
 
 func (service *Service) GetAll(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	filter *types.Filter,
 	pagination *types.Pagination,
 	schoolID int64,

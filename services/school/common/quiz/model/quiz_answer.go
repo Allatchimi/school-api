@@ -46,7 +46,7 @@ func ToQuizAnswerResponseList(itemList []QuizAnswer) []data.QuizAnswerResponse {
 			// Create new answer
 			qar = &data.QuizAnswerResponse{
 				Quiz:    qa.QuizQuestion.Quiz.ToResponse(),
-				Student: qa.Student.ToStudentPublicResponse(),
+				Student: qa.Student.ToPublicResponse(),
 				Answers: []data.QuizAnswersResponse{},
 			}
 			studentResponsesMap[studentID] = qar
@@ -85,7 +85,7 @@ func ToQuizAnswerResultResponseList(itemList []QuizAnswer) []data.QuizResultResp
 		if !exists {
 			// Create new student notation
 			sr = &data.QuizResultResponse{
-				Student: student.ToStudentPublicResponse(),
+				Student: student.ToPublicResponse(),
 				Result:  0,
 			}
 			resultsMap[student.ID] = sr

@@ -1,0 +1,14 @@
+package constants
+
+const (
+	STUDENT_ENROLL_ORIGIN_DASHBOARD     = "dashboard"
+	STUDENT_ENROLL_ORIGIN_PRE_ENROLL    = "pre-enroll"
+	STUDENT_ENROLL_ORIGIN_PRE_PROMOTION = "promotion"
+)
+
+const (
+	STUDENT_PRE_ENROLL_STATUS_INITIATED = "initiated"
+	STUDENT_PRE_ENROLL_STATUS_PENDING   = "pending"
+	STUDENT_PRE_ENROLL_STATUS_REJECTED  = "rejected"
+	STUDENT_PRE_ENROLL_STATUS_ENROLLED  = "enrolled"
+)

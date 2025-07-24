@@ -44,7 +44,7 @@ func (item *UniversityUnit) ToResponse() *data.UnitResponse {
 	resp.InvalidDate = item.InvalidDate
 
 	resp.School = item.School.ToPublicResponse()
-	resp.LevelDomain = item.LevelDomain.ToLevelDomainResponse()
+	resp.LevelDomain = item.LevelDomain.ToResponse()
 	resp.Semester = item.Semester.ToResponse()
 
 	resp.ID = item.ID

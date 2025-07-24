@@ -78,7 +78,7 @@ func (repository *Repository) GetByIDUserID(id int64, userID int64) (*model.Noti
 	return result, repository.Db.Where("id = ?", id).Where("user_id = ?", userID).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetNotSeenCount(userID int64) (result int64, err error) {
+func (repository *Repository) GetNotSeenCountByUserID(userID int64) (result int64, err error) {
 	var count int64
 	countQuery := "SELECT COUNT(*) FROM notifications WHERE notifications.user_id = ? AND (notifications.seen = ? OR notifications.seen IS NULL)"
 	args := []any{}
@@ -93,7 +93,7 @@ func (repository *Repository) GetNotSeenCount(userID int64) (result int64, err e
 	return
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, userID int64) (result []model.Notification, err error) {
+func (repository *Repository) GetAllByUserID(filter *types.Filter, pagination *types.Pagination, userID int64) (result []model.Notification, err error) {
 	result = make([]model.Notification, 0)
 
 	// Build secure WHERE conditions
@@ -111,8 +111,8 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(notifications.id AS TEXT) = ? OR 
-			notifications.title ILIKE ? 
+			CAST(notifications.id AS TEXT) = ? OR
+			notifications.title ILIKE ?
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
@@ -125,8 +125,8 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT notifications.* 
-				FROM notifications 
+				`SELECT notifications.*
+				FROM notifications
 				LEFT JOIN users ON notifications.user_id = users.id`,
 				where,
 				pagination,

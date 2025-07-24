@@ -10,7 +10,6 @@ import (
 	"api/common/constants"
 	"api/common/types"
 	"api/services/school/common/result/data"
-	"api/services/school/common/result/model"
 )
 
 func RegisterEndpoints(
@@ -156,7 +155,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-result-multiple",
 			Summary:     "Delete multiple result",
-			Description: "Delete multiple result by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple result by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -282,17 +281,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			tempResults := make([]model.Result, 10)
-			for i := range tempResults {
-				tmpModel := model.Result{}
-				tmpModel.ID = int64(i)
-				tmpModel.StudentID = int64(i)
-				tmpModel.ExamID = int64(i)
-				tmpModel.Value = float64(13)
-				tempResults[i] = tmpModel
-			}
-			result.Data = model.ToResultResponseList(tempResults)
 
 			return &struct {
 				Body data.ResultResponseList

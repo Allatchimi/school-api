@@ -22,9 +22,13 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "notification"
 const DEFAULT_ERROR_MESSAGE = "interact with notification model"
 
-func (service *Service) UpdateSeen(inputJwtToken *types.JwtToken, id int64, request *data.NotificationSeenRequest) (result *model.Notification, errCode int, err error) {
+func (service *Service) UpdateSeen(
+	ctxData *types.ContextData,
+	id int64,
+	request *data.NotificationSeenRequest,
+) (result *model.Notification, errCode int, err error) {
 	// Check if exists
-	foundItem, err := service.Repository.GetByID(id)
+	foundItem, err := service.Repository.GetByIDUserID(id, ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -33,13 +37,6 @@ func (service *Service) UpdateSeen(inputJwtToken *types.JwtToken, id int64, requ
 	if foundItem == nil || foundItem.ID != id {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-
-	// Check if the user is the same
-	if foundItem.UserID != inputJwtToken.UserID {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
 		return
 	}
 
@@ -61,7 +58,7 @@ func (service *Service) UpdateSeen(inputJwtToken *types.JwtToken, id int64, requ
 	}
 
 	// Update
-	result, err = service.Repository.UpdateSeenByIDUserID(id, inputJwtToken.UserID, item)
+	result, err = service.Repository.UpdateSeenByIDUserID(id, ctxData.Jwt.UserID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -75,7 +72,10 @@ func (service *Service) UpdateSeen(inputJwtToken *types.JwtToken, id int64, requ
 	return
 }
 
-func (service *Service) UpdateSeenAll(inputJwtToken *types.JwtToken, request *data.NotificationSeenAllRequest) (errCode int, err error) {
+func (service *Service) UpdateSeenAll(
+	ctxData *types.ContextData,
+	request *data.NotificationSeenAllRequest,
+) (errCode int, err error) {
 	// Check seen date
 	var seenAt *time.Time
 	if request.Seen {
@@ -84,7 +84,7 @@ func (service *Service) UpdateSeenAll(inputJwtToken *types.JwtToken, request *da
 	}
 
 	// Update
-	err = service.Repository.UpdateSeenAllByUserID(inputJwtToken.UserID, request.Seen, seenAt)
+	err = service.Repository.UpdateSeenAllByUserID(ctxData.Jwt.UserID, request.Seen, seenAt)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -93,8 +93,11 @@ func (service *Service) UpdateSeenAll(inputJwtToken *types.JwtToken, request *da
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteByIDUserID(id, inputJwtToken.UserID)
+func (service *Service) Delete(
+	ctxData *types.ContextData,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteByIDUserID(id, ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -108,8 +111,10 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteAll(inputJwtToken *types.JwtToken) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteAllByUserID(inputJwtToken.UserID)
+func (service *Service) DeleteAll(
+	ctxData *types.ContextData,
+) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteAllByUserID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -118,8 +123,11 @@ func (service *Service) DeleteAll(inputJwtToken *types.JwtToken) (affectedRows i
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Notification, errCode int, err error) {
-	result, err = service.Repository.GetByIDUserID(id, inputJwtToken.UserID)
+func (service *Service) Get(
+	ctxData *types.ContextData,
+	id int64,
+) (result *model.Notification, errCode int, err error) {
+	result, err = service.Repository.GetByIDUserID(id, ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -133,8 +141,10 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetNotSeenCount(inputJwtToken *types.JwtToken) (result int64, errCode int, err error) {
-	result, err = service.Repository.GetNotSeenCount(inputJwtToken.UserID)
+func (service *Service) GetNotSeenCount(
+	ctxData *types.ContextData,
+) (result int64, errCode int, err error) {
+	result, err = service.Repository.GetNotSeenCountByUserID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -143,8 +153,12 @@ func (service *Service) GetNotSeenCount(inputJwtToken *types.JwtToken) (result i
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Notification, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, inputJwtToken.UserID)
+func (service *Service) GetAll(
+	ctxData *types.ContextData,
+	filter *types.Filter, pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.Notification, errCode int, err error) {
+	result, err = service.Repository.GetAllByUserID(filter, pagination, ctxData.Jwt.UserID)
 	fmt.Println(err)
 	if err != nil {
 		errCode = http.StatusInternalServerError

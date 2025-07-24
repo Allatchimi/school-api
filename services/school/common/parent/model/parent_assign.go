@@ -35,7 +35,7 @@ func (item *ParentAssign) ToResponse() *data.ParentAssignResponse {
 	resp.Status = item.Status
 	resp.StatusFeedback = item.StatusFeedback
 
-	resp.Parent = item.Parent.ToParentResponse()
+	resp.Parent = item.Parent.ToResponse()
 	resp.ParentAssignStudents = ToParentAssignStudentResponseList(item.ParentAssignStudents)
 
 	resp.ID = item.ID

@@ -102,7 +102,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ClassSubjectResponse }{Body: *result.ToClassSubjectResponse()}, nil
+			return &struct{ Body data.ClassSubjectResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -188,7 +188,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ClassSubjectResponse }{Body: *result.ToClassSubjectResponse()}, nil
+			return &struct{ Body data.ClassSubjectResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -282,7 +282,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-class-multiple",
 			Summary:     "Delete multiple class",
-			Description: "Delete multiple class by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple class by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -324,7 +324,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-class-subject-multiple",
 			Summary:     "Delete multiple class subject",
-			Description: "Delete multiple class subject by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple class subject by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/subjects/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -446,7 +446,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ClassSubjectResponse }{Body: *result.ToClassSubjectResponse()}, nil
+			return &struct{ Body data.ClassSubjectResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 

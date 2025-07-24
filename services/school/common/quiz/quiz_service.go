@@ -21,7 +21,7 @@ func NewService(repository *Repository) *Service {
 	}
 }
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.QuizRequest) (result *model.Quiz, errCode int, err error) {
+func (service *Service) Create(ctxData *types.ContextData, request *data.QuizRequest) (result *model.Quiz, errCode int, err error) {
 	// Insert the quiz
 	createdQuiz, err := service.Repository.Create(
 		&model.Quiz{
@@ -85,7 +85,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Quiz
 	return
 }
 
-func (service *Service) CreateAnswer(inputJwtToken *types.JwtToken, id int64, request *data.QuizAnswerRequest) (errCode int, err error) {
+func (service *Service) CreateAnswer(ctxData *types.ContextData, id int64, request *data.QuizAnswerRequest) (errCode int, err error) {
 	// Load the quiz
 	foundQuiz, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -137,7 +137,7 @@ func (service *Service) CreateAnswer(inputJwtToken *types.JwtToken, id int64, re
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.QuizRequest) (result *model.Quiz, errCode int, err error) {
+func (service *Service) Update(ctxData *types.ContextData, id int64, request *data.QuizRequest) (result *model.Quiz, errCode int, err error) {
 	// Check if quiz exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -233,7 +233,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	return
 }
 
-func (service *Service) UpdateSolution(inputJwtToken *types.JwtToken, id int64, request *data.QuizSolutionRequest) (result *model.Quiz, errCode int, err error) {
+func (service *Service) UpdateSolution(ctxData *types.ContextData, id int64, request *data.QuizSolutionRequest) (result *model.Quiz, errCode int, err error) {
 	// Load the quiz
 	foundQuiz, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -271,7 +271,7 @@ func (service *Service) UpdateSolution(inputJwtToken *types.JwtToken, id int64, 
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) Delete(ctxData *types.ContextData, id int64) (affectedRows int64, errCode int, err error) {
 	// Delete
 	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
@@ -287,7 +287,7 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, selection []int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteMultiple(ctxData *types.ContextData, selection []int64) (affectedRows int64, errCode int, err error) {
 	// Delete
 	affectedRows, err = service.Repository.DeleteMultipleByID(selection)
 	if err != nil {
@@ -303,7 +303,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, selection 
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Quiz, errCode int, err error) {
+func (service *Service) Get(ctxData *types.ContextData, id int64) (result *model.Quiz, errCode int, err error) {
 	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -319,7 +319,7 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 }
 
 func (service *Service) GetAll(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	filter *types.Filter,
 	pagination *types.Pagination,
 	request *data.GetAllRequest,
@@ -333,7 +333,7 @@ func (service *Service) GetAll(
 }
 
 func (service *Service) GetAllQuizAnswer(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	filter *types.Filter,
 	pagination *types.Pagination,
 	request *data.GetAllQuizAnswerRequest,

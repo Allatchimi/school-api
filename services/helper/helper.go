@@ -34,11 +34,6 @@ func InjectServices(
 	NotificationService = notificationSvc
 }
 
-func GetUserByID(userID int64) (result *modelUser.User, err error) {
-	result, err = UserService.Repository.GetByID(userID)
-	return
-}
-
 func SendMessage(
 	request *MessageRequest,
 	messageTitle string,

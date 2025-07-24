@@ -155,7 +155,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-payment-multiple",
 			Summary:     "Delete multiple payment",
-			Description: "Delete multiple payment by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple payment by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -281,14 +281,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			tempResults := make([]data.PaymentResponse, 10)
-			for i := range tempResults {
-				tmpModel := data.PaymentResponse{}
-				tmpModel.ID = int64(i)
-				tempResults[i] = tmpModel
-			}
-			result.Data = tempResults
 
 			return &struct {
 				Body data.PaymentResponseList

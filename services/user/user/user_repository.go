@@ -159,22 +159,16 @@ func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.User{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.User{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
-	return
-}
-
-func (repository *Repository) CountAllGroupByYear(result *[]dataMonitoring.UsersByYearResponse) (err error) {
-	err = repository.Db.
-		Model(&model.User{}).
-		Select("EXTRACT(YEAR FROM created_at) AS year, COUNT(*) AS count").
-		Group("year").
-		Order("year").
-		Find(&result).Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
@@ -187,17 +181,9 @@ func (repository *Repository) GetByID(id int64) (*model.User, error) {
 func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.User, error) {
 	result := &model.User{}
 	return result, repository.Db.Preload(clause.Associations).
-		Where("id = ?", id).Where("school_id = ?", schoolID).Limit(1).Find(result).Error
-}
-
-func (repository *Repository) GetByEmail(email string) (*model.User, error) {
-	result := &model.User{}
-	return result, repository.Db.Preload(clause.Associations).
-		Where(
-			"login_method = ?", constants.AuthLoginMethodDefault,
-		).Where(
-		"email = ?", email,
-	).Limit(1).Find(result).Error
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByEmailSchoolID(email string, schoolID int64) (*model.User, error) {
@@ -222,16 +208,6 @@ func (repository *Repository) GetByEmailSchoolID(email string, schoolID int64) (
 		Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetByPhoneNumber(phoneNumber uint64) (*model.User, error) {
-	result := &model.User{}
-	return result, repository.Db.Preload(clause.Associations).
-		Where(
-			"login_method = ?", constants.AuthLoginMethodDefault,
-		).Where(
-		"phone_number = ?", phoneNumber,
-	).Limit(1).Find(result).Error
-}
-
 func (repository *Repository) GetByPhoneNumberSchoolID(phoneNumber uint64, schoolID int64) (*model.User, error) {
 	result := &model.User{}
 	if schoolID < 1 {
@@ -252,18 +228,6 @@ func (repository *Repository) GetByPhoneNumberSchoolID(phoneNumber uint64, schoo
 	).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
-}
-
-func (repository *Repository) GetByProvider(provider string, providerUserID string) (*model.User, error) {
-	result := &model.User{}
-	return result, repository.Db.Preload(clause.Associations).
-		Where(
-			"login_method = ?", constants.AuthLoginMethodProvider,
-		).Where(
-		"provider = ?", provider,
-	).Where(
-		"provider_user_id = ?", providerUserID,
-	).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByProviderSchoolID(provider string, providerUserID string, schoolID int64) (*model.User, error) {
@@ -312,15 +276,15 @@ func (repository *Repository) GetAll(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(users.id AS TEXT) = ? OR 
-			users.email ILIKE ? OR 
-			CAST(users.phone_number AS TEXT) ILIKE ? OR 
-			infos.first_name ILIKE ? OR 
-			infos.last_name ILIKE ? OR 
-			infos.username ILIKE ? OR 
-			roles.name ILIKE ? OR 
-			schools.name ILIKE ? OR 
-			schools.type ILIKE ? 
+			CAST(users.id AS TEXT) = ? OR
+			users.email ILIKE ? OR
+			CAST(users.phone_number AS TEXT) ILIKE ? OR
+			infos.first_name ILIKE ? OR
+			infos.last_name ILIKE ? OR
+			infos.username ILIKE ? OR
+			roles.name ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ?
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
@@ -333,10 +297,10 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT users.* 
-				FROM users 
-				LEFT JOIN user_infos AS infos ON users.user_info_id = infos.id 
-				LEFT JOIN roles ON users.role_id = roles.id 
+				`SELECT users.*
+				FROM users
+				LEFT JOIN user_infos AS infos ON users.user_info_id = infos.id
+				LEFT JOIN roles ON users.role_id = roles.id
 				LEFT JOIN schools ON users.school_id = schools.id`,
 				where,
 				pagination,
@@ -345,5 +309,15 @@ func (repository *Repository) GetAll(
 			),
 		).Find(&result).Error
 
+	return
+}
+
+func (repository *Repository) CountAllGroupByYear(result *[]dataMonitoring.UsersByYearResponse) (err error) {
+	err = repository.Db.
+		Model(&model.User{}).
+		Select("EXTRACT(YEAR FROM created_at) AS year, COUNT(*) AS count").
+		Group("year").
+		Order("year").
+		Find(&result).Error
 	return
 }

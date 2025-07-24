@@ -2,6 +2,10 @@ package middlewares
 
 import (
 	httpHelper "api/common/helpers/http"
+	"api/services/school/common/director"
+	"api/services/school/common/parent"
+	"api/services/school/common/student"
+	"api/services/school/common/teacher"
 	"api/services/user/permission"
 	"api/services/user/user"
 	"fmt"
@@ -13,19 +17,49 @@ import (
 	"api/common/constants"
 )
 
+// SetUserContext Adds user information such role, feature,...
+func SetUserContext(humaCtx *huma.Context, roleID int64, feature string, userFeatureID int64) *huma.Context {
+	ctxRoleID := huma.WithValue(*humaCtx, constants.RoleIDKey, roleID)
+	ctxFeature := huma.WithValue(ctxRoleID, constants.FeatureKey, feature)
+	var ctxResult *huma.Context
+	switch feature {
+	case constants.FeatureDirector:
+		tmpCtx := huma.WithValue(ctxFeature, constants.DirectorIDKey, userFeatureID)
+		ctxResult = &tmpCtx
+	case constants.FeatureTeacher:
+		tmpCtx := huma.WithValue(ctxFeature, constants.TeacherIDKey, userFeatureID)
+		ctxResult = &tmpCtx
+	case constants.FeatureStudent:
+		tmpCtx := huma.WithValue(ctxFeature, constants.StudentIDKey, userFeatureID)
+		ctxResult = &tmpCtx
+	case constants.FeatureParent:
+		tmpCtx := huma.WithValue(ctxFeature, constants.ParentIDKey, userFeatureID)
+		ctxResult = &tmpCtx
+	}
+	return ctxResult
+}
+
 // PermissionMiddleware Checks resource permissions
-func PermissionMiddleware(api huma.API, userRepo *user.Repository, permissionRepo *permission.Repository) func(huma.Context, func(huma.Context)) {
+func PermissionMiddleware(
+	api huma.API,
+	userRepo *user.Repository,
+	permissionRepo *permission.Repository,
+	directorRepo *director.Repository,
+	teacherRepo *teacher.Repository,
+	studentRepo *student.Repository,
+	parentRepo *parent.Repository,
+) func(huma.Context, func(huma.Context)) {
 	return func(humaCtx huma.Context, next func(huma.Context)) {
-		// Retrieve jwtToken
+		// Retrieve context data
 		ctx := humaCtx.Context()
-		jwtToken := httpHelper.GetJwtContext(&ctx)
-		if jwtToken == nil || jwtToken.UserID <= 0 {
+		ctxData := httpHelper.GetContextData(&ctx)
+		if ctxData == nil || ctxData.Jwt == nil || ctxData.Jwt.UserID < 1 {
 			next(humaCtx)
 			return
 		}
 
 		// Find user
-		foundUser, errFound := userRepo.GetByID(jwtToken.UserID)
+		foundUser, errFound := userRepo.GetByID(ctxData.Jwt.UserID)
 		if errFound != nil {
 			tempErr := constants.Http500ErrorMessage("interact with user model")
 			_ = huma.WriteErr(api, humaCtx, http.StatusInternalServerError, tempErr.Error(), tempErr)
@@ -108,7 +142,66 @@ func PermissionMiddleware(api huma.API, userRepo *user.Repository, permissionRep
 			}
 		}
 
-		next(humaCtx)
+		// Set user context data
+		var userFeatureID int64
+		switch foundUser.Role.Feature {
+		case constants.FeatureDirector:
+			foundFeat, errFoundFeat := directorRepo.GetByUserID(foundUser.ID)
+			if errFoundFeat != nil {
+				tempErr := constants.Http500ErrorMessage("interact with user model")
+				_ = huma.WriteErr(api, humaCtx, http.StatusInternalServerError, tempErr.Error(), tempErr)
+				return
+			}
+			if foundFeat == nil || foundFeat.ID < 1 {
+				tempErr := constants.Http403InvalidPermissionErrorMessage()
+				_ = huma.WriteErr(api, humaCtx, http.StatusForbidden, tempErr.Error(), tempErr)
+				return
+			}
+			userFeatureID = foundFeat.ID
+		case constants.FeatureTeacher:
+			foundFeat, errFoundFeat := teacherRepo.GetByUserID(foundUser.ID)
+			if errFoundFeat != nil {
+				tempErr := constants.Http500ErrorMessage("interact with user model")
+				_ = huma.WriteErr(api, humaCtx, http.StatusInternalServerError, tempErr.Error(), tempErr)
+				return
+			}
+			if foundFeat == nil || foundFeat.ID < 1 {
+				tempErr := constants.Http403InvalidPermissionErrorMessage()
+				_ = huma.WriteErr(api, humaCtx, http.StatusForbidden, tempErr.Error(), tempErr)
+				return
+			}
+			userFeatureID = foundFeat.ID
+		case constants.FeatureStudent:
+			foundFeat, errFoundFeat := studentRepo.GetByUserID(foundUser.ID)
+			if errFoundFeat != nil {
+				tempErr := constants.Http500ErrorMessage("interact with user model")
+				_ = huma.WriteErr(api, humaCtx, http.StatusInternalServerError, tempErr.Error(), tempErr)
+				return
+			}
+			if foundFeat == nil || foundFeat.ID < 1 {
+				tempErr := constants.Http403InvalidPermissionErrorMessage()
+				_ = huma.WriteErr(api, humaCtx, http.StatusForbidden, tempErr.Error(), tempErr)
+				return
+			}
+			userFeatureID = foundFeat.ID
+		case constants.FeatureParent:
+			foundFeat, errFoundFeat := parentRepo.GetByUserID(foundUser.ID)
+			if errFoundFeat != nil {
+				tempErr := constants.Http500ErrorMessage("interact with user model")
+				_ = huma.WriteErr(api, humaCtx, http.StatusInternalServerError, tempErr.Error(), tempErr)
+				return
+			}
+			if foundFeat == nil || foundFeat.ID < 1 {
+				tempErr := constants.Http403InvalidPermissionErrorMessage()
+				_ = huma.WriteErr(api, humaCtx, http.StatusForbidden, tempErr.Error(), tempErr)
+				return
+			}
+			userFeatureID = foundFeat.ID
+		}
+		userCtx := SetUserContext(&humaCtx, foundUser.RoleID, foundUser.Role.Feature, userFeatureID)
+
+		// Next
+		next(*userCtx)
 
 	}
 }

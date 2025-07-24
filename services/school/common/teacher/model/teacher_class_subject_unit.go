@@ -24,14 +24,14 @@ type TeacherClassSubjectUnit struct {
 	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
-func (item *TeacherClassSubjectUnit) ToTeacherClassSubjectUnitResponse() *data.TeacherClassSubjectUnitResponse {
+func (item *TeacherClassSubjectUnit) ToResponse() *data.TeacherClassSubjectUnitResponse {
 	if item == nil {
 		return nil
 	}
 	resp := &data.TeacherClassSubjectUnitResponse{}
-	resp.Teacher = item.Teacher.ToTeacherPublicResponse()
+	resp.Teacher = item.Teacher.ToPublicResponse()
 	resp.Year = item.Year.ToResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.ClassSubject = item.ClassSubject.ToResponse()
 	resp.Unit = item.Unit.ToResponse()
 
 	resp.ID = item.ID
@@ -43,7 +43,7 @@ func (item *TeacherClassSubjectUnit) ToTeacherClassSubjectUnitResponse() *data.T
 func ToTeacherClassSubjectUnitResponseList(itemList []TeacherClassSubjectUnit) []data.TeacherClassSubjectUnitResponse {
 	resp := make([]data.TeacherClassSubjectUnitResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToTeacherClassSubjectUnitResponse()
+		resp[index] = *item.ToResponse()
 	}
 	return resp
 }

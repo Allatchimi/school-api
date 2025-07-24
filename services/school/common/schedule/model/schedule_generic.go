@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type ScheduleGeneric struct {
+type ScheduleCommon struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
 	School   *schoolModel.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -26,7 +26,7 @@ type ScheduleGeneric struct {
 	InvalidDate  *time.Time `gorm:"default:null"`
 }
 
-func (item *ScheduleGeneric) ToResponse() *data.ScheduleResponse {
+func (item *ScheduleCommon) ToResponse() *data.ScheduleResponse {
 	if item == nil {
 		return nil
 	}
@@ -49,7 +49,7 @@ func (item *ScheduleGeneric) ToResponse() *data.ScheduleResponse {
 	return resp
 }
 
-func FromGenericToScheduleResponseList(itemList []ScheduleGeneric) []data.ScheduleResponse {
+func FromCommonToScheduleResponseList(itemList []ScheduleCommon) []data.ScheduleResponse {
 	resp := make([]data.ScheduleResponse, len(itemList))
 	for index, item := range itemList {
 		resp[index] = *item.ToResponse()

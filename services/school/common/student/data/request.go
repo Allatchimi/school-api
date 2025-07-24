@@ -11,7 +11,11 @@ type StudentID struct {
 }
 
 type StudentEnrollID struct {
-	ID int64 `json:"id" path:"id" required:"true" doc:"Unit/subject id"`
+	ID int64 `json:"id" path:"id" required:"true" doc:"Student enroll id"`
+}
+
+type StudentPreEnrollID struct {
+	ID int64 `json:"id" path:"id" required:"true" doc:"Student pre enroll id"`
 }
 
 type StudentRequest struct {
@@ -32,33 +36,32 @@ type StudentEnrollRequest struct {
 	ClassID       int64 `json:"classID" required:"false" doc:"Class id"`
 	LevelDomainID int64 `json:"levelDomainID" required:"false" doc:"Level domain id"`
 	StudentID     int64 `json:"studentID" required:"true" doc:"Student id"`
-
-	Status         string `json:"status" required:"true" enum:"initiated,pending,accepted,declined" doc:"Status"`
-	StatusFeedback string `json:"statusFeedback" required:"false" minLength:"3" max:"100" doc:"Status feedback"`
 }
 
-type StudentEnrollAnonymRequest struct {
+type StudentPreEnrollRequest struct {
 	SchoolID      int64 `json:"schoolID" required:"true" doc:"School id"`
 	YearID        int64 `json:"yearID" required:"true" doc:"Year id"`
 	ClassID       int64 `json:"classID" required:"false" doc:"Class id"`
 	LevelDomainID int64 `json:"levelDomainID" required:"false" doc:"Level domain id"`
 
-	Email       string `json:"email" required:"false" format:"email" doc:"Email"`
-	PhoneNumber uint64 `json:"phoneNumber" required:"false" minimum:"10000000" doc:"Phone number"`
-
-	Message string `json:"message" required:"true" doc:"Message"`
+	Message string `json:"message" required:"false" doc:"Message"`
 
 	Gender        string     `json:"gender" required:"true" enum:"male,female" doc:"Gender"`
 	FirstName     string     `json:"firstName" required:"true" max:"30" doc:"First name"`
 	LastName      string     `json:"lastName" required:"true" max:"30" doc:"Last name"`
-	Birthday      *time.Time `json:"birthday" required:"true" doc:"Birthday date time"`
-	BirthLocation string     `json:"birthLocation" required:"true" doc:"Birth location"`
+	Birthday      *time.Time `json:"birthday" required:"true" doc:"Birthday"`
+	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
 
 	Document1 string `json:"file1" required:"true" doc:"Document1"`
 	Document2 string `json:"file2" required:"false" doc:"Document2"`
 	Document3 string `json:"file3" required:"false" doc:"Document3"`
 	Document4 string `json:"file4" required:"false" doc:"Document4"`
 	Document5 string `json:"file5" required:"false" doc:"Document5"`
+}
+
+type StudentPreEnrollStatusRequest struct {
+	Status         string `json:"status" required:"true" enum:"initiated,pending,accepted,declined" doc:"Status"`
+	StatusFeedback string `json:"statusFeedback" required:"false" minLength:"3" max:"100" doc:"Status feedback"`
 }
 
 type GetAllRequest struct {
@@ -68,4 +71,10 @@ type GetAllRequest struct {
 type GetAllStudentEnrollRequest struct {
 	types.FilterSchoolYearClassLevelDomainRequest
 	StudentID int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id"`
+	TeacherID int64 `json:"teacherID" query:"teacherID" required:"false" doc:"Teacher id"`
+}
+
+type GetAllStudentPreEnrollRequest struct {
+	types.FilterSchoolYearClassLevelDomainRequest
+	UserID int64 `json:"userID" query:"userID" required:"false" doc:"User id"`
 }

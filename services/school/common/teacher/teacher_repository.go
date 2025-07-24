@@ -247,11 +247,11 @@ func (repository *Repository) GetAll(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(teachers.id AS TEXT) = ? OR 
-			teachers.uid ILIKE ? OR 
+			CAST(teachers.id AS TEXT) = ? OR
+			teachers.uid ILIKE ? OR
 			schools.name ILIKE ? OR
 			schools.type ILIKE ? OR
-			users.email ILIKE ? OR 
+			users.email ILIKE ? OR
 			CAST(users.phone_number AS TEXT) ILIKE ?
 		)`
 
@@ -267,9 +267,9 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT teachers.* 
-				FROM teachers 
-				LEFT JOIN schools ON teachers.school_id = schools.id 
+				`SELECT teachers.*
+				FROM teachers
+				LEFT JOIN schools ON teachers.school_id = schools.id
 				LEFT JOIN users ON teachers.user_id = users.id`,
 				where,
 				pagination,
@@ -309,10 +309,10 @@ func (repository *Repository) GetAllTeacherClassSubjectUnit(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(tcsu.id AS TEXT) = ? OR 
-			teachers.uid ILIKE ? OR 
+			CAST(tcsu.id AS TEXT) = ? OR
+			teachers.uid ILIKE ? OR
 			years.name ILIKE ? OR
-			university_units.name ILIKE ? 
+			university_units.name ILIKE ?
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
@@ -337,11 +337,11 @@ func (repository *Repository) GetAllTeacherClassSubjectUnit(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT tcsu.* 
-				FROM teacher_class_subject_units AS tcsu 
-				LEFT JOIN teachers ON tcsu.teacher_id = teachers.id 
-				LEFT JOIN years ON tcsu.year_id = years.id 
-				LEFT JOIN highschool_class_subjects ON tcsu.class_subject_id = highschool_class_subjects.id 
+				`SELECT tcsu.*
+				FROM teacher_class_subject_units AS tcsu
+				LEFT JOIN teachers ON tcsu.teacher_id = teachers.id
+				LEFT JOIN years ON tcsu.year_id = years.id
+				LEFT JOIN highschool_class_subjects ON tcsu.class_subject_id = highschool_class_subjects.id
 				LEFT JOIN university_units ON tcsu.unit_id = university_units.id `,
 				where,
 				pagination,

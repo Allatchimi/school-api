@@ -43,7 +43,7 @@ func (item *Course) ToResponse() *data.CourseResponse {
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Year = item.Year.ToResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.ClassSubject = item.ClassSubject.ToResponse()
 	resp.Unit = item.Unit.ToResponse()
 	resp.Documents = ToCourseDocumentResponseList(item.Documents)
 	resp.Videos = ToCourseVideoResponseList(item.Videos)

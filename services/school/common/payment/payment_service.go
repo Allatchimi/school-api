@@ -21,7 +21,7 @@ const MODEL_NAME = "payment"
 const DEFAULT_ERROR_MESSAGE = "interact with payment model"
 
 func (service *Service) Create(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	request *data.PaymentRequest,
 ) (result *model.Payment, errCode int, err error) {
 	// Format request
@@ -29,12 +29,12 @@ func (service *Service) Create(
 		SchoolID:        request.SchoolID,
 		StudentEnrollID: request.StudentEnrollID,
 
-		Amount:        request.Amount,
-		Currency:      request.Currency,
-		PaymentDate:   request.PaymentDate,
-		PaymentMethod: request.PaymentMethod,
-		PaymentStatus: request.PaymentStatus,
-		PaymentNote:   request.PaymentNote,
+		Amount:   request.Amount,
+		Currency: request.Currency,
+		Date:     request.Date,
+		Method:   request.Method,
+		Status:   request.Status,
+		Message:  request.Message,
 	}
 
 	// Create
@@ -48,7 +48,7 @@ func (service *Service) Create(
 }
 
 func (service *Service) Update(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	id int64,
 	request *data.PaymentRequest,
 ) (result *model.Payment, errCode int, err error) {
@@ -70,12 +70,12 @@ func (service *Service) Update(
 		SchoolID:        request.SchoolID,
 		StudentEnrollID: request.StudentEnrollID,
 
-		Amount:        request.Amount,
-		Currency:      request.Currency,
-		PaymentDate:   request.PaymentDate,
-		PaymentMethod: request.PaymentMethod,
-		PaymentStatus: request.PaymentStatus,
-		PaymentNote:   request.PaymentNote,
+		Amount:   request.Amount,
+		Currency: request.Currency,
+		Date:     request.Date,
+		Method:   request.Method,
+		Status:   request.Status,
+		Message:  request.Message,
 	}
 
 	// Update payment
@@ -89,7 +89,7 @@ func (service *Service) Update(
 }
 
 func (service *Service) Delete(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	id int64,
 ) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.Delete(id)
@@ -107,7 +107,7 @@ func (service *Service) Delete(
 }
 
 func (service *Service) DeleteMultiple(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	list []int64,
 ) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultiple(list)
@@ -125,7 +125,7 @@ func (service *Service) DeleteMultiple(
 }
 
 func (service *Service) Get(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	id int64,
 ) (result *model.Payment, errCode int, err error) {
 	result, err = service.Repository.GetByID(id)
@@ -143,12 +143,12 @@ func (service *Service) Get(
 }
 
 func (service *Service) GetAll(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	filter *types.Filter,
 	pagination *types.Pagination,
-	schoolID int64,
+	request *data.GetAllRequest,
 ) (result []model.Payment, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, &data.GetAllRequest{SchoolID: schoolID})
+	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

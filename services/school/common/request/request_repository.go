@@ -33,7 +33,7 @@ func (repository *Repository) Update(id int64, data *model.Request) (*model.Requ
 	}
 
 	result := &model.Request{}
-	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Model(&model.Request{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"school_id":        data.SchoolID,
 			"year_id":          data.YearID,
@@ -54,7 +54,7 @@ func (repository *Repository) Update(id int64, data *model.Request) (*model.Requ
 			"document4": data.Document4,
 			"document5": data.Document5,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -109,63 +109,97 @@ func (repository *Repository) GetAll(
 	request *data.GetAllRequest,
 ) (result []model.Request, err error) {
 	result = make([]model.Request, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("requests.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "requests.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 		if request.YearID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("requests.year_id = %d", request.YearID))
+			where = helpers.AppendWhereClause(where, "requests.year_id = ?")
+			args = append(args, request.YearID)
 		}
 		if request.ClassSubjectID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("requests.class_subject_id = %d", request.ClassSubjectID))
+			where = helpers.AppendWhereClause(where, "requests.class_subject_id = ?")
+			args = append(args, request.ClassSubjectID)
 		}
 		if request.SequenceID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("requests.sequence_id = %d", request.SequenceID))
+			where = helpers.AppendWhereClause(where, "requests.sequence_id = ?")
+			args = append(args, request.SequenceID)
 		}
 		if request.UnitID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("requests.unit_id = %d", request.UnitID))
+			where = helpers.AppendWhereClause(where, "requests.unit_id = ?")
+			args = append(args, request.UnitID)
 		}
 		if request.StudentID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("requests.student_id = %d", request.StudentID))
+			where = helpers.AppendWhereClause(where, "requests.student_id = ?")
+			args = append(args, request.StudentID)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(requests.id AS TEXT) = '%s' OR requests.type ILIKE '%s' OR requests.status ILIKE '%s' OR requests.title ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(requests.id AS TEXT) = ? OR
+			requests.title ILIKE ? OR
+			requests.status ILIKE ? OR
+			requests.audience ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			years.name ILIKE ? OR
+			highschool_classes.name ILIKE ? OR
+			highschool_classes.description ILIKE ? OR
+			highschool_subjects.name ILIKE ? OR
+			highschool_subjects.description ILIKE ? OR
+			highschool_sequences.name ILIKE ? OR
+			highschool_sequences.description ILIKE ? OR
+			university_units.name ILIKE ? OR
+			university_units.description ILIKE ? OR
+			students.uid ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like, like, like, like, like, like, like, like, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
 		Preload("ClassSubject.Subject").
-		Preload("Unit.Domain").
-		Preload("Unit.Level").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.Semester").
 		Preload("Student.User").
 		Preload("Student.User.Info").
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT requests.* "+
-					"FROM requests "+
-					"LEFT JOIN schools ON requests.school_id = schools.id "+
-					"LEFT JOIN years ON requests.year_id = years.id "+
-					"LEFT JOIN highschool_class_subjects ON requests.class_subject_id = highschool_class_subjects.id "+
-					"LEFT JOIN highschool_sequences ON requests.sequence_id = highschool_sequences.id "+
-					"LEFT JOIN university_units ON requests.unit_id = university_units.id "+
-					"LEFT JOIN students ON requests.student_id = students.id ",
+				`SELECT requests.*
+				FROM requests
+				LEFT JOIN schools ON requests.school_id = schools.id
+				LEFT JOIN years ON requests.year_id = years.id
+				LEFT JOIN highschool_class_subjects ON requests.class_subject_id = highschool_class_subjects.id
+				LEFT JOIN highschool_sequences ON requests.sequence_id = highschool_sequences.id
+				LEFT JOIN university_units ON requests.unit_id = university_units.id
+				LEFT JOIN students ON requests.student_id = students.id
+				LEFT JOIN highschool_classes ON highschool_class_subjects.class_id = highschool_classes.id
+				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id `,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }

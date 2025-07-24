@@ -132,79 +132,6 @@ func (repository *Repository) DeleteMultiple(list []int64) (result int64, err er
 	return
 }
 
-func (repository *Repository) GetByID(id int64) (*model.MeetingRoom, error) {
-	result := &model.MeetingRoom{}
-	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
-}
-
-func (repository *Repository) GetUniqueObject(item *model.MeetingRoom) (*model.MeetingRoom, error) {
-	result := &model.MeetingRoom{}
-	return result, repository.Db.Preload(clause.Associations).Where(&model.MeetingRoom{
-		SchoolID:       item.SchoolID,
-		UnitID:         item.UnitID,
-		ClassSubjectID: item.ClassSubjectID,
-	}).Limit(1).Find(result).Error
-}
-
-func (repository *Repository) AreSameUniqueObjects(item1 *model.MeetingRoom, item2 *model.MeetingRoom) bool {
-	if item1 != nil && item2 != nil &&
-		(item1.SchoolID == item2.SchoolID &&
-			item1.ClassSubjectID == item2.ClassSubjectID &&
-			item1.UnitID == item2.UnitID) {
-		return true
-	}
-	return false
-}
-
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.MeetingRoom, err error) {
-	result = make([]model.MeetingRoom, 0)
-	var where string = ""
-	if request != nil {
-		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("schools.id = %d", request.SchoolID))
-		}
-		if request.ClassID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("highschool_class_subjects.class_id = %d", request.ClassID))
-		}
-		if request.LevelDomainID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("university_units.level_domain_id = %d", request.LevelDomainID))
-		}
-	}
-	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(meeting_rooms.id AS TEXT) = '%s' OR schools.name ILIKE '%s' OR highschool_class_subjects.name ILIKE '%s' OR university_units.name ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
-	}
-	tmpErr := repository.Db.
-		Preload(clause.Associations).
-		Preload("ClassSubject.Class").
-		Preload("ClassSubject.Subject").
-		Preload("Unit.Domain").
-		Preload("Unit.Level").
-		Preload("Unit.Semester").
-		Scopes(
-			helpers.PaginationScope(
-				repository.Db,
-				"SELECT meeting_rooms.* "+
-					"FROM meeting_rooms "+
-					"LEFT JOIN schools ON meeting_rooms.school_id = schools.id "+
-					"LEFT JOIN highschool_class_subjects ON meeting_rooms.class_subject_id = highschool_class_subjects.id "+
-					"LEFT JOIN university_units ON meeting_rooms.unit_id = university_units.id ",
-				where,
-				pagination,
-				filter,
-			),
-		).Find(&result).Error
-
-	err = tmpErr
-	return
-}
-
 func (repository *Repository) ApiJoinRoom(roomID string, user *modelUser.User, isAdmin bool) (*data.ApiJoinRoomResponse, error) {
 	apiResp := &data.ApiJoinRoomResponse{}
 	var join = &data.ApiJoinRoomRequest{
@@ -238,4 +165,112 @@ func (repository *Repository) ApiJoinRoom(roomID string, user *modelUser.User, i
 		apiResp,
 	)
 	return apiResp, err
+}
+
+func (repository *Repository) GetByID(id int64) (*model.MeetingRoom, error) {
+	result := &model.MeetingRoom{}
+	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetUniqueObject(item *model.MeetingRoom) (*model.MeetingRoom, error) {
+	result := &model.MeetingRoom{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.MeetingRoom{
+		SchoolID:       item.SchoolID,
+		UnitID:         item.UnitID,
+		ClassSubjectID: item.ClassSubjectID,
+	}).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) AreSameUniqueObjects(item1 *model.MeetingRoom, item2 *model.MeetingRoom) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID &&
+			item1.ClassSubjectID == item2.ClassSubjectID &&
+			item1.UnitID == item2.UnitID) {
+		return true
+	}
+	return false
+}
+
+func (repository *Repository) GetAll(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.MeetingRoom, err error) {
+	result = make([]model.MeetingRoom, 0)
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, "meetings.school_id = ?")
+			args = append(args, request.SchoolID)
+		}
+		if request.ClassID > 0 {
+			where = helpers.AppendWhereClause(where, "highschool_class_subjects.class_id = ?")
+			args = append(args, request.ClassID)
+		}
+		if request.LevelDomainID > 0 {
+			where = helpers.AppendWhereClause(where, "university_units.level_domain_id = ?")
+			args = append(args, request.LevelDomainID)
+		}
+	}
+
+	// Handle search filter securely
+	if filter != nil && len(filter.Search) > 0 {
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(meetings.id AS TEXT) = ? OR
+			meetings.api_room_id ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			highschool_classes.name ILIKE ? OR
+			highschool_classes.description ILIKE ? OR
+			highschool_subjects.name ILIKE ? OR
+			highschool_subjects.description ILIKE ? OR
+			university_units.name ILIKE ? OR
+			university_units.description ILIKE ? OR
+			university_levels.name ILIKE ? OR
+			university_levels.description ILIKE ? OR
+			university_domains.name ILIKE ? OR
+			university_domains.description ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like, like, like, like, like, like, like, like, like)
+	}
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.Level").
+		Preload("Unit.Domain").
+		Preload("Unit.Domain.Department").
+		Preload("Unit.Semester").
+		Scopes(
+			helpers.PaginationScopeV2(
+				repository.Db,
+				`SELECT meetings.*
+				FROM meeting_rooms meetings
+				LEFT JOIN schools ON meetings.school_id = schools.id
+				LEFT JOIN highschool_class_subjects ON meetings.class_subject_id = highschool_class_subjects.id
+				LEFT JOIN university_units ON meetings.unit_id = university_units.id
+				LEFT JOIN highschool_classes ON highschool_class_subjects.class_id = highschool_classes.id
+				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id
+				LEFT JOIN university_level_domains ON university_units.level_domain_id = university_level_domains.id
+				LEFT JOIN university_levels ON university_level_domains.level_id = university_levels.id
+				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id `,
+				where,
+				pagination,
+				filter,
+				args...,
+			),
+		).Find(&result).Error
+
+	return
 }

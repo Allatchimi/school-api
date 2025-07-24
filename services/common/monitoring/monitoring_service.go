@@ -49,7 +49,7 @@ const MODEL_NAME = "monitoring"
 const DEFAULT_ERROR_MESSAGE = "interact with monitoring model"
 
 func (service *Service) GetAll(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	filter *types.Filter,
 	pagination *types.Pagination,
 	request *data.GetAllRequest,

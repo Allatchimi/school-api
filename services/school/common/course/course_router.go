@@ -158,7 +158,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-course-multiple",
 			Summary:     "Delete multiple course",
-			Description: "Delete multiple course by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple course by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -284,15 +284,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			// Generate items
-			tempResults := make([]data.CourseResponse, 10)
-			for i := range tempResults {
-				tmpModel := data.CourseResponse{}
-				tmpModel.ID = int64(i)
-				tempResults[i] = tmpModel
-			}
-			result.Data = tempResults
 
 			return &struct {
 				Body data.CourseResponseList

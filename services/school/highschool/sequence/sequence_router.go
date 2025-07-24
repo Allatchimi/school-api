@@ -155,7 +155,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-sequence-multiple",
 			Summary:     "Delete multiple sequence",
-			Description: "Delete multiple sequence by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple sequence by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,

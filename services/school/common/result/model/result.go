@@ -25,7 +25,7 @@ func (item *Result) ToResponse() *data.ResultResponse {
 	resp := &data.ResultResponse{}
 	resp.Value = item.Value
 
-	resp.Student = item.Student.ToStudentPublicResponse()
+	resp.Student = item.Student.ToPublicResponse()
 	resp.Exam = item.Exam.ToResponse()
 
 	resp.ID = item.ID

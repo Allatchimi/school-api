@@ -60,7 +60,7 @@ func (item *Exam) ToResponse() *data.ExamResponse {
 	resp.School = item.School.ToPublicResponse()
 	resp.Year = item.Year.ToResponse()
 	resp.Type = item.Type.ToResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.ClassSubject = item.ClassSubject.ToResponse()
 	resp.Sequence = item.Sequence.ToResponse()
 	resp.Unit = item.Unit.ToResponse()
 

@@ -12,7 +12,7 @@ const (
 	FeatureDirector = "dashboard-director"
 	FeatureTeacher  = "dashboard-teacher"
 	FeatureStudent  = "dashboard-student"
-	FeatureParent   = "dashboard-student"
+	FeatureParent   = "dashboard-parent"
 
 	FeatureDefault = "dashboard-default"
 )

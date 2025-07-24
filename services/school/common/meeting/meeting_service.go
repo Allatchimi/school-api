@@ -28,7 +28,7 @@ func NewService(repository *Repository, userService *user.Service, teacherServic
 	}
 }
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.MeetingRoomRequest) (result *model.MeetingRoom, errCode int, err error) {
+func (service *Service) Create(ctxData *types.ContextData, request *data.MeetingRoomRequest) (result *model.MeetingRoom, errCode int, err error) {
 	// Format request
 	item := &model.MeetingRoom{
 		SchoolID:       request.SchoolID,
@@ -69,7 +69,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Meet
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) Delete(ctxData *types.ContextData, id int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.Delete(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -84,7 +84,7 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteMultiple(ctxData *types.ContextData, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultiple(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -99,7 +99,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.MeetingRoom, errCode int, err error) {
+func (service *Service) Get(ctxData *types.ContextData, id int64) (result *model.MeetingRoom, errCode int, err error) {
 	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -114,7 +114,7 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.MeetingRoom, errCode int, err error) {
+func (service *Service) GetAll(ctxData *types.ContextData, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.MeetingRoom, errCode int, err error) {
 	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -123,9 +123,9 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 	return
 }
 
-func (service *Service) Join(inputJwtToken *types.JwtToken, id int64) (result string, errCode int, err error) {
+func (service *Service) Join(ctxData *types.ContextData, id int64) (result string, errCode int, err error) {
 	// Check if the meeting room exists
-	meetingRoom, errCode, err := service.Get(inputJwtToken, id)
+	meetingRoom, errCode, err := service.Get(ctxData, id)
 	if err != nil || meetingRoom == nil || meetingRoom.ID <= 0 || meetingRoom.ID != id {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
@@ -133,7 +133,7 @@ func (service *Service) Join(inputJwtToken *types.JwtToken, id int64) (result st
 	}
 
 	// Get the user
-	user, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	user, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil || user == nil || user.ID <= 0 {
 		errCode = http.StatusForbidden
 		err = constants.Http403InvalidPermissionErrorMessage()
@@ -142,7 +142,7 @@ func (service *Service) Join(inputJwtToken *types.JwtToken, id int64) (result st
 
 	// Get the teacher and check if it's the teacher for this room(room is associated to unit/class subject)
 	var isAdmin bool = false
-	teacher, _ := service.TeacherService.Repository.GetByUserID(inputJwtToken.UserID)
+	teacher, _ := service.TeacherService.Repository.GetByUserID(ctxData.Jwt.UserID)
 	if teacher != nil && teacher.ID > 0 {
 		if meetingRoom.School.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
 			teacherClassSubject, _ := service.TeacherService.Repository.GetTeacherClassSubjectUnitByUserIDClassSubjectID(teacher.ID, meetingRoom.ClassSubjectID)

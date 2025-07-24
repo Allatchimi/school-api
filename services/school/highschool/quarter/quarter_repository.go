@@ -26,7 +26,7 @@ func (repository *Repository) Create(item *model.HighschoolQuarter) (*model.High
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, item *model.HighschoolQuarter) (*model.HighschoolQuarter, error) {
+func (repository *Repository) UpdateByID(id int64, item *model.HighschoolQuarter) (*model.HighschoolQuarter, error) {
 	result := &model.HighschoolQuarter{}
 	return result, repository.Db.Preload(clause.Associations).Model(&model.HighschoolQuarter{}).Where("id = ?", id).Updates(
 		map[string]any{
@@ -37,23 +37,36 @@ func (repository *Repository) Update(id int64, item *model.HighschoolQuarter) (*
 	).Find(result).Error
 }
 
-func (repository *Repository) Delete(id int64) (int64, error) {
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.HighschoolQuarter{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.HighschoolQuarter{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.HighschoolQuarter{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.HighschoolQuarter, error) {
 	result := &model.HighschoolQuarter{}
-	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.HighschoolQuarter, error) {
+	result := &model.HighschoolQuarter{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.HighschoolQuarter) (*model.HighschoolQuarter, error) {
@@ -97,11 +110,11 @@ func (repository *Repository) GetAll(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(quarters.id AS TEXT) = ? OR 
-			quarters.name ILIKE ? OR 
-			quarters.description ILIKE ? OR 
-			schools.name ILIKE ? OR 
-			schools.type ILIKE ? 
+			CAST(quarters.id AS TEXT) = ? OR
+			quarters.name ILIKE ? OR
+			quarters.description ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ?
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
@@ -114,8 +127,8 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT quarters.* 
-				FROM highschool_quarters quarters 
+				`SELECT quarters.*
+				FROM highschool_quarters quarters
 				LEFT JOIN schools ON quarters.school_id = schools.id`,
 				where,
 				pagination,

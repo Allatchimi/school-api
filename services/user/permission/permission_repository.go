@@ -110,9 +110,9 @@ func (repository *Repository) GetAll(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(permissions.id AS TEXT) = ? OR 
-			permissions.table_name ILIKE ? OR 
-			roles.name ILIKE ? OR 
+			CAST(permissions.id AS TEXT) = ? OR
+			permissions.table_name ILIKE ? OR
+			roles.name ILIKE ? OR
 			roles.description ILIKE ?
 		)`
 
@@ -126,9 +126,9 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT permissions.* 
-				FROM permissions 
-				LEFT JOIN roles ON permissions.role_id = roles.id `,
+				`SELECT permissions.*
+				FROM permissions
+				LEFT JOIN roles ON permissions.role_id = roles.id`,
 				where,
 				pagination,
 				filter,

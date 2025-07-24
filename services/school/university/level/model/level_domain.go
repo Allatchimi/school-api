@@ -26,7 +26,7 @@ type UniversityLevelDomain struct {
 	InvalidDate  *time.Time `gorm:"default:null"`
 }
 
-func (item *UniversityLevelDomain) ToLevelDomainResponse() *data.LevelDomainResponse {
+func (item *UniversityLevelDomain) ToResponse() *data.LevelDomainResponse {
 	if item == nil {
 		return nil
 	}
@@ -50,7 +50,7 @@ func (item *UniversityLevelDomain) ToLevelDomainResponse() *data.LevelDomainResp
 func ToLevelDomainResponseList(itemList []UniversityLevelDomain) []data.LevelDomainResponse {
 	resp := make([]data.LevelDomainResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToLevelDomainResponse()
+		resp[index] = *item.ToResponse()
 	}
 	return resp
 }

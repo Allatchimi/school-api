@@ -15,7 +15,7 @@ type ScheduleRequest struct {
 	ClassSubjectID int64 `json:"classSubjectID" required:"false" doc:"Class Subject id"`
 	UnitID         int64 `json:"unitID" required:"false" doc:"Unit id"`
 
-	IsGeneric      bool       `json:"isGeneric" required:"true" doc:"Is generic"`
+	IsCommon       bool       `json:"isCommon" required:"true" doc:"Is common"`
 	Type           string     `json:"type" required:"true" doc:"Type"`
 	DayOfTheWeek   string     `json:"dayOfTheWeek" required:"true" doc:"Day of the week"`
 	RepeatCount    int        `json:"repeatCount" required:"true" doc:"Repeat count"`
@@ -28,5 +28,5 @@ type ScheduleRequest struct {
 
 type GetAllRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
-	Type string `json:"type" query:"type" required:"false" enum:"all,default,generic" doc:"Type"`
+	Type string `json:"type" query:"type" required:"false" enum:"all,default,common" doc:"Type"`
 }

@@ -155,7 +155,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-quarter-multiple",
 			Summary:     "Delete multiple quarter",
-			Description: "Delete multiple quarter by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple quarter by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,

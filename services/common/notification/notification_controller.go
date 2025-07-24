@@ -24,7 +24,7 @@ func (controller *Controller) Get(
 		data.NotificationID
 	},
 ) (result *model.Notification, errCode int, err error) {
-	notification, errCode, err := controller.Service.Get(httpHelper.GetJwtContext(ctx), input.ID)
+	notification, errCode, err := controller.Service.Get(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -38,7 +38,7 @@ func (controller *Controller) GetNotSeenCount(
 		data.NotificationNotSeenCountRequest
 	},
 ) (result int64, errCode int, err error) {
-	count, errCode, err := controller.Service.GetNotSeenCount(httpHelper.GetJwtContext(ctx))
+	count, errCode, err := controller.Service.GetNotSeenCount(httpHelper.GetContextData(ctx))
 	if err != nil {
 		return
 	}
@@ -53,7 +53,7 @@ func (controller *Controller) UpdateSeen(
 		Body data.NotificationSeenRequest
 	},
 ) (result *model.Notification, errCode int, err error) {
-	notification, errCode, err := controller.Service.UpdateSeen(httpHelper.GetJwtContext(ctx), input.ID, &input.Body)
+	notification, errCode, err := controller.Service.UpdateSeen(httpHelper.GetContextData(ctx), input.ID, &input.Body)
 	if err != nil {
 		return
 	}
@@ -67,7 +67,7 @@ func (controller *Controller) UpdateSeenAll(
 		Body data.NotificationSeenAllRequest
 	},
 ) (errCode int, err error) {
-	errCode, err = controller.Service.UpdateSeenAll(httpHelper.GetJwtContext(ctx), &input.Body)
+	errCode, err = controller.Service.UpdateSeenAll(httpHelper.GetContextData(ctx), &input.Body)
 	if err != nil {
 		return
 	}
@@ -80,7 +80,7 @@ func (controller *Controller) Delete(
 		data.NotificationID
 	},
 ) (result int64, errCode int, err error) {
-	result, errCode, err = controller.Service.Delete(httpHelper.GetJwtContext(ctx), input.ID)
+	result, errCode, err = controller.Service.Delete(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -91,7 +91,7 @@ func (controller *Controller) DeleteAll(
 	ctx *context.Context,
 	input *struct{},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteAll(httpHelper.GetJwtContext(ctx))
+	affectedRows, errCode, err := controller.Service.DeleteAll(httpHelper.GetContextData(ctx))
 	if err != nil {
 		return
 	}
@@ -108,7 +108,7 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.NotificationResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	notificationList, errCode, err := controller.Service.GetAll(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
+	notificationList, errCode, err := controller.Service.GetAll(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}

@@ -21,8 +21,8 @@ func (item *ParentStudent) ToParentStudentResponse() *data.ParentStudentResponse
 		return nil
 	}
 	resp := &data.ParentStudentResponse{}
-	resp.Parent = item.Parent.ToParentPublicResponse()
-	resp.Student = item.Student.ToStudentPublicResponse()
+	resp.Parent = item.Parent.ToPublicResponse()
+	resp.Student = item.Student.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

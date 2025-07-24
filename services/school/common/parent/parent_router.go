@@ -60,7 +60,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ParentResponse }{Body: *result.ToParentResponse()}, nil
+			return &struct{ Body data.ParentResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -149,7 +149,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ParentResponse }{Body: *result.ToParentResponse()}, nil
+			return &struct{ Body data.ParentResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -290,7 +290,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-parent-multiple",
 			Summary:     "Delete multiple parent",
-			Description: "Delete multiple parent by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple parent by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -367,7 +367,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ParentResponse }{Body: *result.ToParentResponse()}, nil
+			return &struct{ Body data.ParentResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 

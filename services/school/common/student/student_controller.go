@@ -25,7 +25,7 @@ func (controller *Controller) Create(
 	},
 ) (result *model.Student, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		&input.Body,
 	)
 	return
@@ -38,20 +38,20 @@ func (controller *Controller) CreateStudentEnroll(
 	},
 ) (result *model.StudentEnroll, errCode int, err error) {
 	result, errCode, err = controller.Service.CreateStudentEnroll(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		&input.Body,
 	)
 	return
 }
 
-func (controller *Controller) CreateStudentEnrollAnonym(
+func (controller *Controller) CreateStudentPreEnroll(
 	ctx *context.Context,
 	input *struct {
-		Body data.StudentEnrollAnonymRequest
+		Body data.StudentPreEnrollRequest
 	},
-) (result *model.StudentEnroll, errCode int, err error) {
-	result, errCode, err = controller.Service.CreateStudentEnrollAnonym(
-		httpHelper.GetJwtContext(ctx),
+) (result *model.StudentPreEnroll, errCode int, err error) {
+	result, errCode, err = controller.Service.CreateStudentPreEnroll(
+		httpHelper.GetContextData(ctx),
 		&input.Body,
 	)
 	return
@@ -65,7 +65,7 @@ func (controller *Controller) Update(
 	},
 ) (result *model.Student, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		input.ID,
 		&input.Body,
 	)
@@ -80,7 +80,37 @@ func (controller *Controller) UpdateStudentEnroll(
 	},
 ) (result *model.StudentEnroll, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateStudentEnroll(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
+		input.ID,
+		&input.Body,
+	)
+	return
+}
+
+func (controller *Controller) UpdateStudentPreEnroll(
+	ctx *context.Context,
+	input *struct {
+		data.StudentPreEnrollID
+		Body data.StudentPreEnrollRequest
+	},
+) (result *model.StudentPreEnroll, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateStudentPreEnroll(
+		httpHelper.GetContextData(ctx),
+		input.ID,
+		&input.Body,
+	)
+	return
+}
+
+func (controller *Controller) UpdateStudentPreEnrollStatus(
+	ctx *context.Context,
+	input *struct {
+		data.StudentPreEnrollID
+		Body data.StudentPreEnrollStatusRequest
+	},
+) (result *model.StudentPreEnroll, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateStudentPreEnrollStatus(
+		httpHelper.GetContextData(ctx),
 		input.ID,
 		&input.Body,
 	)
@@ -93,7 +123,7 @@ func (controller *Controller) Delete(
 		data.StudentID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.Delete(httpHelper.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.Delete(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -107,7 +137,21 @@ func (controller *Controller) DeleteStudentEnroll(
 		data.StudentEnrollID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteStudentEnroll(httpHelper.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.DeleteStudentEnroll(httpHelper.GetContextData(ctx), input.ID)
+	if err != nil {
+		return
+	}
+	result = affectedRows
+	return
+}
+
+func (controller *Controller) DeleteStudentPreEnroll(
+	ctx *context.Context,
+	input *struct {
+		data.StudentPreEnrollID
+	},
+) (result int64, errCode int, err error) {
+	affectedRows, errCode, err := controller.Service.DeleteStudentPreEnroll(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -121,7 +165,35 @@ func (controller *Controller) DeleteMultiple(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetJwtContext(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetContextData(ctx), input.Body.List)
+	if err != nil {
+		return
+	}
+	result = affectedRows
+	return
+}
+
+func (controller *Controller) DeleteMultipleStudentEnroll(
+	ctx *context.Context,
+	input *struct {
+		Body types.DeleteMultipleRequest
+	},
+) (result int64, errCode int, err error) {
+	affectedRows, errCode, err := controller.Service.DeleteMultipleStudentEnroll(httpHelper.GetContextData(ctx), input.Body.List)
+	if err != nil {
+		return
+	}
+	result = affectedRows
+	return
+}
+
+func (controller *Controller) DeleteMultipleStudentPreEnroll(
+	ctx *context.Context,
+	input *struct {
+		Body types.DeleteMultipleRequest
+	},
+) (result int64, errCode int, err error) {
+	affectedRows, errCode, err := controller.Service.DeleteMultipleStudentPreEnroll(httpHelper.GetContextData(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -135,7 +207,7 @@ func (controller *Controller) Get(
 		data.StudentID
 	},
 ) (result *model.Student, errCode int, err error) {
-	student, errCode, err := controller.Service.Get(httpHelper.GetJwtContext(ctx), input.ID)
+	student, errCode, err := controller.Service.Get(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -149,7 +221,21 @@ func (controller *Controller) GetStudentEnroll(
 		data.StudentEnrollID
 	},
 ) (result *model.StudentEnroll, errCode int, err error) {
-	student, errCode, err := controller.Service.GetStudentEnroll(httpHelper.GetJwtContext(ctx), input.ID)
+	student, errCode, err := controller.Service.GetStudentEnroll(httpHelper.GetContextData(ctx), input.ID)
+	if err != nil {
+		return
+	}
+	result = student
+	return
+}
+
+func (controller *Controller) GetStudentPreEnroll(
+	ctx *context.Context,
+	input *struct {
+		data.StudentPreEnrollID
+	},
+) (result *model.StudentPreEnroll, errCode int, err error) {
+	student, errCode, err := controller.Service.GetStudentPreEnroll(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -166,7 +252,7 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.StudentResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	studentList, errCode, err := controller.Service.GetAll(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
+	studentList, errCode, err := controller.Service.GetAll(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}
@@ -187,12 +273,54 @@ func (controller *Controller) GetAllStudentEnroll(
 	},
 ) (result *data.StudentEnrollResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	studentList, errCode, err := controller.Service.GetAllStudentEnroll(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllStudentEnrollRequest)
+	studentList, errCode, err := controller.Service.GetAllStudentEnroll(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllStudentEnrollRequest)
 	if err != nil {
 		return
 	}
 	result = &data.StudentEnrollResponseList{
 		Data: model.ToStudentEnrollResponseList(studentList),
+	}
+	result.Filter = newFilter
+	result.Pagination = newPagination
+	return
+}
+
+func (controller *Controller) GetAllStudentPreEnroll(
+	ctx *context.Context,
+	input *struct {
+		types.Filter
+		types.PaginationRequest
+		data.GetAllStudentPreEnrollRequest
+	},
+) (result *data.StudentPreEnrollResponseList, errCode int, err error) {
+	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
+	studentList, errCode, err := controller.Service.GetAllStudentPreEnroll(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllStudentPreEnrollRequest)
+	if err != nil {
+		return
+	}
+	result = &data.StudentPreEnrollResponseList{
+		Data: model.ToStudentPreEnrollResponseList(studentList),
+	}
+	result.Filter = newFilter
+	result.Pagination = newPagination
+	return
+}
+
+func (controller *Controller) GetAllPublic(
+	ctx *context.Context,
+	input *struct {
+		types.Filter
+		types.PaginationRequest
+		data.GetAllRequest
+	},
+) (result *data.StudentResponseList, errCode int, err error) {
+	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
+	studentList, errCode, err := controller.Service.GetAll(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllRequest)
+	if err != nil {
+		return
+	}
+	result = &data.StudentResponseList{
+		Data: model.ToStudentResponseList(studentList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

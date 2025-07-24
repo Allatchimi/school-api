@@ -8,7 +8,6 @@ import (
 	"api/common/utils"
 	"api/services/common/contact/data"
 	"api/services/common/contact/model"
-	serviceHelper "api/services/helper"
 )
 
 type Service struct {
@@ -22,16 +21,19 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "contact"
 const DEFAULT_ERROR_MESSAGE = "interact with contact model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.ContactRequest) (result *model.Contact, errCode int, err error) {
+func (service *Service) Create(
+	ctxData *types.ContextData,
+	request *data.ContactRequest,
+) (result *model.Contact, errCode int, err error) {
 	// Check inputs
-	if inputJwtToken.SchoolID != request.SchoolID {
+	if ctxData.Jwt.SchoolID != request.SchoolID {
 		errCode = http.StatusBadRequest
-		err = constants.Http422LockedErrorMessage()
+		err = constants.Http422InvalidInputsErrorMessage()
 		return
 	}
 
 	// Insert contact
-	if inputJwtToken.SchoolID > 0 {
+	if ctxData.Jwt.SchoolID > 0 {
 		result, err = service.Repository.Create(&model.Contact{
 			SchoolID: request.SchoolID,
 			Subject:  request.Subject,
@@ -61,18 +63,9 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Cont
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Contact, errCode int, err error) {
-	// Get user
-	foundUser, err := serviceHelper.GetUserByID(inputJwtToken.UserID)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-
-	// Proceed by feature
-	if foundUser.Role.Feature != constants.FeatureAdmin {
-		result, err = service.Repository.GetByIDSchoolID(id, foundUser.SchoolID)
+func (service *Service) Get(ctxData *types.ContextData, id int64) (result *model.Contact, errCode int, err error) {
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		result, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
 	} else {
 		result, err = service.Repository.GetByID(id)
 	}
@@ -89,23 +82,20 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Contact, errCode int, err error) {
-	// Get user
-	foundUser, err := serviceHelper.GetUserByID(inputJwtToken.UserID)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
+func (service *Service) GetAll(
+	ctxData *types.ContextData,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.Contact, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
 	}
 
-	// Proceed by feature
-	if foundUser.Role.Feature != constants.FeatureAdmin {
-		newRequest := *request
-		newRequest.SchoolID = foundUser.SchoolID
-		result, err = service.Repository.GetAll(filter, pagination, &newRequest)
-	} else {
-		result, err = service.Repository.GetAll(filter, pagination, request)
-	}
+	// Get
+	result, err = service.Repository.GetAll(filter, pagination, &newRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

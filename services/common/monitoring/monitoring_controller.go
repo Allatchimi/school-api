@@ -26,7 +26,7 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.MonitoringResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	monitoringList, errCode, err := controller.Service.GetAll(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
+	monitoringList, errCode, err := controller.Service.GetAll(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}

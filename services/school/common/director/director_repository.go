@@ -163,12 +163,12 @@ func (repository *Repository) GetAll(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(directors.id AS TEXT) = ? OR 
-			directors.uid ILIKE ? OR 
-			schools.name ILIKE ? OR 
-			schools.type ILIKE ? OR 
-			users.email ILIKE ? OR 
-			CAST(users.phone_number AS TEXT) ILIKE ? 
+			CAST(directors.id AS TEXT) = ? OR
+			directors.uid ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			users.email ILIKE ? OR
+			CAST(users.phone_number AS TEXT) ILIKE ?
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
@@ -183,9 +183,9 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT directors.* 
-				FROM directors 
-				LEFT JOIN schools ON directors.school_id = schools.id 
+				`SELECT directors.*
+				FROM directors
+				LEFT JOIN schools ON directors.school_id = schools.id
 				LEFT JOIN users ON directors.user_id = users.id`,
 				where,
 				pagination,

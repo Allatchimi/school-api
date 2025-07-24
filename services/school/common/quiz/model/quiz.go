@@ -56,7 +56,7 @@ func (item *Quiz) ToResponse() *data.QuizResponse {
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Year = item.Year.ToResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.ClassSubject = item.ClassSubject.ToResponse()
 	resp.Unit = item.Unit.ToResponse()
 	resp.Questions = ToQuizQuestionResponseListWithOptions(item.Questions)
 

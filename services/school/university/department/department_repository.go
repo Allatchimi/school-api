@@ -26,7 +26,7 @@ func (repository *Repository) Create(item *model.UniversityDepartment) (*model.U
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, item *model.UniversityDepartment) (*model.UniversityDepartment, error) {
+func (repository *Repository) UpdateByID(id int64, item *model.UniversityDepartment) (*model.UniversityDepartment, error) {
 	result := &model.UniversityDepartment{}
 	return result, repository.Db.Preload(clause.Associations).Model(&model.UniversityDepartment{}).Where("id = ?", id).Updates(
 		map[string]any{
@@ -38,23 +38,36 @@ func (repository *Repository) Update(id int64, item *model.UniversityDepartment)
 	).Find(result).Error
 }
 
-func (repository *Repository) Delete(id int64) (int64, error) {
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.UniversityDepartment{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.UniversityDepartment{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.UniversityDepartment{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.UniversityDepartment, error) {
 	result := &model.UniversityDepartment{}
-	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.UniversityDepartment, error) {
+	result := &model.UniversityDepartment{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.UniversityDepartment) (*model.UniversityDepartment, error) {
@@ -102,17 +115,17 @@ func (repository *Repository) GetAll(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(departments.id AS TEXT) = ? OR 
-			departments.name ILIKE ? OR 
-			departments.description ILIKE ? OR 
-			schools.name ILIKE ? OR 
-			schools.type ILIKE ? OR 
-			university_faculties.name ILIKE ? OR 
-			university_faculties.description ILIKE ? 
+			CAST(departments.id AS TEXT) = ? OR
+			departments.name ILIKE ? OR
+			departments.description ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			university_faculties.name ILIKE ? OR
+			university_faculties.description ILIKE ?
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
-		args = append(args, search, like, like, like, like)
+		args = append(args, search, like, like, like, like, like, like)
 	}
 
 	// Perform query with preloads and custom pagination scope
@@ -121,9 +134,9 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT departments.* 
-				FROM university_departments departments 
-				LEFT JOIN schools ON departments.school_id = schools.id 
+				`SELECT departments.*
+				FROM university_departments departments
+				LEFT JOIN schools ON departments.school_id = schools.id
 				LEFT JOIN university_faculties ON departments.faculty_id = university_faculties.id`,
 				where,
 				pagination,

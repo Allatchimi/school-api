@@ -26,7 +26,7 @@ type HighschoolClassSubject struct {
 	InvalidDate  *time.Time `gorm:"default:null"`
 }
 
-func (item *HighschoolClassSubject) ToClassSubjectResponse() *data.ClassSubjectResponse {
+func (item *HighschoolClassSubject) ToResponse() *data.ClassSubjectResponse {
 	if item == nil {
 		return nil
 	}
@@ -50,7 +50,7 @@ func (item *HighschoolClassSubject) ToClassSubjectResponse() *data.ClassSubjectR
 func ToClassSubjectResponseList(itemList []HighschoolClassSubject) []data.ClassSubjectResponse {
 	resp := make([]data.ClassSubjectResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToClassSubjectResponse()
+		resp[index] = *item.ToResponse()
 	}
 	return resp
 }

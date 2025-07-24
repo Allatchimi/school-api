@@ -77,6 +77,10 @@ func StartGin() {
 			humaApi,
 			AllControllers.UserController.Service.Repository,
 			AllControllers.PermissionController.Service.Repository,
+			AllControllers.DirectorController.Service.Repository,
+			AllControllers.TeacherController.Service.Repository,
+			AllControllers.StudentController.Service.Repository,
+			AllControllers.ParentController.Service.Repository,
 		),
 	)
 

@@ -66,7 +66,8 @@ func AuthMiddleware(api huma.API) func(huma.Context, func(huma.Context)) {
 			ctx := humaCtx.Context()
 			schoolID := httpHelper.GetSchoolContext(&ctx)
 			if jwtToken.SchoolID == schoolID {
-				next(*SetAuthContext(&humaCtx, token, jwtToken))
+				authCtx := SetAuthContext(&humaCtx, token, jwtToken)
+				next(*authCtx)
 				return
 			}
 		}

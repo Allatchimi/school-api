@@ -252,7 +252,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-quiz-multiple",
 			Summary:     "Delete multiple quiz",
-			Description: "Delete multiple quiz by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple quiz by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -380,16 +380,6 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			// TODO: Remove this
-			tempResults := make([]data.QuizResponse, 10)
-			for i := range tempResults {
-				tmpModel := data.QuizResponse{}
-				tmpModel.ID = int64(i)
-
-				tempResults[i] = tmpModel
-			}
-			result.Data = tempResults
-
 			return &struct {
 				Body data.QuizResponseList
 			}{Body: *result}, nil
@@ -443,19 +433,9 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			tempResults := make([]data.QuizResultResponse, 10)
-			for i := range tempResults {
-				tmpModel := data.QuizResultResponse{}
-				tmpModel.Student = nil
-				tmpModel.Result = float64(i)
-				tempResults[i] = tmpModel
-			}
-			result.Data = tempResults
-
 			return &struct {
 				Body data.QuizResultResponseList
 			}{Body: *result}, nil
 		},
 	)
-
 }

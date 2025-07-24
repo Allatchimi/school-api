@@ -23,29 +23,35 @@ const MODEL_NAME = "user"
 const DEFAULT_ERROR_MESSAGE = "interact with user model"
 
 func (service *Service) Create(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	request *data.UserRequest,
 	password *string,
 ) (result *model.User, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
 	// Format item
 	item := &model.User{
-		SchoolID:    request.SchoolID,
-		RoleID:      request.RoleID,
-		Email:       request.Email,
-		PhoneNumber: request.PhoneNumber,
-		Status:      request.Status,
-		IsActivated: request.IsActivated,
+		SchoolID:    newRequest.SchoolID,
+		RoleID:      newRequest.RoleID,
+		Email:       newRequest.Email,
+		PhoneNumber: newRequest.PhoneNumber,
+		Status:      newRequest.Status,
+		IsActivated: newRequest.IsActivated,
 		Info: &model.UserInfo{
-			Username:  request.Info.Username,
-			FirstName: request.Info.FirstName,
-			LastName:  request.Info.LastName,
+			Username:  newRequest.Info.Username,
+			FirstName: newRequest.Info.FirstName,
+			LastName:  newRequest.Info.LastName,
 
-			Gender:        request.Info.Gender,
-			Birthday:      request.Info.Birthday,
-			BirthLocation: request.Info.BirthLocation,
-			Address:       request.Info.Address,
-			Language:      request.Info.Language,
-			Image:         request.Info.Image,
+			Gender:        newRequest.Info.Gender,
+			Birthday:      newRequest.Info.Birthday,
+			BirthLocation: newRequest.Info.BirthLocation,
+			Address:       newRequest.Info.Address,
+			Language:      newRequest.Info.Language,
+			Image:         newRequest.Info.Image,
 		},
 	}
 
@@ -54,9 +60,9 @@ func (service *Service) Create(
 	var isEmailValid = utils.IsEmailValid(item.Email)
 	var isPhoneNumberValid = utils.IsPhoneNumberValid(item.PhoneNumber)
 	if isEmailValid {
-		foundItem, err = service.Repository.GetByEmailSchoolID(item.Email, request.SchoolID)
+		foundItem, err = service.Repository.GetByEmailSchoolID(item.Email, item.SchoolID)
 	} else if isPhoneNumberValid {
-		foundItem, err = service.Repository.GetByPhoneNumberSchoolID(item.PhoneNumber, request.SchoolID)
+		foundItem, err = service.Repository.GetByPhoneNumberSchoolID(item.PhoneNumber, item.SchoolID)
 	} else {
 		errCode = http.StatusBadRequest
 		err = constants.Http400BadRequestErrorMessage()
@@ -146,40 +152,63 @@ func (service *Service) Create(
 }
 
 func (service *Service) Update(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	id int64,
 	request *data.UserRequest,
 ) (result *model.User, errCode int, err error) {
+	// Check if the item exists
+	var foundItem *model.User
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetByID(id)
+	}
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundItem == nil || foundItem.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
 	// Format item
 	item := &model.User{
-		SchoolID:    request.SchoolID,
-		RoleID:      request.RoleID,
-		Email:       request.Email,
-		PhoneNumber: request.PhoneNumber,
-		Status:      request.Status,
-		IsActivated: request.IsActivated,
+		SchoolID:    newRequest.SchoolID,
+		RoleID:      newRequest.RoleID,
+		Email:       newRequest.Email,
+		PhoneNumber: newRequest.PhoneNumber,
+		Status:      newRequest.Status,
+		IsActivated: newRequest.IsActivated,
 		Info: &model.UserInfo{
-			Username:  request.Info.Username,
-			FirstName: request.Info.FirstName,
-			LastName:  request.Info.LastName,
+			Username:  newRequest.Info.Username,
+			FirstName: newRequest.Info.FirstName,
+			LastName:  newRequest.Info.LastName,
 
-			Gender:        request.Info.Gender,
-			Birthday:      request.Info.Birthday,
-			BirthLocation: request.Info.BirthLocation,
-			Address:       request.Info.Address,
-			Language:      request.Info.Language,
-			Image:         request.Info.Image,
+			Gender:        newRequest.Info.Gender,
+			Birthday:      newRequest.Info.Birthday,
+			BirthLocation: newRequest.Info.BirthLocation,
+			Address:       newRequest.Info.Address,
+			Language:      newRequest.Info.Language,
+			Image:         newRequest.Info.Image,
 		},
 	}
 
 	// Check if user exists
-	var foundItem *model.User
 	var isEmailValid = utils.IsEmailValid(item.Email)
 	var isPhoneNumberValid = utils.IsPhoneNumberValid(item.PhoneNumber)
 	if isEmailValid {
-		foundItem, err = service.Repository.GetByEmailSchoolID(item.Email, request.SchoolID)
+		foundItem, err = service.Repository.GetByEmailSchoolID(item.Email, item.SchoolID)
 	} else if isPhoneNumberValid {
-		foundItem, err = service.Repository.GetByPhoneNumberSchoolID(item.PhoneNumber, request.SchoolID)
+		foundItem, err = service.Repository.GetByPhoneNumberSchoolID(item.PhoneNumber, item.SchoolID)
 	} else {
 		errCode = http.StatusBadRequest
 		err = constants.Http400BadRequestErrorMessage()
@@ -228,9 +257,28 @@ func (service *Service) Update(
 }
 
 func (service *Service) Delete(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	id int64,
 ) (affectedRows int64, errCode int, err error) {
+	// Check if the item exists
+	var foundItem *model.User
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetByID(id)
+	}
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundItem == nil || foundItem.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Delete
 	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -246,10 +294,16 @@ func (service *Service) Delete(
 }
 
 func (service *Service) DeleteMultiple(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	list []int64,
 ) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteMultipleByID(list)
+	// Check school
+	var foundSchool int64
+	if ctxData.Jwt.SchoolID > 0 {
+		foundSchool = ctxData.Jwt.SchoolID
+	}
+
+	affectedRows, err = service.Repository.DeleteMultipleByID(list, foundSchool)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -264,88 +318,44 @@ func (service *Service) DeleteMultiple(
 }
 
 func (service *Service) Get(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	id int64,
 ) (result *model.User, errCode int, err error) {
-	// Get user
-	foundUser, err := service.Repository.GetByID(inputJwtToken.UserID)
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		result, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		result, err = service.Repository.GetByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundUser == nil || foundUser.ID < 1 || foundUser.ID != inputJwtToken.UserID {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
-	}
-
-	// For admin
-	if foundUser.Role.Feature == constants.FeatureAdmin {
-		result, err = service.Repository.GetByID(id)
-		if err != nil {
-			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			return
-		}
-		return
-	}
-
-	// For director
-	if foundUser.Role.Feature == constants.FeatureDirector {
-		if foundUser.SchoolID > 0 {
-			result, err = service.Repository.GetByIDSchoolID(id, foundUser.SchoolID)
-			if err != nil {
-				errCode = http.StatusInternalServerError
-				err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			}
-		}
+	if result == nil {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
 }
 
 func (service *Service) GetAll(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	filter *types.Filter,
 	pagination *types.Pagination,
 	request *data.GetAllRequest,
 ) (result []model.User, errCode int, err error) {
-	// Get user
-	foundUser, err := service.Repository.GetByID(inputJwtToken.UserID)
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Get
+	result, err = service.Repository.GetAll(filter, pagination, &newRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundUser == nil || foundUser.ID < 1 || foundUser.ID != inputJwtToken.UserID {
-		errCode = http.StatusForbidden
-		err = constants.Http403InvalidPermissionErrorMessage()
-		return
-	}
-
-	// For admin
-	if foundUser.Role.Feature == constants.FeatureAdmin {
-		result, err = service.Repository.GetAll(filter, pagination, request)
-		if err != nil {
-			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		}
-		return
-	}
-
-	// For director
-	if foundUser.Role.Feature == constants.FeatureDirector {
-		if foundUser.SchoolID > 0 {
-			directorRequest := *request
-			directorRequest.SchoolID = foundUser.SchoolID
-			result, err = service.Repository.GetAll(filter, pagination, &directorRequest)
-			if err != nil {
-				errCode = http.StatusInternalServerError
-				err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			}
-		}
-		return
 	}
 	return
 }

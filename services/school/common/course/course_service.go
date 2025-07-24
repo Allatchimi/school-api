@@ -21,7 +21,7 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "course"
 const DEFAULT_ERROR_MESSAGE = "interact with course model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.CourseRequest) (result *model.Course, errCode int, err error) {
+func (service *Service) Create(ctxData *types.ContextData, request *data.CourseRequest) (result *model.Course, errCode int, err error) {
 	// Format request
 	item := &model.Course{
 		SchoolID:       request.SchoolID,
@@ -92,7 +92,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Cour
 	return
 }
 
-func (service *Service) CreateComment(inputJwtToken *types.JwtToken, id int64, request *data.CourseCommentRequest) (result *model.CourseComment, errCode int, err error) {
+func (service *Service) CreateComment(ctxData *types.ContextData, id int64, request *data.CourseCommentRequest) (result *model.CourseComment, errCode int, err error) {
 	// Check if the course exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -109,7 +109,7 @@ func (service *Service) CreateComment(inputJwtToken *types.JwtToken, id int64, r
 	// Format request
 	item := &model.CourseComment{
 		CourseID: id,
-		UserID:   inputJwtToken.UserID,
+		UserID:   ctxData.Jwt.UserID,
 		Message:  request.Message,
 		Rate:     request.Rate,
 	}
@@ -124,7 +124,7 @@ func (service *Service) CreateComment(inputJwtToken *types.JwtToken, id int64, r
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.CourseRequest) (result *model.Course, errCode int, err error) {
+func (service *Service) Update(ctxData *types.ContextData, id int64, request *data.CourseRequest) (result *model.Course, errCode int, err error) {
 	// Check if course exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -205,7 +205,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	return
 }
 
-func (service *Service) UpdateComment(inputJwtToken *types.JwtToken, id int64, request *data.CourseCommentRequest) (result *model.CourseComment, errCode int, err error) {
+func (service *Service) UpdateComment(ctxData *types.ContextData, id int64, request *data.CourseCommentRequest) (result *model.CourseComment, errCode int, err error) {
 	// Get the course comment
 	foundItem, err := service.Repository.GetCourseCommentByID(id)
 	if err != nil {
@@ -228,7 +228,7 @@ func (service *Service) UpdateComment(inputJwtToken *types.JwtToken, id int64, r
 	// Format request
 	item := &model.CourseComment{
 		CourseID: id,
-		UserID:   inputJwtToken.UserID,
+		UserID:   ctxData.Jwt.UserID,
 		Message:  request.Message,
 		Rate:     request.Rate,
 	}
@@ -243,7 +243,7 @@ func (service *Service) UpdateComment(inputJwtToken *types.JwtToken, id int64, r
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) Delete(ctxData *types.ContextData, id int64) (affectedRows int64, errCode int, err error) {
 	// Get the course
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -272,7 +272,7 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteComment(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteComment(ctxData *types.ContextData, id int64) (affectedRows int64, errCode int, err error) {
 	// Get the course comment
 	foundItem, err := service.Repository.GetCourseCommentByID(id)
 	if err != nil {
@@ -304,7 +304,7 @@ func (service *Service) DeleteComment(inputJwtToken *types.JwtToken, id int64) (
 	return
 }
 
-func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteMultiple(ctxData *types.ContextData, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultipleByID(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -319,7 +319,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Course, errCode int, err error) {
+func (service *Service) Get(ctxData *types.ContextData, id int64) (result *model.Course, errCode int, err error) {
 	// Get the course
 	result, err = service.Repository.GetByID(id)
 	if err != nil {
@@ -336,7 +336,7 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 }
 
 func (service *Service) GetAll(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	filter *types.Filter,
 	pagination *types.Pagination,
 	request *data.GetAllRequest,
@@ -354,13 +354,13 @@ func (service *Service) GetAll(
 }
 
 func (service *Service) GetAllComment(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	filter *types.Filter,
 	pagination *types.Pagination,
 	request *data.GetAllCourseCommentRequest,
 ) (result []model.CourseComment, errCode int, err error) {
 	// Get user
-	_, err = serviceHelper.GetUserByID(inputJwtToken.UserID)
+	_, err = serviceHelper.GetUserByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

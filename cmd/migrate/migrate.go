@@ -85,6 +85,7 @@ func Apply() error {
 		&teacherModel.TeacherClassSubjectUnit{},
 		// Student
 		&studentModel.Student{},
+		&studentModel.StudentPreEnroll{},
 		&studentModel.StudentEnroll{},
 		// Parent
 		&parentModel.Parent{},
@@ -116,7 +117,7 @@ func Apply() error {
 		&reportModel.ReportConfig{},
 		// Schedule
 		&scheduleModel.Schedule{},
-		&scheduleModel.ScheduleGeneric{},
+		&scheduleModel.ScheduleCommon{},
 		// Request
 		&requestModel.Request{},
 		// Payment

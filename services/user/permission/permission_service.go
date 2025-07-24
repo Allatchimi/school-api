@@ -22,7 +22,7 @@ const MODEL_NAME = "permission"
 const DEFAULT_ERROR_MESSAGE = "interact with permission model"
 
 func (service *Service) Update(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	roleID int64,
 	request *data.UpdatePermissionRequest,
 ) (result *model.Permission, errCode int, err error) {
@@ -80,7 +80,7 @@ func (service *Service) Update(
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) Delete(ctxData *types.ContextData, id int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -95,7 +95,7 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteMultiple(ctxData *types.ContextData, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultipleByID(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -111,7 +111,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 }
 
 func (service *Service) GetAll(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	filter *types.Filter,
 	pagination *types.Pagination,
 	request *data.GetAllRequest,

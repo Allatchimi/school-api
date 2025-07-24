@@ -24,7 +24,7 @@ const MODEL_NAME = "telegram"
 const DEFAULT_ERROR_MESSAGE = "interact with telegram"
 
 func (service *Service) PostWebhook(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	SchoolID int64,
 	request *data.TelegramWebhookRequest,
 ) (errCode int, err error) {

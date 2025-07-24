@@ -15,7 +15,7 @@ type ReportConfig struct {
 	NotationMinimumSuccess float64 `gorm:"default:null"`
 }
 
-func (item *ReportConfig) ToReportConfigResponse() *data.ReportConfigResponse {
+func (item *ReportConfig) ToResponse() *data.ReportConfigResponse {
 	if item == nil {
 		return nil
 	}
@@ -34,7 +34,7 @@ func (item *ReportConfig) ToReportConfigResponse() *data.ReportConfigResponse {
 func ToReportConfigResponseList(itemList []ReportConfig) []data.ReportConfigResponse {
 	resp := make([]data.ReportConfigResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToReportConfigResponse()
+		resp[index] = *item.ToResponse()
 	}
 	return resp
 }

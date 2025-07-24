@@ -26,9 +26,9 @@ func NewService(userService *user.Service) *Service {
 const MODEL_NAME = "user"
 const DEFAULT_ERROR_MESSAGE = "interact with user model"
 
-func (service *Service) UpdateProfileInfo(inputJwtToken *types.JwtToken, request *data.UpdateProfileInfoRequest) (result *model.UserInfo, errCode int, err error) {
+func (service *Service) UpdateProfileInfo(ctxData *types.ContextData, request *data.UpdateProfileInfoRequest) (result *model.UserInfo, errCode int, err error) {
 	// Find user
-	userFound, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -63,9 +63,9 @@ func (service *Service) UpdateProfileInfo(inputJwtToken *types.JwtToken, request
 	return
 }
 
-func (service *Service) UpdateProfileConfigMessage(inputJwtToken *types.JwtToken, request *data.UpdateProfileMessageRequest) (result *model.UserConfig, errCode int, err error) {
+func (service *Service) UpdateProfileConfigMessage(ctxData *types.ContextData, request *data.UpdateProfileMessageRequest) (result *model.UserConfig, errCode int, err error) {
 	// Find user
-	userFound, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -92,9 +92,9 @@ func (service *Service) UpdateProfileConfigMessage(inputJwtToken *types.JwtToken
 	return
 }
 
-func (service *Service) UpdateProfilePhoneNumber(inputJwtToken *types.JwtToken, phoneNumber uint64) (result *model.User, errCode int, err error) { // Check if user exists
+func (service *Service) UpdateProfilePhoneNumber(ctxData *types.ContextData, phoneNumber uint64) (result *model.User, errCode int, err error) { // Check if user exists
 	// Find user
-	userFound, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -107,7 +107,7 @@ func (service *Service) UpdateProfilePhoneNumber(inputJwtToken *types.JwtToken, 
 	}
 
 	// Check if this phone number is already taken
-	foundUser, err := service.UserService.Repository.GetByPhoneNumberSchoolID(phoneNumber, inputJwtToken.SchoolID)
+	foundUser, err := service.UserService.Repository.GetByPhoneNumberSchoolID(phoneNumber, ctxData.Jwt.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -128,9 +128,9 @@ func (service *Service) UpdateProfilePhoneNumber(inputJwtToken *types.JwtToken, 
 	return
 }
 
-func (service *Service) UpdateProfilePasswordInit(inputJwtToken *types.JwtToken) (token string, errCode int, err error) {
+func (service *Service) UpdateProfilePasswordInit(ctxData *types.ContextData) (token string, errCode int, err error) {
 	// Find user
-	userFound, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -207,9 +207,9 @@ func (service *Service) UpdateProfilePasswordInit(inputJwtToken *types.JwtToken)
 	return
 }
 
-func (service *Service) UpdateProfilePasswordCheckCode(inputJwtToken *types.JwtToken, inputToken string, inputCode int) (token string, errCode int, err error) {
+func (service *Service) UpdateProfilePasswordCheckCode(ctxData *types.ContextData, inputToken string, inputCode int) (token string, errCode int, err error) {
 	// Find user
-	userFound, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -290,9 +290,9 @@ func (service *Service) UpdateProfilePasswordCheckCode(inputJwtToken *types.JwtT
 	return
 }
 
-func (service *Service) UpdateProfilePasswordNewPassword(inputJwtToken *types.JwtToken, token string, currentPassword string, password string) (errCode int, err error) {
+func (service *Service) UpdateProfilePasswordNewPassword(ctxData *types.ContextData, token string, currentPassword string, password string) (errCode int, err error) {
 	// Find user
-	userFound, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -338,7 +338,7 @@ func (service *Service) UpdateProfilePasswordNewPassword(inputJwtToken *types.Jw
 	}
 	if jwtTokenDecoded == nil || jwtTokenDecoded.UserID <= 0 ||
 		jwtTokenDecoded.Issuer != constants.JwtIssuerProfileUpdatePasswordNewPassword ||
-		jwtTokenDecoded.UserID != inputJwtToken.UserID {
+		jwtTokenDecoded.UserID != ctxData.Jwt.UserID {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", errMsg)
 		return
@@ -408,9 +408,9 @@ func (service *Service) UpdateProfilePasswordNewPassword(inputJwtToken *types.Jw
 	return
 }
 
-func (service *Service) UpdateProfilePhoneNumberInit(inputJwtToken *types.JwtToken) (token string, errCode int, err error) {
+func (service *Service) UpdateProfilePhoneNumberInit(ctxData *types.ContextData) (token string, errCode int, err error) {
 	// Find user
-	userFound, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -487,9 +487,9 @@ func (service *Service) UpdateProfilePhoneNumberInit(inputJwtToken *types.JwtTok
 	return
 }
 
-func (service *Service) UpdateProfilePhoneNumberCheckCode(inputJwtToken *types.JwtToken, inputToken string, inputCode int) (token string, errCode int, err error) {
+func (service *Service) UpdateProfilePhoneNumberCheckCode(ctxData *types.ContextData, inputToken string, inputCode int) (token string, errCode int, err error) {
 	// Find user
-	userFound, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -570,9 +570,9 @@ func (service *Service) UpdateProfilePhoneNumberCheckCode(inputJwtToken *types.J
 	return
 }
 
-func (service *Service) UpdateProfilePhoneNumberNewPhoneNumber(inputJwtToken *types.JwtToken, token string, phoneNumber uint64) (errCode int, err error) {
+func (service *Service) UpdateProfilePhoneNumberNewPhoneNumber(ctxData *types.ContextData, token string, phoneNumber uint64) (errCode int, err error) {
 	// Find user
-	userFound, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -616,7 +616,7 @@ func (service *Service) UpdateProfilePhoneNumberNewPhoneNumber(inputJwtToken *ty
 	}
 	if jwtTokenDecoded == nil || jwtTokenDecoded.UserID <= 0 ||
 		jwtTokenDecoded.Issuer != constants.JwtIssuerProfileUpdatePhoneNumberNewPhoneNumber ||
-		jwtTokenDecoded.UserID != inputJwtToken.UserID {
+		jwtTokenDecoded.UserID != ctxData.Jwt.UserID {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", errMsg)
 		return
@@ -649,9 +649,9 @@ func (service *Service) UpdateProfilePhoneNumberNewPhoneNumber(inputJwtToken *ty
 	return
 }
 
-func (service *Service) UpdateProfileMfaEmailInit(inputJwtToken *types.JwtToken) (token string, errCode int, err error) {
+func (service *Service) UpdateProfileMfaEmailInit(ctxData *types.ContextData) (token string, errCode int, err error) {
 	// Find user
-	userFound, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -728,9 +728,9 @@ func (service *Service) UpdateProfileMfaEmailInit(inputJwtToken *types.JwtToken)
 	return
 }
 
-func (service *Service) UpdateProfileMfaEmailCheckCode(inputJwtToken *types.JwtToken, inputToken string, inputCode int) (errCode int, err error) {
+func (service *Service) UpdateProfileMfaEmailCheckCode(ctxData *types.ContextData, inputToken string, inputCode int) (errCode int, err error) {
 	// Find user
-	userFound, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -807,9 +807,9 @@ func (service *Service) UpdateProfileMfaEmailCheckCode(inputJwtToken *types.JwtT
 	return
 }
 
-func (service *Service) UpdateProfileNotification(inputJwtToken *types.JwtToken, enabled bool) (result *model.User, errCode int, err error) {
+func (service *Service) UpdateProfileNotification(ctxData *types.ContextData, enabled bool) (result *model.User, errCode int, err error) {
 	// Check if user exists
-	userFound, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil || userFound == nil {
 		errCode = http.StatusForbidden
 		err = fmt.Errorf("%s", "User not found! Please enter valid information.")
@@ -828,9 +828,9 @@ func (service *Service) UpdateProfileNotification(inputJwtToken *types.JwtToken,
 	return
 }
 
-func (service *Service) UpdateProfileWebPushSubscription(inputJwtToken *types.JwtToken, subscription *data.UpdateProfileWebPushSubscriptionRequest) (errCode int, err error) {
+func (service *Service) UpdateProfileWebPushSubscription(ctxData *types.ContextData, subscription *data.UpdateProfileWebPushSubscriptionRequest) (errCode int, err error) {
 	// Find user
-	userFound, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -843,7 +843,7 @@ func (service *Service) UpdateProfileWebPushSubscription(inputJwtToken *types.Jw
 	}
 
 	// Update user web push subscription
-	result, err := service.UserService.Repository.UpdateUserConfigWebPushSubscriptionByID(inputJwtToken.UserID, subscription.Endpoint, subscription.Keys.P256dh, subscription.Keys.Auth)
+	result, err := service.UserService.Repository.UpdateUserConfigWebPushSubscriptionByID(ctxData.Jwt.UserID, subscription.Endpoint, subscription.Keys.P256dh, subscription.Keys.Auth)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -857,8 +857,8 @@ func (service *Service) UpdateProfileWebPushSubscription(inputJwtToken *types.Jw
 	return
 }
 
-func (service *Service) GetProfile(inputJwtToken *types.JwtToken) (result *model.User, errCode int, err error) {
-	result, err = service.UserService.Repository.GetByID(inputJwtToken.UserID)
+func (service *Service) GetProfile(ctxData *types.ContextData) (result *model.User, errCode int, err error) {
+	result, err = service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -872,9 +872,9 @@ func (service *Service) GetProfile(inputJwtToken *types.JwtToken) (result *model
 	return
 }
 
-func (service *Service) GetWebPushSubscriptionPublicKey(inputJwtToken *types.JwtToken) (result string, errCode int, err error) {
+func (service *Service) GetWebPushSubscriptionPublicKey(ctxData *types.ContextData) (result string, errCode int, err error) {
 	// Find user
-	userFound, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

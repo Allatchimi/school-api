@@ -84,7 +84,6 @@ func (repository *Repository) GetByName(name string) (result *model.Role, err er
 }
 
 func (repository *Repository) GetAll(
-	inputJwtToken *types.JwtToken,
 	filter *types.Filter,
 	pagination *types.Pagination,
 	request *data.GetAllRequest,
@@ -108,9 +107,9 @@ func (repository *Repository) GetAll(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(roles.id AS TEXT) = ? OR 
-			roles.name ILIKE ? OR 
-			infos.feature ILIKE ? OR 
+			CAST(roles.id AS TEXT) = ? OR
+			roles.name ILIKE ? OR
+			infos.feature ILIKE ? OR
 			infos.description ILIKE ?
 		)`
 
@@ -124,8 +123,8 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT roles.* 
-				FROM roles `,
+				`SELECT roles.*
+				FROM roles`,
 				where,
 				pagination,
 				filter,

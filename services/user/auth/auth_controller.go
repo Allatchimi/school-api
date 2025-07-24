@@ -117,7 +117,7 @@ func (controller *Controller) ForgotPasswordEmailInit(
 	},
 ) (result *data.ForgotPasswordInitResponse, errCode int, err error) {
 	token, errCode, err := controller.Service.ForgotPasswordInit(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		&data.ForgotPasswordInitRequest{
 			Email: input.Body.Email,
 		},
@@ -171,7 +171,7 @@ func (controller *Controller) ForgotPasswordNewPassword(
 func (controller *Controller) Logout(
 	ctx *context.Context,
 ) (result *data.LogoutResponse, errCode int, err error) {
-	errCode, err = controller.Service.Logout(httpHelper.GetJwtContext(ctx), httpHelper.ExtractBearerContext(ctx))
+	errCode, err = controller.Service.Logout(httpHelper.GetContextData(ctx), httpHelper.ExtractBearerContext(ctx))
 	if err != nil {
 		return
 	}

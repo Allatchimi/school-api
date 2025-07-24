@@ -52,7 +52,7 @@ func (item *Schedule) ToResponse() *data.ScheduleResponse {
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Year = item.Year.ToResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.ClassSubject = item.ClassSubject.ToResponse()
 	resp.Unit = item.Unit.ToResponse()
 
 	resp.ID = item.ID
@@ -116,13 +116,13 @@ func ToScheduleWeeklyViewResponseList(itemList []Schedule) []data.ScheduleWeekly
 	return result
 }
 
-func ListAppendGenericSchedules(dest []Schedule, src []ScheduleGeneric) []Schedule {
+func ListAppendCommonSchedules(dest []Schedule, src []ScheduleCommon) []Schedule {
 	defaultSize := len(dest)
-	genericSize := len(src)
-	result := make([]Schedule, defaultSize+genericSize)
+	commonSize := len(src)
+	result := make([]Schedule, defaultSize+commonSize)
 	copy(result, dest)
 	for index := range src {
-		schedule := ConvertScheduleGenericToSchedule(&src[index])
+		schedule := ConvertScheduleCommonToSchedule(&src[index])
 		if schedule != nil {
 			result[defaultSize+index] = *schedule
 		}
@@ -130,7 +130,7 @@ func ListAppendGenericSchedules(dest []Schedule, src []ScheduleGeneric) []Schedu
 	return result
 }
 
-func ConvertScheduleGenericToSchedule(item *ScheduleGeneric) (result *Schedule) {
+func ConvertScheduleCommonToSchedule(item *ScheduleCommon) (result *Schedule) {
 	if item == nil {
 		return
 	}

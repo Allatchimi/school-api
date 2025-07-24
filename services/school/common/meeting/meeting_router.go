@@ -115,7 +115,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-meeting-room-multiple",
 			Summary:     "Delete multiple room",
-			Description: "Delete multiple room by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple room by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -241,14 +241,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			tempResults := make([]data.MeetingRoomResponse, 10)
-			for i := range tempResults {
-				tmpModel := data.MeetingRoomResponse{}
-				tmpModel.ID = int64(i)
-				tempResults[i] = tmpModel
-			}
-			result.Data = tempResults
 
 			return &struct {
 				Body data.MeetingRoomResponseList

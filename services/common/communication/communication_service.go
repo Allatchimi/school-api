@@ -23,24 +23,21 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "communication"
 const DEFAULT_ERROR_MESSAGE = "interact with communication model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.CommunicationRequest) (result *model.Communication, errCode int, err error) {
-	// Get user
-	foundUser, err := serviceHelper.GetUserByID(inputJwtToken.UserID)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
+func (service *Service) Create(
+	ctxData *types.ContextData,
+	request *data.CommunicationRequest,
+) (result *model.Communication, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
 	}
 
-	// Insert communication
-	var foundSchoolID int64 = request.SchoolID
-	if foundUser.Role.Feature != constants.FeatureAdmin {
-		foundSchoolID = foundUser.SchoolID
-	}
+	// Insert
 	for _, roleID := range request.RoleIDs {
-		if foundSchoolID > 0 {
+		if newRequest.SchoolID > 0 {
 			result, err = service.Repository.Create(&model.Communication{
-				SchoolID: foundSchoolID,
+				SchoolID: newRequest.SchoolID,
 				RoleID:   roleID,
 				Subject:  request.Subject,
 				Message:  request.Message,
@@ -74,7 +71,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Comm
 			nil,
 			nil,
 			&dataUser.GetAllRequest{
-				SchoolID: foundSchoolID,
+				SchoolID: newRequest.SchoolID,
 				RoleID:   roleID,
 			},
 		)
@@ -96,18 +93,9 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Comm
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Communication, errCode int, err error) {
-	// Get user
-	foundUser, err := serviceHelper.GetUserByID(inputJwtToken.UserID)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-
-	// Proceed by feature
-	if foundUser.Role.Feature != constants.FeatureAdmin {
-		result, err = service.Repository.GetByIDSchoolID(id, foundUser.SchoolID)
+func (service *Service) Get(ctxData *types.ContextData, id int64) (result *model.Communication, errCode int, err error) {
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		result, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
 	} else {
 		result, err = service.Repository.GetByID(id)
 	}
@@ -125,27 +113,19 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 }
 
 func (service *Service) GetAll(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	filter *types.Filter,
 	pagination *types.Pagination,
 	request *data.GetAllRequest,
 ) (result []model.Communication, errCode int, err error) {
-	// Get user
-	foundUser, err := serviceHelper.GetUserByID(inputJwtToken.UserID)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
 	}
 
-	// Proceed by feature
-	if foundUser.Role.Feature != constants.FeatureAdmin {
-		newRequest := *request
-		newRequest.SchoolID = foundUser.SchoolID
-		result, err = service.Repository.GetAll(filter, pagination, &newRequest)
-	} else {
-		result, err = service.Repository.GetAll(filter, pagination, request)
-	}
+	// Get
+	result, err = service.Repository.GetAll(filter, pagination, &newRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

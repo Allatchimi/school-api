@@ -149,15 +149,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete schedule generic with id
+	// Delete schedule common with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-schedule-generic",
-			Summary:     "Delete schedule generic",
-			Description: "Delete existing schedule generic with matching id and return affected rows in database.",
+			OperationID: "delete-schedule-common",
+			Summary:     "Delete schedule common",
+			Description: "Delete existing schedule common with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/generic/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/common/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -183,7 +183,7 @@ func RegisterEndpoints(
 				data.ScheduleID
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteGeneric(&ctx, input)
+			result, errCode, err := controller.DeleteCommon(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -191,15 +191,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get schedule generic by id
+	// Get schedule common by id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-schedule-generic-id",
-			Summary:     "Get schedule generic by id",
-			Description: "Return one schedule generic with matching id",
+			OperationID: "get-schedule-common-id",
+			Summary:     "Get schedule common by id",
+			Description: "Return one schedule common with matching id",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/generic/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/common/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -228,7 +228,7 @@ func RegisterEndpoints(
 				data.ScheduleID
 			},
 		) (*struct{ Body data.ScheduleResponse }, error) {
-			result, errCode, err := controller.GetGeneric(&ctx, input)
+			result, errCode, err := controller.GetCommon(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -327,16 +327,6 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			// Generate items
-			tempResult := make([]data.ScheduleResponse, 10)
-			for i := range result.Data {
-				tempModel := data.ScheduleResponse{}
-				tempModel.ID = int64(i)
-
-				tempResult[i] = tempModel
-			}
-			result.Data = tempResult
-
 			return &struct {
 				Body data.ScheduleResponseList
 			}{Body: *result}, nil
@@ -388,24 +378,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			// Generate items
-			tempResults := make([]data.ScheduleWeeklyViewResponse, 10)
-			for i := range tempResults {
-				tmpModel := data.ScheduleWeeklyViewResponse{
-					StartTime: fmt.Sprintf("%02d:00", i),
-					EndTime:   fmt.Sprintf("%02d:00", i+1),
-				}
-				tmpModel.Monday = make([]data.ScheduleResponse, 1)
-				tmpModel.Tuesday = make([]data.ScheduleResponse, 1)
-				tmpModel.Wednesday = make([]data.ScheduleResponse, 1)
-				tmpModel.Thursday = make([]data.ScheduleResponse, 1)
-				tmpModel.Friday = make([]data.ScheduleResponse, 1)
-				tmpModel.Saturday = make([]data.ScheduleResponse, 1)
-				tmpModel.Sunday = make([]data.ScheduleResponse, 1)
-				tempResults[i] = tmpModel
-			}
-			result.Data = tempResults
 
 			return &struct {
 				Body data.ScheduleWeeklyViewResponseList

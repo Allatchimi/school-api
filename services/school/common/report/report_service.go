@@ -20,22 +20,23 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "report"
 const DEFAULT_ERROR_MESSAGE = "interact with report model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.ReportEntryRequest) (result *model.ReportEntry, errCode int, err error) {
+func (service *Service) Create(ctxData *types.ContextData, request *data.ReportEntryRequest) (result *model.ReportEntry, errCode int, err error) {
 	// TODO
 	return
 }
 
-func (service *Service) CreateGrade(inputJwtToken *types.JwtToken, request *data.ReportGradeRequest) (result *model.ReportGrade, errCode int, err error) {
+func (service *Service) CreateGrade(ctxData *types.ContextData, request *data.ReportGradeRequest) (result *model.ReportGrade, errCode int, err error) {
 	// Format
 	item := &model.ReportGrade{
 		SchoolID: request.SchoolID,
+
+		Name:        request.Name,
+		Description: request.Description,
 
 		MinimumResult:        request.MinimumResult,
 		MaximumResult:        request.MaximumResult,
 		IncludeMinimumResult: request.IncludeMinimumResult,
 		Correspondence:       request.Correspondence,
-		Grade:                request.Grade,
-		GradeDescription:     request.GradeDescription,
 	}
 
 	// Check unique
@@ -61,7 +62,7 @@ func (service *Service) CreateGrade(inputJwtToken *types.JwtToken, request *data
 	return
 }
 
-func (service *Service) CreateConfig(inputJwtToken *types.JwtToken, request *data.ReportConfigRequest) (result *model.ReportConfig, errCode int, err error) {
+func (service *Service) CreateConfig(ctxData *types.ContextData, request *data.ReportConfigRequest) (result *model.ReportConfig, errCode int, err error) {
 	// Format
 	item := &model.ReportConfig{
 		SchoolID: request.SchoolID,
@@ -93,17 +94,18 @@ func (service *Service) CreateConfig(inputJwtToken *types.JwtToken, request *dat
 	return
 }
 
-func (service *Service) UpdateGrade(inputJwtToken *types.JwtToken, id int64, request *data.ReportGradeRequest) (result *model.ReportGrade, errCode int, err error) {
+func (service *Service) UpdateGrade(ctxData *types.ContextData, id int64, request *data.ReportGradeRequest) (result *model.ReportGrade, errCode int, err error) {
 	// Format request
 	item := &model.ReportGrade{
 		SchoolID: request.SchoolID,
+
+		Name:        request.Name,
+		Description: request.Description,
 
 		MinimumResult:        request.MinimumResult,
 		MaximumResult:        request.MaximumResult,
 		IncludeMinimumResult: request.IncludeMinimumResult,
 		Correspondence:       request.Correspondence,
-		Grade:                request.Grade,
-		GradeDescription:     request.GradeDescription,
 	}
 
 	// Check if already exists
@@ -142,7 +144,7 @@ func (service *Service) UpdateGrade(inputJwtToken *types.JwtToken, id int64, req
 	return
 }
 
-func (service *Service) UpdateConfig(inputJwtToken *types.JwtToken, id int64, request *data.ReportConfigRequest) (result *model.ReportConfig, errCode int, err error) {
+func (service *Service) UpdateConfig(ctxData *types.ContextData, id int64, request *data.ReportConfigRequest) (result *model.ReportConfig, errCode int, err error) {
 	// Format request
 	item := &model.ReportConfig{
 		SchoolID: request.SchoolID,
@@ -187,7 +189,7 @@ func (service *Service) UpdateConfig(inputJwtToken *types.JwtToken, id int64, re
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) Delete(ctxData *types.ContextData, id int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteReportEntryByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -202,7 +204,7 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteGrade(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteGrade(ctxData *types.ContextData, id int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteReportGradeByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -217,7 +219,7 @@ func (service *Service) DeleteGrade(inputJwtToken *types.JwtToken, id int64) (af
 	return
 }
 
-func (service *Service) DeleteConfig(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteConfig(ctxData *types.ContextData, id int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteReportConfigByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -232,7 +234,7 @@ func (service *Service) DeleteConfig(inputJwtToken *types.JwtToken, id int64) (a
 	return
 }
 
-func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteMultiple(ctxData *types.ContextData, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultipleReportEntryByID(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -247,7 +249,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) DeleteMultipleGrade(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteMultipleGrade(ctxData *types.ContextData, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultipleReportGradeByID(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -262,7 +264,7 @@ func (service *Service) DeleteMultipleGrade(inputJwtToken *types.JwtToken, list 
 	return
 }
 
-func (service *Service) DeleteMultipleConfig(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteMultipleConfig(ctxData *types.ContextData, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultipleReportConfigByID(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -277,7 +279,7 @@ func (service *Service) DeleteMultipleConfig(inputJwtToken *types.JwtToken, list
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.ReportEntry, errCode int, err error) {
+func (service *Service) Get(ctxData *types.ContextData, id int64) (result *model.ReportEntry, errCode int, err error) {
 	result, err = service.Repository.GetReportEntryByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -292,7 +294,7 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetGrade(inputJwtToken *types.JwtToken, id int64) (result *model.ReportGrade, errCode int, err error) {
+func (service *Service) GetGrade(ctxData *types.ContextData, id int64) (result *model.ReportGrade, errCode int, err error) {
 	result, err = service.Repository.GetReportGradeByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -307,7 +309,7 @@ func (service *Service) GetGrade(inputJwtToken *types.JwtToken, id int64) (resul
 	return
 }
 
-func (service *Service) GetConfig(inputJwtToken *types.JwtToken, id int64) (result *model.ReportConfig, errCode int, err error) {
+func (service *Service) GetConfig(ctxData *types.ContextData, id int64) (result *model.ReportConfig, errCode int, err error) {
 	result, err = service.Repository.GetReportConfigByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -322,7 +324,7 @@ func (service *Service) GetConfig(inputJwtToken *types.JwtToken, id int64) (resu
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllReportEntryRequest) (result []model.ReportEntry, errCode int, err error) {
+func (service *Service) GetAll(ctxData *types.ContextData, filter *types.Filter, pagination *types.Pagination, request *data.GetAllReportEntryRequest) (result []model.ReportEntry, errCode int, err error) {
 	result, err = service.Repository.GetAllReportEntry(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -331,7 +333,7 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 	return
 }
 
-func (service *Service) GetAllGrade(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllReportGradeRequest) (result []model.ReportGrade, errCode int, err error) {
+func (service *Service) GetAllGrade(ctxData *types.ContextData, filter *types.Filter, pagination *types.Pagination, request *data.GetAllReportGradeRequest) (result []model.ReportGrade, errCode int, err error) {
 	result, err = service.Repository.GetAllReportGrade(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -340,7 +342,7 @@ func (service *Service) GetAllGrade(inputJwtToken *types.JwtToken, filter *types
 	return
 }
 
-func (service *Service) GetAllConfig(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllReportConfigRequest) (result []model.ReportConfig, errCode int, err error) {
+func (service *Service) GetAllConfig(ctxData *types.ContextData, filter *types.Filter, pagination *types.Pagination, request *data.GetAllReportConfigRequest) (result []model.ReportConfig, errCode int, err error) {
 	result, err = service.Repository.GetAllReportConfig(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError

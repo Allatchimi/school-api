@@ -155,7 +155,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-year-multiple",
 			Summary:     "Delete multiple year",
-			Description: "Delete multiple year by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple year by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -281,16 +281,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			// Generate items
-			tempResult := make([]data.YearResponse, 10)
-			for i := range result.Data {
-				tempModel := data.YearResponse{}
-				tempModel.ID = int64(i)
-
-				tempResult[i] = tempModel
-			}
-			result.Data = tempResult
 
 			return &struct {
 				Body data.YearResponseList

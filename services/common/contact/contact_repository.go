@@ -76,11 +76,11 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(contacts.id AS TEXT) = ? OR 
-			contacts.subject ILIKE ? OR 
-			contacts.email ILIKE ? OR 
-			contacts.message ILIKE ? OR 
-			schools.name ILIKE ? OR 
+			CAST(contacts.id AS TEXT) = ? OR
+			contacts.subject ILIKE ? OR
+			contacts.email ILIKE ? OR
+			contacts.message ILIKE ? OR
+			schools.name ILIKE ? OR
 			schools.type ILIKE ?
 		)`
 
@@ -94,8 +94,8 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT contacts.* 
-				FROM contacts 
+				`SELECT contacts.*
+				FROM contacts
 				LEFT JOIN schools ON contacts.school_id = schools.id`,
 				where,
 				pagination,

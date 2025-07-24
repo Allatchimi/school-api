@@ -60,7 +60,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.DirectorResponse }{Body: *result.ToDirectorResponse()}, nil
+			return &struct{ Body data.DirectorResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -103,7 +103,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.DirectorResponse }{Body: *result.ToDirectorResponse()}, nil
+			return &struct{ Body data.DirectorResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -155,7 +155,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-director-multiple",
 			Summary:     "Delete multiple director",
-			Description: "Delete multiple director by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple director by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -232,7 +232,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.DirectorResponse }{Body: *result.ToDirectorResponse()}, nil
+			return &struct{ Body data.DirectorResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 

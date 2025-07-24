@@ -47,8 +47,8 @@ func (item *ReportEntry) ToResponse() *data.ReportEntryResponse {
 	resp.Value = item.Value
 	resp.Notation = item.Notation
 
-	resp.Student = item.Student.ToStudentResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.Student = item.Student.ToResponse()
+	resp.ClassSubject = item.ClassSubject.ToResponse()
 	resp.Sequence = item.Sequence.ToResponse()
 	resp.Unit = item.Unit.ToResponse()
 
@@ -68,8 +68,8 @@ func (item *ReportEntry) ToPublicResponse() *data.ReportEntryPublicResponse {
 	resp.Value = item.Value
 	resp.Notation = item.Notation
 
-	resp.Student = item.Student.ToStudentResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.Student = item.Student.ToResponse()
+	resp.ClassSubject = item.ClassSubject.ToResponse()
 	resp.Sequence = item.Sequence.ToResponse()
 	resp.Unit = item.Unit.ToResponse()
 	return resp

@@ -60,7 +60,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.TeacherResponse }{Body: *result.ToTeacherResponse()}, nil
+			return &struct{ Body data.TeacherResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -106,7 +106,7 @@ func RegisterEndpoints(
 			}
 			return &struct {
 				Body data.TeacherClassSubjectUnitResponse
-			}{Body: *result.ToTeacherClassSubjectUnitResponse()}, nil
+			}{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -149,7 +149,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.TeacherResponse }{Body: *result.ToTeacherResponse()}, nil
+			return &struct{ Body data.TeacherResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -196,7 +196,7 @@ func RegisterEndpoints(
 			}
 			return &struct {
 				Body data.TeacherClassSubjectUnitResponse
-			}{Body: *result.ToTeacherClassSubjectUnitResponse()}, nil
+			}{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -290,7 +290,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-teacher-multiple",
 			Summary:     "Delete multiple teacher",
-			Description: "Delete multiple teacher by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple teacher by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -367,7 +367,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.TeacherResponse }{Body: *result.ToTeacherResponse()}, nil
+			return &struct{ Body data.TeacherResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -416,7 +416,7 @@ func RegisterEndpoints(
 			}
 			return &struct {
 				Body data.TeacherClassSubjectUnitResponse
-			}{Body: *result.ToTeacherClassSubjectUnitResponse()}, nil
+			}{Body: *result.ToResponse()}, nil
 		},
 	)
 

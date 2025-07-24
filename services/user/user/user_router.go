@@ -152,7 +152,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-user-multiple",
 			Summary:     "Delete multiple user",
-			Description: "Delete multiple user by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple user by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,

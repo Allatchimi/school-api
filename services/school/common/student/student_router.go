@@ -60,7 +60,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.StudentResponse }{Body: *result.ToStudentResponse()}, nil
+			return &struct{ Body data.StudentResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -102,59 +102,28 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.StudentEnrollResponse }{Body: *result.ToStudentEnrollResponse()}, nil
+			return &struct{ Body data.StudentEnrollResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Create student enroll anonym
+	// Create student pre enroll
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID:   "post-student-enroll-anonym",
-			Summary:       "Create student enroll anonym",
-			Description:   "Create new student enroll anonym and return created object.",
-			Method:        http.MethodPost,
-			Path:          fmt.Sprintf("%s/enrolls/anonyms", endpointConfig.Group),
-			Tags:          endpointConfig.Tag,
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				Body data.StudentEnrollAnonymRequest
-			},
-		) (*struct{ Body data.StudentEnrollResponse }, error) {
-			result, errCode, err := controller.CreateStudentEnrollAnonym(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct{ Body data.StudentEnrollResponse }{Body: *result.ToStudentEnrollResponse()}, nil
-		},
-	)
-
-	// Create student level domain class
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "post-student-level-domain-class",
-			Summary:     "Create student level domain class",
-			Description: "Create new student level domain class and return created object.",
+			OperationID: "post-student--pre-enroll",
+			Summary:     "Create student pre enroll",
+			Description: "Create new student pre enroll and return created object.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/leveldomainclasses", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/enrolls/pre", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
 					constants.SecuritySchemeSchoolToken: {},
 					constants.SecuritySchemeSchoolID:    {},
 					constants.SecuritySchemeBearerToken: {
-						fmt.Sprintf("%s,%s",
-							constants.FeatureAdmin,
-							constants.FeatureDirector,
+						fmt.Sprintf("%s",
+							constants.FeatureDefault,
 						), // Feature
-						tableName,                  // Table name
-						constants.PermissionCreate, // Operation
 					},
 				},
 			},
@@ -165,18 +134,14 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				Body data.StudentEnrollRequest
+				Body data.StudentPreEnrollRequest
 			},
-		) (*struct {
-			Body data.StudentEnrollResponse
-		}, error) {
-			result, errCode, err := controller.CreateStudentEnroll(&ctx, input)
+		) (*struct{ Body data.StudentPreEnrollResponse }, error) {
+			result, errCode, err := controller.CreateStudentPreEnroll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct {
-				Body data.StudentEnrollResponse
-			}{Body: *result.ToStudentEnrollResponse()}, nil
+			return &struct{ Body data.StudentPreEnrollResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -219,19 +184,19 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.StudentResponse }{Body: *result.ToStudentResponse()}, nil
+			return &struct{ Body data.StudentResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Update student level domain class with id
+	// Update student enroll with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "update-student-level-domain-class",
-			Summary:     "Update student level domain class",
-			Description: "Update existing student level domain class with matching id and return the new object.",
+			OperationID: "update-student-enroll",
+			Summary:     "Update student enroll",
+			Description: "Update existing student enroll with matching id and return the new object.",
 			Method:      http.MethodPut,
-			Path:        fmt.Sprintf("%s/leveldomainclasses/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/enrolls/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -266,7 +231,98 @@ func RegisterEndpoints(
 			}
 			return &struct {
 				Body data.StudentEnrollResponse
-			}{Body: *result.ToStudentEnrollResponse()}, nil
+			}{Body: *result.ToResponse()}, nil
+		},
+	)
+
+	// Update student pre enroll with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "update-student-pre-enroll",
+			Summary:     "Update student pre enroll",
+			Description: "Update existing student pre enroll with matching id and return the new object.",
+			Method:      http.MethodPut,
+			Path:        fmt.Sprintf("%s/enrolls/pre/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s",
+							constants.FeatureDefault,
+						), // Feature
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.StudentPreEnrollID
+				Body data.StudentPreEnrollRequest
+			},
+		) (*struct {
+			Body data.StudentPreEnrollResponse
+		}, error) {
+			result, errCode, err := controller.UpdateStudentPreEnroll(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct {
+				Body data.StudentPreEnrollResponse
+			}{Body: *result.ToResponse()}, nil
+		},
+	)
+
+	// Update student pre enroll status with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "update-student-pre-enroll-status",
+			Summary:     "Update student pre enroll status",
+			Description: "Update existing student pre enroll status with matching id and return the new object.",
+			Method:      http.MethodPut,
+			Path:        fmt.Sprintf("%s/enrolls/pre/{id}/status", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.StudentPreEnrollID
+				Body data.StudentPreEnrollStatusRequest
+			},
+		) (*struct {
+			Body data.StudentPreEnrollResponse
+		}, error) {
+			result, errCode, err := controller.UpdateStudentPreEnrollStatus(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct {
+				Body data.StudentPreEnrollResponse
+			}{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -312,15 +368,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete student level domain class with id
+	// Delete student enroll with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-student-level-domain-class",
-			Summary:     "Delete student level domain class",
-			Description: "Delete existing student level domain class with matching id and return affected rows in database.",
+			OperationID: "delete-student-enroll",
+			Summary:     "Delete student enroll",
+			Description: "Delete existing student enroll with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/leveldomainclasses/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/enrolls/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -354,13 +410,55 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Delete student pre enroll with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "delete-student-pre-enroll",
+			Summary:     "Delete student pre enroll",
+			Description: "Delete existing student pre enroll with matching id and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/enrolls/pre/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.StudentPreEnrollID
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteStudentPreEnroll(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
 	// Delete multiple student
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "delete-student-multiple",
 			Summary:     "Delete multiple student",
-			Description: "Delete multiple student by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple student by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -389,6 +487,90 @@ func RegisterEndpoints(
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.DeleteMultiple(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
+	// Delete multiple student enroll
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "delete-student-enroll-multiple",
+			Summary:     "Delete multiple student enroll",
+			Description: "Delete multiple student enroll by providing a list of IDs and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/enrolls/multiple/delete", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body types.DeleteMultipleRequest
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteMultipleStudentEnroll(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
+	// Delete multiple student pre enroll
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "delete-student-pre-enroll-multiple",
+			Summary:     "Delete multiple student pre enroll",
+			Description: "Delete multiple student pre enroll by providing a list of IDs and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/enrolls/pre/multiple/delete", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body types.DeleteMultipleRequest
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteMultipleStudentPreEnroll(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -437,19 +619,19 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.StudentResponse }{Body: *result.ToStudentResponse()}, nil
+			return &struct{ Body data.StudentResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Get student level domain class by id
+	// Get student enroll by id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-student-level-domain-class-id",
-			Summary:     "Get student level domain class by id",
-			Description: "Return one student level domain class with matching id",
+			OperationID: "get-student-enroll-id",
+			Summary:     "Get student enroll by id",
+			Description: "Return one student enroll with matching id",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/leveldomainclasses/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/enrolls/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -486,7 +668,54 @@ func RegisterEndpoints(
 			}
 			return &struct {
 				Body data.StudentEnrollResponse
-			}{Body: *result.ToStudentEnrollResponse()}, nil
+			}{Body: *result.ToResponse()}, nil
+		},
+	)
+
+	// Get student pre enroll by id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-student-pre-enroll-id",
+			Summary:     "Get student pre enroll by id",
+			Description: "Return one student pre enroll with matching id",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/enrolls/pre/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureDefault,
+						), // Feature
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.StudentPreEnrollID
+			},
+		) (*struct {
+			Body data.StudentPreEnrollResponse
+		}, error) {
+			result, errCode, err := controller.GetStudentPreEnroll(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct {
+				Body data.StudentPreEnrollResponse
+			}{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -517,41 +746,6 @@ func RegisterEndpoints(
 					},
 				},
 			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				types.Filter
-				types.PaginationRequest
-				data.GetAllRequest
-			},
-		) (*struct {
-			Body data.StudentResponseList
-		}, error) {
-			result, errCode, err := controller.GetAll(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-
-			return &struct {
-				Body data.StudentResponseList
-			}{Body: *result}, nil
-		},
-	)
-
-	// Get all student public
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID:   "get-student-list-public",
-			Summary:       "Get all student public",
-			Description:   "Get all student public with support for search, filter and pagination",
-			Method:        http.MethodGet,
-			Path:          fmt.Sprintf("%s/public", endpointConfig.Group),
-			Tags:          endpointConfig.Tag,
 			MaxBodyBytes:  constants.DefaultBodySize,
 			DefaultStatus: http.StatusOK,
 			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
@@ -625,6 +819,91 @@ func RegisterEndpoints(
 
 			return &struct {
 				Body data.StudentEnrollResponseList
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get all student pre enroll
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-student-pre-enroll-list",
+			Summary:     "Get all student pre enroll",
+			Description: "Get all student pre enroll with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/enrolls/pre", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureDefault,
+						), // Feature
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllStudentPreEnrollRequest
+			},
+		) (*struct {
+			Body data.StudentPreEnrollResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllStudentPreEnroll(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+
+			return &struct {
+				Body data.StudentPreEnrollResponseList
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get all student public
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID:   "get-student-list-public",
+			Summary:       "Get all student public",
+			Description:   "Get all student public with support for search, filter and pagination",
+			Method:        http.MethodGet,
+			Path:          fmt.Sprintf("%s/public", endpointConfig.Group),
+			Tags:          endpointConfig.Tag,
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllRequest
+			},
+		) (*struct {
+			Body data.StudentResponseList
+		}, error) {
+			result, errCode, err := controller.GetAll(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+
+			return &struct {
+				Body data.StudentResponseList
 			}{Body: *result}, nil
 		},
 	)

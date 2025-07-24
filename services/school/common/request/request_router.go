@@ -211,7 +211,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-request-multiple",
 			Summary:     "Delete multiple request",
-			Description: "Delete multiple request by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple request by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -340,15 +340,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			tempResults := make([]data.RequestResponse, 10)
-			for i := range tempResults {
-				tmpModel := data.RequestResponse{}
-				tmpModel.ID = int64(i)
-
-				tempResults[i] = tmpModel
-			}
-			result.Data = tempResults
 
 			if result == nil {
 				return &struct{ Body data.RequestResponseList }{Body: data.RequestResponseList{}}, nil

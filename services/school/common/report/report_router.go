@@ -10,7 +10,6 @@ import (
 	"api/common/constants"
 	"api/common/types"
 	"api/services/school/common/report/data"
-	"api/services/school/common/report/model"
 )
 
 func RegisterEndpoints(
@@ -103,7 +102,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ReportGradeResponse }{Body: *result.ToReportGradeResponse()}, nil
+			return &struct{ Body data.ReportGradeResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -149,7 +148,7 @@ func RegisterEndpoints(
 			}
 			return &struct {
 				Body data.ReportConfigResponse
-			}{Body: *result.ToReportConfigResponse()}, nil
+			}{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -192,7 +191,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ReportGradeResponse }{Body: *result.ToReportGradeResponse()}, nil
+			return &struct{ Body data.ReportGradeResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -239,7 +238,7 @@ func RegisterEndpoints(
 			}
 			return &struct {
 				Body data.ReportConfigResponse
-			}{Body: *result.ToReportConfigResponse()}, nil
+			}{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -375,7 +374,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-report-multiple",
 			Summary:     "Delete multiple report",
-			Description: "Delete multiple report by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple report by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -417,7 +416,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-report-grade-multiple",
 			Summary:     "Delete multiple report grade",
-			Description: "Delete multiple report grade by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple report grade by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/grade/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -459,7 +458,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-report-config-multiple",
 			Summary:     "Delete multiple report config",
-			Description: "Delete multiple report config by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple report config by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/config/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
@@ -581,7 +580,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ReportGradeResponse }{Body: *result.ToReportGradeResponse()}, nil
+			return &struct{ Body data.ReportGradeResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -630,7 +629,7 @@ func RegisterEndpoints(
 			}
 			return &struct {
 				Body data.ReportConfigResponse
-			}{Body: *result.ToReportConfigResponse()}, nil
+			}{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -679,14 +678,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			tempReportEntrys := make([]model.ReportEntry, 10)
-			for i := range tempReportEntrys {
-				tmpModel := model.ReportEntry{}
-				tmpModel.ID = int64(i)
-				tempReportEntrys[i] = tmpModel
-			}
-			result.Data = model.ToReportEntryResponseList(tempReportEntrys)
 
 			return &struct {
 				Body data.ReportEntryResponseList
@@ -740,14 +731,6 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			tempReportEntrys := make([]model.ReportGrade, 10)
-			for i := range tempReportEntrys {
-				tmpModel := model.ReportGrade{}
-				tmpModel.ID = int64(i)
-				tempReportEntrys[i] = tmpModel
-			}
-			result.Data = model.ToReportGradeResponseList(tempReportEntrys)
-
 			return &struct {
 				Body data.ReportGradeResponseList
 			}{Body: *result}, nil
@@ -799,14 +782,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			tempReportEntrys := make([]model.ReportConfig, 10)
-			for i := range tempReportEntrys {
-				tmpModel := model.ReportConfig{}
-				tmpModel.ID = int64(i)
-				tempReportEntrys[i] = tmpModel
-			}
-			result.Data = model.ToReportConfigResponseList(tempReportEntrys)
 
 			return &struct {
 				Body data.ReportConfigResponseList

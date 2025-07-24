@@ -23,7 +23,7 @@ func (repository *Repository) Create(data *model.Schedule) (*model.Schedule, err
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) CreateScheduleGeneric(data *model.ScheduleGeneric) (*model.ScheduleGeneric, error) {
+func (repository *Repository) CreateScheduleCommon(data *model.ScheduleCommon) (*model.ScheduleCommon, error) {
 	result := *data
 	return &result, repository.Db.Create(&result).Error
 }
@@ -35,7 +35,7 @@ func (repository *Repository) Update(id int64, data *model.Schedule) (*model.Sch
 	}
 
 	result := &model.Schedule{}
-	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Model(&model.Schedule{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"school_id":        data.SchoolID,
 			"year_id":          data.YearID,
@@ -51,17 +51,17 @@ func (repository *Repository) Update(id int64, data *model.Schedule) (*model.Sch
 			"is_valid":        data.IsValid,
 			"invalid_date":    data.InvalidDate,
 		},
-	).Error
+	).Find(result).Error
 }
 
-func (repository *Repository) UpdateScheduleGeneric(id int64, data *model.ScheduleGeneric) (*model.ScheduleGeneric, error) {
-	tempSchedule, err := repository.GetScheduleGenericByID(id)
+func (repository *Repository) UpdateScheduleCommon(id int64, data *model.ScheduleCommon) (*model.ScheduleCommon, error) {
+	tempSchedule, err := repository.GetScheduleCommonByID(id)
 	if err != nil || tempSchedule == nil || tempSchedule.ID != id {
 		return nil, err
 	}
 
-	result := &model.ScheduleGeneric{}
-	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
+	result := &model.ScheduleCommon{}
+	return result, repository.Db.Model(&model.ScheduleCommon{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"school_id": data.SchoolID,
 			"year_id":   data.YearID,
@@ -75,7 +75,7 @@ func (repository *Repository) UpdateScheduleGeneric(id int64, data *model.Schedu
 			"is_valid":        data.IsValid,
 			"invalid_date":    data.InvalidDate,
 		},
-	).Error
+	).Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -83,8 +83,8 @@ func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteScheduleGenericByID(id int64) (int64, error) {
-	result := repository.Db.Where("id = ?", id).Delete(&model.ScheduleGeneric{})
+func (repository *Repository) DeleteScheduleCommonByID(id int64) (int64, error) {
+	result := repository.Db.Where("id = ?", id).Delete(&model.ScheduleCommon{})
 	return result.RowsAffected, result.Error
 }
 
@@ -93,9 +93,9 @@ func (repository *Repository) GetByID(id int64) (*model.Schedule, error) {
 	return result, repository.Db.Model(&model.Schedule{}).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetScheduleGenericByID(id int64) (*model.ScheduleGeneric, error) {
-	result := &model.ScheduleGeneric{}
-	return result, repository.Db.Model(&model.ScheduleGeneric{}).Where("id = ?", id).Limit(1).Find(result).Error
+func (repository *Repository) GetScheduleCommonByID(id int64) (*model.ScheduleCommon, error) {
+	result := &model.ScheduleCommon{}
+	return result, repository.Db.Model(&model.ScheduleCommon{}).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.Schedule) (*model.Schedule, error) {
@@ -129,9 +129,9 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.Schedule, item2 
 	return false
 }
 
-func (repository *Repository) GetScheduleGenericUniqueObject(item *model.ScheduleGeneric) (*model.ScheduleGeneric, error) {
-	result := &model.ScheduleGeneric{}
-	return result, repository.Db.Preload(clause.Associations).Where(&model.ScheduleGeneric{
+func (repository *Repository) GetScheduleCommonUniqueObject(item *model.ScheduleCommon) (*model.ScheduleCommon, error) {
+	result := &model.ScheduleCommon{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.ScheduleCommon{
 		SchoolID:     item.SchoolID,
 		YearID:       item.YearID,
 		DayOfTheWeek: item.DayOfTheWeek,
@@ -142,7 +142,7 @@ func (repository *Repository) GetScheduleGenericUniqueObject(item *model.Schedul
 	}).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) AreScheduleGenericSameUniqueObjects(item1 *model.ScheduleGeneric, item2 *model.ScheduleGeneric) bool {
+func (repository *Repository) AreScheduleCommonSameUniqueObjects(item1 *model.ScheduleCommon, item2 *model.ScheduleCommon) bool {
 	if item1 != nil && item2 != nil &&
 		(item1.SchoolID == item2.SchoolID &&
 			item1.YearID == item2.YearID &&
@@ -182,6 +182,10 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "schedules.unit_id = ?")
 			args = append(args, request.UnitID)
 		}
+		if len(request.Type) > 0 {
+			where = helpers.AppendWhereClause(where, "schedules.type = ?")
+			args = append(args, request.Type)
+		}
 	}
 
 	// Handle search filter securely
@@ -191,16 +195,25 @@ func (repository *Repository) GetAll(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(schedules.id AS TEXT) = ? OR 
-			schedules.type ILIKE ? OR 
-			schedules.day_of_the_week ILIKE ? OR 
-			schedules.repeat_type ILIKE ? OR 
-			schedules.start_time ILIKE ? OR 
-			schedules.end_time ILIKE ?
+			CAST(schedules.id AS TEXT) = ? OR
+			schedules.type ILIKE ? OR
+			schedules.day_of_the_week ILIKE ? OR
+			schedules.repeat_type ILIKE ? OR
+			schedules.start_time ILIKE ? OR
+			schedules.end_time ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			years.name ILIKE ? OR
+			highschool_classes.name ILIKE ? OR
+			highschool_classes.description ILIKE ? OR
+			highschool_subjects.name ILIKE ? OR
+			highschool_subjects.description ILIKE ? OR
+			university_units.name ILIKE ? OR
+			university_units.description ILIKE ? 
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
-		args = append(args, search, like, like, like, like, like)
+		args = append(args, search, like, like, like, like, like, like, like, like, like, like, like, like, like, like)
 	}
 
 	// Perform query with preloads and custom pagination scope
@@ -215,12 +228,14 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT schedules.* 
-				FROM schedules 
-				LEFT JOIN schools ON schedules.school_id = schools.id 
-				LEFT JOIN years ON schedules.year_id = years.id 
-				LEFT JOIN highschool_class_subjects ON schedules.class_subject_id = highschool_class_subjects.id 
-				LEFT JOIN university_units ON schedules.unit_id = university_units.id`,
+				`SELECT schedules.*
+				FROM schedules
+				LEFT JOIN schools ON schedules.school_id = schools.id
+				LEFT JOIN years ON schedules.year_id = years.id
+				LEFT JOIN highschool_class_subjects ON schedules.class_subject_id = highschool_class_subjects.id
+				LEFT JOIN university_units ON schedules.unit_id = university_units.id
+				LEFT JOIN highschool_classes ON highschool_class_subjects.class_id = highschool_classes.id
+				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id `,
 				where,
 				pagination,
 				filter,
@@ -231,22 +246,22 @@ func (repository *Repository) GetAll(
 	return
 }
 
-func (repository *Repository) GetAllScheduleGeneric(
+func (repository *Repository) GetAllScheduleCommon(
 	filter *types.Filter, pagination *types.Pagination,
 	request *data.GetAllRequest,
-) (result []model.ScheduleGeneric, err error) {
-	result = make([]model.ScheduleGeneric, 0)
+) (result []model.ScheduleCommon, err error) {
+	result = make([]model.ScheduleCommon, 0)
 
 	// Build secure WHERE conditions
 	where := ""
 	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, "schedule_generics.school_id = ?")
+			where = helpers.AppendWhereClause(where, "schedules.school_id = ?")
 			args = append(args, request.SchoolID)
 		}
 		if request.YearID > 0 {
-			where = helpers.AppendWhereClause(where, "schedule_generics.year_id = ?")
+			where = helpers.AppendWhereClause(where, "schedules.year_id = ?")
 			args = append(args, request.YearID)
 		}
 	}
@@ -258,16 +273,19 @@ func (repository *Repository) GetAllScheduleGeneric(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(schedule_generics.id AS TEXT) = ? OR 
-			schedule_generics.type ILIKE ? OR 
-			schedule_generics.day_of_the_week ILIKE ? OR 
-			schedule_generics.repeat_type ILIKE ? OR 
-			schedule_generics.start_time ILIKE ? OR 
-			schedule_generics.end_time ILIKE ?
+			CAST(schedules.id AS TEXT) = ? OR
+			schedules.type ILIKE ? OR
+			schedules.day_of_the_week ILIKE ? OR
+			schedules.repeat_type ILIKE ? OR
+			schedules.start_time ILIKE ? OR
+			schedules.end_time ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			years.name ILIKE ?
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
-		args = append(args, search, like, like, like, like, like)
+		args = append(args, search, like, like, like, like, like, like, like, like)
 	}
 
 	// Perform query with preloads and custom pagination scope
@@ -276,10 +294,10 @@ func (repository *Repository) GetAllScheduleGeneric(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT schedule_generics.* 
-				FROM schedule_generics 
-				LEFT JOIN schools ON schedule_generics.school_id = schools.id 
-				LEFT JOIN years ON schedule_generics.year_id = years.id`,
+				`SELECT schedules.*
+				FROM schedule_commons schedules
+				LEFT JOIN schools ON schedules.school_id = schools.id
+				LEFT JOIN years ON schedules.year_id = years.id`,
 				where,
 				pagination,
 				filter,

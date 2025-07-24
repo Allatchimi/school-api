@@ -103,6 +103,14 @@ func (repository *Repository) GetByID(id int64) (*model.Parent, error) {
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
 }
 
+func (repository *Repository) GetByUserID(userID int64) (*model.Parent, error) {
+	result := &model.Parent{}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("User.Info").
+		Where("user_id = ?", userID).Limit(1).Find(result).Error
+}
+
 func (repository *Repository) GetParentStudentByID(id int64) (*model.ParentStudent, error) {
 	result := &model.ParentStudent{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
@@ -142,11 +150,11 @@ func (repository *Repository) GetAll(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(parents.id AS TEXT) = ? OR 
-			schools.name ILIKE ? OR 
-			schools.type ILIKE ? OR 
-			users.email ILIKE ? OR 
-			CAST(users.phone_number AS TEXT) ILIKE ? 
+			CAST(parents.id AS TEXT) = ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			users.email ILIKE ? OR
+			CAST(users.phone_number AS TEXT) ILIKE ?
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
@@ -161,9 +169,9 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT parents.* 
-				FROM parents 
-				LEFT JOIN schools ON parents.school_id = schools.id 
+				`SELECT parents.*
+				FROM parents
+				LEFT JOIN schools ON parents.school_id = schools.id
 				LEFT JOIN users ON parents.user_id = users.id`,
 				where,
 				pagination,
@@ -219,11 +227,11 @@ func (repository *Repository) GetAllParentStudent(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(directors.id AS TEXT) = ? OR 
-			students.uid ILIKE ? OR 
-			schools.name ILIKE ? OR 
-			schools.type ILIKE ? OR 
-			years.name ILIKE ? 
+			CAST(directors.id AS TEXT) = ? OR
+			students.uid ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			years.name ILIKE ?
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
@@ -240,14 +248,14 @@ func (repository *Repository) GetAllParentStudent(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT parent_students.* 
-				FROM parent_students 
-				LEFT JOIN parents ON parent_students.parent_id = parents.id 
-				LEFT JOIN students ON parent_students.student_id = students.id 
-				LEFT JOIN schools ON students.school_id = schools.id 
-				LEFT JOIN student_enrolls ON students.id = student_enrolls.student_id 
-				LEFT JOIN years ON student_enrolls.year_id = years.id 
-				LEFT JOIN highschool_class_subjects ON student_enrolls.class_subject_id = highschool_class_subjects.id 
+				`SELECT parent_students.*
+				FROM parent_students
+				LEFT JOIN parents ON parent_students.parent_id = parents.id
+				LEFT JOIN students ON parent_students.student_id = students.id
+				LEFT JOIN schools ON students.school_id = schools.id
+				LEFT JOIN student_enrolls ON students.id = student_enrolls.student_id
+				LEFT JOIN years ON student_enrolls.year_id = years.id
+				LEFT JOIN highschool_class_subjects ON student_enrolls.class_subject_id = highschool_class_subjects.id
 				LEFT JOIN university_units ON student_enrolls.unit_id = university_units.id`,
 				where,
 				pagination,

@@ -31,7 +31,7 @@ func (item *MeetingRoom) ToResponse() *data.MeetingRoomResponse {
 	resp.ApiRoomID = item.ApiRoomID
 
 	resp.School = item.School.ToPublicResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.ClassSubject = item.ClassSubject.ToResponse()
 	resp.Unit = item.Unit.ToResponse()
 
 	resp.ID = item.ID

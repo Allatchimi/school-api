@@ -556,7 +556,7 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	return
 }
 
-func (service *Service) ForgotPasswordInit(jwtToken *types.JwtToken, input *data.ForgotPasswordInitRequest) (token string, errCode int, err error) {
+func (service *Service) ForgotPasswordInit(ctxData *types.ContextData, input *data.ForgotPasswordInitRequest) (token string, errCode int, err error) {
 	// Check input
 	var errMsg string
 	var isInputValid bool
@@ -575,7 +575,7 @@ func (service *Service) ForgotPasswordInit(jwtToken *types.JwtToken, input *data
 	var userFound *model.User
 	if utils.IsEmailValid(input.Email) {
 		errMsg = "User with this email"
-		userFound, err = service.UserService.Repository.GetByEmailSchoolID(input.Email, jwtToken.SchoolID)
+		userFound, err = service.UserService.Repository.GetByEmailSchoolID(input.Email, ctxData.Jwt.SchoolID)
 	}
 	if err != nil || userFound.ID <= 0 {
 		errCode = http.StatusNotFound
@@ -783,9 +783,9 @@ func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewP
 	return
 }
 
-func (service *Service) Logout(jwtToken *types.JwtToken, bearerToken string) (errCode int, err error) {
+func (service *Service) Logout(ctxData *types.ContextData, bearerToken string) (errCode int, err error) {
 	// Invalidate the token
-	sessions, err := config.GetRedisStringList(securityUtil.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
+	sessions, err := config.GetRedisStringList(securityUtil.GetJWTCachedKey(ctxData.Jwt.UserID, ctxData.Jwt.Issuer))
 	if err != nil {
 		errCode = http.StatusUnauthorized
 		err = constants.Http401InvalidTokenErrorMessage()
@@ -797,7 +797,7 @@ func (service *Service) Logout(jwtToken *types.JwtToken, bearerToken string) (er
 		err = constants.Http401InvalidTokenErrorMessage()
 		return
 	}
-	err = config.RemoveFromRedisStringList(fmt.Sprintf("%d", jwtToken.UserID), int64(tokenIndex))
+	err = config.RemoveFromRedisStringList(fmt.Sprintf("%d", ctxData.Jwt.UserID), int64(tokenIndex))
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

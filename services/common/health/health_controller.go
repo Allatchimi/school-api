@@ -21,7 +21,7 @@ func (controller *Controller) HealthLive(
 		data.HealthRequest
 	},
 ) (result bool, errCode int, err error) {
-	health, errCode, err := controller.Service.HealthLive(httpHelper.GetJwtContext(ctx))
+	health, errCode, err := controller.Service.HealthLive(httpHelper.GetContextData(ctx))
 	if err != nil {
 		return
 	}
@@ -35,7 +35,7 @@ func (controller *Controller) HealthDepencencies(
 		data.HealthRequest
 	},
 ) (result bool, errCode int, err error) {
-	health, errCode, err := controller.Service.HealthDepencencies(httpHelper.GetJwtContext(ctx))
+	health, errCode, err := controller.Service.HealthDepencencies(httpHelper.GetContextData(ctx))
 	if err != nil {
 		return
 	}

@@ -37,13 +37,13 @@ type ReportGradeResponse struct {
 type ReportGradePublicResponse struct {
 	School *dataSchool.SchoolResponse `json:"school" required:"false" doc:"School"`
 
+	Name                 string  `json:"name" required:"false" doc:"Name"`
+	Description          string  `json:"description" required:"false" doc:"Description"`
 	MinimumResult        float64 `json:"minimumResult" required:"false" doc:"Minimum result"`
 	MaximumResult        float64 `json:"maximumResult" required:"false" doc:"Maximum result"`
 	IncludeMinimumResult bool    `json:"includeMinimumResult" required:"false" doc:"Include minimum result"`
 	IncludeMaximumResult bool    `json:"includeMaximumResult" required:"false" doc:"Include maximum result"`
 	Correspondence       float64 `json:"correspondence" required:"false" doc:"Correspondence"`
-	Grade                string  `json:"grade" required:"false" doc:"Grade"`
-	GradeDescription     string  `json:"gradeDescription" required:"false" doc:"Grade description"`
 }
 
 type ReportConfigResponse struct {

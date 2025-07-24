@@ -20,7 +20,7 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "exam/type"
 const DEFAULT_ERROR_MESSAGE = "interact with exam/type model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.ExamRequest) (result *model.Exam, errCode int, err error) {
+func (service *Service) Create(ctxData *types.ContextData, request *data.ExamRequest) (result *model.Exam, errCode int, err error) {
 	// Format request
 	item := &model.Exam{
 		SchoolID:       request.SchoolID,
@@ -64,7 +64,7 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Exam
 	return
 }
 
-func (service *Service) CreateType(inputJwtToken *types.JwtToken, request *data.ExamTypeRequest) (result *model.ExamType, errCode int, err error) {
+func (service *Service) CreateType(ctxData *types.ContextData, request *data.ExamTypeRequest) (result *model.ExamType, errCode int, err error) {
 	// Format request
 	item := &model.ExamType{
 		SchoolID:    request.SchoolID,
@@ -95,7 +95,7 @@ func (service *Service) CreateType(inputJwtToken *types.JwtToken, request *data.
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.ExamRequest) (result *model.Exam, errCode int, err error) {
+func (service *Service) Update(ctxData *types.ContextData, id int64, request *data.ExamRequest) (result *model.Exam, errCode int, err error) {
 	// Check if exam already exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -152,7 +152,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	return
 }
 
-func (service *Service) UpdateType(inputJwtToken *types.JwtToken, id int64, request *data.ExamTypeRequest) (result *model.ExamType, errCode int, err error) {
+func (service *Service) UpdateType(ctxData *types.ContextData, id int64, request *data.ExamTypeRequest) (result *model.ExamType, errCode int, err error) {
 	// Check if exam already exists
 	foundItem, err := service.Repository.GetTypeByID(id)
 	if err != nil {
@@ -196,7 +196,7 @@ func (service *Service) UpdateType(inputJwtToken *types.JwtToken, id int64, requ
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) Delete(ctxData *types.ContextData, id int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -211,7 +211,7 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteType(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteType(ctxData *types.ContextData, id int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteTypeByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -226,7 +226,7 @@ func (service *Service) DeleteType(inputJwtToken *types.JwtToken, id int64) (aff
 	return
 }
 
-func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteMultiple(ctxData *types.ContextData, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultipleByID(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -241,7 +241,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, examID int64) (result *model.Exam, errCode int, err error) {
+func (service *Service) Get(ctxData *types.ContextData, examID int64) (result *model.Exam, errCode int, err error) {
 	result, err = service.Repository.GetByID(examID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -256,7 +256,7 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, examID int64) (result
 	return
 }
 
-func (service *Service) GetType(inputJwtToken *types.JwtToken, examID int64) (result *model.ExamType, errCode int, err error) {
+func (service *Service) GetType(ctxData *types.ContextData, examID int64) (result *model.ExamType, errCode int, err error) {
 	result, err = service.Repository.GetTypeByID(examID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -271,7 +271,7 @@ func (service *Service) GetType(inputJwtToken *types.JwtToken, examID int64) (re
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Exam, errCode int, err error) {
+func (service *Service) GetAll(ctxData *types.ContextData, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Exam, errCode int, err error) {
 	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -280,7 +280,7 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 	return
 }
 
-func (service *Service) GetAllExamType(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllExamTypeRequest) (result []model.ExamType, errCode int, err error) {
+func (service *Service) GetAllExamType(ctxData *types.ContextData, filter *types.Filter, pagination *types.Pagination, request *data.GetAllExamTypeRequest) (result []model.ExamType, errCode int, err error) {
 	result, err = service.Repository.GetAllExamType(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError

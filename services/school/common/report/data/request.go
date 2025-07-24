@@ -24,12 +24,12 @@ type ReportEntryRequest struct {
 type ReportGradeRequest struct {
 	SchoolID int64 `json:"schoolID" required:"true" doc:"School id"`
 
+	Name                 string  `json:"name" required:"true" doc:"Name"`
+	Description          string  `json:"description" required:"false" doc:"Description"`
 	MinimumResult        float64 `json:"minimumResult" required:"true" doc:"Minimum result"`
 	MaximumResult        float64 `json:"maximumResult" required:"true" doc:"Maximum result"`
 	IncludeMinimumResult bool    `json:"includeMinimumResult" required:"true" doc:"Include minimum result"`
 	Correspondence       float64 `json:"correspondence" required:"true" doc:"Correspondence"`
-	Grade                string  `json:"grade" required:"false" doc:"Grade"`
-	GradeDescription     string  `json:"gradeDescription" required:"false" doc:"Grade description"`
 }
 
 type ReportConfigRequest struct {

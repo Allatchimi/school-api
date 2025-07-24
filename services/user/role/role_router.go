@@ -146,7 +146,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-role-multiple",
 			Summary:     "Delete multiple role",
-			Description: "Delete multiple role by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple role by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,

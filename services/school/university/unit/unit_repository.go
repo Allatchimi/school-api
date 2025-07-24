@@ -1,11 +1,14 @@
 package unit
 
 import (
+	"fmt"
+
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
 	"api/common/helpers"
 	"api/common/types"
+	"api/common/utils"
 	"api/services/school/university/unit/data"
 	"api/services/school/university/unit/model"
 )
@@ -23,7 +26,7 @@ func (repository *Repository) Create(item *model.UniversityUnit) (*model.Univers
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, item *model.UniversityUnit) (*model.UniversityUnit, error) {
+func (repository *Repository) UpdateByID(id int64, item *model.UniversityUnit) (*model.UniversityUnit, error) {
 	result := &model.UniversityUnit{}
 	return result, repository.Db.Preload(clause.Associations).Model(&model.UniversityUnit{}).Where("id = ?", id).Updates(
 		map[string]any{
@@ -43,19 +46,36 @@ func (repository *Repository) Update(id int64, item *model.UniversityUnit) (*mod
 	).Find(result).Error
 }
 
-func (repository *Repository) Delete(id int64) (int64, error) {
-	tempUnit, err := repository.GetByID(id)
-	if err != nil || tempUnit == nil || tempUnit.ID != id {
-		return -1, err
-	}
-
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.UniversityUnit{})
 	return result.RowsAffected, result.Error
 }
 
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.UniversityUnit{})
+
+	result = query.RowsAffected
+	err = query.Error
+	return
+}
+
 func (repository *Repository) GetByID(id int64) (*model.UniversityUnit, error) {
 	result := &model.UniversityUnit{}
-	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.UniversityUnit, error) {
+	result := &model.UniversityUnit{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.UniversityUnit) (*model.UniversityUnit, error) {
@@ -112,12 +132,12 @@ func (repository *Repository) GetAll(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(units.id AS TEXT) = ? OR 
-			units.name ILIKE ? OR 
-			units.description ILIKE ? OR 
-			schools.name ILIKE ? OR 
-			schools.type ILIKE ? OR 
-			university_semesters.name ILIKE ? 
+			CAST(units.id AS TEXT) = ? OR
+			units.name ILIKE ? OR
+			units.description ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			university_semesters.name ILIKE ?
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
@@ -132,10 +152,10 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT units.* 
-				FROM university_units units 
-				LEFT JOIN schools ON units.school_id = schools.id 
-				LEFT JOIN university_level_domains ON units.level_domain_id = university_level_domains.id 
+				`SELECT units.*
+				FROM university_units units
+				LEFT JOIN schools ON units.school_id = schools.id
+				LEFT JOIN university_level_domains ON units.level_domain_id = university_level_domains.id
 				LEFT JOIN university_semesters ON units.semester_id = university_semesters.id`,
 				where,
 				pagination,

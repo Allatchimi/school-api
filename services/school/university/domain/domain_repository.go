@@ -26,7 +26,7 @@ func (repository *Repository) Create(item *model.UniversityDomain) (*model.Unive
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, item *model.UniversityDomain) (*model.UniversityDomain, error) {
+func (repository *Repository) UpdateByID(id int64, item *model.UniversityDomain) (*model.UniversityDomain, error) {
 	result := &model.UniversityDomain{}
 	return result, repository.Db.Preload(clause.Associations).Model(&model.UniversityDomain{}).Where("id = ?", id).Updates(
 		map[string]any{
@@ -38,23 +38,36 @@ func (repository *Repository) Update(id int64, item *model.UniversityDomain) (*m
 	).Find(result).Error
 }
 
-func (repository *Repository) Delete(id int64) (int64, error) {
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.UniversityDomain{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.UniversityDomain{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.UniversityDomain{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.UniversityDomain, error) {
 	result := &model.UniversityDomain{}
-	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.UniversityDomain, error) {
+	result := &model.UniversityDomain{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.UniversityDomain) (*model.UniversityDomain, error) {
@@ -102,13 +115,13 @@ func (repository *Repository) GetAll(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(domains.id AS TEXT) = ? OR 
-			domains.name ILIKE ? OR 
-			domains.description ILIKE ? OR 
-			schools.name ILIKE ? OR 
-			schools.type ILIKE ? OR 
-			university_departments.name ILIKE ? OR 
-			university_departments.description ILIKE ? 
+			CAST(domains.id AS TEXT) = ? OR
+			domains.name ILIKE ? OR
+			domains.description ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			university_departments.name ILIKE ? OR
+			university_departments.description ILIKE ?
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
@@ -121,9 +134,9 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT domains.* 
-				FROM university_domains domains 
-				LEFT JOIN schools ON domains.school_id = schools.id 
+				`SELECT domains.*
+				FROM university_domains domains
+				LEFT JOIN schools ON domains.school_id = schools.id
 				LEFT JOIN university_departments ON domains.department_id = university_departments.id`,
 				where,
 				pagination,

@@ -24,7 +24,7 @@ func (controller *Controller) Create(
 	},
 ) (result *model.Quiz, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		&input.Body,
 	)
 	return
@@ -38,7 +38,7 @@ func (controller *Controller) CreateAnswer(
 	},
 ) (errCode int, err error) {
 	errCode, err = controller.Service.CreateAnswer(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		input.QuizID.ID,
 		&input.Body,
 	)
@@ -53,7 +53,7 @@ func (controller *Controller) Update(
 	},
 ) (result *model.Quiz, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		input.ID,
 		&input.Body,
 	)
@@ -68,7 +68,7 @@ func (controller *Controller) UpdateSolution(
 	},
 ) (result *model.Quiz, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateSolution(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		input.ID,
 		&input.Body,
 	)
@@ -81,7 +81,7 @@ func (controller *Controller) Delete(
 		data.QuizID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.Delete(httpHelper.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.Delete(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -95,7 +95,7 @@ func (controller *Controller) DeleteMultiple(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetJwtContext(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetContextData(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -109,7 +109,7 @@ func (controller *Controller) Get(
 		data.QuizID
 	},
 ) (result *model.Quiz, errCode int, err error) {
-	quiz, errCode, err := controller.Service.Get(httpHelper.GetJwtContext(ctx), input.ID)
+	quiz, errCode, err := controller.Service.Get(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -127,7 +127,7 @@ func (controller *Controller) GetAll(
 ) (result *data.QuizResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
 	quizList, errCode, err := controller.Service.GetAll(
-		httpHelper.GetJwtContext(ctx), newFilter, newPagination,
+		httpHelper.GetContextData(ctx), newFilter, newPagination,
 		&input.GetAllRequest,
 	)
 	if err != nil {
@@ -152,7 +152,7 @@ func (controller *Controller) GetAllQuizResult(
 ) (result *data.QuizResultResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
 	quizAnswerList, errCode, err := controller.Service.GetAllQuizAnswer(
-		httpHelper.GetJwtContext(ctx), newFilter, newPagination,
+		httpHelper.GetContextData(ctx), newFilter, newPagination,
 		&input.GetAllQuizAnswerRequest,
 	)
 	if err != nil {

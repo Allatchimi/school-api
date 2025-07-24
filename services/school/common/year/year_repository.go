@@ -26,35 +26,48 @@ func (repository *Repository) Create(item *model.Year) (*model.Year, error) {
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, item *model.Year) (*model.Year, error) {
+func (repository *Repository) UpdateByID(id int64, item *model.Year) (*model.Year, error) {
 	result := &model.Year{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.Year{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"name":       item.Name,
 			"start_date": item.StartDate,
 			"end_date":   item.EndDate,
 			"school_id":  item.SchoolID,
 		},
-	).Error
+	).Find(result).Error
 }
 
-func (repository *Repository) Delete(id int64) (int64, error) {
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.Year{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.Year{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.Year{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.Year, error) {
 	result := &model.Year{}
-	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Year, error) {
+	result := &model.Year{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.Year) (*model.Year, error) {
@@ -74,39 +87,55 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.Year, item2 *mod
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Year, err error) {
+func (repository *Repository) GetAll(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.Year, err error) {
 	result = make([]model.Year, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("years.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "years.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"CAST(years.id AS TEXT) = '%s' OR years.name ILIKE '%s' OR years.start_date ILIKE '%s' OR years.end_date ILIKE '%s' OR schools.name ILIKE '%s'",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(years.id AS TEXT) = ? OR
+			years.name ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT years.* "+
-					"FROM years "+
-					"LEFT JOIN schools ON years.school_id = schools.id ",
+				`SELECT years.*
+				FROM years
+				LEFT JOIN schools ON years.school_id = schools.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }
