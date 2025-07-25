@@ -26,14 +26,9 @@ func (repository *Repository) Create(data *model.Request) (*model.Request, error
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, data *model.Request) (*model.Request, error) {
-	foundItem, err := repository.GetByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return nil, err
-	}
-
+func (repository *Repository) UpdateByID(id int64, data *model.Request) (*model.Request, error) {
 	result := &model.Request{}
-	return result, repository.Db.Model(&model.Request{}).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.Request{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"school_id":        data.SchoolID,
 			"year_id":          data.YearID,
@@ -42,11 +37,9 @@ func (repository *Repository) Update(id int64, data *model.Request) (*model.Requ
 			"unit_id":          data.UnitID,
 			"student_id":       data.StudentID,
 
-			"status":          data.Status,
-			"status_feedback": data.StatusFeedback,
-			"audience":        data.Audience,
-			"title":           data.Title,
-			"message":         data.Message,
+			"audience": data.Audience,
+			"title":    data.Title,
+			"message":  data.Message,
 
 			"document1": data.Document1,
 			"document2": data.Document2,
@@ -57,28 +50,46 @@ func (repository *Repository) Update(id int64, data *model.Request) (*model.Requ
 	).Find(result).Error
 }
 
-func (repository *Repository) DeleteByID(id int64) (int64, error) {
-	foundItem, err := repository.GetByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return -1, err
-	}
+func (repository *Repository) UpdateStatusByID(id int64, data *model.Request) (*model.Request, error) {
+	result := &model.Request{}
+	return result, repository.Db.Preload(clause.Associations).Model(&model.Request{}).Where("id = ?", id).Updates(
+		map[string]any{
+			"status":          data.Status,
+			"status_feedback": data.StatusFeedback,
+		},
+	).Find(result).Error
+}
 
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.Request{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.Request{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.Request{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.Request, error) {
 	result := &model.Request{}
-	return result, repository.Db.Model(&model.Request{}).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Request, error) {
+	result := &model.Request{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.Request) (*model.Request, error) {

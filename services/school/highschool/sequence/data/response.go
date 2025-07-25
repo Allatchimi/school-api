@@ -17,5 +17,5 @@ type SequenceResponse struct {
 
 type SequenceResponseList struct {
 	types.PaginatedResponse
-	Data []SequenceResponse `json:"data" required:"false" doc:"List of sections" example:"[]"`
+	Data []SequenceResponse `json:"data" required:"false" doc:"List of section"`
 }

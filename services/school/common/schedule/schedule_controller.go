@@ -24,13 +24,6 @@ func (controller *Controller) Create(
 		Body data.ScheduleRequest
 	},
 ) (result *model.Schedule, errCode int, err error) {
-	if input.Body.IsCommon {
-		result, errCode, err = controller.Service.CreateCommon(
-			httpHelper.GetContextData(ctx),
-			&input.Body,
-		)
-		return
-	}
 	result, errCode, err = controller.Service.Create(
 		httpHelper.GetContextData(ctx),
 		&input.Body,
@@ -45,14 +38,6 @@ func (controller *Controller) Update(
 		Body data.ScheduleRequest
 	},
 ) (result *model.Schedule, errCode int, err error) {
-	if input.Body.IsCommon {
-		result, errCode, err = controller.Service.UpdateCommon(
-			httpHelper.GetContextData(ctx),
-			input.ID,
-			&input.Body,
-		)
-		return
-	}
 	result, errCode, err = controller.Service.Update(
 		httpHelper.GetContextData(ctx),
 		input.ID,
@@ -75,13 +60,13 @@ func (controller *Controller) Delete(
 	return
 }
 
-func (controller *Controller) DeleteCommon(
+func (controller *Controller) DeleteMultiple(
 	ctx *context.Context,
 	input *struct {
-		data.ScheduleID
+		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteCommon(httpHelper.GetContextData(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetContextData(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -96,16 +81,6 @@ func (controller *Controller) Get(
 	},
 ) (result *model.Schedule, errCode int, err error) {
 	result, errCode, err = controller.Service.Get(httpHelper.GetContextData(ctx), input.ID)
-	return
-}
-
-func (controller *Controller) GetCommon(
-	ctx *context.Context,
-	input *struct {
-		data.ScheduleID
-	},
-) (result *model.Schedule, errCode int, err error) {
-	result, errCode, err = controller.Service.GetCommon(httpHelper.GetContextData(ctx), input.ID)
 	return
 }
 

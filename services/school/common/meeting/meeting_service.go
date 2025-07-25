@@ -28,12 +28,26 @@ func NewService(repository *Repository, userService *user.Service, teacherServic
 	}
 }
 
-func (service *Service) Create(ctxData *types.ContextData, request *data.MeetingRoomRequest) (result *model.MeetingRoom, errCode int, err error) {
+func (service *Service) Create(
+	ctxData *types.ContextData,
+	request *data.MeetingRoomRequest,
+) (result *model.MeetingRoom, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
 	// Format request
 	item := &model.MeetingRoom{
-		SchoolID:       request.SchoolID,
-		ClassSubjectID: request.ClassSubjectID,
-		UnitID:         request.UnitID,
+		SchoolID:       newRequest.SchoolID,
+		ClassSubjectID: newRequest.ClassSubjectID,
+		UnitID:         newRequest.UnitID,
+	}
+	if newRequest.ClassSubjectID < 1 && newRequest.UnitID < 1 {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessageV2("class subject id or unit id(you should provide one of these fields)")
+		return
 	}
 
 	// Check unique
@@ -69,8 +83,30 @@ func (service *Service) Create(ctxData *types.ContextData, request *data.Meeting
 	return
 }
 
-func (service *Service) Delete(ctxData *types.ContextData, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(id)
+func (service *Service) Delete(
+	ctxData *types.ContextData,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
+	// Check if the item exists
+	var foundItem *model.MeetingRoom
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetByID(id)
+	}
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundItem == nil || foundItem.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Delete
+	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -84,8 +120,11 @@ func (service *Service) Delete(ctxData *types.ContextData, id int64) (affectedRo
 	return
 }
 
-func (service *Service) DeleteMultiple(ctxData *types.ContextData, list []int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteMultiple(list)
+func (service *Service) DeleteMultiple(
+	ctxData *types.ContextData,
+	list []int64,
+) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteMultipleByID(list, ctxData.Jwt.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -99,8 +138,15 @@ func (service *Service) DeleteMultiple(ctxData *types.ContextData, list []int64)
 	return
 }
 
-func (service *Service) Get(ctxData *types.ContextData, id int64) (result *model.MeetingRoom, errCode int, err error) {
-	result, err = service.Repository.GetByID(id)
+func (service *Service) Get(
+	ctxData *types.ContextData,
+	id int64,
+) (result *model.MeetingRoom, errCode int, err error) {
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		result, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		result, err = service.Repository.GetByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -114,8 +160,20 @@ func (service *Service) Get(ctxData *types.ContextData, id int64) (result *model
 	return
 }
 
-func (service *Service) GetAll(ctxData *types.ContextData, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.MeetingRoom, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, request)
+func (service *Service) GetAll(
+	ctxData *types.ContextData,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.MeetingRoom, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Get
+	result, err = service.Repository.GetAll(filter, pagination, &newRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -123,7 +181,10 @@ func (service *Service) GetAll(ctxData *types.ContextData, filter *types.Filter,
 	return
 }
 
-func (service *Service) Join(ctxData *types.ContextData, id int64) (result string, errCode int, err error) {
+func (service *Service) Join(
+	ctxData *types.ContextData,
+	id int64,
+) (result string, errCode int, err error) {
 	// Check if the meeting room exists
 	meetingRoom, errCode, err := service.Get(ctxData, id)
 	if err != nil || meetingRoom == nil || meetingRoom.ID <= 0 || meetingRoom.ID != id {

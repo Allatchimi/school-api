@@ -35,6 +35,10 @@ type ReportEntry struct {
 	Credit      int     `gorm:"default:null"`
 	Value       float64 `gorm:"default:null"`
 	Notation    float64 `gorm:"default:null"`
+
+	IsRetry      bool   `gorm:"default:null"`
+	RetryCount   int64  `gorm:"default:null"`
+	RetryDetails string `gorm:"default:null"`
 }
 
 func (item *ReportEntry) ToResponse() *data.ReportEntryResponse {
@@ -46,6 +50,9 @@ func (item *ReportEntry) ToResponse() *data.ReportEntryResponse {
 	resp.Credit = item.Credit
 	resp.Value = item.Value
 	resp.Notation = item.Notation
+	resp.IsRetry = item.IsRetry
+	resp.RetryCount = item.RetryCount
+	resp.RetryDetails = item.RetryDetails
 
 	resp.Student = item.Student.ToResponse()
 	resp.ClassSubject = item.ClassSubject.ToResponse()
@@ -55,23 +62,6 @@ func (item *ReportEntry) ToResponse() *data.ReportEntryResponse {
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-	return resp
-}
-
-func (item *ReportEntry) ToPublicResponse() *data.ReportEntryPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.ReportEntryPublicResponse{}
-	resp.Coefficient = item.Coefficient
-	resp.Credit = item.Credit
-	resp.Value = item.Value
-	resp.Notation = item.Notation
-
-	resp.Student = item.Student.ToResponse()
-	resp.ClassSubject = item.ClassSubject.ToResponse()
-	resp.Sequence = item.Sequence.ToResponse()
-	resp.Unit = item.Unit.ToResponse()
 	return resp
 }
 

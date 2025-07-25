@@ -89,5 +89,5 @@ type SchoolConfigResponse struct {
 
 type SchoolResponseList struct {
 	types.PaginatedResponse
-	Data []SchoolResponse `json:"data" required:"false" doc:"List of schools"`
+	Data []SchoolResponse `json:"data" required:"false" doc:"List of school"`
 }

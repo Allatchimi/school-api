@@ -91,10 +91,10 @@ func (repository *Repository) UpdateActivationByID(id int64, item *model.User) (
 	result := &model.User{}
 	return result, repository.Db.Preload(clause.Associations).Model(&model.User{}).Where("id = ?", id).Updates(
 		map[string]any{
-			"is_activated":   item.IsActivated,
-			"activated_at":   item.ActivatedAt,
-			"user_info_id":   item.UserInfoID,
-			"user_config_id": item.UserConfigID,
+			"is_activated": item.IsActivated,
+			"activated_at": item.ActivatedAt,
+			"info_id":      item.InfoID,
+			"config_id":    item.ConfigID,
 		},
 	).Find(result).Error
 }
@@ -299,7 +299,7 @@ func (repository *Repository) GetAll(
 				repository.Db,
 				`SELECT users.*
 				FROM users
-				LEFT JOIN user_infos AS infos ON users.user_info_id = infos.id
+				LEFT JOIN user_infos AS infos ON users.info_id = infos.id
 				LEFT JOIN roles ON users.role_id = roles.id
 				LEFT JOIN schools ON users.school_id = schools.id`,
 				where,
@@ -312,9 +312,72 @@ func (repository *Repository) GetAll(
 	return
 }
 
-func (repository *Repository) CountAllGroupByYear(result *[]dataMonitoring.UsersByYearResponse) (err error) {
-	err = repository.Db.
+func (repository *Repository) CountAllByFeature(schoolID int64, feature string) (result int64, err error) {
+	query := repository.Db.
 		Model(&model.User{}).
+		Joins("LEFT JOIN roles ON users.role_id = roles.id").
+		Where("roles.feature = ?", feature)
+
+	if schoolID > 0 {
+		query = query.Where("users.school_id = ?", schoolID)
+	}
+	err = query.Count(&result).Error
+	return
+}
+
+func (repository *Repository) CountAllGroupByFeature(schoolID int64, result *[]dataMonitoring.UsersByFeatureResponse) (err error) {
+	query := repository.Db.
+		Model(&model.User{}).
+		Joins("LEFT JOIN roles ON users.role_id = roles.id")
+
+	if schoolID > 0 {
+		query = query.Where("users.school_id = ?", schoolID)
+	}
+	err = query.
+		Select("roles.feature AS feature, COUNT(*) AS count").
+		Group("feature").
+		Order("feature").
+		Find(&result).Error
+	return
+}
+
+func (repository *Repository) CountAllGroupByGender(schoolID int64, result *[]dataMonitoring.UsersByGenderResponse) (err error) {
+	query := repository.Db.
+		Model(&model.User{}).
+		Joins("LEFT JOIN user_infos ON users.info_id = user_infos.id")
+
+	if schoolID > 0 {
+		query = query.Where("users.school_id = ?", schoolID)
+	}
+	err = query.
+		Select("user_infos.gender AS gender, COUNT(*) AS count").
+		Group("gender").
+		Order("gender").
+		Find(&result).Error
+	return
+}
+
+func (repository *Repository) CountAllGroupByMonth(schoolID int64, result *[]dataMonitoring.UsersByMonthResponse) (err error) {
+	query := repository.Db.Model(&model.User{})
+
+	if schoolID > 0 {
+		query = query.Where("users.school_id = ?", schoolID)
+	}
+	err = query.
+		Select("EXTRACT(MONTH FROM created_at) AS month, COUNT(*) AS count").
+		Group("month").
+		Order("month").
+		Find(&result).Error
+	return
+}
+
+func (repository *Repository) CountAllGroupByYear(schoolID int64, result *[]dataMonitoring.UsersByYearResponse) (err error) {
+	query := repository.Db.Model(&model.User{})
+
+	if schoolID > 0 {
+		query = query.Where("users.school_id = ?", schoolID)
+	}
+	err = query.
 		Select("EXTRACT(YEAR FROM created_at) AS year, COUNT(*) AS count").
 		Group("year").
 		Order("year").

@@ -11,7 +11,7 @@ type UserRequest struct {
 	SchoolID int64 `json:"schoolID" required:"false" doc:"School id"`
 
 	Email       string `json:"email" required:"true" format:"email" doc:"Email"`
-	PhoneNumber uint64 `json:"phoneNumber" required:"false" minimum:"10000000" doc:"Phone number"`
+	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number"`
 	IsActivated bool   `json:"isActivated" required:"true" doc:"Is activated"`
 	Status      string `json:"status" required:"true" enum:"enabled,disabled" doc:"Status"`
 

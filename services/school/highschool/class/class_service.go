@@ -151,10 +151,16 @@ func (service *Service) Update(
 	id int64,
 	request *data.ClassRequest,
 ) (result *model.HighschoolClass, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
 	// Check if the item exists
 	var foundItem *model.HighschoolClass
 	if ctxData.User.Feature != constants.FeatureAdmin {
-		foundItem, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+		foundItem, err = service.Repository.GetByIDSchoolID(id, newRequest.SchoolID)
 	} else {
 		foundItem, err = service.Repository.GetByID(id)
 	}
@@ -167,12 +173,6 @@ func (service *Service) Update(
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
-	}
-
-	// Check school
-	newRequest := *request
-	if ctxData.Jwt.SchoolID > 0 {
-		newRequest.SchoolID = ctxData.Jwt.SchoolID
 	}
 
 	// Format request
@@ -218,7 +218,7 @@ func (service *Service) Update(
 		item.InvalidDate = nil
 	}
 
-	// Update class
+	// Update
 	result, err = service.Repository.UpdateByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -233,10 +233,16 @@ func (service *Service) UpdateClassSubject(
 	id int64,
 	request *data.ClassSubjectRequest,
 ) (result *model.HighschoolClassSubject, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
 	// Check if the item exists
 	var foundItem *model.HighschoolClassSubject
 	if ctxData.User.Feature != constants.FeatureAdmin {
-		foundItem, err = service.Repository.GetClassSubjectByIDSchoolID(id, ctxData.Jwt.SchoolID)
+		foundItem, err = service.Repository.GetClassSubjectByIDSchoolID(id, newRequest.SchoolID)
 	} else {
 		foundItem, err = service.Repository.GetClassSubjectByID(id)
 	}
@@ -249,12 +255,6 @@ func (service *Service) UpdateClassSubject(
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
-	}
-
-	// Check school
-	newRequest := *request
-	if ctxData.Jwt.SchoolID > 0 {
-		newRequest.SchoolID = ctxData.Jwt.SchoolID
 	}
 
 	// Format request
@@ -299,7 +299,7 @@ func (service *Service) UpdateClassSubject(
 		item.InvalidDate = nil
 	}
 
-	// Update class
+	// Update
 	result, err = service.Repository.UpdateClassSubjectByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -386,13 +386,7 @@ func (service *Service) DeleteMultiple(
 	ctxData *types.ContextData,
 	list []int64,
 ) (affectedRows int64, errCode int, err error) {
-	// Check school
-	var foundSchool int64
-	if ctxData.Jwt.SchoolID > 0 {
-		foundSchool = ctxData.Jwt.SchoolID
-	}
-
-	affectedRows, err = service.Repository.DeleteMultipleByID(list, foundSchool)
+	affectedRows, err = service.Repository.DeleteMultipleByID(list, ctxData.Jwt.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -410,13 +404,7 @@ func (service *Service) DeleteMultipleClassSubject(
 	ctxData *types.ContextData,
 	list []int64,
 ) (affectedRows int64, errCode int, err error) {
-	// Check school
-	var foundSchool int64
-	if ctxData.Jwt.SchoolID > 0 {
-		foundSchool = ctxData.Jwt.SchoolID
-	}
-
-	affectedRows, err = service.Repository.DeleteMultipleClassSubjectByID(list, foundSchool)
+	affectedRows, err = service.Repository.DeleteMultipleClassSubjectByID(list, ctxData.Jwt.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

@@ -24,6 +24,7 @@ type Schedule struct {
 	UnitID int64                     `gorm:"default:null"`
 	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
+	IsCommon       bool       `gorm:"default:null"`
 	Type           string     `gorm:"default:null"`
 	DayOfTheWeek   string     `gorm:"default:null"`
 	RepeatCount    int        `gorm:"default:null"`
@@ -40,6 +41,7 @@ func (item *Schedule) ToResponse() *data.ScheduleResponse {
 		return nil
 	}
 	resp := &data.ScheduleResponse{}
+	resp.IsCommon = item.IsCommon
 	resp.Type = item.Type
 	resp.DayOfTheWeek = item.DayOfTheWeek
 	resp.RepeatCount = item.RepeatCount
@@ -114,43 +116,4 @@ func ToScheduleWeeklyViewResponseList(itemList []Schedule) []data.ScheduleWeekly
 	}
 
 	return result
-}
-
-func ListAppendCommonSchedules(dest []Schedule, src []ScheduleCommon) []Schedule {
-	defaultSize := len(dest)
-	commonSize := len(src)
-	result := make([]Schedule, defaultSize+commonSize)
-	copy(result, dest)
-	for index := range src {
-		schedule := ConvertScheduleCommonToSchedule(&src[index])
-		if schedule != nil {
-			result[defaultSize+index] = *schedule
-		}
-	}
-	return result
-}
-
-func ConvertScheduleCommonToSchedule(item *ScheduleCommon) (result *Schedule) {
-	if item == nil {
-		return
-	}
-	result = &Schedule{
-		SchoolID: item.SchoolID,
-		School:   item.School,
-		YearID:   item.YearID,
-		Year:     item.Year,
-
-		Type:         item.Type,
-		DayOfTheWeek: item.DayOfTheWeek,
-		RepeatCount:  item.RepeatCount,
-		RepeatType:   item.RepeatType,
-		StartTime:    item.StartTime,
-		EndTime:      item.EndTime,
-		IsValid:      item.IsValid,
-		InvalidDate:  item.InvalidDate,
-	}
-	result.ID = item.ID
-	result.CreatedAt = item.CreatedAt
-	result.UpdatedAt = item.UpdatedAt
-	return
 }

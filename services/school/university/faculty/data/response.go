@@ -14,5 +14,5 @@ type FacultyResponse struct {
 
 type FacultyResponseList struct {
 	types.PaginatedResponse
-	Data []FacultyResponse `json:"data" required:"false" doc:"List of faculties" example:"[]"`
+	Data []FacultyResponse `json:"data" required:"false" doc:"List of facultie"`
 }

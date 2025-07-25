@@ -66,20 +66,6 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			// Generate items
-			tempResult := &data.MonitoringResponse{}
-			tempResult.Count = &data.CountResponse{
-				Schools:   2,
-				Directors: 4,
-				Teachers:  29,
-				Students:  3842,
-				Parents:   123,
-			}
-			tempResult.UsersByYear = make([]data.UsersByYearResponse, 5)
-			tempResult.SuccessBySchool = make([]data.SuccessBySchoolResponse, 5)
-			tempResult.SuccessBySchoolGender = make([]data.SuccessBySchoolGenderResponse, 5)
-			result.Data = tempResult
-
 			return &struct {
 				Body data.MonitoringResponseList
 			}{Body: *result}, nil

@@ -7,15 +7,12 @@ import (
 	dataYear "api/services/school/common/year/data"
 	dataClass "api/services/school/highschool/class/data"
 	dataSequence "api/services/school/highschool/sequence/data"
+	dataLevel "api/services/school/university/level/data"
 	dataUnit "api/services/school/university/unit/data"
 )
 
 type ReportEntryResponse struct {
 	types.BaseGormModelResponse
-	ReportEntryPublicResponse
-}
-
-type ReportEntryPublicResponse struct {
 	School       *dataSchool.SchoolResponse      `json:"school" required:"false" doc:"School"`
 	Year         *dataYear.YearResponse          `json:"year" required:"false" doc:"Year"`
 	ClassSubject *dataClass.ClassSubjectResponse `json:"classSubject" required:"false" doc:"Subject for specific class"`
@@ -27,55 +24,66 @@ type ReportEntryPublicResponse struct {
 	Credit      int     `json:"credit" required:"false" doc:"Credit"`
 	Value       float64 `json:"value" required:"false" doc:"Value"`
 	Notation    float64 `json:"notation" required:"false" doc:"Notation"`
+
+	IsRetry      bool   `json:"isRetry" required:"false" doc:"Is retry"`
+	RetryCount   int64  `json:"retryCount" required:"false" doc:"Retry count"`
+	RetryDetails string `json:"retryDetails" required:"false" doc:"Retry details"`
 }
 
 type ReportGradeResponse struct {
 	types.BaseGormModelResponse
-	ReportGradePublicResponse
-}
-
-type ReportGradePublicResponse struct {
 	School *dataSchool.SchoolResponse `json:"school" required:"false" doc:"School"`
 
-	Name                 string  `json:"name" required:"false" doc:"Name"`
-	Description          string  `json:"description" required:"false" doc:"Description"`
-	MinimumResult        float64 `json:"minimumResult" required:"false" doc:"Minimum result"`
-	MaximumResult        float64 `json:"maximumResult" required:"false" doc:"Maximum result"`
-	IncludeMinimumResult bool    `json:"includeMinimumResult" required:"false" doc:"Include minimum result"`
-	IncludeMaximumResult bool    `json:"includeMaximumResult" required:"false" doc:"Include maximum result"`
-	Correspondence       float64 `json:"correspondence" required:"false" doc:"Correspondence"`
+	Name           string  `json:"name" required:"false" doc:"Name"`
+	Description    string  `json:"description" required:"false" doc:"Description"`
+	Minimum        float64 `json:"minimum" required:"false" doc:"Minimum result"`
+	Maximum        float64 `json:"maximum" required:"false" doc:"Maximum result"`
+	IncludeMinimum bool    `json:"includeMinimum" required:"false" doc:"Include minimum result"`
+	IncludeMaximum bool    `json:"includeMaximum" required:"false" doc:"Include maximum result"`
 }
 
 type ReportConfigResponse struct {
 	types.BaseGormModelResponse
 	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
 
-	Notation               float64 `json:"notation" required:"false" doc:"Notation"`
-	NotationMinimumSuccess float64 `json:"notationMinimumSuccess" required:"false" doc:"Notation minimum success"`
+	Notation                      float64 `json:"notation" required:"false" doc:"Notation"`
+	MinimumRequiredValueToPromote float64 `json:"minimumRequiredValueToPromote" required:"false" doc:"Minimum required value to promote"`
 }
 
-type ReportStudentResponse struct {
+type ReportBoardResponse struct {
 	types.BaseGormModelResponse
-	Student *dataStudent.StudentResponse `json:"student" required:"false" doc:"Student"`
-	Report  []ReportEntryResponse        `json:"report" required:"false" doc:"List of report entries for the student"`
+	School      *dataSchool.SchoolResponse     `json:"school" required:"false" doc:"School"`
+	Year        *dataYear.YearResponse         `json:"year" required:"false" doc:"Year"`
+	Class       *dataClass.ClassResponse       `json:"class" required:"false" doc:"Class"`
+	LevelDomain *dataLevel.LevelDomainResponse `json:"levelDomain" required:"false" doc:"Level domain"`
+
+	PeriodType string `json:"periodType" required:"false" doc:"Period type"`
+	PeriodName string `json:"periodName" required:"false" doc:"Period name"`
+
+	Status string `json:"status" required:"false" doc:"Status"`
+
+	Notation                      float64 `json:"notation" required:"false" doc:"Notation"`
+	MinimumRequiredValueToPromote float64 `json:"minimumRequiredValueToPromote" required:"false" doc:"Minimum required value to promote"`
+	GradeName                     string  `json:"gradeName" required:"false" doc:"Grade name"`
+	GradeDescription              string  `json:"gradeDescription" required:"false" doc:"Grade description"`
 }
 
 type ReportEntryResponseList struct {
 	types.PaginatedResponse
-	Data []ReportEntryResponse `json:"data" required:"false" doc:"List of report entries"`
+	Data []ReportEntryResponse `json:"data" required:"false" doc:"List of report entry"`
 }
 
 type ReportGradeResponseList struct {
 	types.PaginatedResponse
-	Data []ReportGradeResponse `json:"data" required:"false" doc:"List of report grades"`
+	Data []ReportGradeResponse `json:"data" required:"false" doc:"List of report grade"`
 }
 
 type ReportConfigResponseList struct {
 	types.PaginatedResponse
-	Data []ReportConfigResponse `json:"data" required:"false" doc:"List of report configs"`
+	Data []ReportConfigResponse `json:"data" required:"false" doc:"List of report config"`
 }
 
-type ReportStudentResponseList struct {
+type ReportBoardResponseList struct {
 	types.PaginatedResponse
-	Data []ReportStudentResponse `json:"data" required:"false" doc:"List of report students"`
+	Data []ReportBoardResponse `json:"data" required:"false" doc:"List of report board"`
 }

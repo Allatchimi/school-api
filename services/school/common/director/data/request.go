@@ -12,7 +12,7 @@ type DirectorRequest struct {
 	UID               string `json:"uid" required:"false" doc:"User UID"`
 	AutoGenerateEmail bool   `json:"autoGenerateEmail" required:"false" doc:"Auto generate email"`
 	Email             string `json:"email" required:"false" format:"email" doc:"Email"`
-	PhoneNumber       uint64 `json:"phoneNumber" required:"false" minimum:"10000000" doc:"Phone number"`
+	PhoneNumber       uint64 `json:"phoneNumber" required:"false" doc:"Phone number"`
 	Status            string `json:"status" required:"true" enum:"enabled,disabled" doc:"Status"`
 
 	Info *dataUser.UserInfoRequest `json:"info" required:"true" doc:"Information"`

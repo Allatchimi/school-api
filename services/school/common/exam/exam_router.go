@@ -72,7 +72,7 @@ func RegisterEndpoints(
 			Summary:     "Create exam type",
 			Description: "Create new exam type and return created object.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/type", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/types", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -157,7 +157,7 @@ func RegisterEndpoints(
 			Summary:     "Update exam type",
 			Description: "Update existing exam type with matching id and return the new exam object.",
 			Method:      http.MethodPut,
-			Path:        fmt.Sprintf("%s/type/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/types/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -242,7 +242,7 @@ func RegisterEndpoints(
 			Summary:     "Delete exam type",
 			Description: "Delete existing exam type with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/type/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/types/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -318,6 +318,48 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Delete multiple exam type
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "delete-exam-type-multiple",
+			Summary:     "Delete multiple exam type",
+			Description: "Delete multiple exam type by providing a list of IDs and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/types/multiple/delete", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body types.DeleteMultipleRequest
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteMultipleType(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
 	// Get exam by id
 	huma.Register(
 		*humaApi,
@@ -371,7 +413,7 @@ func RegisterEndpoints(
 			Summary:     "Get exam type by id",
 			Description: "Return one exam type with matching id",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/type/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/types/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -468,7 +510,7 @@ func RegisterEndpoints(
 			Summary:     "Get all exam types",
 			Description: "Get all exam types with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/type", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/types", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{

@@ -19,24 +19,30 @@ type ReportEntryRequest struct {
 	YearID        int64 `json:"yearID" required:"true" doc:"Year id"`
 	ClassID       int64 `json:"classID" required:"false" doc:"Class id"`
 	LevelDomainID int64 `json:"levelDomainID" required:"false" doc:"Level domain id"`
+
+	PeriodType string `json:"periodType" required:"true" enum:"final,semester,quarter,sequence" doc:"Period type"`
+	QuarterID  int64  `json:"quarterID" required:"false" doc:"Quarter id"`
+	SequenceID int64  `json:"sequenceID" required:"false" doc:"Sequence id"`
+	SemesterID int64  `json:"semesterID" required:"false" doc:"Semester id"`
 }
 
 type ReportGradeRequest struct {
 	SchoolID int64 `json:"schoolID" required:"true" doc:"School id"`
 
-	Name                 string  `json:"name" required:"true" doc:"Name"`
-	Description          string  `json:"description" required:"false" doc:"Description"`
-	MinimumResult        float64 `json:"minimumResult" required:"true" doc:"Minimum result"`
-	MaximumResult        float64 `json:"maximumResult" required:"true" doc:"Maximum result"`
-	IncludeMinimumResult bool    `json:"includeMinimumResult" required:"true" doc:"Include minimum result"`
-	Correspondence       float64 `json:"correspondence" required:"true" doc:"Correspondence"`
+	Name        string `json:"name" required:"true" doc:"Name"`
+	Description string `json:"description" required:"false" doc:"Description"`
+
+	Minimum        float64 `json:"minimum" required:"true" doc:"Minimum"`
+	Maximum        float64 `json:"maximum" required:"true" doc:"Maximum"`
+	IncludeMinimum bool    `json:"includeMinimum" required:"true" doc:"Include minimum"`
+	IncludeMaximum bool    `json:"includeMaximum" required:"true" doc:"Include maximum"`
 }
 
 type ReportConfigRequest struct {
 	SchoolID int64 `json:"schoolID" required:"true" doc:"School id"`
 
-	Notation               float64 `json:"notation" required:"true" doc:"Notation"`
-	NotationMinimumSuccess float64 `json:"notationMinimumSuccess" required:"true" doc:"Notation minimum success"`
+	Notation                      float64 `json:"notation" required:"true" doc:"Notation"`
+	MinimumRequiredValueToPromote float64 `json:"minimumRequiredValueToPromote" required:"true" doc:"Minimum required value to promote"`
 }
 
 type GetAllReportEntryRequest struct {

@@ -119,7 +119,7 @@ func (service *Service) Create(
 	)
 
 	// Create user
-	createdUser, errCodeCreate, errCreate := service.UserService.Create(nil, item, &password)
+	createdUser, errCodeCreate, errCreate := service.UserService.Create(ctxData, item, &password)
 	if errCreate != nil {
 		errCode = errCodeCreate
 		err = errCreate
@@ -219,7 +219,7 @@ func (service *Service) Update(
 			Image:         request.Info.Image,
 		},
 	}
-	_, errCodeUser, errUser := service.UserService.Update(nil, foundItem.UserID, &user)
+	_, errCodeUser, errUser := service.UserService.Update(ctxData, foundItem.UserID, &user)
 	if errUser != nil {
 		errCode = errCodeUser
 		err = errUser

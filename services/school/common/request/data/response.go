@@ -34,5 +34,5 @@ type RequestResponse struct {
 
 type RequestResponseList struct {
 	types.PaginatedResponse
-	Data []RequestResponse `json:"data" required:"false" doc:"List of requests"`
+	Data []RequestResponse `json:"data" required:"false" doc:"List of request"`
 }

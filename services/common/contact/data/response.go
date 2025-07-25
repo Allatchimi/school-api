@@ -15,5 +15,5 @@ type ContactResponse struct {
 
 type ContactResponseList struct {
 	types.PaginatedResponse
-	Data []ContactResponse `json:"data" required:"false" doc:"List of contacts" example:"[]"`
+	Data []ContactResponse `json:"data" required:"false" doc:"List of contact"`
 }

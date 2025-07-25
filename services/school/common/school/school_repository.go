@@ -168,11 +168,6 @@ func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, er
 	return
 }
 
-func (repository *Repository) CountAll() (result int64, err error) {
-	err = repository.Db.Model(&model.School{}).Count(&result).Error
-	return
-}
-
 func (repository *Repository) GetByID(id int64) (*model.School, error) {
 	result := &model.School{}
 	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
@@ -275,5 +270,10 @@ func (repository *Repository) GetAll(
 			),
 		).Find(&result).Error
 
+	return
+}
+
+func (repository *Repository) CountAll() (result int64, err error) {
+	err = repository.Db.Preload(clause.Associations).Model(&model.School{}).Count(&result).Error
 	return
 }

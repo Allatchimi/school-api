@@ -59,7 +59,10 @@ func (repository *Repository) UpdateByID(id int64, item *model.Quiz) (*model.Qui
 
 func (repository *Repository) UpdateQuizQuestionSolutionByID(id int64, item *model.QuizQuestion) (*model.QuizQuestion, error) {
 	result := &model.QuizQuestion{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.QuizQuestion{}).Where("id = ?", id).Updates(
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.QuizQuestion{}).
+		Where("id = ?", id).Updates(
 		map[string]any{
 			"solution_id": item.SolutionID,
 		},
@@ -81,12 +84,16 @@ func (repository *Repository) DeleteQuizQuestionOptionByID(id int64) (int64, err
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.Quiz{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.Quiz{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
@@ -111,8 +118,15 @@ func (repository *Repository) DeleteMultipleQuizQuestionOptionByID(list []int64)
 func (repository *Repository) GetByID(id int64) (*model.Quiz, error) {
 	result := &model.Quiz{}
 	return result, repository.Db.Preload(clause.Associations).
-		Preload("Questions.Options").
 		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Quiz, error) {
+	result := &model.Quiz{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetAllQuizAnswerByStudentIDQuizQuestionIDs(studentID int64, list []int64) (*model.QuizAnswer, error) {
@@ -225,6 +239,10 @@ func (repository *Repository) GetAllQuizAnswer(
 			where = helpers.AppendWhereClause(where, "quiz_answers.student_id = ?")
 			args = append(args, request.StudentID)
 		}
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, "students.school_id = ?")
+			args = append(args, request.SchoolID)
+		}
 	}
 
 	// Handle search filter securely
@@ -237,7 +255,9 @@ func (repository *Repository) GetAllQuizAnswer(
 			CAST(quiz_answers.id AS TEXT) = ? OR
 			quiz_questions.title ILIKE ? OR
 			quiz_questions.description ILIKE ? OR
-			students.uid ILIKE ?
+			students.uid ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
@@ -255,7 +275,8 @@ func (repository *Repository) GetAllQuizAnswer(
 				`SELECT quiz_answers.*
 				FROM quiz_answers
 				LEFT JOIN quiz_questions ON quiz_answers.quiz_question_id = quiz_questions.id
-				LEFT JOIN students ON quiz_answers.student_id = students.id`,
+				LEFT JOIN students ON quiz_answers.student_id = students.id
+				LEFT JOIN schools ON students.school_id = schools.id`,
 				where,
 				pagination,
 				filter,

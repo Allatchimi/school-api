@@ -54,75 +54,87 @@ func (service *Service) GetAll(
 	pagination *types.Pagination,
 	request *data.GetAllRequest,
 ) (result *data.MonitoringResponseList, errCode int, err error) {
-	// Count directors
-	directorCount, err := service.DirectorService.Repository.CountAll(request.SchoolID)
+	// Count users
+	directorCount, err := service.UserService.Repository.CountAllByFeature(request.SchoolID, constants.FeatureDirector)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	// Count teachers
-	teacherCount, err := service.TeacherService.Repository.CountAll(request.SchoolID)
+	teacherCount, err := service.UserService.Repository.CountAllByFeature(request.SchoolID, constants.FeatureTeacher)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	// Count students
-	studentCount, err := service.StudentService.Repository.CountAll(request.SchoolID)
+	studentCount, err := service.UserService.Repository.CountAllByFeature(request.SchoolID, constants.FeatureStudent)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	// Count parents
-	parentCount, err := service.ParentService.Repository.CountAll(request.SchoolID)
+	parentCount, err := service.UserService.Repository.CountAllByFeature(request.SchoolID, constants.FeatureParent)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	// Count users by year and schools
+	// Count users by feature
+	var usersByFeature = make([]data.UsersByFeatureResponse, 0)
+	err = service.UserService.Repository.CountAllGroupByFeature(request.SchoolID, &usersByFeature)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	// Count users by gender
+	var usersByGender = make([]data.UsersByGenderResponse, 0)
+	err = service.UserService.Repository.CountAllGroupByGender(request.SchoolID, &usersByGender)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	// Count users by month
+	var usersByMonth = make([]data.UsersByMonthResponse, 0)
+	err = service.UserService.Repository.CountAllGroupByMonth(request.SchoolID, &usersByMonth)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	// Count users by year
 	var usersByYear = make([]data.UsersByYearResponse, 0)
+	err = service.UserService.Repository.CountAllGroupByYear(request.SchoolID, &usersByYear)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	// Count schools
 	var schoolsCount int64
-	if request.SchoolID < 1 {
-		// Count users by year
-		err = service.UserService.Repository.CountAllGroupByYear(&usersByYear)
-		if err != nil {
-			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			return
-		}
-		// Count schools
-		schoolsCount, err = service.SchoolService.Repository.CountAll()
-		if err != nil {
-			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			return
-		}
+	schoolsCount, err = service.SchoolService.Repository.CountAll()
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
 	}
 	// Count success by school
 	var successBySchool = make([]data.SuccessBySchoolResponse, 0)
-	if request.SchoolID < 1 {
-		// Count success by school
-		// err = service.UserService.Repository.CountAllGroupBySchool(&successBySchool)
-		if err != nil {
-			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			return
-		}
-	}
+	// err = service.UserService.Repository.CountAllGroupBySchool(&successBySchool)
+	// if err != nil {
+	// 	errCode = http.StatusInternalServerError
+	// 	err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+	// 	return
+	// }
 	// Count success by school gender
 	var successBySchoolGender = make([]data.SuccessBySchoolGenderResponse, 0)
-	if request.SchoolID < 1 {
-		// Count success by school gender
-		// err = service.UserService.Repository.CountAllGroupBySchoolGender(&successBySchoolGender)
-		if err != nil {
-			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			return
-		}
-	}
+	// err = service.UserService.Repository.CountAllGroupBySchoolGender(&successBySchoolGender)
+	// if err != nil {
+	// 	errCode = http.StatusInternalServerError
+	// 	err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+	// 	return
+	// }
 
 	result = &data.MonitoringResponseList{
 		Data: &data.MonitoringResponse{
@@ -133,6 +145,9 @@ func (service *Service) GetAll(
 				Students:  studentCount,
 				Parents:   parentCount,
 			},
+			UsersByFeature:        usersByFeature,
+			UsersByGender:         usersByGender,
+			UsersByMonth:          usersByMonth,
 			UsersByYear:           usersByYear,
 			SuccessBySchool:       successBySchool,
 			SuccessBySchoolGender: successBySchoolGender,

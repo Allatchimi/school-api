@@ -66,15 +66,6 @@ func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, er
 	return
 }
 
-func (repository *Repository) CountAll(schoolID int64) (result int64, err error) {
-	if schoolID <= 1 {
-		err = repository.Db.Model(&model.Director{}).Count(&result).Error
-		return
-	}
-	err = repository.Db.Model(&model.Director{}).Where("school_id = ?", schoolID).Count(&result).Error
-	return
-}
-
 func (repository *Repository) GetByID(
 	id int64,
 ) (*model.Director, error) {

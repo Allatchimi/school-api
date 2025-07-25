@@ -22,5 +22,5 @@ type DirectorpublicResponse struct {
 
 type DirectorResponseList struct {
 	types.PaginatedResponse
-	Data []DirectorResponse `json:"data" required:"false" doc:"List of directors"`
+	Data []DirectorResponse `json:"data" required:"false" doc:"List of director"`
 }

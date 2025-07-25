@@ -838,7 +838,7 @@ func RegisterEndpoints(
 					constants.SecuritySchemeSchoolToken: {},
 					constants.SecuritySchemeSchoolID:    {},
 					constants.SecuritySchemeBearerToken: {
-						fmt.Sprintf("%s,%s,%s,%s,%s",
+						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureDefault,

@@ -117,9 +117,9 @@ func Load() (err error) {
 			IsActivated: true,
 			ActivatedAt: &tmpActivatedAt,
 
-			RoleID:       roleAdmin.ID,
-			UserInfoID:   userInfoAdmin.ID,
-			UserConfigID: userConfigAdmin.ID,
+			RoleID:   roleAdmin.ID,
+			InfoID:   userInfoAdmin.ID,
+			ConfigID: userConfigAdmin.ID,
 		})
 	}
 

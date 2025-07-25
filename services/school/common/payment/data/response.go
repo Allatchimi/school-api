@@ -22,5 +22,5 @@ type PaymentResponse struct {
 
 type PaymentResponseList struct {
 	types.PaginatedResponse
-	Data []PaymentResponse `json:"data" required:"false" doc:"List of academic Payments"`
+	Data []PaymentResponse `json:"data" required:"false" doc:"List of payment"`
 }

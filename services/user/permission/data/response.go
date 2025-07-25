@@ -18,5 +18,5 @@ type PermissionResponse struct {
 
 type PermissionListResponse struct {
 	types.PaginatedResponse
-	Data []PermissionResponse `json:"data" required:"false" doc:"List of all permissions" example:"[]"`
+	Data []PermissionResponse `json:"data" required:"false" doc:"List of all permission"`
 }

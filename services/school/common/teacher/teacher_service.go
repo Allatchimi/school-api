@@ -125,7 +125,7 @@ func (service *Service) Create(
 	)
 
 	// Create user
-	createdUser, errCodeCreate, errCreate := service.UserService.Create(nil, item, &password)
+	createdUser, errCodeCreate, errCreate := service.UserService.Create(ctxData, item, &password)
 	if errCreate != nil {
 		errCode = errCodeCreate
 		err = errCreate
@@ -183,13 +183,24 @@ func (service *Service) CreateTeacherClassSubjectUnit(
 	ctxData *types.ContextData,
 	request *data.TeacherClassSubjectUnitRequest,
 ) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
-	// Format request
+	// Check school
 	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Format request
 	item := &model.TeacherClassSubjectUnit{
-		TeacherID:      newRequest.TeacherID,
+		SchoolID:       newRequest.SchoolID,
 		YearID:         newRequest.YearID,
 		ClassSubjectID: newRequest.ClassSubjectID,
 		UnitID:         newRequest.UnitID,
+		TeacherID:      newRequest.TeacherID,
+	}
+	if newRequest.ClassSubjectID < 1 && newRequest.UnitID < 1 {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessageV2("class subject id or unit id(you should provide one of these fields)")
+		return
 	}
 
 	// Check unique
@@ -220,10 +231,16 @@ func (service *Service) Update(
 	id int64,
 	request *data.TeacherRequest,
 ) (result *model.Teacher, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
 	// Check if the item exists
 	var foundItem *model.Teacher
 	if ctxData.User.Feature != constants.FeatureAdmin {
-		foundItem, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+		foundItem, err = service.Repository.GetByIDSchoolID(id, newRequest.SchoolID)
 	} else {
 		foundItem, err = service.Repository.GetByID(id)
 	}
@@ -236,12 +253,6 @@ func (service *Service) Update(
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
-	}
-
-	// Check school
-	newRequest := *request
-	if ctxData.Jwt.SchoolID > 0 {
-		newRequest.SchoolID = ctxData.Jwt.SchoolID
 	}
 
 	// Generate the uid if it is empty
@@ -325,7 +336,7 @@ func (service *Service) Update(
 			Image:         newRequest.Info.Image,
 		},
 	}
-	_, errCodeUser, errUser := service.UserService.Update(nil, foundItem.UserID, &userRequest)
+	_, errCodeUser, errUser := service.UserService.Update(ctxData, foundItem.UserID, &userRequest)
 	if errUser != nil {
 		errCode = errCodeUser
 		err = errUser
@@ -351,12 +362,18 @@ func (service *Service) UpdateTeacherClassSubjectUnit(
 	id int64,
 	request *data.TeacherClassSubjectUnitRequest,
 ) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
 	// Check if the item exists
 	var foundItem *model.TeacherClassSubjectUnit
 	if ctxData.User.Feature != constants.FeatureAdmin {
-		foundItem, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+		foundItem, err = service.Repository.GetTeacherClassSubjectUnitByIDSchoolID(id, newRequest.SchoolID)
 	} else {
-		foundItem, err = service.Repository.GetByID(id)
+		foundItem, err = service.Repository.GetTeacherClassSubjectUnitByID(id)
 	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -369,18 +386,18 @@ func (service *Service) UpdateTeacherClassSubjectUnit(
 		return
 	}
 
-	// Check school
-	newRequest := *request
-	if ctxData.Jwt.SchoolID > 0 {
-		newRequest.SchoolID = ctxData.Jwt.SchoolID
-	}
-
 	// Format request
 	item := &model.TeacherClassSubjectUnit{
-		TeacherID:      newRequest.TeacherID,
+		SchoolID:       newRequest.SchoolID,
 		YearID:         newRequest.YearID,
 		ClassSubjectID: newRequest.ClassSubjectID,
 		UnitID:         newRequest.UnitID,
+		TeacherID:      newRequest.TeacherID,
+	}
+	if newRequest.ClassSubjectID < 1 && newRequest.UnitID < 1 {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessageV2("class subject id or unit id(you should provide one of these fields)")
+		return
 	}
 
 	// Check unique
@@ -447,6 +464,25 @@ func (service *Service) DeleteTeacherClassSubjectUnit(
 	ctxData *types.ContextData,
 	id int64,
 ) (affectedRows int64, errCode int, err error) {
+	// Check if the item exists
+	var foundItem *model.TeacherClassSubjectUnit
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetTeacherClassSubjectUnitByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetTeacherClassSubjectUnitByID(id)
+	}
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundItem == nil || foundItem.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Delete
 	affectedRows, err = service.Repository.DeleteTeacherClassSubjectUnitByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -455,7 +491,7 @@ func (service *Service) DeleteTeacherClassSubjectUnit(
 	}
 	if affectedRows <= 0 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
@@ -465,13 +501,25 @@ func (service *Service) DeleteMultiple(
 	ctxData *types.ContextData,
 	list []int64,
 ) (affectedRows int64, errCode int, err error) {
-	// Check school
-	var foundSchool int64
-	if ctxData.Jwt.SchoolID > 0 {
-		foundSchool = ctxData.Jwt.SchoolID
+	affectedRows, err = service.Repository.DeleteMultipleByID(list, ctxData.Jwt.SchoolID)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
 	}
+	if affectedRows <= 0 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+	return
+}
 
-	affectedRows, err = service.Repository.DeleteMultipleByID(list, foundSchool)
+func (service *Service) DeleteMultipleTeacherClassSubjectUnit(
+	ctxData *types.ContextData,
+	list []int64,
+) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteMultipleTeacherClassSubjectUnitByID(list, ctxData.Jwt.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -512,7 +560,7 @@ func (service *Service) GetTeacherClassSubjectUnit(
 	id int64,
 ) (result *model.TeacherClassSubjectUnit, errCode int, err error) {
 	if ctxData.User.Feature != constants.FeatureAdmin {
-		result, err = service.Repository.GetTeacherClassSubjectUnitByIDShoolID(id, ctxData.Jwt.SchoolID)
+		result, err = service.Repository.GetTeacherClassSubjectUnitByIDSchoolID(id, ctxData.Jwt.SchoolID)
 	} else {
 		result, err = service.Repository.GetTeacherClassSubjectUnitByID(id)
 	}

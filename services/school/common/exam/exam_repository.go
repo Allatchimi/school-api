@@ -31,14 +31,9 @@ func (repository *Repository) CreateType(data *model.ExamType) (*model.ExamType,
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, data *model.Exam) (*model.Exam, error) {
-	tempExam, err := repository.GetByID(id)
-	if err != nil || tempExam == nil || tempExam.ID != id {
-		return nil, err
-	}
-
+func (repository *Repository) UpdateByID(id int64, data *model.Exam) (*model.Exam, error) {
 	result := &model.Exam{}
-	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
 		map[string]any{
 			"school_id":        data.SchoolID,
 			"year_id":          data.YearID,
@@ -48,6 +43,7 @@ func (repository *Repository) Update(id int64, data *model.Exam) (*model.Exam, e
 			"sequence_id":      data.SequenceID,
 
 			"status":           data.Status,
+			"notation":         data.Notation,
 			"percentage":       data.Percentage,
 			"description":      data.Description,
 			"location_type":    data.LocationType,
@@ -56,18 +52,16 @@ func (repository *Repository) Update(id int64, data *model.Exam) (*model.Exam, e
 			"allowed_items":    data.AllowedItems,
 			"start_date":       data.StartDate,
 			"end_date":         data.EndDate,
+
+			"is_retry":    data.IsRetry,
+			"retry_count": data.RetryCount,
 		},
 	).Find(result).Error
 }
 
-func (repository *Repository) UpdateType(id int64, data *model.ExamType) (*model.ExamType, error) {
-	tempExam, err := repository.GetTypeByID(id)
-	if err != nil || tempExam == nil || tempExam.ID != id {
-		return nil, err
-	}
-
+func (repository *Repository) UpdateExamTypeByID(id int64, data *model.ExamType) (*model.ExamType, error) {
 	result := &model.ExamType{}
-	return result, repository.Db.Model(&model.ExamType{}).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.ExamType{}).Where("id = ?", id).Updates(
 		map[string]any{
 			"school_id":   data.SchoolID,
 			"name":        data.Name,
@@ -77,42 +71,67 @@ func (repository *Repository) UpdateType(id int64, data *model.ExamType) (*model
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
-	tempExam, err := repository.GetTypeByID(id)
-	if err != nil || tempExam == nil || tempExam.ID != id {
-		return -1, err
-	}
-
 	result := repository.Db.Where("id = ?", id).Delete(&model.Exam{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteTypeByID(id int64) (int64, error) {
-	tempExam, err := repository.GetTypeByID(id)
-	if err != nil || tempExam == nil || tempExam.ID != id {
-		return -1, err
-	}
-
+func (repository *Repository) DeleteExamTypeByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.ExamType{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.Exam{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.Exam{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
+	return
+}
+
+func (repository *Repository) DeleteMultipleExamTypeByID(list []int64, schoolID int64) (result int64, err error) {
+	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.ExamType{})
+
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.Exam, error) {
 	result := &model.Exam{}
-	return result, repository.Db.Model(&model.Exam{}).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetTypeByID(id int64) (*model.ExamType, error) {
+func (repository *Repository) GetExamTypeByID(id int64) (*model.ExamType, error) {
 	result := &model.ExamType{}
-	return result, repository.Db.Model(&model.ExamType{}).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Exam, error) {
+	result := &model.Exam{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetExamTypeByIDSchoolID(id int64, schoolID int64) (*model.ExamType, error) {
+	result := &model.ExamType{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.Exam) (*model.Exam, error) {
@@ -120,10 +139,12 @@ func (repository *Repository) GetUniqueObject(item *model.Exam) (*model.Exam, er
 	return result, repository.Db.Preload(clause.Associations).Where(&model.Exam{
 		SchoolID:       item.SchoolID,
 		YearID:         item.YearID,
-		TypeID:         item.TypeID,
-		UnitID:         item.UnitID,
 		ClassSubjectID: item.ClassSubjectID,
 		SequenceID:     item.SequenceID,
+		UnitID:         item.UnitID,
+		TypeID:         item.TypeID,
+		IsRetry:        item.IsRetry,
+		RetryCount:     item.RetryCount,
 	}).Limit(1).Find(result).Error
 }
 
@@ -131,10 +152,12 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.Exam, item2 *mod
 	if item1 != nil && item2 != nil &&
 		(item1.SchoolID == item2.SchoolID &&
 			item1.YearID == item2.YearID &&
-			item1.TypeID == item2.TypeID &&
-			item1.UnitID == item2.UnitID &&
 			item1.ClassSubjectID == item2.ClassSubjectID &&
-			item1.SequenceID == item2.SequenceID) {
+			item1.SequenceID == item2.SequenceID &&
+			item1.UnitID == item2.UnitID &&
+			item1.TypeID == item2.TypeID &&
+			item1.IsRetry == item2.IsRetry &&
+			item1.RetryCount == item2.RetryCount) {
 		return true
 	}
 	return false
@@ -306,5 +329,40 @@ func (repository *Repository) GetAll(
 			),
 		).Find(&result).Error
 
+	return
+}
+
+func (repository *Repository) CountAllUniqueIsNotRetry(item *model.Exam) (result int64, err error) {
+	var count int64
+	countQuery := `
+	SELECT COUNT(*) FROM exams
+	WHERE exams.school_id = ?
+	AND exams.year_id = ?
+	AND exams.class_subject_id = ?
+	AND exams.sequence_id = ?
+	AND exams.unit_id = ?
+	AND (exams.is_retry = ? OR exams.is_retry IS NULL)
+	`
+	args := []any{}
+	args = append(args, item.SchoolID, item.YearID, item.ClassSubjectID, item.SequenceID, item.UnitID, false)
+	repository.Db.Raw(countQuery, args...).Count(&count)
+	result = count
+	return
+}
+
+func (repository *Repository) CountAllUniqueIsRetry(item *model.Exam) (result int64, err error) {
+	query := repository.Db.
+		Model(&model.Exam{}).
+		Where(&model.Exam{
+			SchoolID:       item.SchoolID,
+			YearID:         item.YearID,
+			ClassSubjectID: item.ClassSubjectID,
+			SequenceID:     item.SequenceID,
+			UnitID:         item.UnitID,
+			TypeID:         item.TypeID,
+
+			IsRetry: true,
+		})
+	err = query.Count(&result).Error
 	return
 }

@@ -21,19 +21,19 @@ import (
 func SetUserContext(humaCtx *huma.Context, roleID int64, feature string, userFeatureID int64) *huma.Context {
 	ctxRoleID := huma.WithValue(*humaCtx, constants.RoleIDKey, roleID)
 	ctxFeature := huma.WithValue(ctxRoleID, constants.FeatureKey, feature)
-	var ctxResult *huma.Context
+	var ctxResult *huma.Context = &ctxFeature
 	switch feature {
 	case constants.FeatureDirector:
-		tmpCtx := huma.WithValue(ctxFeature, constants.DirectorIDKey, userFeatureID)
+		tmpCtx := huma.WithValue(*ctxResult, constants.DirectorIDKey, userFeatureID)
 		ctxResult = &tmpCtx
 	case constants.FeatureTeacher:
-		tmpCtx := huma.WithValue(ctxFeature, constants.TeacherIDKey, userFeatureID)
+		tmpCtx := huma.WithValue(*ctxResult, constants.TeacherIDKey, userFeatureID)
 		ctxResult = &tmpCtx
 	case constants.FeatureStudent:
-		tmpCtx := huma.WithValue(ctxFeature, constants.StudentIDKey, userFeatureID)
+		tmpCtx := huma.WithValue(*ctxResult, constants.StudentIDKey, userFeatureID)
 		ctxResult = &tmpCtx
 	case constants.FeatureParent:
-		tmpCtx := huma.WithValue(ctxFeature, constants.ParentIDKey, userFeatureID)
+		tmpCtx := huma.WithValue(*ctxResult, constants.ParentIDKey, userFeatureID)
 		ctxResult = &tmpCtx
 	}
 	return ctxResult

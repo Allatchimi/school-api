@@ -21,28 +21,43 @@ func NewService(repository *Repository) *Service {
 	}
 }
 
-func (service *Service) Create(ctxData *types.ContextData, request *data.QuizRequest) (result *model.Quiz, errCode int, err error) {
-	// Insert the quiz
-	createdQuiz, err := service.Repository.Create(
-		&model.Quiz{
-			SchoolID:       request.SchoolID,
-			YearID:         request.SchoolID,
-			ClassSubjectID: request.ClassSubjectID,
-			UnitID:         request.UnitID,
+func (service *Service) Create(
+	ctxData *types.ContextData,
+	request *data.QuizRequest,
+) (result *model.Quiz, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
 
-			Title:       request.Title,
-			Description: request.Description,
-			Status:      request.Status,
-		},
-	)
+	// Format item
+	item := &model.Quiz{
+		SchoolID:       newRequest.SchoolID,
+		YearID:         newRequest.SchoolID,
+		ClassSubjectID: newRequest.ClassSubjectID,
+		UnitID:         newRequest.UnitID,
+
+		Title:       newRequest.Title,
+		Description: newRequest.Description,
+		Status:      newRequest.Status,
+	}
+	if newRequest.ClassSubjectID < 1 && newRequest.UnitID < 1 {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessageV2("class subject id or unit id(you should provide one of these fields)")
+		return
+	}
+
+	// Insert the quiz
+	createdQuiz, err := service.Repository.Create(item)
 	if err != nil || createdQuiz == nil || createdQuiz.ID <= 0 {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 	// Insert every question and option
-	if len(request.Questions) > 0 {
-		for _, question := range request.Questions {
+	if len(newRequest.Questions) > 0 {
+		for _, question := range newRequest.Questions {
 			// Insert question
 			createdQuestion, errQt := service.Repository.CreateQuizQuestion(
 				&model.QuizQuestion{
@@ -85,27 +100,39 @@ func (service *Service) Create(ctxData *types.ContextData, request *data.QuizReq
 	return
 }
 
-func (service *Service) CreateAnswer(ctxData *types.ContextData, id int64, request *data.QuizAnswerRequest) (errCode int, err error) {
-	// Load the quiz
-	foundQuiz, err := service.Repository.GetByID(id)
+func (service *Service) CreateAnswer(
+	ctxData *types.ContextData,
+	id int64,
+	request *data.QuizAnswerRequest,
+) (errCode int, err error) {
+	// Check school
+	newRequest := *request
+
+	// Check if the item exists
+	var foundItem *model.Quiz
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundQuiz == nil || foundQuiz.ID < 1 {
+	if foundItem == nil || foundItem.ID < 1 {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 
 	// Check if the student have already submitted and answer
-	questionsIDs := make([]int64, len(request.Answers))
-	for i := range request.Answers {
-		questionsIDs[i] = request.Answers[i].QuestionID
+	questionsIDs := make([]int64, len(newRequest.Answers))
+	for i := range newRequest.Answers {
+		questionsIDs[i] = newRequest.Answers[i].QuestionID
 	}
 	foundAnswer, tempErrFoundAnswer := service.Repository.GetAllQuizAnswerByStudentIDQuizQuestionIDs(
-		request.StudentID,
+		newRequest.StudentID,
 		questionsIDs,
 	)
 	if tempErrFoundAnswer != nil {
@@ -120,10 +147,10 @@ func (service *Service) CreateAnswer(ctxData *types.ContextData, id int64, reque
 	}
 
 	// Add answers
-	for _, answer := range request.Answers {
+	for _, answer := range newRequest.Answers {
 		_, tempAddErr := service.Repository.CreateQuizAnswer(
 			&model.QuizAnswer{
-				StudentID:            request.StudentID,
+				StudentID:            newRequest.StudentID,
 				QuizQuestionID:       answer.QuestionID,
 				QuizQuestionOptionID: answer.OptionID,
 			},
@@ -137,9 +164,24 @@ func (service *Service) CreateAnswer(ctxData *types.ContextData, id int64, reque
 	return
 }
 
-func (service *Service) Update(ctxData *types.ContextData, id int64, request *data.QuizRequest) (result *model.Quiz, errCode int, err error) {
-	// Check if quiz exists
-	foundItem, err := service.Repository.GetByID(id)
+func (service *Service) Update(
+	ctxData *types.ContextData,
+	id int64,
+	request *data.QuizRequest,
+) (result *model.Quiz, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Check if the item exists
+	var foundItem *model.Quiz
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetByIDSchoolID(id, newRequest.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -151,16 +193,23 @@ func (service *Service) Update(ctxData *types.ContextData, id int64, request *da
 		return
 	}
 
+	// Format item
+	if newRequest.ClassSubjectID < 1 && newRequest.UnitID < 1 {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessageV2("class subject id or unit id(you should provide one of these fields)")
+		return
+	}
+
 	// Update the quiz
 	updatedItem, err := service.Repository.UpdateByID(id, &model.Quiz{
-		SchoolID:       request.SchoolID,
-		YearID:         request.YearID,
-		ClassSubjectID: request.ClassSubjectID,
-		UnitID:         request.UnitID,
+		SchoolID:       newRequest.SchoolID,
+		YearID:         newRequest.YearID,
+		ClassSubjectID: newRequest.ClassSubjectID,
+		UnitID:         newRequest.UnitID,
 
-		Title:       request.Title,
-		Description: request.Description,
-		Status:      request.Status,
+		Title:       newRequest.Title,
+		Description: newRequest.Description,
+		Status:      newRequest.Status,
 	})
 	if err != nil || updatedItem == nil || updatedItem.ID <= 0 {
 		errCode = http.StatusInternalServerError
@@ -196,8 +245,8 @@ func (service *Service) Update(ctxData *types.ContextData, id int64, request *da
 	}
 
 	// Insert every question and option
-	if len(request.Questions) > 0 {
-		for _, question := range request.Questions {
+	if len(newRequest.Questions) > 0 {
+		for _, question := range newRequest.Questions {
 			// Insert question
 			createdQuestion, errQt := service.Repository.CreateQuizQuestion(
 				&model.QuizQuestion{
@@ -233,23 +282,35 @@ func (service *Service) Update(ctxData *types.ContextData, id int64, request *da
 	return
 }
 
-func (service *Service) UpdateSolution(ctxData *types.ContextData, id int64, request *data.QuizSolutionRequest) (result *model.Quiz, errCode int, err error) {
-	// Load the quiz
-	foundQuiz, err := service.Repository.GetByID(id)
+func (service *Service) UpdateSolution(
+	ctxData *types.ContextData,
+	quizID int64,
+	request *data.QuizSolutionRequest,
+) (result *model.Quiz, errCode int, err error) {
+	// Check school
+	newRequest := *request
+
+	// Check if the item exists
+	var foundItem *model.Quiz
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetByIDSchoolID(quizID, ctxData.Jwt.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetByID(quizID)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundQuiz == nil || foundQuiz.ID < 1 {
+	if foundItem == nil || foundItem.ID < 1 {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 
 	// Update the quiz question solution
-	if len(request.Solutions) > 0 {
-		for _, solution := range request.Solutions {
+	if len(newRequest.Solutions) > 0 {
+		for _, solution := range newRequest.Solutions {
 			// Update question solution
 			updatedQuestion, errUpdate := service.Repository.UpdateQuizQuestionSolutionByID(
 				solution.QuestionID,
@@ -266,12 +327,33 @@ func (service *Service) UpdateSolution(ctxData *types.ContextData, id int64, req
 	}
 
 	// Reload the quiz
-	result, err = service.Repository.GetByID(id)
+	result, err = service.Repository.GetByID(quizID)
 
 	return
 }
 
-func (service *Service) Delete(ctxData *types.ContextData, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) Delete(
+	ctxData *types.ContextData,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
+	// Check if the item exists
+	var foundItem *model.Quiz
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetByID(id)
+	}
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundItem == nil || foundItem.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
 	// Delete
 	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
@@ -287,9 +369,11 @@ func (service *Service) Delete(ctxData *types.ContextData, id int64) (affectedRo
 	return
 }
 
-func (service *Service) DeleteMultiple(ctxData *types.ContextData, selection []int64) (affectedRows int64, errCode int, err error) {
-	// Delete
-	affectedRows, err = service.Repository.DeleteMultipleByID(selection)
+func (service *Service) DeleteMultiple(
+	ctxData *types.ContextData,
+	list []int64,
+) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteMultipleByID(list, ctxData.Jwt.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -303,8 +387,15 @@ func (service *Service) DeleteMultiple(ctxData *types.ContextData, selection []i
 	return
 }
 
-func (service *Service) Get(ctxData *types.ContextData, id int64) (result *model.Quiz, errCode int, err error) {
-	result, err = service.Repository.GetByID(id)
+func (service *Service) Get(
+	ctxData *types.ContextData,
+	id int64,
+) (result *model.Quiz, errCode int, err error) {
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		result, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		result, err = service.Repository.GetByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -324,7 +415,14 @@ func (service *Service) GetAll(
 	pagination *types.Pagination,
 	request *data.GetAllRequest,
 ) (result []model.Quiz, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, request)
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Get
+	result, err = service.Repository.GetAll(filter, pagination, &newRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -338,7 +436,14 @@ func (service *Service) GetAllQuizAnswer(
 	pagination *types.Pagination,
 	request *data.GetAllQuizAnswerRequest,
 ) (result []model.QuizAnswer, errCode int, err error) {
-	result, err = service.Repository.GetAllQuizAnswer(filter, pagination, request)
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Get
+	result, err = service.Repository.GetAllQuizAnswer(filter, pagination, &newRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

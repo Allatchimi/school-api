@@ -23,7 +23,10 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "school"
 const DEFAULT_ERROR_MESSAGE = "interact with school model"
 
-func (service *Service) Create(ctxData *types.ContextData, request *data.SchoolRequest) (result *model.School, errCode int, err error) {
+func (service *Service) Create(
+	ctxData *types.ContextData,
+	request *data.SchoolRequest,
+) (result *model.School, errCode int, err error) {
 	// Format request
 	item := &model.School{
 		Name:   request.Name,
@@ -124,8 +127,12 @@ func (service *Service) Create(ctxData *types.ContextData, request *data.SchoolR
 	return
 }
 
-func (service *Service) Update(ctxData *types.ContextData, id int64, request *data.SchoolRequest) (result *model.School, errCode int, err error) {
-	// Check if school exists
+func (service *Service) Update(
+	ctxData *types.ContextData,
+	id int64,
+	request *data.SchoolRequest,
+) (result *model.School, errCode int, err error) {
+	// Check if the item exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -257,8 +264,12 @@ func (service *Service) Update(ctxData *types.ContextData, id int64, request *da
 	return
 }
 
-func (service *Service) UpdateDeploymentStatus(ctxData *types.ContextData, id int64, request *data.SchoolDeploymentStatusRequest) (errCode int, err error) {
-	// Check if school exists
+func (service *Service) UpdateDeploymentStatus(
+	ctxData *types.ContextData,
+	id int64,
+	request *data.SchoolDeploymentStatusRequest,
+) (errCode int, err error) {
+	// Check if the item exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -297,8 +308,12 @@ func (service *Service) UpdateDeploymentStatus(ctxData *types.ContextData, id in
 	return
 }
 
-func (service *Service) UpdateInfo(ctxData *types.ContextData, id int64, item *model.SchoolInfo) (result *model.SchoolInfo, errCode int, err error) {
-	// Check if school info already exists
+func (service *Service) UpdateInfo(
+	ctxData *types.ContextData,
+	id int64,
+	item *model.SchoolInfo,
+) (result *model.SchoolInfo, errCode int, err error) {
+	// Check if the item exists
 	foundItem, err := service.Repository.GetSchoolInfoByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -321,8 +336,12 @@ func (service *Service) UpdateInfo(ctxData *types.ContextData, id int64, item *m
 	return
 }
 
-func (service *Service) UpdateConfig(ctxData *types.ContextData, id int64, item *model.SchoolConfig) (result *model.SchoolConfig, errCode int, err error) {
-	// Check if school config already exists
+func (service *Service) UpdateConfig(
+	ctxData *types.ContextData,
+	id int64,
+	item *model.SchoolConfig,
+) (result *model.SchoolConfig, errCode int, err error) {
+	// Check if the item exists
 	foundItem, err := service.Repository.GetSchoolConfigByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -345,8 +364,11 @@ func (service *Service) UpdateConfig(ctxData *types.ContextData, id int64, item 
 	return
 }
 
-func (service *Service) Delete(ctxData *types.ContextData, id int64) (affectedRows int64, errCode int, err error) {
-	// Check if school exists
+func (service *Service) Delete(
+	ctxData *types.ContextData,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
+	// Check if the item exists
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -391,7 +413,10 @@ func (service *Service) Delete(ctxData *types.ContextData, id int64) (affectedRo
 	return
 }
 
-func (service *Service) DeleteMultiple(ctxData *types.ContextData, list []int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteMultiple(
+	ctxData *types.ContextData,
+	list []int64,
+) (affectedRows int64, errCode int, err error) {
 	for _, id := range list {
 		total, _, err := service.Delete(ctxData, id)
 		if err != nil && total > 0 {
@@ -401,7 +426,10 @@ func (service *Service) DeleteMultiple(ctxData *types.ContextData, list []int64)
 	return
 }
 
-func (service *Service) Get(ctxData *types.ContextData, id int64) (result *model.School, errCode int, err error) {
+func (service *Service) Get(
+	ctxData *types.ContextData,
+	id int64,
+) (result *model.School, errCode int, err error) {
 	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -416,7 +444,12 @@ func (service *Service) Get(ctxData *types.ContextData, id int64) (result *model
 	return
 }
 
-func (service *Service) GetAll(ctxData *types.ContextData, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.School, errCode int, err error) {
+func (service *Service) GetAll(
+	ctxData *types.ContextData,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.School, errCode int, err error) {
 	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError

@@ -32,6 +32,7 @@ type RequestUpdateRequest struct {
 
 type GetAllRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
+	types.FilterTeacherStudentRequest
 	SequenceID int64 `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
 	StudentID  int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id"`
 }

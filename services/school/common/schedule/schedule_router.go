@@ -149,15 +149,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete schedule common with id
+	// Delete multiple schedule
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-schedule-common",
-			Summary:     "Delete schedule common",
-			Description: "Delete existing schedule common with matching id and return affected rows in database.",
+			OperationID: "delete-schedule-multiple",
+			Summary:     "Delete multiple schedule",
+			Description: "Delete multiple schedule by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/common/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -180,59 +180,14 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.ScheduleID
+				Body types.DeleteMultipleRequest
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteCommon(&ctx, input)
+			result, errCode, err := controller.DeleteMultiple(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
-		},
-	)
-
-	// Get schedule common by id
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "get-schedule-common-id",
-			Summary:     "Get schedule common by id",
-			Description: "Return one schedule common with matching id",
-			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/common/{id}", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecuritySchemeSchoolToken: {},
-					constants.SecuritySchemeSchoolID:    {},
-					constants.SecuritySchemeBearerToken: {
-						fmt.Sprintf("%s,%s,%s,%s,%s",
-							constants.FeatureAdmin,
-							constants.FeatureDirector,
-							constants.FeatureTeacher,
-							constants.FeatureStudent,
-							constants.FeatureParent,
-						), // Feature
-						tableName,                // Table name
-						constants.PermissionRead, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				data.ScheduleID
-			},
-		) (*struct{ Body data.ScheduleResponse }, error) {
-			result, errCode, err := controller.GetCommon(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct{ Body data.ScheduleResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 

@@ -11,8 +11,8 @@ type ReportConfig struct {
 	SchoolID int64               `gorm:"default:null"`
 	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Notation               float64 `gorm:"default:null"`
-	NotationMinimumSuccess float64 `gorm:"default:null"`
+	Notation                      float64 `gorm:"default:null"`
+	MinimumRequiredValueToPromote float64 `gorm:"default:null"`
 }
 
 func (item *ReportConfig) ToResponse() *data.ReportConfigResponse {
@@ -21,7 +21,7 @@ func (item *ReportConfig) ToResponse() *data.ReportConfigResponse {
 	}
 	resp := &data.ReportConfigResponse{}
 	resp.Notation = item.Notation
-	resp.NotationMinimumSuccess = item.NotationMinimumSuccess
+	resp.MinimumRequiredValueToPromote = item.MinimumRequiredValueToPromote
 
 	resp.School = item.School.ToPublicResponse()
 

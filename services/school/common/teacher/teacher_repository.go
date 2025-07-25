@@ -39,12 +39,8 @@ func (repository *Repository) UpdateByID(
 	id int64,
 	item *model.Teacher,
 ) (*model.Teacher, error) {
-	foundItem, err := repository.GetByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return nil, err
-	}
 	result := &model.Teacher{}
-	return result, repository.Db.Model(&model.Teacher{}).Where("id = ?", item.ID).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.Teacher{}).Where("id = ?", item.ID).Updates(
 		map[string]any{
 			"school_id": item.SchoolID,
 			"user_id":   item.UserID,
@@ -57,82 +53,86 @@ func (repository *Repository) UpdateTeacherClassSubjectUnitByID(
 	id int64,
 	item *model.TeacherClassSubjectUnit,
 ) (*model.TeacherClassSubjectUnit, error) {
-	foundItem, err := repository.GetByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return nil, err
-	}
 	result := &model.TeacherClassSubjectUnit{}
-	return result, repository.Db.Model(&model.TeacherClassSubjectUnit{}).Where("id = ?", item.ID).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.TeacherClassSubjectUnit{}).Where("id = ?", item.ID).Updates(
 		map[string]any{
-			"teacher_id":       item.TeacherID,
+			"school_id":        item.SchoolID,
 			"year_id":          item.YearID,
 			"class_subject_id": item.ClassSubjectID,
 			"unit_id":          item.UnitID,
+			"teacher_id":       item.TeacherID,
 		},
 	).Find(result).Error
 }
 
-func (repository *Repository) DeleteByID(
-	id int64,
-) (int64, error) {
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.Teacher{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteTeacherClassSubjectUnitByID(
-	id int64,
-) (int64, error) {
-	foundItem, err := repository.GetTeacherClassSubjectUnitByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return -1, err
-	}
+func (repository *Repository) DeleteTeacherClassSubjectUnitByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.TeacherClassSubjectUnit{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.Teacher{})
-
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
-	return
-}
-
-func (repository *Repository) CountAll(schoolID int64) (result int64, err error) {
-	if schoolID <= 1 {
-		err = repository.Db.Model(&model.Teacher{}).Count(&result).Error
-		return
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
 	}
-	err = repository.Db.Model(&model.Teacher{}).Where("school_id = ?", schoolID).Count(&result).Error
+	query = query.Delete(&model.Teacher{})
+
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
-func (repository *Repository) GetByID(
-	id int64,
-) (*model.Teacher, error) {
+func (repository *Repository) DeleteMultipleTeacherClassSubjectUnitByID(list []int64, schoolID int64) (result int64, err error) {
+	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.TeacherClassSubjectUnit{})
+
+	result = query.RowsAffected
+	err = query.Error
+	return
+}
+
+func (repository *Repository) GetByID(id int64) (*model.Teacher, error) {
 	result := &model.Teacher{}
-	return result, repository.Db.
-		Preload(clause.Associations).
-		Preload("User.Info").
+	return result, repository.Db.Preload(clause.Associations).
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetByUserID(
-	userID int64,
-) (*model.Teacher, error) {
+func (repository *Repository) GetByUserID(userID int64) (*model.Teacher, error) {
 	result := &model.Teacher{}
-	return result, repository.Db.
-		Preload(clause.Associations).
-		Preload("User.Info").
+	return result, repository.Db.Preload(clause.Associations).
 		Where("user_id = ?", userID).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetTeacherClassSubjectUnitByID(
-	id int64,
-) (*model.TeacherClassSubjectUnit, error) {
+func (repository *Repository) GetTeacherClassSubjectUnitByID(id int64) (*model.TeacherClassSubjectUnit, error) {
 	result := &model.TeacherClassSubjectUnit{}
-	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Teacher, error) {
+	result := &model.Teacher{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetTeacherClassSubjectUnitByIDSchoolID(id int64, schoolID int64) (*model.TeacherClassSubjectUnit, error) {
+	result := &model.TeacherClassSubjectUnit{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObjectByUserID(
@@ -184,10 +184,11 @@ func (repository *Repository) GetTeacherClassSubjectUnitUniqueObject(
 ) (*model.TeacherClassSubjectUnit, error) {
 	result := &model.TeacherClassSubjectUnit{}
 	return result, repository.Db.Preload(clause.Associations).Where(&model.TeacherClassSubjectUnit{
-		TeacherID:      item.TeacherID,
+		SchoolID:       item.SchoolID,
 		YearID:         item.YearID,
-		UnitID:         item.UnitID,
 		ClassSubjectID: item.ClassSubjectID,
+		UnitID:         item.UnitID,
+		TeacherID:      item.TeacherID,
 	}).Limit(1).Find(result).Error
 }
 
@@ -196,8 +197,11 @@ func (repository *Repository) AreTeacherClassSubjectUnitSameUniqueObjects(
 	item2 *model.TeacherClassSubjectUnit,
 ) bool {
 	if item1 != nil && item2 != nil &&
-		(item1.TeacherID == item2.TeacherID &&
-			item1.YearID == item2.YearID && item1.UnitID == item2.UnitID && item1.ClassSubjectID == item2.ClassSubjectID) {
+		(item1.SchoolID == item2.SchoolID &&
+			item1.YearID == item2.YearID &&
+			item1.ClassSubjectID == item2.ClassSubjectID &&
+			item1.UnitID == item2.UnitID &&
+			item1.TeacherID == item2.TeacherID) {
 		return true
 	}
 	return false
@@ -310,13 +314,20 @@ func (repository *Repository) GetAllTeacherClassSubjectUnit(
 		// Securely append search conditions
 		searchClause := `(
 			CAST(tcsu.id AS TEXT) = ? OR
-			teachers.uid ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
 			years.name ILIKE ? OR
-			university_units.name ILIKE ?
+			highschool_classes.name ILIKE ? OR
+			highschool_classes.description ILIKE ? OR
+			highschool_subjects.name ILIKE ? OR
+			highschool_subjects.description ILIKE ? OR
+			university_units.name ILIKE ? OR
+			university_units.description ILIKE ? OR
+			teachers.uid ILIKE ? OR
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
-		args = append(args, search, like, like, like, like, like)
+		args = append(args, search, like, like, like, like, like, like, like, like, like, like)
 	}
 
 	// Perform query with preloads and custom pagination scope
@@ -339,10 +350,13 @@ func (repository *Repository) GetAllTeacherClassSubjectUnit(
 				repository.Db,
 				`SELECT tcsu.*
 				FROM teacher_class_subject_units AS tcsu
-				LEFT JOIN teachers ON tcsu.teacher_id = teachers.id
+				LEFT JOIN schools ON tcsu.school_id = schools.id
 				LEFT JOIN years ON tcsu.year_id = years.id
 				LEFT JOIN highschool_class_subjects ON tcsu.class_subject_id = highschool_class_subjects.id
-				LEFT JOIN university_units ON tcsu.unit_id = university_units.id `,
+				LEFT JOIN university_units ON tcsu.unit_id = university_units.id
+				LEFT JOIN teachers ON tcsu.teacher_id = teachers.id
+				LEFT JOIN highschool_classes ON highschool_class_subjects.class_id = highschool_classes.id
+				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id`,
 				where,
 				pagination,
 				filter,

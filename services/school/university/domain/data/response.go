@@ -16,5 +16,5 @@ type DomainResponse struct {
 
 type DomainResponseList struct {
 	types.PaginatedResponse
-	Data []DomainResponse `json:"data" required:"false" doc:"List of departments" example:"[]"`
+	Data []DomainResponse `json:"data" required:"false" doc:"List of department"`
 }

@@ -31,10 +31,10 @@ type LevelDomainResponse struct {
 
 type LevelResponseList struct {
 	types.PaginatedResponse
-	Data []LevelResponse `json:"data" required:"false" doc:"List of level" example:"[]"`
+	Data []LevelResponse `json:"data" required:"false" doc:"List of level"`
 }
 
 type LevelDomainResponseList struct {
 	types.PaginatedResponse
-	Data []LevelDomainResponse `json:"data" required:"false" doc:"List of level domain" example:"[]"`
+	Data []LevelDomainResponse `json:"data" required:"false" doc:"List of level domain"`
 }

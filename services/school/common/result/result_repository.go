@@ -27,14 +27,10 @@ func (repository *Repository) Create(data *model.Result) (*model.Result, error) 
 }
 
 func (repository *Repository) Update(id int64, data *model.Result) (*model.Result, error) {
-	foundItem, err := repository.GetByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return nil, err
-	}
-
 	result := &model.Result{}
-	return result, repository.Db.Model(&model.Result{}).Where("id = ?", id).Updates(
+	return result, repository.Db.Preload(clause.Associations).Model(&model.Result{}).Where("id = ?", id).Updates(
 		map[string]any{
+			"school_id":  data.SchoolID,
 			"student_id": data.StudentID,
 			"exam_id":    data.ExamID,
 
@@ -48,23 +44,37 @@ func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.Result{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.Result{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.Result, error) {
 	result := &model.Result{}
-	return result, repository.Db.Model(&model.Result{}).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Result, error) {
+	result := &model.Result{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.Result) (*model.Result, error) {
 	result := &model.Result{}
 	return result, repository.Db.Preload(clause.Associations).Where(&model.Result{
+		SchoolID:  item.SchoolID,
 		StudentID: item.StudentID,
 		ExamID:    item.ExamID,
 	}).Limit(1).Find(result).Error
@@ -72,7 +82,8 @@ func (repository *Repository) GetUniqueObject(item *model.Result) (*model.Result
 
 func (repository *Repository) AreSameUniqueObjects(item1 *model.Result, item2 *model.Result) bool {
 	if item1 != nil && item2 != nil &&
-		(item1.StudentID == item2.StudentID &&
+		(item1.SchoolID == item2.SchoolID &&
+			item1.StudentID == item2.StudentID &&
 			item1.ExamID == item2.ExamID) {
 		return true
 	}

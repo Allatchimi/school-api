@@ -39,10 +39,10 @@ type ClassSubjectResponse struct {
 
 type ClassResponseList struct {
 	types.PaginatedResponse
-	Data []ClassResponse `json:"data" required:"false" doc:"List of classes" example:"[]"`
+	Data []ClassResponse `json:"data" required:"false" doc:"List of classe"`
 }
 
 type ClassSubjectResponseList struct {
 	types.PaginatedResponse
-	Data []ClassSubjectResponse `json:"data" required:"false" doc:"List of subject for matching class" example:"[]"`
+	Data []ClassSubjectResponse `json:"data" required:"false" doc:"List of subject for matching clas"`
 }

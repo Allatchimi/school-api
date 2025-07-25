@@ -73,5 +73,5 @@ type UserConfigResponse struct {
 
 type UserResponseList struct {
 	types.PaginatedResponse
-	Data []UserResponse `json:"data" required:"false" doc:"List of users" example:"[]"`
+	Data []UserResponse `json:"data" required:"false" doc:"List of user"`
 }

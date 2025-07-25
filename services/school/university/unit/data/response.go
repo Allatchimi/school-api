@@ -28,5 +28,5 @@ type UnitResponse struct {
 
 type UnitResponseList struct {
 	types.PaginatedResponse
-	Data []UnitResponse `json:"data" required:"false" doc:"List of unit" example:"[]"`
+	Data []UnitResponse `json:"data" required:"false" doc:"List of unit"`
 }

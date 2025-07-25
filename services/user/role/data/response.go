@@ -13,5 +13,5 @@ type RoleResponse struct {
 
 type RoleResponseList struct {
 	types.PaginatedResponse
-	Data []RoleResponse `json:"data" required:"false" doc:"List of roles" example:"[]"`
+	Data []RoleResponse `json:"data" required:"false" doc:"List of role"`
 }

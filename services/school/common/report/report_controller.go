@@ -24,7 +24,7 @@ func (controller *Controller) CreateEntry(
 		Body data.ReportEntryRequest
 	},
 ) (result *model.ReportEntry, errCode int, err error) {
-	result, errCode, err = controller.Service.Create(
+	result, errCode, err = controller.Service.CreateEntry(
 		httpHelper.GetContextData(ctx),
 		&input.Body,
 	)
@@ -93,7 +93,7 @@ func (controller *Controller) DeleteEntry(
 		data.ReportEntryID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.Delete(httpHelper.GetContextData(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.DeleteEntry(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -135,7 +135,7 @@ func (controller *Controller) DeleteMultipleEntry(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetContextData(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultipleEntry(httpHelper.GetContextData(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -177,7 +177,7 @@ func (controller *Controller) GetEntry(
 		data.ReportEntryID
 	},
 ) (result *model.ReportEntry, errCode int, err error) {
-	result, errCode, err = controller.Service.Get(httpHelper.GetContextData(ctx), input.ID)
+	result, errCode, err = controller.Service.GetEntry(httpHelper.GetContextData(ctx), input.ID)
 	return
 }
 
@@ -210,7 +210,7 @@ func (controller *Controller) GetAllEntry(
 	},
 ) (result *data.ReportEntryResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	resultList, errCode, err := controller.Service.GetAll(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllReportEntryRequest)
+	resultList, errCode, err := controller.Service.GetAllEntry(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllReportEntryRequest)
 	if err != nil {
 		return
 	}

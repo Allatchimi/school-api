@@ -26,7 +26,10 @@ func NewService(userService *user.Service) *Service {
 const MODEL_NAME = "user"
 const DEFAULT_ERROR_MESSAGE = "interact with user model"
 
-func (service *Service) UpdateProfileInfo(ctxData *types.ContextData, request *data.UpdateProfileInfoRequest) (result *model.UserInfo, errCode int, err error) {
+func (service *Service) UpdateProfileInfo(
+	ctxData *types.ContextData,
+	request *data.UpdateProfileInfoRequest,
+) (result *model.UserInfo, errCode int, err error) {
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
@@ -55,7 +58,7 @@ func (service *Service) UpdateProfileInfo(ctxData *types.ContextData, request *d
 	}
 
 	//Update user info
-	result, err = service.UserService.Repository.UpdateUserInfoByID(userFound.UserInfoID, item)
+	result, err = service.UserService.Repository.UpdateUserInfoByID(userFound.InfoID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -63,7 +66,10 @@ func (service *Service) UpdateProfileInfo(ctxData *types.ContextData, request *d
 	return
 }
 
-func (service *Service) UpdateProfileConfigMessage(ctxData *types.ContextData, request *data.UpdateProfileMessageRequest) (result *model.UserConfig, errCode int, err error) {
+func (service *Service) UpdateProfileConfigMessage(
+	ctxData *types.ContextData,
+	request *data.UpdateProfileMessageRequest,
+) (result *model.UserConfig, errCode int, err error) {
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
@@ -84,7 +90,7 @@ func (service *Service) UpdateProfileConfigMessage(ctxData *types.ContextData, r
 	}
 
 	//Update user config
-	result, err = service.UserService.Repository.UpdateUserConfigByID(userFound.UserConfigID, item)
+	result, err = service.UserService.Repository.UpdateUserConfigByID(userFound.ConfigID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -92,7 +98,10 @@ func (service *Service) UpdateProfileConfigMessage(ctxData *types.ContextData, r
 	return
 }
 
-func (service *Service) UpdateProfilePhoneNumber(ctxData *types.ContextData, phoneNumber uint64) (result *model.User, errCode int, err error) { // Check if user exists
+func (service *Service) UpdateProfilePhoneNumber(
+	ctxData *types.ContextData,
+	phoneNumber uint64,
+) (result *model.User, errCode int, err error) { // Check if user exists
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
@@ -128,7 +137,9 @@ func (service *Service) UpdateProfilePhoneNumber(ctxData *types.ContextData, pho
 	return
 }
 
-func (service *Service) UpdateProfilePasswordInit(ctxData *types.ContextData) (token string, errCode int, err error) {
+func (service *Service) UpdateProfilePasswordInit(
+	ctxData *types.ContextData,
+) (token string, errCode int, err error) {
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
@@ -207,7 +218,11 @@ func (service *Service) UpdateProfilePasswordInit(ctxData *types.ContextData) (t
 	return
 }
 
-func (service *Service) UpdateProfilePasswordCheckCode(ctxData *types.ContextData, inputToken string, inputCode int) (token string, errCode int, err error) {
+func (service *Service) UpdateProfilePasswordCheckCode(
+	ctxData *types.ContextData,
+	inputToken string,
+	inputCode int,
+) (token string, errCode int, err error) {
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
@@ -290,7 +305,12 @@ func (service *Service) UpdateProfilePasswordCheckCode(ctxData *types.ContextDat
 	return
 }
 
-func (service *Service) UpdateProfilePasswordNewPassword(ctxData *types.ContextData, token string, currentPassword string, password string) (errCode int, err error) {
+func (service *Service) UpdateProfilePasswordNewPassword(
+	ctxData *types.ContextData,
+	token string,
+	currentPassword string,
+	password string,
+) (errCode int, err error) {
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
@@ -408,7 +428,9 @@ func (service *Service) UpdateProfilePasswordNewPassword(ctxData *types.ContextD
 	return
 }
 
-func (service *Service) UpdateProfilePhoneNumberInit(ctxData *types.ContextData) (token string, errCode int, err error) {
+func (service *Service) UpdateProfilePhoneNumberInit(
+	ctxData *types.ContextData,
+) (token string, errCode int, err error) {
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
@@ -487,7 +509,11 @@ func (service *Service) UpdateProfilePhoneNumberInit(ctxData *types.ContextData)
 	return
 }
 
-func (service *Service) UpdateProfilePhoneNumberCheckCode(ctxData *types.ContextData, inputToken string, inputCode int) (token string, errCode int, err error) {
+func (service *Service) UpdateProfilePhoneNumberCheckCode(
+	ctxData *types.ContextData,
+	inputToken string,
+	inputCode int,
+) (token string, errCode int, err error) {
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
@@ -570,7 +596,11 @@ func (service *Service) UpdateProfilePhoneNumberCheckCode(ctxData *types.Context
 	return
 }
 
-func (service *Service) UpdateProfilePhoneNumberNewPhoneNumber(ctxData *types.ContextData, token string, phoneNumber uint64) (errCode int, err error) {
+func (service *Service) UpdateProfilePhoneNumberNewPhoneNumber(
+	ctxData *types.ContextData,
+	token string,
+	phoneNumber uint64,
+) (errCode int, err error) {
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
@@ -649,7 +679,9 @@ func (service *Service) UpdateProfilePhoneNumberNewPhoneNumber(ctxData *types.Co
 	return
 }
 
-func (service *Service) UpdateProfileMfaEmailInit(ctxData *types.ContextData) (token string, errCode int, err error) {
+func (service *Service) UpdateProfileMfaEmailInit(
+	ctxData *types.ContextData,
+) (token string, errCode int, err error) {
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
@@ -728,7 +760,11 @@ func (service *Service) UpdateProfileMfaEmailInit(ctxData *types.ContextData) (t
 	return
 }
 
-func (service *Service) UpdateProfileMfaEmailCheckCode(ctxData *types.ContextData, inputToken string, inputCode int) (errCode int, err error) {
+func (service *Service) UpdateProfileMfaEmailCheckCode(
+	ctxData *types.ContextData,
+	inputToken string,
+	inputCode int,
+) (errCode int, err error) {
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
@@ -790,7 +826,7 @@ func (service *Service) UpdateProfileMfaEmailCheckCode(ctxData *types.ContextDat
 	_, _ = config.DeleteRedisString(securityUtil.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
 
 	// Toggle Mfa settings
-	mfaUpdated, err := service.UserService.Repository.UpdateUserConfigFieldByID(userFound.UserConfigID, "mfa_email", !userFound.Config.MfaEmail)
+	mfaUpdated, err := service.UserService.Repository.UpdateUserConfigFieldByID(userFound.ConfigID, "mfa_email", !userFound.Config.MfaEmail)
 	if err != nil || mfaUpdated == nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
 		if errPgState == nil {
@@ -807,7 +843,10 @@ func (service *Service) UpdateProfileMfaEmailCheckCode(ctxData *types.ContextDat
 	return
 }
 
-func (service *Service) UpdateProfileNotification(ctxData *types.ContextData, enabled bool) (result *model.User, errCode int, err error) {
+func (service *Service) UpdateProfileNotification(
+	ctxData *types.ContextData,
+	enabled bool,
+) (result *model.User, errCode int, err error) {
 	// Check if user exists
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil || userFound == nil {
@@ -817,7 +856,7 @@ func (service *Service) UpdateProfileNotification(ctxData *types.ContextData, en
 	}
 
 	// Update user notification
-	tempConfig, err := service.UserService.Repository.UpdateUserConfigAllowNotificationByID(userFound.UserConfigID, enabled)
+	tempConfig, err := service.UserService.Repository.UpdateUserConfigAllowNotificationByID(userFound.ConfigID, enabled)
 	if err != nil || tempConfig == nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -828,7 +867,10 @@ func (service *Service) UpdateProfileNotification(ctxData *types.ContextData, en
 	return
 }
 
-func (service *Service) UpdateProfileWebPushSubscription(ctxData *types.ContextData, subscription *data.UpdateProfileWebPushSubscriptionRequest) (errCode int, err error) {
+func (service *Service) UpdateProfileWebPushSubscription(
+	ctxData *types.ContextData,
+	subscription *data.UpdateProfileWebPushSubscriptionRequest,
+) (errCode int, err error) {
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
@@ -857,7 +899,9 @@ func (service *Service) UpdateProfileWebPushSubscription(ctxData *types.ContextD
 	return
 }
 
-func (service *Service) GetProfile(ctxData *types.ContextData) (result *model.User, errCode int, err error) {
+func (service *Service) GetProfile(
+	ctxData *types.ContextData,
+) (result *model.User, errCode int, err error) {
 	result, err = service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -872,7 +916,9 @@ func (service *Service) GetProfile(ctxData *types.ContextData) (result *model.Us
 	return
 }
 
-func (service *Service) GetWebPushSubscriptionPublicKey(ctxData *types.ContextData) (result string, errCode int, err error) {
+func (service *Service) GetWebPushSubscriptionPublicKey(
+	ctxData *types.ContextData,
+) (result string, errCode int, err error) {
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil {

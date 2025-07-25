@@ -16,5 +16,5 @@ type SemesterResponse struct {
 
 type SemesterResponseList struct {
 	types.PaginatedResponse
-	Data []SemesterResponse `json:"data" required:"false" doc:"List of semesters" example:"[]"`
+	Data []SemesterResponse `json:"data" required:"false" doc:"List of semester"`
 }

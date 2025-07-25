@@ -123,17 +123,17 @@ func (service *Service) Create(
 		activatedAt = &tmpTime
 	}
 	result, err = service.Repository.Create(&model.User{
-		RoleID:       item.RoleID,
-		SchoolID:     item.SchoolID,
-		Email:        item.Email,
-		PhoneNumber:  item.PhoneNumber,
-		Status:       item.Status,
-		IsActivated:  item.IsActivated,
-		ActivatedAt:  activatedAt,
-		LoginMethod:  constants.AuthLoginMethodDefault,
-		Password:     randomPassword,
-		UserInfoID:   tempInfo.ID,
-		UserConfigID: tempConfig.ID,
+		RoleID:      item.RoleID,
+		SchoolID:    item.SchoolID,
+		Email:       item.Email,
+		PhoneNumber: item.PhoneNumber,
+		Status:      item.Status,
+		IsActivated: item.IsActivated,
+		ActivatedAt: activatedAt,
+		LoginMethod: constants.AuthLoginMethodDefault,
+		Password:    randomPassword,
+		InfoID:      tempInfo.ID,
+		ConfigID:    tempConfig.ID,
 	})
 	if err != nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
@@ -156,10 +156,16 @@ func (service *Service) Update(
 	id int64,
 	request *data.UserRequest,
 ) (result *model.User, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
 	// Check if the item exists
 	var foundItem *model.User
 	if ctxData.User.Feature != constants.FeatureAdmin {
-		foundItem, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+		foundItem, err = service.Repository.GetByIDSchoolID(id, newRequest.SchoolID)
 	} else {
 		foundItem, err = service.Repository.GetByID(id)
 	}
@@ -172,12 +178,6 @@ func (service *Service) Update(
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
-	}
-
-	// Check school
-	newRequest := *request
-	if ctxData.Jwt.SchoolID > 0 {
-		newRequest.SchoolID = ctxData.Jwt.SchoolID
 	}
 
 	// Format item
@@ -202,7 +202,7 @@ func (service *Service) Update(
 		},
 	}
 
-	// Check if user exists
+	// Check inputs
 	var isEmailValid = utils.IsEmailValid(item.Email)
 	var isPhoneNumberValid = utils.IsPhoneNumberValid(item.PhoneNumber)
 	if isEmailValid {
@@ -219,14 +219,16 @@ func (service *Service) Update(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem == nil || foundItem.ID < 1 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
+	if foundItem != nil && foundItem.ID > 0 {
+		if (isEmailValid && foundItem.Email == item.Email) || (!isEmailValid && foundItem.PhoneNumber == item.PhoneNumber) {
+			errCode = http.StatusFound
+			err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
 	}
 
 	// Update user info
-	_, err = service.Repository.UpdateUserInfoByID(foundItem.UserInfoID, item.Info)
+	_, err = service.Repository.UpdateUserInfoByID(foundItem.InfoID, item.Info)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -297,13 +299,7 @@ func (service *Service) DeleteMultiple(
 	ctxData *types.ContextData,
 	list []int64,
 ) (affectedRows int64, errCode int, err error) {
-	// Check school
-	var foundSchool int64
-	if ctxData.Jwt.SchoolID > 0 {
-		foundSchool = ctxData.Jwt.SchoolID
-	}
-
-	affectedRows, err = service.Repository.DeleteMultipleByID(list, foundSchool)
+	affectedRows, err = service.Repository.DeleteMultipleByID(list, ctxData.Jwt.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

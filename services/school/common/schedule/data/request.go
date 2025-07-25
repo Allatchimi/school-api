@@ -28,5 +28,6 @@ type ScheduleRequest struct {
 
 type GetAllRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
-	Type string `json:"type" query:"type" required:"false" enum:"all,default,common" doc:"Type"`
+	types.FilterTeacherStudentRequest
+	Type string `json:"type" query:"type" required:"false" doc:"Type"`
 }

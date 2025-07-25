@@ -20,11 +20,11 @@ type User struct {
 	RoleID int64           `gorm:"default:null"`
 	Role   *modelRole.Role `gorm:"default:null;foreignKey:RoleID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	UserInfoID int64     `gorm:"default:null"`
-	Info       *UserInfo `gorm:"default:null;foreignKey:UserInfoID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	InfoID int64     `gorm:"default:null"`
+	Info   *UserInfo `gorm:"default:null;foreignKey:InfoID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	UserConfigID int64       `gorm:"default:null"`
-	Config       *UserConfig `gorm:"default:null;foreignKey:UserConfigID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	ConfigID int64       `gorm:"default:null"`
+	Config   *UserConfig `gorm:"default:null;foreignKey:ConfigID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Email       string `gorm:"default:null"`
 	PhoneNumber uint64 `gorm:"default:null"`

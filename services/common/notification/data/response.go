@@ -21,5 +21,5 @@ type NotificationNotSeenResponse struct {
 
 type NotificationResponseList struct {
 	types.PaginatedResponse
-	Data []NotificationResponse `json:"data" required:"false" doc:"List of notifications" example:"[]"`
+	Data []NotificationResponse `json:"data" required:"false" doc:"List of notification"`
 }

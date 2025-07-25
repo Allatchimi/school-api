@@ -1,7 +1,6 @@
 package notification
 
 import (
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -80,16 +79,15 @@ func (repository *Repository) GetByIDUserID(id int64, userID int64) (*model.Noti
 
 func (repository *Repository) GetNotSeenCountByUserID(userID int64) (result int64, err error) {
 	var count int64
-	countQuery := "SELECT COUNT(*) FROM notifications WHERE notifications.user_id = ? AND (notifications.seen = ? OR notifications.seen IS NULL)"
+	countQuery := `
+	SELECT COUNT(*) FROM notifications
+	WHERE notifications.user_id = ?
+	AND (notifications.seen = ? OR notifications.seen IS NULL)
+	`
 	args := []any{}
 	args = append(args, userID, false)
 	repository.Db.Raw(countQuery, args...).Count(&count)
 	result = count
-
-	fmt.Print("Notifications not seen")
-	fmt.Println("")
-	fmt.Print(result)
-	fmt.Println("")
 	return
 }
 

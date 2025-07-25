@@ -115,6 +115,20 @@ func (controller *Controller) DeleteMultiple(
 	return
 }
 
+func (controller *Controller) DeleteMultipleTeacherClassSubjectUnit(
+	ctx *context.Context,
+	input *struct {
+		Body types.DeleteMultipleRequest
+	},
+) (result int64, errCode int, err error) {
+	affectedRows, errCode, err := controller.Service.DeleteMultipleTeacherClassSubjectUnit(httpHelper.GetContextData(ctx), input.Body.List)
+	if err != nil {
+		return
+	}
+	result = affectedRows
+	return
+}
+
 func (controller *Controller) Get(
 	ctx *context.Context,
 	input *struct {

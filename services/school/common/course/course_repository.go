@@ -68,10 +68,13 @@ func (repository *Repository) UpdateCourseCommentByID(id int64, item *model.Cour
 	).Find(result).Error
 }
 
-func (repository *Repository) DeleteByID(
-	id int64,
-) (int64, error) {
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.Course{})
+	return result.RowsAffected, result.Error
+}
+
+func (repository *Repository) DeleteCourseCommentByID(id int64) (int64, error) {
+	result := repository.Db.Where("id = ?", id).Delete(&model.CourseComment{})
 	return result.RowsAffected, result.Error
 }
 
@@ -89,27 +92,46 @@ func (repository *Repository) DeleteCourseVideoByCourseID(
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.Course{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.Course{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
-func (repository *Repository) GetByID(
-	id int64,
-) (*model.Course, error) {
+func (repository *Repository) GetByID(id int64) (*model.Course, error) {
 	result := &model.Course{}
-	return result, repository.Db.Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetCourseCommentByID(
-	id int64,
-) (*model.CourseComment, error) {
+func (repository *Repository) GetCourseCommentByID(id int64) (*model.CourseComment, error) {
 	result := &model.CourseComment{}
-	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Course, error) {
+	result := &model.Course{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetCourseCommentByIDSchoolID(id int64, schoolID int64) (*model.CourseComment, error) {
+	result := &model.CourseComment{}
+	return result, repository.Db.Preload(clause.Associations).
+		Joins("LEFT JOIN courses ON course_comments.course_id = courses.id").
+		Where("id = ?", id).
+		Where("courses.school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetAll(

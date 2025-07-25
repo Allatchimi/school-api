@@ -25,19 +25,19 @@ type TeacherPublicResponse struct {
 
 type TeacherClassSubjectUnitResponse struct {
 	types.BaseGormModelResponse
-	Teacher *TeacherPublicResponse `json:"teacher" required:"false" doc:"Teacher"`
-
-	Year         *dataYear.YearResponse          `json:"year" required:"false" doc:"Year"`
-	ClassSubject *dataClass.ClassSubjectResponse `json:"classSubject" required:"false" doc:"Subject for specific class"`
-	Unit         *dataUnit.UnitResponse          `json:"unit" required:"false" doc:"Unit"`
+	School       *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	Teacher      *TeacherPublicResponse           `json:"teacher" required:"false" doc:"Teacher"`
+	Year         *dataYear.YearResponse           `json:"year" required:"false" doc:"Year"`
+	ClassSubject *dataClass.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Subject for specific class"`
+	Unit         *dataUnit.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
 }
 
 type TeacherResponseList struct {
 	types.PaginatedResponse
-	Data []TeacherResponse `json:"data" required:"false" doc:"List of teachers" example:"[]"`
+	Data []TeacherResponse `json:"data" required:"false" doc:"List of teacher" example:"[]"`
 }
 
 type TeacherClassSubjectUnitResponseList struct {
 	types.PaginatedResponse
-	Data []TeacherClassSubjectUnitResponse `json:"data" required:"false" doc:"List of unit/subject for the specified teacher" example:"[]"`
+	Data []TeacherClassSubjectUnitResponse `json:"data" required:"false" doc:"List of subject for teacher" example:"[]"`
 }

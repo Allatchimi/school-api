@@ -5,7 +5,6 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
-	serviceHelper "api/services/helper"
 	"api/services/school/common/course/data"
 	"api/services/school/common/course/model"
 )
@@ -21,17 +20,31 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "course"
 const DEFAULT_ERROR_MESSAGE = "interact with course model"
 
-func (service *Service) Create(ctxData *types.ContextData, request *data.CourseRequest) (result *model.Course, errCode int, err error) {
+func (service *Service) Create(
+	ctxData *types.ContextData,
+	request *data.CourseRequest,
+) (result *model.Course, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
 	// Format request
 	item := &model.Course{
-		SchoolID:       request.SchoolID,
-		YearID:         request.YearID,
-		ClassSubjectID: request.ClassSubjectID,
-		UnitID:         request.UnitID,
+		SchoolID:       newRequest.SchoolID,
+		YearID:         newRequest.YearID,
+		ClassSubjectID: newRequest.ClassSubjectID,
+		UnitID:         newRequest.UnitID,
 
-		Title:       request.Title,
-		Description: request.Description,
-		Content:     request.Content,
+		Title:       newRequest.Title,
+		Description: newRequest.Description,
+		Content:     newRequest.Content,
+	}
+	if newRequest.ClassSubjectID < 1 && newRequest.UnitID < 1 {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessageV2("class subject id or unit id(you should provide one of these fields)")
+		return
 	}
 
 	// Insert the course
@@ -43,8 +56,8 @@ func (service *Service) Create(ctxData *types.ContextData, request *data.CourseR
 	}
 
 	// Insert every document and video
-	if len(request.Documents) > 0 {
-		for _, tempIterator := range request.Documents {
+	if len(newRequest.Documents) > 0 {
+		for _, tempIterator := range newRequest.Documents {
 			tempItem, tempErr := service.Repository.CreateCourseDocument(
 				&model.CourseDocument{
 					Title:       tempIterator.Title,
@@ -59,8 +72,8 @@ func (service *Service) Create(ctxData *types.ContextData, request *data.CourseR
 			}
 		}
 	}
-	if len(request.Videos) > 0 {
-		for _, tempIterator := range request.Videos {
+	if len(newRequest.Videos) > 0 {
+		for _, tempIterator := range newRequest.Videos {
 			tempItem, tempErr := service.Repository.CreateCourseDocument(
 				&model.CourseDocument{
 					Title:       tempIterator.Title,
@@ -92,26 +105,38 @@ func (service *Service) Create(ctxData *types.ContextData, request *data.CourseR
 	return
 }
 
-func (service *Service) CreateComment(ctxData *types.ContextData, id int64, request *data.CourseCommentRequest) (result *model.CourseComment, errCode int, err error) {
-	// Check if the course exists
-	foundItem, err := service.Repository.GetByID(id)
+func (service *Service) CreateComment(
+	ctxData *types.ContextData,
+	courseID int64,
+	request *data.CourseCommentRequest,
+) (result *model.CourseComment, errCode int, err error) {
+	// Check school
+	newRequest := *request
+
+	// Check if the item exists
+	var foundItem *model.Course
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetByIDSchoolID(courseID, ctxData.Jwt.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetByID(courseID)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem == nil || foundItem.ID < 0 {
+	if foundItem == nil || foundItem.ID < 1 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 
 	// Format request
 	item := &model.CourseComment{
-		CourseID: id,
+		CourseID: courseID,
 		UserID:   ctxData.Jwt.UserID,
-		Message:  request.Message,
-		Rate:     request.Rate,
+		Message:  newRequest.Message,
+		Rate:     newRequest.Rate,
 	}
 
 	// Insert course
@@ -124,9 +149,24 @@ func (service *Service) CreateComment(ctxData *types.ContextData, id int64, requ
 	return
 }
 
-func (service *Service) Update(ctxData *types.ContextData, id int64, request *data.CourseRequest) (result *model.Course, errCode int, err error) {
-	// Check if course exists
-	foundItem, err := service.Repository.GetByID(id)
+func (service *Service) Update(
+	ctxData *types.ContextData,
+	id int64,
+	request *data.CourseRequest,
+) (result *model.Course, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Check if the item exists
+	var foundItem *model.Course
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetByIDSchoolID(id, newRequest.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -135,6 +175,13 @@ func (service *Service) Update(ctxData *types.ContextData, id int64, request *da
 	if foundItem == nil || foundItem.ID < 1 {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Format item
+	if newRequest.ClassSubjectID < 1 && newRequest.UnitID < 1 {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessageV2("class subject id or unit id(you should provide one of these fields)")
 		return
 	}
 
@@ -153,8 +200,8 @@ func (service *Service) Update(ctxData *types.ContextData, id int64, request *da
 	}
 
 	// Insert every document and video
-	if len(request.Documents) > 0 {
-		for _, tempIterator := range request.Documents {
+	if len(newRequest.Documents) > 0 {
+		for _, tempIterator := range newRequest.Documents {
 			tempItem, tempErr := service.Repository.CreateCourseDocument(
 				&model.CourseDocument{
 					Title:       tempIterator.Title,
@@ -169,8 +216,8 @@ func (service *Service) Update(ctxData *types.ContextData, id int64, request *da
 			}
 		}
 	}
-	if len(request.Videos) > 0 {
-		for _, tempIterator := range request.Videos {
+	if len(newRequest.Videos) > 0 {
+		for _, tempIterator := range newRequest.Videos {
 			tempItem, tempErr := service.Repository.CreateCourseDocument(
 				&model.CourseDocument{
 					Title:       tempIterator.Title,
@@ -188,14 +235,14 @@ func (service *Service) Update(ctxData *types.ContextData, id int64, request *da
 
 	// Update the course
 	result, err = service.Repository.UpdateByID(id, &model.Course{
-		SchoolID:       request.SchoolID,
-		YearID:         request.YearID,
-		ClassSubjectID: request.ClassSubjectID,
-		UnitID:         request.UnitID,
+		SchoolID:       newRequest.SchoolID,
+		YearID:         newRequest.YearID,
+		ClassSubjectID: newRequest.ClassSubjectID,
+		UnitID:         newRequest.UnitID,
 
-		Title:       request.Title,
-		Description: request.Description,
-		Content:     request.Content,
+		Title:       newRequest.Title,
+		Description: newRequest.Description,
+		Content:     newRequest.Content,
 	})
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -205,9 +252,21 @@ func (service *Service) Update(ctxData *types.ContextData, id int64, request *da
 	return
 }
 
-func (service *Service) UpdateComment(ctxData *types.ContextData, id int64, request *data.CourseCommentRequest) (result *model.CourseComment, errCode int, err error) {
-	// Get the course comment
-	foundItem, err := service.Repository.GetCourseCommentByID(id)
+func (service *Service) UpdateComment(
+	ctxData *types.ContextData,
+	id int64,
+	request *data.CourseCommentRequest,
+) (result *model.CourseComment, errCode int, err error) {
+	// Check school
+	newRequest := *request
+
+	// Check if the item exists
+	var foundItem *model.CourseComment
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetCourseCommentByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetCourseCommentByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -218,6 +277,7 @@ func (service *Service) UpdateComment(ctxData *types.ContextData, id int64, requ
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
+
 	// Check if the comment is not deleted
 	if foundItem.IsDeleted {
 		errCode = http.StatusForbidden
@@ -229,8 +289,8 @@ func (service *Service) UpdateComment(ctxData *types.ContextData, id int64, requ
 	item := &model.CourseComment{
 		CourseID: id,
 		UserID:   ctxData.Jwt.UserID,
-		Message:  request.Message,
-		Rate:     request.Rate,
+		Message:  newRequest.Message,
+		Rate:     newRequest.Rate,
 	}
 
 	// Update
@@ -243,7 +303,10 @@ func (service *Service) UpdateComment(ctxData *types.ContextData, id int64, requ
 	return
 }
 
-func (service *Service) Delete(ctxData *types.ContextData, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) Delete(
+	ctxData *types.ContextData,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
 	// Get the course
 	foundItem, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -272,17 +335,25 @@ func (service *Service) Delete(ctxData *types.ContextData, id int64) (affectedRo
 	return
 }
 
-func (service *Service) DeleteComment(ctxData *types.ContextData, id int64) (affectedRows int64, errCode int, err error) {
-	// Get the course comment
-	foundItem, err := service.Repository.GetCourseCommentByID(id)
+func (service *Service) DeleteComment(
+	ctxData *types.ContextData,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
+	// Check if the item exists
+	var foundItem *model.CourseComment
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetCourseCommentByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetCourseCommentByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem == nil || foundItem.ID < 0 {
+	if foundItem == nil || foundItem.ID < 1 {
 		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 
@@ -304,8 +375,11 @@ func (service *Service) DeleteComment(ctxData *types.ContextData, id int64) (aff
 	return
 }
 
-func (service *Service) DeleteMultiple(ctxData *types.ContextData, list []int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteMultipleByID(list)
+func (service *Service) DeleteMultiple(
+	ctxData *types.ContextData,
+	list []int64,
+) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteMultipleByID(list, ctxData.Jwt.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -319,9 +393,15 @@ func (service *Service) DeleteMultiple(ctxData *types.ContextData, list []int64)
 	return
 }
 
-func (service *Service) Get(ctxData *types.ContextData, id int64) (result *model.Course, errCode int, err error) {
-	// Get the course
-	result, err = service.Repository.GetByID(id)
+func (service *Service) Get(
+	ctxData *types.ContextData,
+	id int64,
+) (result *model.Course, errCode int, err error) {
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		result, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		result, err = service.Repository.GetByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -341,11 +421,14 @@ func (service *Service) GetAll(
 	pagination *types.Pagination,
 	request *data.GetAllRequest,
 ) (result []model.Course, errCode int, err error) {
-	result, err = service.Repository.GetAll(
-		filter,
-		pagination,
-		request,
-	)
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Get
+	result, err = service.Repository.GetAll(filter, pagination, &newRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -359,26 +442,7 @@ func (service *Service) GetAllComment(
 	pagination *types.Pagination,
 	request *data.GetAllCourseCommentRequest,
 ) (result []model.CourseComment, errCode int, err error) {
-	// Get user
-	_, err = serviceHelper.GetUserByID(ctxData.Jwt.UserID)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-
-	// Proceed by feature
-	// if foundUser.Role.Feature != constants.FeatureAdmin {
-	// 	newRequest := *request
-	// 	newRequest.SchoolID = foundUser.SchoolID
-	// 	result, err = service.Repository.GetAll(filter, pagination, &newRequest)
-	// } else {
-	// 	result, err = service.Repository.GetAllCourseComment(
-	// 		filter,
-	// 		pagination,
-	// 		request,
-	// 	)
-	// }
+	result, err = service.Repository.GetAllCourseComment(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

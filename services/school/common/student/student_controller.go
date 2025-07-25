@@ -3,6 +3,7 @@ package student
 import (
 	"context"
 
+	"api/common/constants"
 	"api/common/helpers"
 	httpHelper "api/common/helpers/http"
 	"api/common/types"
@@ -37,6 +38,9 @@ func (controller *Controller) CreateStudentEnroll(
 		Body data.StudentEnrollRequest
 	},
 ) (result *model.StudentEnroll, errCode int, err error) {
+	newReq := input.Body
+	newReq.Origin = constants.STUDENT_ENROLL_ORIGIN_DASHBOARD
+	newReq.OriginFeedback = "Manually created student enroll"
 	result, errCode, err = controller.Service.CreateStudentEnroll(
 		httpHelper.GetContextData(ctx),
 		&input.Body,

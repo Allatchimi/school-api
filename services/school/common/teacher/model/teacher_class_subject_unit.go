@@ -2,6 +2,7 @@ package model
 
 import (
 	"api/common/types"
+	modelSchool "api/services/school/common/school/model"
 	"api/services/school/common/teacher/data"
 	modelYear "api/services/school/common/year/model"
 	modelClass "api/services/school/highschool/class/model"
@@ -10,6 +11,8 @@ import (
 
 type TeacherClassSubjectUnit struct {
 	types.BaseGormModel
+	SchoolID int64               `gorm:"default:null"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	TeacherID int64    `gorm:"default:null"`
 	Teacher   *Teacher `gorm:"default:null;foreignKey:TeacherID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -29,6 +32,7 @@ func (item *TeacherClassSubjectUnit) ToResponse() *data.TeacherClassSubjectUnitR
 		return nil
 	}
 	resp := &data.TeacherClassSubjectUnitResponse{}
+	resp.School = item.School.ToPublicResponse()
 	resp.Teacher = item.Teacher.ToPublicResponse()
 	resp.Year = item.Year.ToResponse()
 	resp.ClassSubject = item.ClassSubject.ToResponse()

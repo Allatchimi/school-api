@@ -69,5 +69,5 @@ type QuizResultResponse struct {
 
 type QuizResultResponseList struct {
 	types.PaginatedResponse
-	Data []QuizResultResponse `json:"data" required:"false" doc:"List of quiz results"`
+	Data []QuizResultResponse `json:"data" required:"false" doc:"List of quiz result"`
 }

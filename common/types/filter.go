@@ -19,3 +19,8 @@ type FilterSchoolYearClassLevelDomainRequest struct {
 	ClassID       int64 `json:"classID" query:"classID" required:"false" doc:"Class id"`
 	LevelDomainID int64 `json:"levelDomainID" query:"levelDomainID" required:"false" doc:"Level domain id"`
 }
+
+type FilterTeacherStudentRequest struct {
+	TeacherID int64 `json:"teacherID" query:"teacherID" required:"false" doc:"Teacher id"`
+	StudentID int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id"`
+}

@@ -60,6 +60,7 @@ type GetAllRequest struct {
 
 type GetAllQuizAnswerRequest struct {
 	QuizID
+	SchoolID       int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
 	QuizQuestionID int64 `json:"quizQuestionID" query:"quizQuestionID" required:"false" doc:"Quiz question id"`
 	StudentID      int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id"`
 }

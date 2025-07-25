@@ -118,58 +118,36 @@ func (repository *Repository) ApiCreateRoom() (*data.ApiCreateRoomResponse, erro
 	return apiResp, err
 }
 
-func (repository *Repository) Delete(id int64) (int64, error) {
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.MeetingRoom{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.MeetingRoom{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.MeetingRoom{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
-}
-
-func (repository *Repository) ApiJoinRoom(roomID string, user *modelUser.User, isAdmin bool) (*data.ApiJoinRoomResponse, error) {
-	apiResp := &data.ApiJoinRoomResponse{}
-	var join = &data.ApiJoinRoomRequest{
-		RoomID: roomID,
-		UserInfo: &data.ApiUserInfo{
-			Name:     user.Info.FirstName,
-			UserID:   fmt.Sprintf("user_%d", user.ID),
-			IsAdmin:  isAdmin,
-			IsHidden: false,
-			UserMetadata: &data.ApiUserMetadata{
-				ProfilePic: "",
-				LockSettings: &data.ApiUserLockSettings{
-					LockMicrophone:      !isAdmin,
-					LockWebcam:          !isAdmin,
-					LockScreenSharing:   !isAdmin,
-					LockChat:            false,
-					LockChatSendMessage: false,
-					LockChatFileShare:   false,
-				},
-			},
-		},
-	}
-	url := fmt.Sprintf("%s/room/getJoinToken", config.Env.MeetingApiUrl)
-	headers := []httpHelper.HttpHeader{
-		{Label: "Content-Type", Value: "application/json"},
-	}
-	err := httpHelper.HttpPost(
-		url,
-		headers,
-		join,
-		apiResp,
-	)
-	return apiResp, err
 }
 
 func (repository *Repository) GetByID(id int64) (*model.MeetingRoom, error) {
 	result := &model.MeetingRoom{}
-	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.MeetingRoom, error) {
+	result := &model.MeetingRoom{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.MeetingRoom) (*model.MeetingRoom, error) {
@@ -273,4 +251,39 @@ func (repository *Repository) GetAll(
 		).Find(&result).Error
 
 	return
+}
+
+func (repository *Repository) ApiJoinRoom(roomID string, user *modelUser.User, isAdmin bool) (*data.ApiJoinRoomResponse, error) {
+	apiResp := &data.ApiJoinRoomResponse{}
+	var join = &data.ApiJoinRoomRequest{
+		RoomID: roomID,
+		UserInfo: &data.ApiUserInfo{
+			Name:     user.Info.FirstName,
+			UserID:   fmt.Sprintf("user_%d", user.ID),
+			IsAdmin:  isAdmin,
+			IsHidden: false,
+			UserMetadata: &data.ApiUserMetadata{
+				ProfilePic: "",
+				LockSettings: &data.ApiUserLockSettings{
+					LockMicrophone:      !isAdmin,
+					LockWebcam:          !isAdmin,
+					LockScreenSharing:   !isAdmin,
+					LockChat:            false,
+					LockChatSendMessage: false,
+					LockChatFileShare:   false,
+				},
+			},
+		},
+	}
+	url := fmt.Sprintf("%s/room/getJoinToken", config.Env.MeetingApiUrl)
+	headers := []httpHelper.HttpHeader{
+		{Label: "Content-Type", Value: "application/json"},
+	}
+	err := httpHelper.HttpPost(
+		url,
+		headers,
+		join,
+		apiResp,
+	)
+	return apiResp, err
 }
