@@ -231,17 +231,13 @@ func (repository *Repository) GetAllQuizAnswer(
 	where := ""
 	args := []any{}
 	if request != nil {
-		if request.QuizQuestionID > 0 {
-			where = helpers.AppendWhereClause(where, "quiz_answers.quiz_question_id = ?")
-			args = append(args, request.QuizQuestionID)
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, "students.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 		if request.StudentID > 0 {
 			where = helpers.AppendWhereClause(where, "quiz_answers.student_id = ?")
 			args = append(args, request.StudentID)
-		}
-		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, "students.school_id = ?")
-			args = append(args, request.SchoolID)
 		}
 	}
 

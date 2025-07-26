@@ -17,10 +17,10 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/schools/reportentries",
-		Tag:   []string{"Report entries"},
+		Group: "/schools/reports",
+		Tag:   []string{"Reports"},
 	}
-	const tableName = "report_entries"
+	const tableName = "reports"
 
 	// Create report entry
 	huma.Register(
@@ -30,7 +30,7 @@ func RegisterEndpoints(
 			Summary:     "Create report entry",
 			Description: "Create new report entry and return created object.",
 			Method:      http.MethodPost,
-			Path:        endpointConfig.Group,
+			Path:        fmt.Sprintf("%s/entries", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -72,7 +72,7 @@ func RegisterEndpoints(
 			Summary:     "Create report grade",
 			Description: "Create new report grade and return created object.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/grade", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/grades", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -114,7 +114,7 @@ func RegisterEndpoints(
 			Summary:     "Create report config",
 			Description: "Create new report config and return created object.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/config", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/configs", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -160,7 +160,7 @@ func RegisterEndpoints(
 			Summary:     "Update report grade",
 			Description: "Update existing report grade with matching id and return the new report grade object.",
 			Method:      http.MethodPut,
-			Path:        fmt.Sprintf("%s/grade/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/grades/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -203,7 +203,7 @@ func RegisterEndpoints(
 			Summary:     "Update report config",
 			Description: "Update existing report config with matching id and return the new report config object.",
 			Method:      http.MethodPut,
-			Path:        fmt.Sprintf("%s/config/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/configs/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -242,15 +242,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete report with id
+	// Delete report entry with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-report",
-			Summary:     "Delete report",
-			Description: "Delete existing report with matching id and return affected rows in database.",
+			OperationID: "delete-report-entry",
+			Summary:     "Delete report entry",
+			Description: "Delete existing report entry with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/entries/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -292,7 +292,7 @@ func RegisterEndpoints(
 			Summary:     "Delete report grade",
 			Description: "Delete existing report grade with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/grade/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/grades/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -334,7 +334,7 @@ func RegisterEndpoints(
 			Summary:     "Delete report config",
 			Description: "Delete existing report config with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/config/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/configs/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -368,15 +368,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete multiple report
+	// Delete multiple report entry
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-report-multiple",
-			Summary:     "Delete multiple report",
-			Description: "Delete multiple report by providing a list of IDs and return affected rows in database.",
+			OperationID: "delete-report-entry-multiple",
+			Summary:     "Delete multiple report entry",
+			Description: "Delete multiple report entry by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/entries/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -418,7 +418,7 @@ func RegisterEndpoints(
 			Summary:     "Delete multiple report grade",
 			Description: "Delete multiple report grade by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/grade/multiple/delete", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/grades/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -460,7 +460,7 @@ func RegisterEndpoints(
 			Summary:     "Delete multiple report config",
 			Description: "Delete multiple report config by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/config/multiple/delete", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/configs/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -494,15 +494,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get report by id
+	// Get report entry by id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-report-id",
-			Summary:     "Get report by id",
-			Description: "Return one report with matching id",
+			OperationID: "get-report-entry-id",
+			Summary:     "Get report entry by id",
+			Description: "Return one report entry with matching id",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/entries/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -547,7 +547,7 @@ func RegisterEndpoints(
 			Summary:     "Get report grade by id",
 			Description: "Return one report grade with matching id",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/grade/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/grades/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -592,7 +592,7 @@ func RegisterEndpoints(
 			Summary:     "Get report config by id",
 			Description: "Return one report config with matching id",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/config/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/configs/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -633,15 +633,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all report
+	// Get all report entry
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-report-list",
-			Summary:     "Get all report",
-			Description: "Get all report with support for search, filter and pagination",
+			OperationID: "get-report-entry-list",
+			Summary:     "Get all report entry",
+			Description: "Get all report entry with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        endpointConfig.Group,
+			Path:        fmt.Sprintf("%s/entries", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -693,7 +693,7 @@ func RegisterEndpoints(
 			Summary:     "Get all report grade",
 			Description: "Get all report grade with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/grade", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/grades", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -745,7 +745,7 @@ func RegisterEndpoints(
 			Summary:     "Get all report config",
 			Description: "Get all report config with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/config", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/configs", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{

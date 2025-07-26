@@ -29,9 +29,8 @@ type ReportEntryRequest struct {
 type ReportGradeRequest struct {
 	SchoolID int64 `json:"schoolID" required:"true" doc:"School id"`
 
-	Name        string `json:"name" required:"true" doc:"Name"`
-	Description string `json:"description" required:"false" doc:"Description"`
-
+	Name           string  `json:"name" required:"true" doc:"Name"`
+	Description    string  `json:"description" required:"false" doc:"Description"`
 	Minimum        float64 `json:"minimum" required:"true" doc:"Minimum"`
 	Maximum        float64 `json:"maximum" required:"true" doc:"Maximum"`
 	IncludeMinimum bool    `json:"includeMinimum" required:"true" doc:"Include minimum"`

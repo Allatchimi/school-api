@@ -12,6 +12,13 @@ import (
 
 type ExamResponse struct {
 	types.BaseGormModelResponse
+	School       *schoolData.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	Year         *yearData.YearResponse           `json:"Year" required:"false" doc:"Year"`
+	ClassSubject *classData.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Class subject"`
+	Sequence     *sequenceData.SequenceResponse   `json:"semester" required:"false" doc:"Sequence"`
+	Unit         *unitData.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
+	Type         *ExamTypeResponse                `json:"type" required:"false" doc:"Type"`
+
 	Status          string     `json:"status" required:"false" doc:"Status"`
 	Notation        float64    `json:"notation" required:"false" doc:"Notation"`
 	Percentage      int        `json:"percentage" required:"false" doc:"Percentage"`
@@ -25,21 +32,14 @@ type ExamResponse struct {
 
 	IsRetry    bool  `json:"isRetry" required:"false" doc:"Is retry"`
 	RetryCount int64 `json:"retryCount" required:"false" doc:"Retry count"`
-
-	School       *schoolData.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Year         *yearData.YearResponse           `json:"Year" required:"false" doc:"Year"`
-	ClassSubject *classData.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Class subject"`
-	Sequence     *sequenceData.SequenceResponse   `json:"semester" required:"false" doc:"Sequence"`
-	Unit         *unitData.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
-	Type         *ExamTypeResponse                `json:"type" required:"false" doc:"Type"`
 }
 
 type ExamTypeResponse struct {
 	types.BaseGormModelResponse
+	School *schoolData.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+
 	Name        string `json:"name" required:"false" doc:"Name"`
 	Description string `json:"description" required:"false" doc:"Description"`
-
-	School *schoolData.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
 }
 
 type ExamResponseList struct {

@@ -73,7 +73,7 @@ func RegisterEndpoints(
 			Summary:     "Create quiz answer",
 			Description: "Create quiz answer.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/{id}/questions/answers", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/{id}/answers", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -167,7 +167,7 @@ func RegisterEndpoints(
 			Summary:     "Update quiz solution",
 			Description: "Update solution for an existing quiz.",
 			Method:      http.MethodPut,
-			Path:        fmt.Sprintf("%s/{id}/questions/solutions", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/{id}/solutions", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -386,6 +386,59 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Get all quiz answer
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-quiz-answer-list",
+			Summary:     "Get all answer for quiz",
+			Description: "Get all answer for quiz with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/{id}/answers", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Feature
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.QuizID
+				data.GetAllQuizAnswerRequest
+			},
+		) (*struct {
+			Body data.QuizAnswerResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllQuizAnswer(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+
+			return &struct {
+				Body data.QuizAnswerResponseList
+			}{Body: *result}, nil
+		},
+	)
+
 	// Get all quiz result
 	huma.Register(
 		*humaApi,
@@ -423,7 +476,7 @@ func RegisterEndpoints(
 				types.Filter
 				types.PaginationRequest
 				data.QuizID
-				data.GetAllQuizAnswerRequest
+				data.GetAllQuizResultRequest
 			},
 		) (*struct {
 			Body data.QuizResultResponseList

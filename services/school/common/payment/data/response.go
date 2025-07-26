@@ -9,15 +9,15 @@ import (
 
 type PaymentResponse struct {
 	types.BaseGormModelResponse
-	Amount   float64    `json:"amount" required:"false" doc:"Amount"`
-	Currency string     `json:"currency" required:"false" doc:"Currency"`
-	Date     *time.Time `json:"paymentDate" required:"false" doc:"Date"`
-	Method   string     `json:"paymentMethod" required:"false" doc:"Method"`
-	Status   string     `json:"paymentStatus" required:"false" doc:"Status"`
-	Message  string     `json:"message" required:"false" doc:"Message"`
-
 	School        *dataSchool.SchoolPublicResponse   `json:"school" required:"false" doc:"School"`
 	StudentEnroll *dataStudent.StudentEnrollResponse `json:"studentEnroll" required:"false" doc:"Student Enroll"`
+
+	Amount   float64    `json:"amount" required:"false" doc:"Amount"`
+	Currency string     `json:"currency" required:"false" doc:"Currency"`
+	Date     *time.Time `json:"date" required:"false" doc:"Date"`
+	Method   string     `json:"method" required:"false" doc:"Method"`
+	Status   string     `json:"status" required:"false" doc:"Status"`
+	Message  string     `json:"message" required:"false" doc:"Message"`
 }
 
 type PaymentResponseList struct {

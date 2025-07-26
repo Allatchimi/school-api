@@ -25,7 +25,7 @@ func RegisterEndpoints(
 	}
 	const tableName = "meetings"
 
-	// Create room
+	// Create meeting room
 	huma.Register(
 		*humaApi,
 		huma.Operation{
@@ -67,7 +67,7 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete room with id
+	// Delete meeting room with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
@@ -109,7 +109,7 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete multiple room
+	// Delete multiple meeting room
 	huma.Register(
 		*humaApi,
 		huma.Operation{
@@ -151,7 +151,7 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get room by id
+	// Get meeting room by id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
@@ -196,7 +196,7 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get all room
+	// Get all meeting room
 	huma.Register(
 		*humaApi,
 		huma.Operation{
@@ -248,7 +248,7 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Join room
+	// Join meeting room
 	huma.Register(
 		*humaApi,
 		huma.Operation{

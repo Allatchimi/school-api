@@ -21,7 +21,7 @@ type ExamRequest struct {
 	UnitID         int64 `json:"unitID" required:"true" doc:"Unit id"`
 	TypeID         int64 `json:"typeID" required:"true" doc:"Type id"`
 
-	Status          string     `json:"status" required:"true" enum:"draft,published,results" doc:"Status"`
+	Status          string     `json:"status" required:"true" enum:"draft,online,results" doc:"Status"`
 	Notation        float64    `json:"notation" required:"true" minimum:"1" doc:"Notation"`
 	Percentage      int        `json:"percentage" required:"true" minimum:"1" maximum:"100" doc:"Percentage"`
 	Description     string     `json:"description" required:"false" doc:"Description"`
@@ -43,8 +43,8 @@ type ExamTypeRequest struct {
 
 type GetAllRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
-	TypeID     int64 `json:"typeID" query:"typeID" required:"false" doc:"Type id"`
 	SequenceID int64 `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
+	TypeID     int64 `json:"typeID" query:"typeID" required:"false" doc:"Type id"`
 }
 
 type GetAllExamTypeRequest struct {

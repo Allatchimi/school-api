@@ -141,7 +141,7 @@ func (controller *Controller) GetAll(
 	return
 }
 
-func (controller *Controller) GetAllQuizResult(
+func (controller *Controller) GetAllQuizAnswer(
 	ctx *context.Context,
 	input *struct {
 		types.Filter
@@ -149,11 +149,38 @@ func (controller *Controller) GetAllQuizResult(
 		data.QuizID
 		data.GetAllQuizAnswerRequest
 	},
+) (result *data.QuizAnswerResponseList, errCode int, err error) {
+	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
+	resultList, errCode, err := controller.Service.GetAllQuizAnswer(
+		httpHelper.GetContextData(ctx), newFilter, newPagination,
+		&input.GetAllQuizAnswerRequest,
+	)
+	if err != nil {
+		return
+	}
+	result = &data.QuizAnswerResponseList{
+		Data: model.ToQuizAnswerResponseList(resultList),
+	}
+	result.Filter = newFilter
+	result.Pagination = newPagination
+	return
+}
+
+func (controller *Controller) GetAllQuizResult(
+	ctx *context.Context,
+	input *struct {
+		types.Filter
+		types.PaginationRequest
+		data.QuizID
+		data.GetAllQuizResultRequest
+	},
 ) (result *data.QuizResultResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
 	quizAnswerList, errCode, err := controller.Service.GetAllQuizAnswer(
 		httpHelper.GetContextData(ctx), newFilter, newPagination,
-		&input.GetAllQuizAnswerRequest,
+		&data.GetAllQuizAnswerRequest{
+			QuizID: input.QuizID,
+		},
 	)
 	if err != nil {
 		return

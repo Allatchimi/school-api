@@ -33,14 +33,6 @@ type CourseRequest struct {
 	} `json:"videos" required:"false" doc:"Videos"`
 }
 
-type CourseDocumentRequest struct {
-	CourseID int64 `json:"courseID" required:"true" doc:"Course id"`
-
-	Title       string `json:"title" required:"true" doc:"Title"`
-	Description string `json:"description" required:"false" doc:"Description"`
-	URL         string `json:"url" required:"true" doc:"URL"`
-}
-
 type CourseCommentRequest struct {
 	CourseID int64 `json:"courseID" required:"true" doc:"Course id"`
 
@@ -50,10 +42,6 @@ type CourseCommentRequest struct {
 
 type GetAllRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
-}
-
-type GetAllCourseDocumentRequest struct {
-	CourseID int64 `json:"courseID" required:"false" doc:"Course id"`
 }
 
 type GetAllCourseCommentRequest struct {

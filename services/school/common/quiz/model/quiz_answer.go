@@ -45,7 +45,7 @@ func ToQuizAnswerResponseList(itemList []QuizAnswer) []data.QuizAnswerResponse {
 		if !exists {
 			// Create new answer
 			qar = &data.QuizAnswerResponse{
-				Quiz:    qa.QuizQuestion.Quiz.ToResponse(),
+				QuizID:  qa.QuizQuestion.QuizID,
 				Student: qa.Student.ToPublicResponse(),
 				Answers: []data.QuizAnswersResponse{},
 			}

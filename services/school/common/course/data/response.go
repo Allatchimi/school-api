@@ -64,7 +64,7 @@ type CourseDocumentResponseList struct {
 
 type CourseVideoResponseList struct {
 	types.PaginatedResponse
-	Data []CourseDocumentResponse `json:"data" required:"false" doc:"List of video"`
+	Data []CourseVideoResponse `json:"data" required:"false" doc:"List of video"`
 }
 
 type CourseCpmmentResponseList struct {
