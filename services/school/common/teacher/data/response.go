@@ -21,15 +21,17 @@ type TeacherPublicResponse struct {
 	types.BaseGormModelResponse
 	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
 	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
+
+	UID string `json:"uid" required:"false" doc:"Teacher UID"`
 }
 
 type TeacherClassSubjectUnitResponse struct {
 	types.BaseGormModelResponse
 	School       *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Teacher      *TeacherPublicResponse           `json:"teacher" required:"false" doc:"Teacher"`
 	Year         *dataYear.YearResponse           `json:"year" required:"false" doc:"Year"`
 	ClassSubject *dataClass.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Subject for specific class"`
 	Unit         *dataUnit.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
+	Teacher      *TeacherPublicResponse           `json:"teacher" required:"false" doc:"Teacher"`
 }
 
 type TeacherResponseList struct {

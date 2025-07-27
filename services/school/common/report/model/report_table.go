@@ -9,7 +9,7 @@ import (
 	modelLevel "api/services/school/university/level/model"
 )
 
-type ReportBoard struct {
+type ReportTable struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
 	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -23,22 +23,20 @@ type ReportBoard struct {
 	LevelDomainID int64                             `gorm:"default:null"`
 	LevelDomain   *modelLevel.UniversityLevelDomain `gorm:"default:null;foreignKey:LevelDomainID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	PeriodType string `gorm:"default:null"`
-	PeriodName string `gorm:"default:null"`
-
-	Status string `gorm:"default:null"`
-
+	PeriodType                    string  `gorm:"default:null"`
+	PeriodName                    string  `gorm:"default:null"`
+	Status                        string  `gorm:"default:null"`
 	Notation                      float64 `gorm:"default:null"`
 	MinimumRequiredValueToPromote float64 `gorm:"default:null"`
 	GradeName                     string  `gorm:"default:null"`
 	GradeDescription              string  `gorm:"default:null"`
 }
 
-func (item *ReportBoard) ToResponse() *data.ReportBoardResponse {
+func (item *ReportTable) ToResponse() *data.ReportTableResponse {
 	if item == nil {
 		return nil
 	}
-	resp := &data.ReportBoardResponse{}
+	resp := &data.ReportTableResponse{}
 	resp.PeriodType = item.PeriodType
 	resp.PeriodName = item.PeriodName
 	resp.Status = item.Status
@@ -58,8 +56,8 @@ func (item *ReportBoard) ToResponse() *data.ReportBoardResponse {
 	return resp
 }
 
-func ToReportBoardResponseList(itemList []ReportBoard) []data.ReportBoardResponse {
-	resp := make([]data.ReportBoardResponse, len(itemList))
+func ToReportTableResponseList(itemList []ReportTable) []data.ReportTableResponse {
+	resp := make([]data.ReportTableResponse, len(itemList))
 	for index, item := range itemList {
 		resp[index] = *item.ToResponse()
 	}

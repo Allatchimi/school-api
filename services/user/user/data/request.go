@@ -10,19 +10,17 @@ type UserRequest struct {
 	RoleID   int64 `json:"roleID" required:"true" doc:"Role id"`
 	SchoolID int64 `json:"schoolID" required:"false" doc:"School id"`
 
-	Email       string `json:"email" required:"true" format:"email" doc:"Email"`
-	PhoneNumber uint64 `json:"phoneNumber" required:"false" doc:"Phone number"`
-	IsActivated bool   `json:"isActivated" required:"true" doc:"Is activated"`
-	Status      string `json:"status" required:"true" enum:"enabled,disabled" doc:"Status"`
-
-	Info *UserInfoRequest `json:"info" required:"true" doc:"Information"`
+	Email       string           `json:"email" required:"true" format:"email" doc:"Email"`
+	PhoneNumber uint64           `json:"phoneNumber" required:"false" doc:"Phone number"`
+	IsActivated bool             `json:"isActivated" required:"true" doc:"Is activated"`
+	Status      string           `json:"status" required:"true" enum:"enabled,disabled" doc:"Status"`
+	Info        *UserInfoRequest `json:"info" required:"true" doc:"Information"`
 }
 
 type UserInfoRequest struct {
-	Username  string `json:"username" required:"false" maxLength:"150" doc:"User name"`
-	FirstName string `json:"firstName" required:"true" maxLength:"150" doc:"First name"`
-	LastName  string `json:"lastName" required:"true" maxLength:"150" doc:"Last name"`
-
+	Username      string     `json:"username" required:"false" maxLength:"150" doc:"User name"`
+	FirstName     string     `json:"firstName" required:"true" maxLength:"150" doc:"First name"`
+	LastName      string     `json:"lastName" required:"true" maxLength:"150" doc:"Last name"`
 	Gender        string     `json:"Gender" required:"true" enum:"male,female" doc:"Gender"`
 	Birthday      *time.Time `json:"birthday" required:"false" doc:"Birthday"`
 	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`

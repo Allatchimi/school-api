@@ -7,24 +7,20 @@ import (
 
 type SchoolConfig struct {
 	types.BaseGormModel
-	WebsiteDomainName   string `gorm:"default:null"`
-	UserEmailDomainName string `gorm:"default:null"`
-	SupportEmail        string `gorm:"default:null"`
-
+	WebsiteDomainName              string `gorm:"default:null"`
+	UserEmailDomainName            string `gorm:"default:null"`
+	SupportEmail                   string `gorm:"default:null"`
 	GoogleWorkspaceCredentials     string `gorm:"default:null"`
 	GoogleWorkspaceUserEmailDomain string `gorm:"default:null"`
-
-	SmsUserID        string `gorm:"default:null"`
-	WhatsappToken    string `gorm:"default:null"`
-	WhatsappPhoneID  string `gorm:"default:null"`
-	TelegramBotToken string `gorm:"default:null"`
-
-	WebsiteTitle       string `gorm:"default:null"`
-	WebsiteDescription string `gorm:"default:null"`
-
-	ColorPrimary        string `gorm:"default:null"`
-	ColorPrimaryBg      string `gorm:"default:null"`
-	ColorPrimaryBgHover string `gorm:"default:null"`
+	SmsUserID                      string `gorm:"default:null"`
+	WhatsappToken                  string `gorm:"default:null"`
+	WhatsappPhoneID                string `gorm:"default:null"`
+	TelegramBotToken               string `gorm:"default:null"`
+	WebsiteTitle                   string `gorm:"default:null"`
+	WebsiteDescription             string `gorm:"default:null"`
+	ColorPrimary                   string `gorm:"default:null"`
+	ColorPrimaryBg                 string `gorm:"default:null"`
+	ColorPrimaryBgHover            string `gorm:"default:null"`
 }
 
 func (item *SchoolConfig) ToResponse() *data.SchoolConfigResponse {

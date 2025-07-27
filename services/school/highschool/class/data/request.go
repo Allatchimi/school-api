@@ -12,9 +12,8 @@ type ClassRequest struct {
 	SchoolID    int64 `json:"schoolID" required:"true" doc:"School id"`
 	SpecialtyID int64 `json:"specialtyID" required:"true" doc:"Specialty id"`
 
-	Name        string `json:"name" required:"true" doc:"Class name"`
-	Description string `json:"description" required:"false" doc:"Class description"`
-
+	Name         string `json:"name" required:"true" doc:"Class name"`
+	Description  string `json:"description" required:"false" doc:"Class description"`
 	Fees         int64  `json:"fees" required:"false" doc:"Class fees"`
 	Program      string `json:"program" required:"false" doc:"Program"`
 	Requirements string `json:"requirements" required:"false" doc:"Requirements"`
@@ -28,8 +27,7 @@ type ClassSubjectRequest struct {
 	Coefficient  int    `json:"coefficient" required:"false" doc:"Coefficient"`
 	Program      string `json:"program" required:"false" doc:"Program"`
 	Requirements string `json:"requirements" required:"false" doc:"Requirements"`
-
-	IsValid bool `json:"isValid" required:"false" doc:"Is valid"`
+	IsValid      bool   `json:"isValid" required:"false" doc:"Is valid"`
 }
 type GetAllRequest struct {
 	SchoolID    int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`

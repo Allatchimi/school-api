@@ -47,8 +47,7 @@ func (service *Service) Create(
 		Credit:       newRequest.Credit,
 		Program:      newRequest.Program,
 		Requirements: newRequest.Requirements,
-
-		IsValid: newRequest.IsValid,
+		IsValid:      newRequest.IsValid,
 	}
 
 	// Check if the school type is university
@@ -134,8 +133,7 @@ func (service *Service) Update(
 		Credit:       newRequest.Credit,
 		Program:      newRequest.Program,
 		Requirements: newRequest.Requirements,
-
-		IsValid: newRequest.IsValid,
+		IsValid:      newRequest.IsValid,
 	}
 
 	// Check if the school type is university

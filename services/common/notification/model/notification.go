@@ -24,16 +24,16 @@ func (item *Notification) ToResponse() *data.NotificationResponse {
 		return nil
 	}
 	resp := &data.NotificationResponse{}
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
+
+	resp.User = item.User.ToPublicResponse()
+
 	resp.Title = item.Title
 	resp.Message = item.Message
 	resp.Seen = item.Seen
 	resp.SeenAt = item.SeenAt
-
-	resp.User = item.User.ToPublicResponse()
-
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

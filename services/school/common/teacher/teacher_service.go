@@ -98,8 +98,9 @@ func (service *Service) Create(
 
 	// Format request
 	var item = &dataUser.UserRequest{
-		SchoolID:    newRequest.SchoolID,
-		RoleID:      userRole.ID,
+		SchoolID: newRequest.SchoolID,
+		RoleID:   userRole.ID,
+
 		Email:       newEmail,
 		PhoneNumber: newRequest.PhoneNumber,
 		IsActivated: true,
@@ -169,7 +170,8 @@ func (service *Service) Create(
 	result, err = service.Repository.Create(&model.Teacher{
 		SchoolID: newRequest.SchoolID,
 		UserID:   createdUser.ID,
-		UID:      newUID,
+
+		UID: newUID,
 	})
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -318,8 +320,9 @@ func (service *Service) Update(
 
 	// Update user
 	userRequest := dataUser.UserRequest{
-		SchoolID:    newRequest.SchoolID,
-		RoleID:      teacherRole.ID,
+		SchoolID: newRequest.SchoolID,
+		RoleID:   teacherRole.ID,
+
 		Email:       newRequest.Email,
 		PhoneNumber: newRequest.PhoneNumber,
 		IsActivated: true,

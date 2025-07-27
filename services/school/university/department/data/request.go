@@ -5,8 +5,9 @@ type DepartmentID struct {
 }
 
 type DepartmentRequest struct {
-	SchoolID    int64  `json:"schoolID" required:"true" doc:"School id"`
-	FacultyID   int64  `json:"facultyID" required:"true" doc:"Faculty id"`
+	SchoolID  int64 `json:"schoolID" required:"true" doc:"School id"`
+	FacultyID int64 `json:"facultyID" required:"true" doc:"Faculty id"`
+
 	Name        string `json:"name" required:"true" doc:"Department name"`
 	Description string `json:"description" required:"false" doc:"Department description"`
 }

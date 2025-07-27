@@ -20,14 +20,14 @@ func (item *UniversityLevel) ToResponse() *data.LevelResponse {
 		return nil
 	}
 	resp := &data.LevelResponse{}
-	resp.Name = item.Name
-	resp.Description = item.Description
-
-	resp.School = item.School.ToPublicResponse()
-
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+
+	resp.School = item.School.ToPublicResponse()
+
+	resp.Name = item.Name
+	resp.Description = item.Description
 	return resp
 }
 

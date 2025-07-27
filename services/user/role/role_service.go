@@ -27,8 +27,8 @@ func (service *Service) Create(
 ) (result *model.Role, errCode int, err error) {
 	// Format item
 	item := &model.Role{
-		Name:        request.Name,
 		Feature:     request.Feature,
+		Name:        request.Name,
 		Description: request.Description,
 	}
 
@@ -75,8 +75,8 @@ func (service *Service) Update(
 
 	// Format item
 	item := &model.Role{
-		Name:        request.Name,
 		Feature:     request.Feature,
+		Name:        request.Name,
 		Description: request.Description,
 	}
 

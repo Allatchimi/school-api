@@ -9,10 +9,11 @@ import (
 
 type LevelResponse struct {
 	types.BaseGormModelResponse
-	School      *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Domain      *dataDomain.DomainResponse       `json:"domain" required:"false" doc:"Domain"`
-	Name        string                           `json:"name" required:"false" doc:"Level name"`
-	Description string                           `json:"description" required:"false" doc:"Level description"`
+	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	Domain *dataDomain.DomainResponse       `json:"domain" required:"false" doc:"Domain"`
+
+	Name        string `json:"name" required:"false" doc:"Level name"`
+	Description string `json:"description" required:"false" doc:"Level description"`
 }
 
 type LevelDomainResponse struct {
@@ -21,12 +22,11 @@ type LevelDomainResponse struct {
 	Level  *LevelResponse                   `json:"level" required:"false" doc:"Level"`
 	Domain *dataDomain.DomainResponse       `json:"domain" required:"false" doc:"Domain"`
 
-	Fees         float64 `json:"fees" required:"false" doc:"Level domain fees"`
-	Program      string  `json:"program" required:"false" doc:"Program"`
-	Requirements string  `json:"requirements" required:"false" doc:"Requirements"`
-
-	IsValid     bool       `json:"isValid" required:"false" doc:"Is valid"`
-	InvalidDate *time.Time `json:"invalidDate" required:"false" doc:"Invalid date"`
+	Fees         float64    `json:"fees" required:"false" doc:"Level domain fees"`
+	Program      string     `json:"program" required:"false" doc:"Program"`
+	Requirements string     `json:"requirements" required:"false" doc:"Requirements"`
+	IsValid      bool       `json:"isValid" required:"false" doc:"Is valid"`
+	InvalidDate  *time.Time `json:"invalidDate" required:"false" doc:"Invalid date"`
 }
 
 type LevelResponseList struct {

@@ -9,11 +9,11 @@ import (
 
 type ResultResponse struct {
 	types.BaseGormModelResponse
-	Value float64 `json:"value" required:"false" doc:"Value"`
-
 	School  *dataSchool.SchoolPublicResponse   `json:"school" required:"false" doc:"School"`
-	Student *studentData.StudentPublicResponse `json:"student" required:"true" doc:"Student"`
 	Exam    *examData.ExamResponse             `json:"exam" required:"true" doc:"Exam"`
+	Student *studentData.StudentPublicResponse `json:"student" required:"true" doc:"Student"`
+
+	Value float64 `json:"value" required:"false" doc:"Value"`
 }
 
 type ResultResponseList struct {

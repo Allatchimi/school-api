@@ -29,24 +29,20 @@ func (service *Service) Create(
 ) (result *model.School, errCode int, err error) {
 	// Format request
 	item := &model.School{
-		Name:   request.Name,
-		Type:   request.Type,
-		Status: request.Status,
-
-		Favicon:   request.Favicon,
-		Logo:      request.Logo,
-		LogoWhite: request.LogoWhite,
-
-		Currency:     request.Currency,
-		PaymentCount: request.PaymentCount,
-
+		Name:               request.Name,
+		Type:               request.Type,
+		Status:             request.Status,
+		Favicon:            request.Favicon,
+		Logo:               request.Logo,
+		LogoWhite:          request.LogoWhite,
+		Currency:           request.Currency,
+		PaymentCount:       request.PaymentCount,
 		DeploymentRequest:  constants.SCHOOL_DEPLOYMENT_REQUEST_CREATE,
 		DeploymentStatus:   constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED,
 		DeploymentFeedback: "",
 		DeploymentCount:    1,
-
-		Info:   model.FromInfoRequest(request.Info),
-		Config: model.FromConfigRequest(request.Config),
+		Info:               model.FromInfoRequest(request.Info),
+		Config:             model.FromConfigRequest(request.Config),
 	}
 
 	// Check unique
@@ -156,24 +152,20 @@ func (service *Service) Update(
 
 	// Format request
 	item := &model.School{
-		Name:   request.Name,
-		Type:   request.Type,
-		Status: request.Status,
-
+		Name:               request.Name,
+		Type:               request.Type,
+		Status:             request.Status,
 		DeploymentRequest:  constants.SCHOOL_DEPLOYMENT_REQUEST_UPDATE,
 		DeploymentStatus:   constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED,
 		DeploymentFeedback: "",
 		DeploymentCount:    foundItem.DeploymentCount + 1,
-
-		Favicon:   request.Favicon,
-		Logo:      request.Logo,
-		LogoWhite: request.LogoWhite,
-
-		Currency:     request.Currency,
-		PaymentCount: request.PaymentCount,
-
-		Info:   model.FromInfoRequest(request.Info),
-		Config: model.FromConfigRequest(request.Config),
+		Favicon:            request.Favicon,
+		Logo:               request.Logo,
+		LogoWhite:          request.LogoWhite,
+		Currency:           request.Currency,
+		PaymentCount:       request.PaymentCount,
+		Info:               model.FromInfoRequest(request.Info),
+		Config:             model.FromConfigRequest(request.Config),
 	}
 
 	// Check unique

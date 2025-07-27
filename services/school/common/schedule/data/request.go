@@ -16,10 +16,10 @@ type ScheduleRequest struct {
 	UnitID         int64 `json:"unitID" required:"false" doc:"Unit id"`
 
 	IsCommon       bool       `json:"isCommon" required:"true" doc:"Is common"`
-	Type           string     `json:"type" required:"true" doc:"Type"`
+	Type           string     `json:"type" required:"true" enum:"course,tp,td,pause,event" doc:"Type"`
 	DayOfTheWeek   string     `json:"dayOfTheWeek" required:"true" doc:"Day of the week"`
 	RepeatCount    int        `json:"repeatCount" required:"true" doc:"Repeat count"`
-	RepeatType     string     `json:"repeatType" required:"true" doc:"Repeat type"`
+	RepeatType     string     `json:"repeatType" required:"true"  enum:"daily,weekly,monthly,yearly,onetime" doc:"Repeat type"`
 	StartTime      string     `json:"startTime" required:"true" doc:"Start time"`
 	EndTime        string     `json:"endTime" required:"true" doc:"End time"`
 	StartCountDate *time.Time `json:"startCountDate" required:"true" doc:"Start count date"`

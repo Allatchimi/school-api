@@ -5,8 +5,9 @@ type SpecialtyID struct {
 }
 
 type SpecialtyRequest struct {
-	SchoolID    int64  `json:"schoolID" required:"true" doc:"School id"`
-	SectionID   int64  `json:"sectionID" required:"true" doc:"Section id"`
+	SchoolID  int64 `json:"schoolID" required:"true" doc:"School id"`
+	SectionID int64 `json:"sectionID" required:"true" doc:"Section id"`
+
 	Name        string `json:"name" required:"true" doc:"Specialty name"`
 	Description string `json:"description" required:"false" doc:"Specialty description"`
 }

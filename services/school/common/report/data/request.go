@@ -29,6 +29,7 @@ type ReportEntryRequest struct {
 type ReportGradeRequest struct {
 	SchoolID int64 `json:"schoolID" required:"true" doc:"School id"`
 
+	Type           string  `json:"type" required:"true" enum:"average,report" doc:"Type"`
 	Name           string  `json:"name" required:"true" doc:"Name"`
 	Description    string  `json:"description" required:"false" doc:"Description"`
 	Minimum        float64 `json:"minimum" required:"true" doc:"Minimum"`
@@ -40,7 +41,8 @@ type ReportGradeRequest struct {
 type ReportConfigRequest struct {
 	SchoolID int64 `json:"schoolID" required:"true" doc:"School id"`
 
-	Notation                      float64 `json:"notation" required:"true" doc:"Notation"`
+	NotationAverage               float64 `json:"notationAverage" required:"true" doc:"Notation average"`
+	NotationReport                float64 `json:"notationReport" required:"true" doc:"Notation report"`
 	MinimumRequiredValueToPromote float64 `json:"minimumRequiredValueToPromote" required:"true" doc:"Minimum required value to promote"`
 }
 
@@ -52,9 +54,16 @@ type GetAllReportEntryRequest struct {
 }
 
 type GetAllReportGradeRequest struct {
-	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
+	SchoolID int64  `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
+	Type     string `json:"type" query:"type" required:"false" doc:"Type"`
 }
 
 type GetAllReportConfigRequest struct {
 	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
+}
+
+type GetAllReportTableRequest struct {
+	types.FilterSchoolYearClassLevelDomainRequest
+	PeriodType string `json:"periodType" query:"periodType" required:"false" doc:"Period type"`
+	PeriodName string `json:"periodName" query:"periodName" required:"false" doc:"Period name"`
 }

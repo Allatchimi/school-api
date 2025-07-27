@@ -48,9 +48,9 @@ func (service *Service) CreateGrade(
 	item := &model.ReportGrade{
 		SchoolID: newRequest.SchoolID,
 
-		Name:        newRequest.Name,
-		Description: newRequest.Description,
-
+		Type:           newRequest.Type,
+		Name:           newRequest.Name,
+		Description:    newRequest.Description,
 		Minimum:        newRequest.Minimum,
 		Maximum:        newRequest.Maximum,
 		IncludeMinimum: newRequest.IncludeMinimum,
@@ -93,7 +93,8 @@ func (service *Service) CreateConfig(
 	item := &model.ReportConfig{
 		SchoolID: newRequest.SchoolID,
 
-		Notation:                      newRequest.Notation,
+		NotationAverage:               newRequest.NotationAverage,
+		NotationReport:                newRequest.NotationReport,
 		MinimumRequiredValueToPromote: newRequest.MinimumRequiredValueToPromote,
 	}
 
@@ -153,9 +154,9 @@ func (service *Service) UpdateGrade(
 	item := &model.ReportGrade{
 		SchoolID: newRequest.SchoolID,
 
-		Name:        newRequest.Name,
-		Description: newRequest.Description,
-
+		Type:           newRequest.Type,
+		Name:           newRequest.Name,
+		Description:    newRequest.Description,
 		Minimum:        newRequest.Minimum,
 		Maximum:        newRequest.Maximum,
 		IncludeMinimum: newRequest.IncludeMinimum,
@@ -219,7 +220,8 @@ func (service *Service) UpdateConfig(
 	item := &model.ReportConfig{
 		SchoolID: newRequest.SchoolID,
 
-		Notation:                      newRequest.Notation,
+		NotationAverage:               newRequest.NotationAverage,
+		NotationReport:                newRequest.NotationReport,
 		MinimumRequiredValueToPromote: newRequest.MinimumRequiredValueToPromote,
 	}
 
@@ -534,6 +536,27 @@ func (service *Service) GetAllConfig(
 
 	// Get
 	result, err = service.Repository.GetAllReportConfig(filter, pagination, &newRequest)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+	}
+	return
+}
+
+func (service *Service) GetAllTable(
+	ctxData *types.ContextData,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllReportTableRequest,
+) (result []model.ReportTable, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Get
+	result, err = service.Repository.GetAllReportTable(filter, pagination, &newRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

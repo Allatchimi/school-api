@@ -22,6 +22,8 @@ type StudentPublicResponse struct {
 	types.BaseGormModelResponse
 	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
 	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
+
+	UID string `json:"uid" required:"false" doc:"Student UID"`
 }
 
 type StudentEnrollResponse struct {
@@ -44,23 +46,19 @@ type StudentPreEnrollResponse struct {
 	LevelDomain *dataLevel.LevelDomainResponse   `json:"levelDomain" required:"false" doc:"Level for domain"`
 	User        *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
 
-	Birthday      *time.Time `json:"birthday" required:"false" doc:"Birthday date time"`
-	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
-
-	Status         string `json:"status" required:"false" doc:"Status"`
-	StatusFeedback string `json:"statusFeedback" required:"false" doc:"Status feedback"`
-
-	Message string `json:"Message" required:"false" doc:"Message"`
-
-	Gender    string `json:"gender" required:"false" doc:"Gender"`
-	FirstName string `json:"firstName" required:"false" doc:"First name"`
-	LastName  string `json:"lastName" required:"false" doc:"Last name or family name"`
-
-	Document1 string `json:"file1" required:"false" doc:"Document1"`
-	Document2 string `json:"file2" required:"false" doc:"Document2"`
-	Document3 string `json:"file3" required:"false" doc:"Document3"`
-	Document4 string `json:"file4" required:"false" doc:"Document4"`
-	Document5 string `json:"file5" required:"false" doc:"Document5"`
+	Birthday       *time.Time `json:"birthday" required:"false" doc:"Birthday date time"`
+	BirthLocation  string     `json:"birthLocation" required:"false" doc:"Birth location"`
+	Status         string     `json:"status" required:"false" doc:"Status"`
+	StatusFeedback string     `json:"statusFeedback" required:"false" doc:"Status feedback"`
+	Message        string     `json:"Message" required:"false" doc:"Message"`
+	Gender         string     `json:"gender" required:"false" doc:"Gender"`
+	FirstName      string     `json:"firstName" required:"false" doc:"First name"`
+	LastName       string     `json:"lastName" required:"false" doc:"Last name or family name"`
+	Document1      string     `json:"document1" required:"false" doc:"Document1"`
+	Document2      string     `json:"document2" required:"false" doc:"Document2"`
+	Document3      string     `json:"document3" required:"false" doc:"Document3"`
+	Document4      string     `json:"document4" required:"false" doc:"Document4"`
+	Document5      string     `json:"document5" required:"false" doc:"Document5"`
 }
 
 type StudentResponseList struct {

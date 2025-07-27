@@ -100,14 +100,6 @@ func (repository *Repository) GetAll(
 	where := ""
 	args := []any{}
 	if request != nil {
-		if request.StudentID > 0 {
-			where = helpers.AppendWhereClause(where, "results.student_id = ?")
-			args = append(args, request.StudentID)
-		}
-		if request.ExamID > 0 {
-			where = helpers.AppendWhereClause(where, "results.exam_id = ?")
-			args = append(args, request.ExamID)
-		}
 		if request.SchoolID > 0 {
 			where = helpers.AppendWhereClause(where, "exams.school_id = ?")
 			args = append(args, request.SchoolID)
@@ -128,9 +120,21 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "exams.unit_id = ?")
 			args = append(args, request.UnitID)
 		}
-		if request.TypeID > 0 {
+		if request.SemesterID > 0 {
+			where = helpers.AppendWhereClause(where, "university_units.semester_id = ?")
+			args = append(args, request.SemesterID)
+		}
+		if request.ExamID > 0 {
+			where = helpers.AppendWhereClause(where, "results.exam_id = ?")
+			args = append(args, request.ExamID)
+		}
+		if request.ExamTypeID > 0 {
 			where = helpers.AppendWhereClause(where, "exams.type_id = ?")
-			args = append(args, request.TypeID)
+			args = append(args, request.ExamTypeID)
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, "results.student_id = ?")
+			args = append(args, request.StudentID)
 		}
 	}
 
@@ -187,16 +191,16 @@ func (repository *Repository) GetAll(
 				repository.Db,
 				`SELECT results.*
 				FROM results
-				LEFT JOIN exams ON results.exam_id = exams.id
-				LEFT JOIN students ON results.student_id = students.id
 				LEFT JOIN schools ON exams.school_id = schools.id
 				LEFT JOIN years ON exams.year_id = years.id
 				LEFT JOIN highschool_class_subjects ON exams.class_subject_id = highschool_class_subjects.id
 				LEFT JOIN highschool_sequences ON exams.sequence_id = highschool_sequences.id
 				LEFT JOIN university_units ON exams.unit_id = university_units.id
+				LEFT JOIN exams ON results.exam_id = exams.id
+				LEFT JOIN exam_types ON exams.type_id = exam_types.id
+				LEFT JOIN students ON results.student_id = students.id
 				LEFT JOIN highschool_classes ON highschool_class_subjects.class_id = highschool_classes.id
-				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id
-				LEFT JOIN exam_types ON exams.type_id = exam_types.id `,
+				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id`,
 				where,
 				pagination,
 				filter,

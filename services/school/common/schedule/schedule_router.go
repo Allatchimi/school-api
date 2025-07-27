@@ -296,7 +296,7 @@ func RegisterEndpoints(
 			Summary:     "Get all schedule weekly view",
 			Description: "Get all schedule with weekly view support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/weekly-view", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/weeklyview", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{

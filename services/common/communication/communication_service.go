@@ -39,12 +39,14 @@ func (service *Service) Create(
 			result, err = service.Repository.Create(&model.Communication{
 				SchoolID: newRequest.SchoolID,
 				RoleID:   roleID,
-				Subject:  request.Subject,
-				Message:  request.Message,
+
+				Subject: request.Subject,
+				Message: request.Message,
 			})
 		} else {
 			result, err = service.Repository.Create(&model.Communication{
-				RoleID:  roleID,
+				RoleID: roleID,
+
 				Subject: request.Subject,
 				Message: request.Message,
 			})

@@ -40,21 +40,18 @@ func (repository *Repository) UpdateByID(id int64, item *model.School) (*model.S
 	result := &model.School{}
 	return result, repository.Db.Preload(clause.Associations).Model(&model.School{}).Where("id = ?", id).Updates(
 		map[string]any{
-			"name":   item.Name,
-			"type":   item.Type,
-			"status": item.Status,
-
+			"name":                item.Name,
+			"type":                item.Type,
+			"status":              item.Status,
 			"deployment_request":  item.DeploymentRequest,
 			"deployment_status":   item.DeploymentStatus,
 			"deployment_feedback": item.DeploymentFeedback,
 			"deployment_count":    item.DeploymentCount,
-
-			"favicon":    item.Favicon,
-			"logo":       item.Logo,
-			"logo_white": item.LogoWhite,
-
-			"currency":      item.Currency,
-			"payment_count": item.PaymentCount,
+			"favicon":             item.Favicon,
+			"logo":                item.Logo,
+			"logo_white":          item.LogoWhite,
+			"currency":            item.Currency,
+			"payment_count":       item.PaymentCount,
 		},
 	).Find(result).Error
 }
@@ -83,37 +80,31 @@ func (repository *Repository) UpdateSchoolInfoByID(id int64, item *model.SchoolI
 	result := &model.SchoolInfo{}
 	return result, repository.Db.Preload(clause.Associations).Model(&model.SchoolInfo{}).Where("id = ?", id).Updates(
 		map[string]any{
-			"full_name":   item.FullName,
-			"description": item.Description,
-			"motto":       item.Motto,
-
-			"phone_number1": item.PhoneNumber1,
-			"phone_number2": item.PhoneNumber2,
-			"phone_number3": item.PhoneNumber3,
-
-			"email1": item.Email1,
-			"email2": item.Email2,
-			"email3": item.Email3,
-
-			"founder":    item.Founder,
-			"founded_at": item.FoundedAt,
-
-			"address":            item.Address,
-			"po_box":             item.PoBox,
-			"location_longitude": item.LocationLongitude,
-			"location_latitude":  item.LocationLatitude,
-
+			"full_name":             item.FullName,
+			"description":           item.Description,
+			"motto":                 item.Motto,
+			"phone_number1":         item.PhoneNumber1,
+			"phone_number2":         item.PhoneNumber2,
+			"phone_number3":         item.PhoneNumber3,
+			"email1":                item.Email1,
+			"email2":                item.Email2,
+			"email3":                item.Email3,
+			"founder":               item.Founder,
+			"founded_at":            item.FoundedAt,
+			"address":               item.Address,
+			"po_box":                item.PoBox,
+			"location_longitude":    item.LocationLongitude,
+			"location_latitude":     item.LocationLatitude,
 			"social_media_telegram": item.SocialMediaTelegram,
 			"social_media_whasapp":  item.SocialMediaWhasapp,
 			"social_media_youtube":  item.SocialMediaYoutube,
 			"social_media_twitter":  item.SocialMediaTwitter,
 			"social_media_facebook": item.SocialMediaFacebook,
-
-			"image1": item.Image1,
-			"image2": item.Image2,
-			"image3": item.Image3,
-			"image4": item.Image4,
-			"image5": item.Image5,
+			"image1":                item.Image1,
+			"image2":                item.Image2,
+			"image3":                item.Image3,
+			"image4":                item.Image4,
+			"image5":                item.Image5,
 		},
 	).Find(result).Error
 }
@@ -122,24 +113,20 @@ func (repository *Repository) UpdateSchoolConfigByID(id int64, item *model.Schoo
 	result := &model.SchoolConfig{}
 	return result, repository.Db.Preload(clause.Associations).Model(&model.SchoolConfig{}).Where("id = ?", id).Updates(
 		map[string]any{
-			"website_domain_name":    item.WebsiteDomainName,
-			"user_email_domain_name": item.UserEmailDomainName,
-			"support_email":          item.SupportEmail,
-
+			"website_domain_name":                item.WebsiteDomainName,
+			"user_email_domain_name":             item.UserEmailDomainName,
+			"support_email":                      item.SupportEmail,
 			"google_workspace_credentials":       item.GoogleWorkspaceCredentials,
 			"google_workspace_user_email_domain": item.GoogleWorkspaceUserEmailDomain,
-
-			"sms_user_id":        item.SmsUserID,
-			"whatsapp_token":     item.WhatsappToken,
-			"whatsapp_phone_id":  item.WhatsappPhoneID,
-			"telegram_bot_token": item.TelegramBotToken,
-
-			"website_title":       item.WebsiteTitle,
-			"website_description": item.WebsiteDescription,
-
-			"color_primary":          item.ColorPrimary,
-			"color_primary_bg":       item.ColorPrimaryBg,
-			"color_primary_bg_hover": item.ColorPrimaryBgHover,
+			"sms_user_id":                        item.SmsUserID,
+			"whatsapp_token":                     item.WhatsappToken,
+			"whatsapp_phone_id":                  item.WhatsappPhoneID,
+			"telegram_bot_token":                 item.TelegramBotToken,
+			"website_title":                      item.WebsiteTitle,
+			"website_description":                item.WebsiteDescription,
+			"color_primary":                      item.ColorPrimary,
+			"color_primary_bg":                   item.ColorPrimaryBg,
+			"color_primary_bg_hover":             item.ColorPrimaryBgHover,
 		},
 	).Find(result).Error
 }

@@ -36,8 +36,9 @@ func (item *StudentEnroll) ToResponse() *data.StudentEnrollResponse {
 		return nil
 	}
 	resp := &data.StudentEnrollResponse{}
-	resp.Origin = item.Origin
-	resp.OriginFeedback = item.OriginFeedback
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Year = item.Year.ToResponse()
@@ -45,9 +46,8 @@ func (item *StudentEnroll) ToResponse() *data.StudentEnrollResponse {
 	resp.LevelDomain = item.LevelDomain.ToResponse()
 	resp.Student = item.Student.ToPublicResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.Origin = item.Origin
+	resp.OriginFeedback = item.OriginFeedback
 	return resp
 }
 

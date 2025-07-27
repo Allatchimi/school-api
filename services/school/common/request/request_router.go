@@ -148,7 +148,7 @@ func RegisterEndpoints(
 			ctx context.Context,
 			input *struct {
 				data.RequestID
-				Body data.RequestUpdateRequest
+				Body data.RequestStatusRequest
 			},
 		) (*struct{ Body data.RequestResponse }, error) {
 			result, errCode, err := controller.UpdateStatus(&ctx, input)

@@ -10,27 +10,24 @@ import (
 
 type School struct {
 	types.BaseGormModel
-	Name   string `gorm:"unique;default:null"`
-	Type   string `gorm:"default:null"`
-	Status string `gorm:"default:null"`
+	Config *SchoolConfig `gorm:"default:null;foreignKey:ConfigID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
+	InfoID int64       `gorm:"default:null"`
+	Info   *SchoolInfo `gorm:"default:null;foreignKey:InfoID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	Name               string `gorm:"unique;default:null"`
+	Type               string `gorm:"default:null"`
+	Status             string `gorm:"default:null"`
 	DeploymentRequest  string `gorm:"default:null"`
 	DeploymentStatus   string `gorm:"default:null"`
 	DeploymentFeedback string `gorm:"default:null;type:text"`
 	DeploymentCount    int64  `gorm:"default:null"`
-
-	Favicon   string `gorm:"default:null"`
-	Logo      string `gorm:"default:null"`
-	LogoWhite string `gorm:"default:null"`
-
-	Currency     string `gorm:"default:null"`
-	PaymentCount int64  `gorm:"default:1"`
-
-	ConfigID int64         `gorm:"default:null"`
-	Config   *SchoolConfig `gorm:"default:null;foreignKey:ConfigID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-
-	InfoID int64       `gorm:"default:null"`
-	Info   *SchoolInfo `gorm:"default:null;foreignKey:InfoID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Favicon            string `gorm:"default:null"`
+	Logo               string `gorm:"default:null"`
+	LogoWhite          string `gorm:"default:null"`
+	Currency           string `gorm:"default:null"`
+	PaymentCount       int64  `gorm:"default:1"`
+	ConfigID           int64  `gorm:"default:null"`
 }
 
 func (item *School) ToResponse() *data.SchoolResponse {
@@ -38,28 +35,25 @@ func (item *School) ToResponse() *data.SchoolResponse {
 		return nil
 	}
 	resp := &data.SchoolResponse{}
-	resp.Name = item.Name
-	resp.Type = item.Type
-	resp.Status = item.Status
-
-	resp.DeploymentRequest = item.DeploymentRequest
-	resp.DeploymentStatus = item.DeploymentStatus
-	resp.DeploymentFeedback = item.DeploymentFeedback
-	resp.DeploymentCount = item.DeploymentCount
-
-	resp.Favicon = item.Favicon
-	resp.Logo = item.Logo
-	resp.LogoWhite = item.LogoWhite
-
-	resp.Currency = item.Currency
-	resp.PaymentCount = item.PaymentCount
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.Info = item.Info.ToResponse()
 	resp.Config = item.Config.ToResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.Name = item.Name
+	resp.Type = item.Type
+	resp.Status = item.Status
+	resp.DeploymentRequest = item.DeploymentRequest
+	resp.DeploymentStatus = item.DeploymentStatus
+	resp.DeploymentFeedback = item.DeploymentFeedback
+	resp.DeploymentCount = item.DeploymentCount
+	resp.Favicon = item.Favicon
+	resp.Logo = item.Logo
+	resp.LogoWhite = item.LogoWhite
+	resp.Currency = item.Currency
+	resp.PaymentCount = item.PaymentCount
 	return resp
 }
 
@@ -68,22 +62,20 @@ func (item *School) ToPublicResponse() *data.SchoolPublicResponse {
 		return nil
 	}
 	resp := &data.SchoolPublicResponse{}
-	resp.Name = item.Name
-	resp.Type = item.Type
-	resp.Status = item.Status
-
-	resp.Favicon = item.Favicon
-	resp.Logo = item.Logo
-	resp.LogoWhite = item.LogoWhite
-
-	resp.Currency = item.Currency
-	resp.PaymentCount = item.PaymentCount
-
-	resp.Info = item.Info.ToResponse()
-
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+
+	resp.Info = item.Info.ToResponse()
+
+	resp.Name = item.Name
+	resp.Type = item.Type
+	resp.Status = item.Status
+	resp.Favicon = item.Favicon
+	resp.Logo = item.Logo
+	resp.LogoWhite = item.LogoWhite
+	resp.Currency = item.Currency
+	resp.PaymentCount = item.PaymentCount
 	return resp
 }
 

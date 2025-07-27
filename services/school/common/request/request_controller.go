@@ -50,7 +50,7 @@ func (controller *Controller) UpdateStatus(
 	ctx *context.Context,
 	input *struct {
 		data.RequestID
-		Body data.RequestUpdateRequest
+		Body data.RequestStatusRequest
 	},
 ) (result *model.Request, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateStatus(

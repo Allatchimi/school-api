@@ -41,6 +41,15 @@ func (item *Schedule) ToResponse() *data.ScheduleResponse {
 		return nil
 	}
 	resp := &data.ScheduleResponse{}
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
+
+	resp.School = item.School.ToPublicResponse()
+	resp.Year = item.Year.ToResponse()
+	resp.ClassSubject = item.ClassSubject.ToResponse()
+	resp.Unit = item.Unit.ToResponse()
+
 	resp.IsCommon = item.IsCommon
 	resp.Type = item.Type
 	resp.DayOfTheWeek = item.DayOfTheWeek
@@ -51,15 +60,6 @@ func (item *Schedule) ToResponse() *data.ScheduleResponse {
 	resp.StartCountDate = item.StartCountDate
 	resp.IsValid = item.IsValid
 	resp.InvalidDate = item.InvalidDate
-
-	resp.School = item.School.ToPublicResponse()
-	resp.Year = item.Year.ToResponse()
-	resp.ClassSubject = item.ClassSubject.ToResponse()
-	resp.Unit = item.Unit.ToResponse()
-
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

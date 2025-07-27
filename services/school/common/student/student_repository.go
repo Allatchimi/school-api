@@ -165,6 +165,14 @@ func (repository *Repository) GetByUserID(userID int64) (*model.Student, error) 
 		Where("user_id = ?", userID).Limit(1).Find(result).Error
 }
 
+func (repository *Repository) GetByUserIDSchoolID(userID int64, schoolID int64) (*model.Student, error) {
+	result := &model.Student{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("user_id = ?", userID).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
+}
+
 func (repository *Repository) GetStudentEnrollByID(id int64) (*model.StudentEnroll, error) {
 	result := &model.StudentEnroll{}
 	return result, repository.Db.Preload(clause.Associations).

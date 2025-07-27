@@ -70,6 +70,7 @@ func (service *Service) Login(
 			&types.JwtToken{
 				UserID:   userFound.ID,
 				SchoolID: userFound.SchoolID,
+
 				Platform: device.Platform,
 				Device:   device.DeviceName,
 				App:      device.App,
@@ -105,6 +106,7 @@ func (service *Service) Login(
 		&types.JwtToken{
 			UserID:   userFound.ID,
 			SchoolID: userFound.SchoolID,
+
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -292,6 +294,7 @@ func (service *Service) LoginWithProvider(
 		&types.JwtToken{
 			UserID:   userFound.ID,
 			SchoolID: userFound.SchoolID,
+
 			Platform: device.Platform,
 			Device:   device.DeviceName,
 			App:      device.App,
@@ -404,6 +407,7 @@ func (service *Service) Register(
 		&types.JwtToken{
 			UserID:   createdUser.ID,
 			SchoolID: userFound.SchoolID,
+
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -611,6 +615,7 @@ func (service *Service) ForgotPasswordInit(
 		&types.JwtToken{
 			UserID:   userFound.ID,
 			SchoolID: userFound.SchoolID,
+
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -727,6 +732,7 @@ func (service *Service) ForgotPasswordCode(
 		&types.JwtToken{
 			UserID:   userFound.ID,
 			SchoolID: userFound.SchoolID,
+
 			Platform: "*",
 			Device:   "*",
 			App:      "*",

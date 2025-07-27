@@ -12,6 +12,12 @@ import (
 
 type ScheduleResponse struct {
 	types.BaseGormModelResponse
+	School       *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	Year         *dataYear.YearResponse           `json:"year" required:"false" doc:"Year"`
+	ClassSubject *dataClass.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Class subject"`
+	Sequence     *dataSequence.SequenceResponse   `json:"semester" required:"false" doc:"Sequence"`
+	Unit         *unitData.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
+
 	IsCommon       bool       `json:"isCommon" required:"false" doc:"Is common"`
 	Type           string     `json:"type" required:"false" doc:"Type"`
 	DayOfTheWeek   string     `json:"dayOfTheWeek" required:"false" doc:"Day of the week"`
@@ -22,12 +28,6 @@ type ScheduleResponse struct {
 	StartCountDate *time.Time `json:"startCountDate" required:"false" doc:"Start count date"`
 	IsValid        bool       `json:"isValid" required:"false" doc:"Is valid"`
 	InvalidDate    *time.Time `json:"invalidDate" required:"false" doc:"Invalid date"`
-
-	School       *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Year         *dataYear.YearResponse           `json:"year" required:"false" doc:"Year"`
-	ClassSubject *dataClass.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Class subject"`
-	Sequence     *dataSequence.SequenceResponse   `json:"semester" required:"false" doc:"Sequence"`
-	Unit         *unitData.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
 }
 
 type ScheduleWeeklyViewResponse struct {

@@ -120,10 +120,9 @@ func (repository *Repository) UpdateUserInfoByID(id int64, item *model.UserInfo)
 	result := &model.UserInfo{}
 	return result, repository.Db.Preload(clause.Associations).Model(&model.UserInfo{}).Where("id = ?", id).Updates(
 		map[string]any{
-			"username":   item.Username,
-			"first_name": item.FirstName,
-			"last_name":  item.LastName,
-
+			"username":       item.Username,
+			"first_name":     item.FirstName,
+			"last_name":      item.LastName,
 			"gender":         item.Gender,
 			"birthday":       item.Birthday,
 			"birth_location": item.BirthLocation,

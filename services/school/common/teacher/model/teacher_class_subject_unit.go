@@ -14,9 +14,6 @@ type TeacherClassSubjectUnit struct {
 	SchoolID int64               `gorm:"default:null"`
 	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	TeacherID int64    `gorm:"default:null"`
-	Teacher   *Teacher `gorm:"default:null;foreignKey:TeacherID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-
 	YearID int64           `gorm:"default:null"`
 	Year   *modelYear.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
@@ -25,6 +22,9 @@ type TeacherClassSubjectUnit struct {
 
 	UnitID int64                     `gorm:"default:null"`
 	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	TeacherID int64    `gorm:"default:null"`
+	Teacher   *Teacher `gorm:"default:null;foreignKey:TeacherID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
 func (item *TeacherClassSubjectUnit) ToResponse() *data.TeacherClassSubjectUnitResponse {
@@ -32,15 +32,15 @@ func (item *TeacherClassSubjectUnit) ToResponse() *data.TeacherClassSubjectUnitR
 		return nil
 	}
 	resp := &data.TeacherClassSubjectUnitResponse{}
-	resp.School = item.School.ToPublicResponse()
-	resp.Teacher = item.Teacher.ToPublicResponse()
-	resp.Year = item.Year.ToResponse()
-	resp.ClassSubject = item.ClassSubject.ToResponse()
-	resp.Unit = item.Unit.ToResponse()
-
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+
+	resp.School = item.School.ToPublicResponse()
+	resp.Year = item.Year.ToResponse()
+	resp.ClassSubject = item.ClassSubject.ToResponse()
+	resp.Unit = item.Unit.ToResponse()
+	resp.Teacher = item.Teacher.ToPublicResponse()
 	return resp
 }
 

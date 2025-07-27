@@ -9,7 +9,6 @@ import (
 
 type Communication struct {
 	types.BaseGormModel
-
 	SchoolID int64               `gorm:"default:null"`
 	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
@@ -25,15 +24,15 @@ func (item *Communication) ToResponse() *data.CommunicationResponse {
 		return nil
 	}
 	resp := &data.CommunicationResponse{}
-	resp.Subject = item.Subject
-	resp.Message = item.Message
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Role = item.Role.ToResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.Subject = item.Subject
+	resp.Message = item.Message
 	return resp
 }
 

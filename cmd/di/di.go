@@ -186,6 +186,7 @@ func InjectDependencies() {
 	api.AllControllers.RequestController = request.NewController(
 		request.NewService(
 			requestRepo,
+			api.AllControllers.StudentController.Service,
 		),
 	)
 	api.AllControllers.ResultController = result.NewController(

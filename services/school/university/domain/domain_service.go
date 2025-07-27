@@ -39,8 +39,9 @@ func (service *Service) Create(
 	item := &model.UniversityDomain{
 		SchoolID:     newRequest.SchoolID,
 		DepartmentID: newRequest.DepartmentID,
-		Name:         newRequest.Name,
-		Description:  newRequest.Description,
+
+		Name:        newRequest.Name,
+		Description: newRequest.Description,
 	}
 
 	// Check if the school type is university
@@ -112,8 +113,9 @@ func (service *Service) Update(
 	item := &model.UniversityDomain{
 		SchoolID:     newRequest.SchoolID,
 		DepartmentID: newRequest.DepartmentID,
-		Name:         newRequest.Name,
-		Description:  newRequest.Description,
+
+		Name:        newRequest.Name,
+		Description: newRequest.Description,
 	}
 
 	// Check if the school type is university

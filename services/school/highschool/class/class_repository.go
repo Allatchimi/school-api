@@ -37,8 +37,9 @@ func (repository *Repository) UpdateByID(id int64, item *model.HighschoolClass) 
 		map[string]any{
 			"school_id":    item.SchoolID,
 			"specialty_id": item.SpecialtyID,
-			"name":         item.Name,
-			"description":  item.Description,
+
+			"name":        item.Name,
+			"description": item.Description,
 		},
 	).Find(result).Error
 }

@@ -30,7 +30,8 @@ func (repository *Repository) UpdateByID(id int64, item *model.UniversityFaculty
 	result := &model.UniversityFaculty{}
 	return result, repository.Db.Preload(clause.Associations).Model(&model.UniversityFaculty{}).Where("id = ?", id).Updates(
 		map[string]any{
-			"school_id":   item.SchoolID,
+			"school_id": item.SchoolID,
+
 			"name":        item.Name,
 			"description": item.Description,
 		},

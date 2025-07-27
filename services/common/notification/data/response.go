@@ -8,11 +8,12 @@ import (
 
 type NotificationResponse struct {
 	types.BaseGormModelResponse
-	User    *dataUser.UserPublicResponse `json:"user" required:"false" doc:"User"`
-	Title   string                       `json:"title" required:"false" doc:"Title"`
-	Message string                       `json:"message" required:"false" doc:"Message"`
-	Seen    bool                         `json:"seen" required:"false" doc:"Seen"`
-	SeenAt  *time.Time                   `json:"seenAt" required:"false" doc:"Seen at"`
+	User *dataUser.UserPublicResponse `json:"user" required:"false" doc:"User"`
+
+	Title   string     `json:"title" required:"false" doc:"Title"`
+	Message string     `json:"message" required:"false" doc:"Message"`
+	Seen    bool       `json:"seen" required:"false" doc:"Seen"`
+	SeenAt  *time.Time `json:"seenAt" required:"false" doc:"Seen at"`
 }
 
 type NotificationNotSeenResponse struct {

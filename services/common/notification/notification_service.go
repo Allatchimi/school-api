@@ -42,7 +42,8 @@ func (service *Service) UpdateSeen(
 
 	// Format request
 	item := &model.Notification{
-		UserID:  foundItem.UserID,
+		UserID: foundItem.UserID,
+
 		Title:   foundItem.Title,
 		Message: foundItem.Message,
 		Seen:    request.Seen,

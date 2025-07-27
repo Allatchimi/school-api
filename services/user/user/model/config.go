@@ -10,11 +10,9 @@ type UserConfig struct {
 	WhatsappPhoneNumber int64 `gorm:"default:null"`
 	TelegramChatID      int64 `gorm:"default:null"`
 
-	AllowNotifications bool `gorm:"default:true"`
-
-	MfaEmail         bool `gorm:"default:false"`
-	MfaAuthenticator bool `gorm:"default:false"`
-
+	AllowNotifications           bool   `gorm:"default:true"`
+	MfaEmail                     bool   `gorm:"default:false"`
+	MfaAuthenticator             bool   `gorm:"default:false"`
 	WebPushSubscriptionEndpoint  string `gorm:"default:null"`
 	WebPushSubscriptionKeyP256dh string `gorm:"default:null"`
 	WebPushSubscriptionKeyAuth   string `gorm:"default:null"`

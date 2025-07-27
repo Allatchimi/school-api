@@ -41,9 +41,8 @@ func (service *Service) Create(
 		SchoolID:    newRequest.SchoolID,
 		SpecialtyID: newRequest.SpecialtyID,
 
-		Name:        newRequest.Name,
-		Description: newRequest.Description,
-
+		Name:         newRequest.Name,
+		Description:  newRequest.Description,
 		Fees:         newRequest.Fees,
 		Program:      newRequest.Program,
 		Requirements: newRequest.Requirements,
@@ -112,8 +111,7 @@ func (service *Service) CreateClassSubject(
 		Coefficient:  newRequest.Coefficient,
 		Program:      newRequest.Program,
 		Requirements: newRequest.Requirements,
-
-		IsValid: newRequest.IsValid,
+		IsValid:      newRequest.IsValid,
 	}
 
 	// Check unique
@@ -180,9 +178,8 @@ func (service *Service) Update(
 		SchoolID:    newRequest.SchoolID,
 		SpecialtyID: newRequest.SpecialtyID,
 
-		Name:        newRequest.Name,
-		Description: newRequest.Description,
-
+		Name:         newRequest.Name,
+		Description:  newRequest.Description,
 		Fees:         newRequest.Fees,
 		Program:      newRequest.Program,
 		Requirements: newRequest.Requirements,
@@ -266,8 +263,7 @@ func (service *Service) UpdateClassSubject(
 		Coefficient:  newRequest.Coefficient,
 		Program:      newRequest.Program,
 		Requirements: newRequest.Requirements,
-
-		IsValid: newRequest.IsValid,
+		IsValid:      newRequest.IsValid,
 	}
 
 	// Check if the school type is highschool

@@ -20,20 +20,23 @@ type ReportEntryResponse struct {
 	Unit         *dataUnit.UnitResponse          `json:"unit" required:"false" doc:"Unit"`
 	Student      *dataStudent.StudentResponse    `json:"student" required:"false" doc:"Student"`
 
-	Coefficient  int     `json:"coefficient" required:"false" doc:"Coefficient"`
-	Credit       int     `json:"credit" required:"false" doc:"Credit"`
-	Value        float64 `json:"value" required:"false" doc:"Value"`
-	Notation     float64 `json:"notation" required:"false" doc:"Notation"`
-	IsRetry      bool    `json:"isRetry" required:"false" doc:"Is retry"`
-	RetryCount   int64   `json:"retryCount" required:"false" doc:"Retry count"`
-	RetryDetails string  `json:"retryDetails" required:"false" doc:"Retry details"`
+	Coefficient      int     `json:"coefficient" required:"false" doc:"Coefficient"`
+	Credit           int     `json:"credit" required:"false" doc:"Credit"`
+	Value            float64 `json:"value" required:"false" doc:"Value"`
+	Notation         float64 `json:"notation" required:"false" doc:"Notation"`
+	Grade            string  `json:"grade" required:"false" doc:"Grade"`
+	GradeDescription string  `json:"gradeDescription" required:"false" doc:"Grade description"`
+	IsRetry          bool    `json:"isRetry" required:"false" doc:"Is retry"`
+	RetryCount       int64   `json:"retryCount" required:"false" doc:"Retry count"`
+	RetryDetails     string  `json:"retryDetails" required:"false" doc:"Retry details"`
 }
 
 type ReportGradeResponse struct {
 	types.BaseGormModelResponse
 	School *dataSchool.SchoolResponse `json:"school" required:"false" doc:"School"`
 
-	Name           string  `json:"name" required:"false" doc:"Name"`
+	Type           string  `json:"type" required:"false" doc:"Type"`
+	Name           string  `json:"name" required:"true" doc:"Name"`
 	Description    string  `json:"description" required:"false" doc:"Description"`
 	Minimum        float64 `json:"minimum" required:"false" doc:"Minimum"`
 	Maximum        float64 `json:"maximum" required:"false" doc:"Maximum"`
@@ -45,11 +48,12 @@ type ReportConfigResponse struct {
 	types.BaseGormModelResponse
 	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
 
-	Notation                      float64 `json:"notation" required:"false" doc:"Notation"`
+	NotationAverage               float64 `json:"notationAverage" required:"false" doc:"Notation average"`
+	NotationReport                float64 `json:"notationReport" required:"false" doc:"Notation report"`
 	MinimumRequiredValueToPromote float64 `json:"minimumRequiredValueToPromote" required:"false" doc:"Minimum required value to promote"`
 }
 
-type ReportBoardResponse struct {
+type ReportTableResponse struct {
 	types.BaseGormModelResponse
 	School      *dataSchool.SchoolResponse     `json:"school" required:"false" doc:"School"`
 	Year        *dataYear.YearResponse         `json:"year" required:"false" doc:"Year"`
@@ -80,7 +84,7 @@ type ReportConfigResponseList struct {
 	Data []ReportConfigResponse `json:"data" required:"false" doc:"List of report config"`
 }
 
-type ReportBoardResponseList struct {
+type ReportTableResponseList struct {
 	types.PaginatedResponse
-	Data []ReportBoardResponse `json:"data" required:"false" doc:"List of report board"`
+	Data []ReportTableResponse `json:"data" required:"false" doc:"List of report board"`
 }

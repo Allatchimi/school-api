@@ -5,7 +5,8 @@ type QuarterID struct {
 }
 
 type QuarterRequest struct {
-	SchoolID    int64  `json:"schoolID" required:"true" doc:"School id"`
+	SchoolID int64 `json:"schoolID" required:"true" doc:"School id"`
+
 	Name        string `json:"name" required:"true" doc:"Quarter name"`
 	Description string `json:"description" required:"false" doc:"Quarter description"`
 }

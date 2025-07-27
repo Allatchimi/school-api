@@ -35,12 +35,10 @@ func (repository *Repository) UpdateByID(id int64, data *model.Request) (*model.
 			"class_subject_id": data.ClassSubjectID,
 			"sequence_id":      data.SequenceID,
 			"unit_id":          data.UnitID,
-			"student_id":       data.StudentID,
 
-			"audience": data.Audience,
-			"title":    data.Title,
-			"message":  data.Message,
-
+			"audience":  data.Audience,
+			"title":     data.Title,
+			"message":   data.Message,
 			"document1": data.Document1,
 			"document2": data.Document2,
 			"document3": data.Document3,
@@ -148,6 +146,10 @@ func (repository *Repository) GetAll(
 		if request.StudentID > 0 {
 			where = helpers.AppendWhereClause(where, "requests.student_id = ?")
 			args = append(args, request.StudentID)
+		}
+		if len(request.Audience) > 0 {
+			where = helpers.AppendWhereClause(where, "requests.audience = ?")
+			args = append(args, request.Audience)
 		}
 	}
 

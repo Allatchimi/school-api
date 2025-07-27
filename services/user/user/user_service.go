@@ -35,8 +35,9 @@ func (service *Service) Create(
 
 	// Format item
 	item := &model.User{
-		SchoolID:    newRequest.SchoolID,
-		RoleID:      newRequest.RoleID,
+		SchoolID: newRequest.SchoolID,
+		RoleID:   newRequest.RoleID,
+
 		Email:       newRequest.Email,
 		PhoneNumber: newRequest.PhoneNumber,
 		Status:      newRequest.Status,
@@ -83,10 +84,9 @@ func (service *Service) Create(
 
 	// Create user info
 	tempInfo, err := service.Repository.CreateUserInfo(&model.UserInfo{
-		Username:  item.Info.Username,
-		FirstName: item.Info.FirstName,
-		LastName:  item.Info.LastName,
-
+		Username:      item.Info.Username,
+		FirstName:     item.Info.FirstName,
+		LastName:      item.Info.LastName,
 		Gender:        item.Info.Gender,
 		Birthday:      item.Info.Birthday,
 		BirthLocation: item.Info.BirthLocation,
@@ -182,17 +182,17 @@ func (service *Service) Update(
 
 	// Format item
 	item := &model.User{
-		SchoolID:    newRequest.SchoolID,
-		RoleID:      newRequest.RoleID,
+		SchoolID: newRequest.SchoolID,
+		RoleID:   newRequest.RoleID,
+
 		Email:       newRequest.Email,
 		PhoneNumber: newRequest.PhoneNumber,
 		Status:      newRequest.Status,
 		IsActivated: newRequest.IsActivated,
 		Info: &model.UserInfo{
-			Username:  newRequest.Info.Username,
-			FirstName: newRequest.Info.FirstName,
-			LastName:  newRequest.Info.LastName,
-
+			Username:      newRequest.Info.Username,
+			FirstName:     newRequest.Info.FirstName,
+			LastName:      newRequest.Info.LastName,
 			Gender:        newRequest.Info.Gender,
 			Birthday:      newRequest.Info.Birthday,
 			BirthLocation: newRequest.Info.BirthLocation,

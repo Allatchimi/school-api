@@ -31,19 +31,19 @@ func (item *HighschoolClassSubject) ToResponse() *data.ClassSubjectResponse {
 		return nil
 	}
 	resp := &data.ClassSubjectResponse{}
-	resp.Coefficient = item.Coefficient
-	resp.Program = item.Program
-	resp.Requirements = item.Requirements
-	resp.IsValid = item.IsValid
-	resp.InvalidDate = item.InvalidDate
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Subject = item.Subject.ToResponse()
 	resp.Class = item.Class.ToResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.Coefficient = item.Coefficient
+	resp.Program = item.Program
+	resp.Requirements = item.Requirements
+	resp.IsValid = item.IsValid
+	resp.InvalidDate = item.InvalidDate
 	return resp
 }
 

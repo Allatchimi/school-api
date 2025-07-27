@@ -45,10 +45,9 @@ func (service *Service) UpdateProfileInfo(
 
 	// Format item
 	item := &model.UserInfo{
-		Username:  request.Username,
-		FirstName: request.FirstName,
-		LastName:  request.LastName,
-
+		Username:      request.Username,
+		FirstName:     request.FirstName,
+		LastName:      request.LastName,
 		Gender:        request.Gender,
 		Birthday:      request.Birthday,
 		BirthLocation: request.BirthLocation,

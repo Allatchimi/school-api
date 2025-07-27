@@ -38,7 +38,8 @@ func (service *Service) Create(
 
 	// Format request
 	item := &model.UniversityLevel{
-		SchoolID:    newRequest.SchoolID,
+		SchoolID: newRequest.SchoolID,
+
 		Name:        newRequest.Name,
 		Description: newRequest.Description,
 	}
@@ -161,7 +162,8 @@ func (service *Service) Update(
 
 	// Format request
 	item := &model.UniversityLevel{
-		SchoolID:    newRequest.SchoolID,
+		SchoolID: newRequest.SchoolID,
+
 		Name:        newRequest.Name,
 		Description: newRequest.Description,
 	}

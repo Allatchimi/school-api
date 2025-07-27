@@ -39,7 +39,6 @@ func (repository *Repository) UpdateByID(id int64, item *model.UniversityUnit) (
 			"credit":       item.Credit,
 			"program":      item.Program,
 			"requirements": item.Requirements,
-
 			"is_valid":     item.IsValid,
 			"invalid_date": item.InvalidDate,
 		},

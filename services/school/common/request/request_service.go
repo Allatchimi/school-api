@@ -7,14 +7,22 @@ import (
 	"api/common/types"
 	"api/services/school/common/request/data"
 	"api/services/school/common/request/model"
+	"api/services/school/common/student"
 )
 
 type Service struct {
-	Repository *Repository
+	Repository     *Repository
+	StudentService *student.Service
 }
 
-func NewService(repository *Repository) *Service {
-	return &Service{Repository: repository}
+func NewService(
+	repository *Repository,
+	studentService *student.Service,
+) *Service {
+	return &Service{
+		Repository:     repository,
+		StudentService: studentService,
+	}
 }
 
 const MODEL_NAME = "request"
@@ -30,6 +38,13 @@ func (service *Service) Create(
 		newRequest.SchoolID = ctxData.Jwt.SchoolID
 	}
 
+	// Check if the user is student
+	if ctxData.User.Feature != constants.FeatureStudent {
+		errCode = http.StatusForbidden
+		err = constants.Http403InvalidPermissionErrorMessage()
+		return
+	}
+
 	// Format request
 	item := &model.Request{
 		SchoolID:       newRequest.SchoolID,
@@ -37,7 +52,6 @@ func (service *Service) Create(
 		ClassSubjectID: newRequest.ClassSubjectID,
 		SequenceID:     newRequest.SequenceID,
 		UnitID:         newRequest.UnitID,
-		StudentID:      newRequest.StudentID,
 
 		Audience: newRequest.Audience,
 		Title:    newRequest.Title,
@@ -73,7 +87,21 @@ func (service *Service) Create(
 		return
 	}
 
-	// Insert request
+	// Get the student and update the item
+	foundStudent, err := service.StudentService.Repository.GetByUserIDSchoolID(ctxData.Jwt.UserID, newRequest.SchoolID)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundStudent == nil || foundStudent.ID < 1 {
+		errCode = http.StatusForbidden
+		err = constants.Http403InvalidPermissionErrorMessage()
+		return
+	}
+	item.StudentID = foundStudent.ID
+
+	// Create
 	result, err = service.Repository.Create(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -94,6 +122,13 @@ func (service *Service) Update(
 		newRequest.SchoolID = ctxData.Jwt.SchoolID
 	}
 
+	// Check if the user is student
+	if ctxData.User.Feature != constants.FeatureStudent {
+		errCode = http.StatusForbidden
+		err = constants.Http403InvalidPermissionErrorMessage()
+		return
+	}
+
 	// Check if the item exists
 	var foundItem *model.Request
 	if ctxData.User.Feature != constants.FeatureAdmin {
@@ -111,6 +146,11 @@ func (service *Service) Update(
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
+	if foundItem.Student.UserID != ctxData.Jwt.UserID {
+		errCode = http.StatusForbidden
+		err = constants.Http403InvalidPermissionErrorMessage()
+		return
+	}
 
 	// Format request
 	item := &model.Request{
@@ -119,7 +159,7 @@ func (service *Service) Update(
 		ClassSubjectID: newRequest.ClassSubjectID,
 		SequenceID:     newRequest.SequenceID,
 		UnitID:         newRequest.UnitID,
-		StudentID:      newRequest.StudentID,
+		StudentID:      foundItem.StudentID,
 
 		Audience: newRequest.Audience,
 		Title:    newRequest.Title,
@@ -155,7 +195,7 @@ func (service *Service) Update(
 		return
 	}
 
-	// Update request
+	// Update
 	result, err = service.Repository.UpdateByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -168,7 +208,7 @@ func (service *Service) Update(
 func (service *Service) UpdateStatus(
 	ctxData *types.ContextData,
 	id int64,
-	request *data.RequestUpdateRequest,
+	request *data.RequestStatusRequest,
 ) (result *model.Request, errCode int, err error) {
 	// Check school
 	newRequest := *request

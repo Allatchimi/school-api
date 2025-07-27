@@ -4,6 +4,7 @@ const (
 	STUDENT_ENROLL_ORIGIN_DASHBOARD     = "dashboard"
 	STUDENT_ENROLL_ORIGIN_PRE_ENROLL    = "pre-enroll"
 	STUDENT_ENROLL_ORIGIN_PRE_PROMOTION = "promotion"
+	STUDENT_ENROLL_ORIGIN_RETROGRADE    = "retrograde"
 )
 
 const (

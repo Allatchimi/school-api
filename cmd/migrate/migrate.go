@@ -114,7 +114,7 @@ func Apply() error {
 		&reportModel.ReportEntry{},
 		&reportModel.ReportGrade{},
 		&reportModel.ReportConfig{},
-		&reportModel.ReportBoard{},
+		&reportModel.ReportTable{},
 		// Schedule
 		&scheduleModel.Schedule{},
 		// Request

@@ -23,14 +23,14 @@ func (item *Student) ToResponse() *data.StudentResponse {
 		return nil
 	}
 	resp := &data.StudentResponse{}
-	resp.UID = item.UID
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.School = item.School.ToPublicResponse()
 	resp.User = item.User.ToResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.UID = item.UID
 	return resp
 }
 
@@ -39,13 +39,14 @@ func (item *Student) ToPublicResponse() *data.StudentPublicResponse {
 		return nil
 	}
 	resp := &data.StudentPublicResponse{}
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.School = item.School.ToPublicResponse()
 	resp.User = item.User.ToPublicResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.UID = item.UID
 	return resp
 }
 

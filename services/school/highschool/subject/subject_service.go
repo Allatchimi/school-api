@@ -37,7 +37,8 @@ func (service *Service) Create(
 
 	// Format request
 	item := &model.HighschoolSubject{
-		SchoolID:    newRequest.SchoolID,
+		SchoolID: newRequest.SchoolID,
+
 		Name:        newRequest.Name,
 		Description: newRequest.Description,
 	}
@@ -109,7 +110,8 @@ func (service *Service) Update(
 
 	// Form request
 	item := &model.HighschoolSubject{
-		SchoolID:    newRequest.SchoolID,
+		SchoolID: newRequest.SchoolID,
+
 		Name:        newRequest.Name,
 		Description: newRequest.Description,
 	}

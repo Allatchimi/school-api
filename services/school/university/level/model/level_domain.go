@@ -31,19 +31,19 @@ func (item *UniversityLevelDomain) ToResponse() *data.LevelDomainResponse {
 		return nil
 	}
 	resp := &data.LevelDomainResponse{}
-	resp.Fees = item.Fees
-	resp.Program = item.Program
-	resp.Requirements = item.Requirements
-	resp.IsValid = item.IsValid
-	resp.InvalidDate = item.InvalidDate
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Level = item.Level.ToResponse()
 	resp.Domain = item.Domain.ToResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.Fees = item.Fees
+	resp.Program = item.Program
+	resp.Requirements = item.Requirements
+	resp.IsValid = item.IsValid
+	resp.InvalidDate = item.InvalidDate
 	return resp
 }
 

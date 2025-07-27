@@ -36,9 +36,10 @@ func (service *Service) Create(
 	if ctxData.Jwt.SchoolID > 0 {
 		result, err = service.Repository.Create(&model.Contact{
 			SchoolID: request.SchoolID,
-			Subject:  request.Subject,
-			Email:    request.Email,
-			Message:  request.Message,
+
+			Subject: request.Subject,
+			Email:   request.Email,
+			Message: request.Message,
 		})
 	} else {
 		result, err = service.Repository.Create(&model.Contact{

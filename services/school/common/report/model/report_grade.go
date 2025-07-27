@@ -11,6 +11,7 @@ type ReportGrade struct {
 	SchoolID int64               `gorm:"default:null"`
 	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
+	Type           string  `gorm:"default:null"`
 	Name           string  `gorm:"default:null"`
 	Description    string  `gorm:"default:null"`
 	Minimum        float64 `gorm:"default:null"`
@@ -24,6 +25,7 @@ func (item *ReportGrade) ToResponse() *data.ReportGradeResponse {
 		return nil
 	}
 	resp := &data.ReportGradeResponse{}
+	resp.Type = item.Type
 	resp.Name = item.Name
 	resp.Description = item.Description
 	resp.Minimum = item.Minimum

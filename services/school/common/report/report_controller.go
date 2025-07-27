@@ -263,3 +263,24 @@ func (controller *Controller) GetAllConfig(
 	result.Pagination = newPagination
 	return
 }
+
+func (controller *Controller) GetAllTable(
+	ctx *context.Context,
+	input *struct {
+		types.Filter
+		types.PaginationRequest
+		data.GetAllReportTableRequest
+	},
+) (result *data.ReportTableResponseList, errCode int, err error) {
+	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
+	resultList, errCode, err := controller.Service.GetAllTable(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllReportTableRequest)
+	if err != nil {
+		return
+	}
+	result = &data.ReportTableResponseList{
+		Data: model.ToReportTableResponseList(resultList),
+	}
+	result.Filter = newFilter
+	result.Pagination = newPagination
+	return
+}

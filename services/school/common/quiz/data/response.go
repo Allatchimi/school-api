@@ -19,7 +19,7 @@ type QuizResponse struct {
 
 	Title       string `json:"title" required:"false" doc:"Title"`
 	Description string `json:"description" required:"false" doc:"Description"`
-	Status      string `json:"status" required:"false" doc:"Status" example:""`
+	Status      string `json:"status" required:"false" doc:"Status"`
 }
 
 type QuizQuestionListResponse struct {
@@ -53,8 +53,8 @@ type QuizAnswerResponse struct {
 }
 
 type QuizAnswersResponse struct {
-	Question *QuizQuestionResponse       `json:"question" required:"false" doc:"Question" example:""`
-	Answer   *QuizQuestionOptionResponse `json:"answer" required:"false" doc:"Answer" example:""`
+	Question *QuizQuestionResponse       `json:"question" required:"false" doc:"Question"`
+	Answer   *QuizQuestionOptionResponse `json:"answer" required:"false" doc:"Answer"`
 }
 
 type QuizResultResponse struct {

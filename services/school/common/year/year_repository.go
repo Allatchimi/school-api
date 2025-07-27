@@ -30,10 +30,11 @@ func (repository *Repository) UpdateByID(id int64, item *model.Year) (*model.Yea
 	result := &model.Year{}
 	return result, repository.Db.Preload(clause.Associations).Model(&model.Year{}).Where("id = ?", id).Updates(
 		map[string]any{
+			"school_id": item.SchoolID,
+
 			"name":       item.Name,
 			"start_date": item.StartDate,
 			"end_date":   item.EndDate,
-			"school_id":  item.SchoolID,
 		},
 	).Find(result).Error
 }

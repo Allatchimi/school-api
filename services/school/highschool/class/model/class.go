@@ -31,21 +31,20 @@ func (item *HighschoolClass) ToResponse() *data.ClassResponse {
 		return nil
 	}
 	resp := &data.ClassResponse{}
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
+
+	resp.School = item.School.ToPublicResponse()
+	resp.Specialty = item.Specialty.ToResponse()
+
 	resp.Name = item.Name
 	resp.Description = item.Description
-
 	resp.Fees = item.Fees
 	resp.Program = item.Program
 	resp.Requirements = item.Requirements
 	resp.IsValid = item.IsValid
 	resp.InvalidDate = item.InvalidDate
-
-	resp.School = item.School.ToPublicResponse()
-	resp.Specialty = item.Specialty.ToResponse()
-
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

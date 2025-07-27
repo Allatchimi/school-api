@@ -40,8 +40,8 @@ func (repository *Repository) UpdateByID(id int64, role *model.Role) (result *mo
 	result = &model.Role{}
 	tmpErr := repository.Db.Preload(clause.Associations).Model(&model.Role{}).Where("id = ?", id).Updates(
 		map[string]any{
-			"name":        role.Name,
 			"feature":     role.Feature,
+			"name":        role.Name,
 			"description": role.Description,
 		},
 	).Find(result).Error
@@ -108,8 +108,8 @@ func (repository *Repository) GetAll(
 		// Securely append search conditions
 		searchClause := `(
 			CAST(roles.id AS TEXT) = ? OR
-			roles.name ILIKE ? OR
 			infos.feature ILIKE ? OR
+			roles.name ILIKE ? OR
 			infos.description ILIKE ?
 		)`
 

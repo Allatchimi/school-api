@@ -22,15 +22,15 @@ func (item *Contact) ToResponse() *data.ContactResponse {
 		return nil
 	}
 	resp := &data.ContactResponse{}
-	resp.Subject = item.Subject
-	resp.Email = item.Email
-	resp.Message = item.Message
-
-	resp.School = item.School.ToPublicResponse()
-
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+
+	resp.School = item.School.ToPublicResponse()
+
+	resp.Subject = item.Subject
+	resp.Email = item.Email
+	resp.Message = item.Message
 	return resp
 }
 

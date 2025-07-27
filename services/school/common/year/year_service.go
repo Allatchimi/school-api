@@ -33,7 +33,8 @@ func (service *Service) Create(
 
 	// Format item
 	item := &model.Year{
-		SchoolID:  newRequest.SchoolID,
+		SchoolID: newRequest.SchoolID,
+
 		Name:      fmt.Sprintf("%d-%d", newRequest.StartDate.Year(), newRequest.EndDate.Year()),
 		StartDate: newRequest.StartDate,
 		EndDate:   newRequest.EndDate,
@@ -93,7 +94,8 @@ func (service *Service) Update(
 
 	// Format
 	item := &model.Year{
-		SchoolID:  newRequest.SchoolID,
+		SchoolID: newRequest.SchoolID,
+
 		Name:      fmt.Sprintf("%d-%d", newRequest.StartDate.Year(), newRequest.EndDate.Year()),
 		StartDate: newRequest.StartDate,
 		EndDate:   newRequest.EndDate,

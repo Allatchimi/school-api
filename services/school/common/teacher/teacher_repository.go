@@ -44,7 +44,8 @@ func (repository *Repository) UpdateByID(
 		map[string]any{
 			"school_id": item.SchoolID,
 			"user_id":   item.UserID,
-			"uid":       item.UID,
+
+			"uid": item.UID,
 		},
 	).Find(result).Error
 }

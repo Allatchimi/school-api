@@ -21,13 +21,12 @@ type StudentPreEnrollID struct {
 type StudentRequest struct {
 	SchoolID int64 `json:"schoolID" required:"true" doc:"School id"`
 
-	UID               string `json:"uid" required:"false" doc:"User UID"`
-	AutoGenerateEmail bool   `json:"autoGenerateEmail" required:"false" doc:"Auto generate email"`
-	Email             string `json:"email" required:"false" format:"email" doc:"Email"`
-	PhoneNumber       uint64 `json:"phoneNumber" required:"false" doc:"Phone number"`
-	Status            string `json:"status" required:"true" enum:"enabled,disabled" doc:"Status"`
-
-	Info *dataUser.UserInfoRequest `json:"info" required:"true" doc:"Information"`
+	UID               string                    `json:"uid" required:"false" doc:"User UID"`
+	AutoGenerateEmail bool                      `json:"autoGenerateEmail" required:"false" doc:"Auto generate email"`
+	Email             string                    `json:"email" required:"false" format:"email" doc:"Email"`
+	PhoneNumber       uint64                    `json:"phoneNumber" required:"false" doc:"Phone number"`
+	Status            string                    `json:"status" required:"true" enum:"enabled,disabled" doc:"Status"`
+	Info              *dataUser.UserInfoRequest `json:"info" required:"true" doc:"Information"`
 }
 
 type StudentEnrollRequest struct {
@@ -47,19 +46,17 @@ type StudentPreEnrollRequest struct {
 	ClassID       int64 `json:"classID" required:"false" doc:"Class id"`
 	LevelDomainID int64 `json:"levelDomainID" required:"false" doc:"Level domain id"`
 
-	Message string `json:"message" required:"false" doc:"Message"`
-
+	Message       string     `json:"message" required:"false" doc:"Message"`
 	Gender        string     `json:"gender" required:"true" enum:"male,female" doc:"Gender"`
 	FirstName     string     `json:"firstName" required:"true" max:"30" doc:"First name"`
 	LastName      string     `json:"lastName" required:"true" max:"30" doc:"Last name"`
 	Birthday      *time.Time `json:"birthday" required:"true" doc:"Birthday"`
 	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
-
-	Document1 string `json:"file1" required:"true" doc:"Document1"`
-	Document2 string `json:"file2" required:"false" doc:"Document2"`
-	Document3 string `json:"file3" required:"false" doc:"Document3"`
-	Document4 string `json:"file4" required:"false" doc:"Document4"`
-	Document5 string `json:"file5" required:"false" doc:"Document5"`
+	Document1     string     `json:"document1" required:"true" doc:"Document1"`
+	Document2     string     `json:"document2" required:"false" doc:"Document2"`
+	Document3     string     `json:"document3" required:"false" doc:"Document3"`
+	Document4     string     `json:"document4" required:"false" doc:"Document4"`
+	Document5     string     `json:"document5" required:"false" doc:"Document5"`
 }
 
 type StudentPreEnrollStatusRequest struct {
