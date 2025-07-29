@@ -6,18 +6,12 @@
 
 - Docker installed if you want to build and start postgres or redis containers
 
-- Build and start Redis container with the command ```make docker-redis```
-
-- Build and start postgres container with the command ```make docker-postgres```
-
-- Rename .env.example to ```app.env```
-
-- JWT .pem files with ES512(ECDSA SHA-512) algorithm: ```./assets/private/keys/jwt/private.pem``` ```./assets/private/keys/jwt/public.pem```
+- JWT .pem files with ES512(ECDSA SHA-512) algorithm: `./assets/private/keys/jwt/private.pem` `./assets/private/keys/jwt/public.pem`
   You ca use this website to generate JWT keys for your tests [JWT online generator](https://jwt-keys.21no.de/)
 
-- Password is hashed using Argon2id algorithm. If you want to customize salinity, you can edit the ```app.env``` file
+- Password is hashed using Argon2id algorithm. If you want to customize salinity, you can edit the `app.env` file
 
-Others information such configurations are on ```app.env```
+Others information such configurations are on `app.env`
 
 ### 2. Clone the repository
 
@@ -37,28 +31,51 @@ The entry point of the project is `cmd/` folder. In this folder the is the `main
 make install
 ```
 
+Add env file:
+
+```
+cp .env.example app.env
+```
+
+Remove comment line on this file docker/cdn/Dockerfile:
+
+````
+# COPY --from=builder /app/app.env ./app.env
+```
+
 ### 4. Run the API
 
-```
+- Build and start Redis container with the command `make docker-redis`
+
+- Build and start postgres container with the command `make docker-postgres`
+
+````
+
 make build
+
 ```
 
 ```
+
 make run
+
 ```
 
 API docs with openAPI v3.1(latest) is on
 
 ```
+
 /api/v1/docs
+
 ```
 
 If you want to scan vulnerabilities(security issues)
 
 ```
-make scan
-```
 
+make scan
+
+```
 
 # Update GitHub Action Secrets for continuous integration(build and package)
 
@@ -66,8 +83,7 @@ Go to this link: [GitHub Action Secrets](https://github.com/EMENEC-FINANCE/schoo
 
 - ------------- On your GitHub Action Secrets page -------------
 
-    - Set Secrets `GHCR_USERNAME` `GHCR_PASSWORD` with value your GitHub credentials. `GHCR_PASSWORD` is your personal access token with `write package` permission enabled
-        
+  - Set Secrets `GHCR_USERNAME` `GHCR_PASSWORD` with value your GitHub credentials. `GHCR_PASSWORD` is your personal access token with `write package` permission enabled
 
 # Makefile Targets
 
@@ -77,7 +93,7 @@ Go to this link: [GitHub Action Secrets](https://github.com/EMENEC-FINANCE/schoo
 
 - `docker-ghcr-pull`: Pulls a specific image from the GitHub Container Registry.
 
-
 # Additional Notes
 
 By following these steps and customizing the Makefile to fit your specific needs, you can effectively manage your project using Docker and Make.
+```

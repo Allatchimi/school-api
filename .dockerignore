@@ -56,8 +56,11 @@ Thumbs.db # Windows
 go.work
 go.work.sum
 
-# env files (can opt-in for commiting if needed)
-.env.example
+# env, keys, and others sensibles files
+*.env
+*.env.*
+!app.env
+*.pem
 
 /build
 /bin
