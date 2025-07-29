@@ -15,7 +15,7 @@ type QuizQuestion struct {
 	Title       string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
 
-	Options []QuizQuestionOption `gorm:"foreignKey:QuizQuestionID;references:ID"`
+	Options []QuizQuestionOption `gorm:"default:null;foreignKey:QuizQuestionID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 type QuizQuestionWithoutFk struct {
 	types.BaseGormModel

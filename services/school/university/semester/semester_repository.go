@@ -28,14 +28,20 @@ func (repository *Repository) Create(item *model.UniversitySemester) (*model.Uni
 
 func (repository *Repository) UpdateByID(id int64, item *model.UniversitySemester) (*model.UniversitySemester, error) {
 	result := &model.UniversitySemester{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.UniversitySemester{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id": item.SchoolID,
+	fields := map[string]any{
+		"school_id": item.SchoolID,
 
-			"name":        item.Name,
-			"description": item.Description,
-		},
-	).Find(result).Error
+		"name":        item.Name,
+		"description": item.Description,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.UniversitySemester{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -44,6 +50,9 @@ func (repository *Repository) DeleteByID(id int64) (int64, error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -111,9 +120,9 @@ func (repository *Repository) GetAll(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(units.id AS TEXT) = ? OR
-			units.name ILIKE ? OR
-			units.description ILIKE ? OR
+			CAST(semesters.id AS TEXT) = ? OR
+			semesters.name ILIKE ? OR
+			semesters.description ILIKE ? OR
 			schools.name ILIKE ? OR
 			schools.type ILIKE ?
 		)`

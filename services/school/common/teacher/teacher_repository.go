@@ -40,14 +40,20 @@ func (repository *Repository) UpdateByID(
 	item *model.Teacher,
 ) (*model.Teacher, error) {
 	result := &model.Teacher{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.Teacher{}).Where("id = ?", item.ID).Updates(
-		map[string]any{
-			"school_id": item.SchoolID,
-			"user_id":   item.UserID,
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+		"user_id":   item.UserID,
 
-			"uid": item.UID,
-		},
-	).Find(result).Error
+		"uid": item.UID,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Teacher{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) UpdateTeacherClassSubjectUnitByID(
@@ -55,15 +61,24 @@ func (repository *Repository) UpdateTeacherClassSubjectUnitByID(
 	item *model.TeacherClassSubjectUnit,
 ) (*model.TeacherClassSubjectUnit, error) {
 	result := &model.TeacherClassSubjectUnit{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.TeacherClassSubjectUnit{}).Where("id = ?", item.ID).Updates(
-		map[string]any{
-			"school_id":        item.SchoolID,
-			"year_id":          item.YearID,
-			"class_subject_id": item.ClassSubjectID,
-			"unit_id":          item.UnitID,
-			"teacher_id":       item.TeacherID,
-		},
-	).Find(result).Error
+	fields := map[string]any{
+		"school_id":  item.SchoolID,
+		"year_id":    item.YearID,
+		"teacher_id": item.TeacherID,
+	}
+	if item.ClassSubjectID > 0 {
+		fields["class_subject_id"] = item.ClassSubjectID
+	} else if item.UnitID > 0 {
+		fields["unit_id"] = item.UnitID
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.TeacherClassSubjectUnit{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -77,6 +92,9 @@ func (repository *Repository) DeleteTeacherClassSubjectUnitByID(id int64) (int64
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -90,6 +108,9 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 }
 
 func (repository *Repository) DeleteMultipleTeacherClassSubjectUnitByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {

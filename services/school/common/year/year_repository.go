@@ -28,15 +28,21 @@ func (repository *Repository) Create(item *model.Year) (*model.Year, error) {
 
 func (repository *Repository) UpdateByID(id int64, item *model.Year) (*model.Year, error) {
 	result := &model.Year{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.Year{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id": item.SchoolID,
+	fields := map[string]any{
+		"school_id": item.SchoolID,
 
-			"name":       item.Name,
-			"start_date": item.StartDate,
-			"end_date":   item.EndDate,
-		},
-	).Find(result).Error
+		"name":       item.Name,
+		"start_date": item.StartDate,
+		"end_date":   item.EndDate,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Year{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -45,6 +51,9 @@ func (repository *Repository) DeleteByID(id int64) (int64, error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {

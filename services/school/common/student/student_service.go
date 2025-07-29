@@ -200,8 +200,7 @@ func (service *Service) CreateStudentEnroll(
 		LevelDomainID: newRequest.LevelDomainID,
 		StudentID:     newRequest.StudentID,
 
-		Origin:         newRequest.Origin,
-		OriginFeedback: newRequest.OriginFeedback,
+		Origin: constants.STUDENT_ENROLL_ORIGIN_DASHBOARD,
 	}
 
 	// Check unique

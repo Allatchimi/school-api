@@ -33,31 +33,43 @@ func (repository *Repository) CreateLevelDomain(item *model.UniversityLevelDomai
 
 func (repository *Repository) UpdateByID(id int64, item *model.UniversityLevel) (*model.UniversityLevel, error) {
 	result := &model.UniversityLevel{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.UniversityLevel{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id": item.SchoolID,
+	fields := map[string]any{
+		"school_id": item.SchoolID,
 
-			"name":        item.Name,
-			"description": item.Description,
-		},
-	).Find(result).Error
+		"name":        item.Name,
+		"description": item.Description,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.UniversityLevel{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) UpdateLevelDomainByID(id int64, item *model.UniversityLevelDomain) (*model.UniversityLevelDomain, error) {
 	result := &model.UniversityLevelDomain{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id": item.SchoolID,
-			"level_id":  item.LevelID,
-			"domain_id": item.DomainID,
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+		"level_id":  item.LevelID,
+		"domain_id": item.DomainID,
 
-			"fees":         item.Fees,
-			"program":      item.Program,
-			"requirements": item.Requirements,
-			"is_valid":     item.IsValid,
-			"invalid_date": item.InvalidDate,
-		},
-	).Error
+		"fees":         item.Fees,
+		"program":      item.Program,
+		"requirements": item.Requirements,
+		"is_valid":     item.IsValid,
+		"invalid_date": item.InvalidDate,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.UniversityLevelDomain{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -71,6 +83,9 @@ func (repository *Repository) DeleteLevelDomainByID(id int64) (int64, error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -84,6 +99,9 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 }
 
 func (repository *Repository) DeleteMultipleLevelDomainByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -130,6 +148,9 @@ func (repository *Repository) DeleteLevelDomain(id int64) (int64, error) {
 }
 
 func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	tmpResult := repository.Db.Where(where).Delete(&model.UniversityLevel{})
 
@@ -139,6 +160,9 @@ func (repository *Repository) DeleteMultiple(list []int64) (result int64, err er
 }
 
 func (repository *Repository) DeleteMultipleLevelDomain(list []int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	tmpResult := repository.Db.Where(where).Delete(&model.UniversityLevelDomain{})
 

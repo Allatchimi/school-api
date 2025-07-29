@@ -7,14 +7,22 @@ import (
 	"api/common/types"
 	"api/services/school/common/report/data"
 	"api/services/school/common/report/model"
+	"api/services/school/common/school"
 )
 
 type Service struct {
-	Repository *Repository
+	Repository    *Repository
+	SchoolService *school.Service
 }
 
-func NewService(repository *Repository) *Service {
-	return &Service{Repository: repository}
+func NewService(
+	repository *Repository,
+	schoolService *school.Service,
+) *Service {
+	return &Service{
+		Repository:    repository,
+		SchoolService: schoolService,
+	}
 }
 
 const MODEL_NAME = "report"
@@ -553,6 +561,37 @@ func (service *Service) GetAllTable(
 	newRequest := *request
 	if ctxData.Jwt.SchoolID > 0 {
 		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Get school
+	if newRequest.SchoolID > 0 {
+		foundSchool, errFound := service.SchoolService.Repository.GetByID(newRequest.SchoolID)
+		if errFound != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		}
+		if foundSchool == nil || foundSchool.ID < 1 {
+			errCode = http.StatusNotFound
+			err = constants.Http404ErrorMessage(MODEL_NAME)
+			return
+		}
+
+		// Get
+		switch foundSchool.Type {
+		case constants.SCHOOL_TYPE_HIGHSCHOOL:
+			result, err = service.Repository.GetAllReportTableHighschool(filter, pagination, &newRequest)
+			if err != nil {
+				errCode = http.StatusInternalServerError
+				err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			}
+		case constants.SCHOOL_TYPE_UNIVERSITY:
+			result, err = service.Repository.GetAllReportTableUniversity(filter, pagination, &newRequest)
+			if err != nil {
+				errCode = http.StatusInternalServerError
+				err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			}
+		}
+		return
 	}
 
 	// Get

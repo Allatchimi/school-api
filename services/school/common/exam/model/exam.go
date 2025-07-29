@@ -41,9 +41,8 @@ type Exam struct {
 	AllowedItems    string     `gorm:"default:null"`
 	StartDate       *time.Time `gorm:"default:null"`
 	EndDate         *time.Time `gorm:"default:null"`
-
-	IsRetry    bool  `gorm:"default:null"`
-	RetryCount int64 `gorm:"default:null"`
+	IsRetry         bool       `gorm:"default:null"`
+	RetryCount      int64      `gorm:"default:null"`
 }
 
 func (item *Exam) ToResponse() *data.ExamResponse {

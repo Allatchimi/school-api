@@ -10,11 +10,15 @@ type CourseDocumentID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Course document id"`
 }
 
+type CourseCommentID struct {
+	ID int64 `json:"commentID" path:"commentID" required:"true" doc:"Course document id"`
+}
+
 type CourseRequest struct {
 	SchoolID       int64 `json:"schoolID" required:"true" doc:"School id"`
 	YearID         int64 `json:"yearID" required:"true" doc:"Year id"`
-	ClassSubjectID int64 `json:"classSubjectID" required:"true" doc:"Subject class id"`
-	UnitID         int64 `json:"unitID" required:"true" doc:"Unit id"`
+	ClassSubjectID int64 `json:"classSubjectID" required:"false" doc:"Subject class id"`
+	UnitID         int64 `json:"unitID" required:"false" doc:"Unit id"`
 
 	Title       string `json:"title" required:"true" doc:"Title"`
 	Description string `json:"description" required:"false" doc:"Description"`
@@ -34,8 +38,6 @@ type CourseRequest struct {
 }
 
 type CourseCommentRequest struct {
-	CourseID int64 `json:"courseID" required:"true" doc:"Course id"`
-
 	Message string `json:"message" required:"true" doc:"Message"`
 	Rate    int    `json:"rate" required:"false" doc:"Rate"`
 }
@@ -45,6 +47,6 @@ type GetAllRequest struct {
 }
 
 type GetAllCourseCommentRequest struct {
+	SchoolID int64 `json:"schoolID" required:"false" doc:"School id"`
 	CourseID int64 `json:"courseID" required:"false" doc:"Course id"`
-	UserID   int64 `json:"userID" required:"false" doc:"User id"`
 }

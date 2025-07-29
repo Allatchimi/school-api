@@ -26,6 +26,7 @@ type Schedule struct {
 
 	IsCommon       bool       `gorm:"default:null"`
 	Type           string     `gorm:"default:null"`
+	Description    string     `gorm:"default:null"`
 	DayOfTheWeek   string     `gorm:"default:null"`
 	RepeatCount    int        `gorm:"default:null"`
 	RepeatType     string     `gorm:"default:null"`
@@ -52,6 +53,7 @@ func (item *Schedule) ToResponse() *data.ScheduleResponse {
 
 	resp.IsCommon = item.IsCommon
 	resp.Type = item.Type
+	resp.Description = item.Description
 	resp.DayOfTheWeek = item.DayOfTheWeek
 	resp.RepeatCount = item.RepeatCount
 	resp.RepeatType = item.RepeatType

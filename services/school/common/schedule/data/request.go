@@ -17,6 +17,7 @@ type ScheduleRequest struct {
 
 	IsCommon       bool       `json:"isCommon" required:"true" doc:"Is common"`
 	Type           string     `json:"type" required:"true" enum:"course,tp,td,pause,event" doc:"Type"`
+	Description    string     `json:"description" required:"false" doc:"Description"`
 	DayOfTheWeek   string     `json:"dayOfTheWeek" required:"true" doc:"Day of the week"`
 	RepeatCount    int        `json:"repeatCount" required:"true" doc:"Repeat count"`
 	RepeatType     string     `json:"repeatType" required:"true"  enum:"daily,weekly,monthly,yearly,onetime" doc:"Repeat type"`

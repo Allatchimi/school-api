@@ -65,6 +65,51 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Create course comment
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "post-course-comment",
+			Summary:     "Create course comment",
+			Description: "Create new course comment and return created object.",
+			Method:      http.MethodPost,
+			Path:        fmt.Sprintf("%s/{id}/comments", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionCreate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.CourseID
+				Body data.CourseCommentRequest
+			},
+		) (*struct{ Body data.CourseCommentResponse }, error) {
+			result, errCode, err := controller.CreateCourseComment(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.CourseCommentResponse }{Body: *result.ToResponse()}, nil
+		},
+	)
+
 	// Update course with id
 	huma.Register(
 		*humaApi,
@@ -109,6 +154,51 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Update course comment with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "update-course-comment",
+			Summary:     "Update course comment",
+			Description: "Update existing course comment with matching id and return the new course object.",
+			Method:      http.MethodPut,
+			Path:        fmt.Sprintf("%s/comments/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionUpdate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.CourseID
+				Body data.CourseCommentRequest
+			},
+		) (*struct{ Body data.CourseCommentResponse }, error) {
+			result, errCode, err := controller.UpdateCourseComment(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.CourseCommentResponse }{Body: *result.ToResponse()}, nil
+		},
+	)
+
 	// Delete course with id
 	huma.Register(
 		*humaApi,
@@ -145,6 +235,51 @@ func RegisterEndpoints(
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.Delete(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
+	// Delete course comment with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "delete-course-comment",
+			Summary:     "Delete course comment",
+			Description: "Delete existing course comment with matching id and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/{id}/comments/{commentID}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.CourseID
+				data.CourseCommentID
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteCourseComment(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -287,6 +422,59 @@ func RegisterEndpoints(
 
 			return &struct {
 				Body data.CourseResponseList
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get all course comment
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-course-comment-list",
+			Summary:     "Get all course comment",
+			Description: "Get all course comment with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/{id}/comments", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Feature
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.CourseID
+				data.GetAllCourseCommentRequest
+			},
+		) (*struct {
+			Body data.CourseCommentResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllCourseComment(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+
+			return &struct {
+				Body data.CourseCommentResponseList
 			}{Body: *result}, nil
 		},
 	)

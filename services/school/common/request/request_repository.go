@@ -21,41 +21,59 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(data *model.Request) (*model.Request, error) {
-	result := *data
+func (repository *Repository) Create(item *model.Request) (*model.Request, error) {
+	result := *item
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) UpdateByID(id int64, data *model.Request) (*model.Request, error) {
+func (repository *Repository) UpdateByID(id int64, item *model.Request) (*model.Request, error) {
 	result := &model.Request{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.Request{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":        data.SchoolID,
-			"year_id":          data.YearID,
-			"class_subject_id": data.ClassSubjectID,
-			"sequence_id":      data.SequenceID,
-			"unit_id":          data.UnitID,
+	fields := map[string]any{
+		"school_id":  item.SchoolID,
+		"year_id":    item.YearID,
+		"student_id": item.StudentID,
 
-			"audience":  data.Audience,
-			"title":     data.Title,
-			"message":   data.Message,
-			"document1": data.Document1,
-			"document2": data.Document2,
-			"document3": data.Document3,
-			"document4": data.Document4,
-			"document5": data.Document5,
-		},
-	).Find(result).Error
+		"audience":  item.Audience,
+		"title":     item.Title,
+		"message":   item.Message,
+		"document1": item.Document1,
+		"document2": item.Document2,
+		"document3": item.Document3,
+		"document4": item.Document4,
+		"document5": item.Document5,
+	}
+	if item.ClassSubjectID > 0 {
+		fields["class_subject_id"] = item.ClassSubjectID
+		if item.SequenceID > 0 {
+			fields["sequence_id"] = item.SequenceID
+		}
+	} else if item.UnitID > 0 {
+		fields["unit_id"] = item.UnitID
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Request{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) UpdateStatusByID(id int64, data *model.Request) (*model.Request, error) {
 	result := &model.Request{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.Request{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"status":          data.Status,
-			"status_feedback": data.StatusFeedback,
-		},
-	).Find(result).Error
+	fields := map[string]any{
+		"status":          data.Status,
+		"status_feedback": data.StatusFeedback,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Request{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -64,6 +82,9 @@ func (repository *Repository) DeleteByID(id int64) (int64, error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -92,24 +113,10 @@ func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.
 
 func (repository *Repository) GetUniqueObject(item *model.Request) (*model.Request, error) {
 	result := &model.Request{}
-	return result, repository.Db.Preload(clause.Associations).Where(&model.Request{
-		SchoolID:       item.SchoolID,
-		YearID:         item.YearID,
-		ClassSubjectID: item.ClassSubjectID,
-		SequenceID:     item.SequenceID,
-		UnitID:         item.UnitID,
-	}).Limit(1).Find(result).Error
+	return result, nil
 }
 
 func (repository *Repository) AreSameUniqueObjects(item1 *model.Request, item2 *model.Request) bool {
-	if item1 != nil && item2 != nil &&
-		(item1.SchoolID == item2.SchoolID &&
-			item1.YearID == item2.YearID &&
-			item1.ClassSubjectID == item2.ClassSubjectID &&
-			item1.SequenceID == item2.SequenceID &&
-			item1.UnitID == item2.UnitID) {
-		return true
-	}
 	return false
 }
 
@@ -187,10 +194,11 @@ func (repository *Repository) GetAll(
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
 		Preload("ClassSubject.Subject").
+		Preload("Sequence.Quarter").
 		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.LevelDomain.Domain").
 		Preload("Unit.LevelDomain.Domain.Department").
-		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.Semester").
 		Preload("Student.User").
 		Preload("Student.User.Info").

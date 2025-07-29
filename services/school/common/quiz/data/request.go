@@ -16,16 +16,20 @@ type QuizRequest struct {
 	ClassSubjectID int64 `json:"classSubjectID" required:"false" doc:"Class subject id"`
 	UnitID         int64 `json:"unitID" required:"false" doc:"Unit id"`
 
-	Title       string                `json:"title" required:"true" doc:"Title"`
-	Description string                `json:"description" required:"false" doc:"Description"`
-	Status      string                `json:"status" required:"false" enum:"draft,published,closed,result" doc:"Status"`
-	Questions   []QuizQuestionRequest `json:"questions" required:"false" doc:"Questions"`
+	Title       string                     `json:"title" required:"true" doc:"Title"`
+	Description string                     `json:"description" required:"false" doc:"Description"`
+	Status      string                     `json:"status" required:"false" enum:"draft,published,closed,result" doc:"Status"`
+	Questions   []QuizQuestionGroupRequest `json:"questions" required:"false" doc:"Questions"`
+}
+
+type QuizQuestionGroupRequest struct {
+	Question QuizQuestionRequest         `json:"question" required:"false" doc:"Question"`
+	Options  []QuizQuestionOptionRequest `json:"options" required:"false" doc:"Options"`
 }
 
 type QuizQuestionRequest struct {
-	Title       string                      `json:"title" required:"true" doc:"Title"`
-	Description string                      `json:"description" required:"false" doc:"Description"`
-	Options     []QuizQuestionOptionRequest `json:"options" required:"false" doc:"Options"`
+	Title       string `json:"title" required:"true" doc:"Title"`
+	Description string `json:"description" required:"false" doc:"Description"`
 }
 
 type QuizQuestionOptionRequest struct {

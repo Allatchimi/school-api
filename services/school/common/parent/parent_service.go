@@ -94,8 +94,9 @@ func (service *Service) Create(
 
 	// Format request
 	var item = &dataUser.UserRequest{
-		SchoolID:    newRequest.SchoolID,
-		RoleID:      userRole.ID,
+		SchoolID: newRequest.SchoolID,
+		RoleID:   userRole.ID,
+
 		Email:       newEmail,
 		PhoneNumber: newRequest.PhoneNumber,
 		IsActivated: true,
@@ -201,24 +202,20 @@ func (service *Service) CreateParentAssign(
 		SchoolID: newRequest.SchoolID,
 		UserID:   ctxData.Jwt.UserID,
 
-		StudentListID: newRequest.StudentListID,
-
+		StudentListID:  newRequest.StudentListID,
 		Status:         newRequest.StudentListID,
 		StatusFeedback: newRequest.StudentListID,
-
-		Message: newRequest.Message,
-
-		Gender:        newRequest.Gender,
-		FirstName:     newRequest.FirstName,
-		LastName:      newRequest.LastName,
-		Birthday:      newRequest.Birthday,
-		BirthLocation: newRequest.BirthLocation,
-
-		Document1: newRequest.Document1,
-		Document2: newRequest.Document2,
-		Document3: newRequest.Document3,
-		Document4: newRequest.Document4,
-		Document5: newRequest.Document5,
+		Message:        newRequest.Message,
+		Gender:         newRequest.Gender,
+		FirstName:      newRequest.FirstName,
+		LastName:       newRequest.LastName,
+		Birthday:       newRequest.Birthday,
+		BirthLocation:  newRequest.BirthLocation,
+		Document1:      newRequest.Document1,
+		Document2:      newRequest.Document2,
+		Document3:      newRequest.Document3,
+		Document4:      newRequest.Document4,
+		Document5:      newRequest.Document5,
 	}
 
 	// Check unique
@@ -296,8 +293,9 @@ func (service *Service) Update(
 
 	// Update user
 	userRequest := dataUser.UserRequest{
-		SchoolID:    newRequest.SchoolID,
-		RoleID:      userRole.ID,
+		SchoolID: newRequest.SchoolID,
+		RoleID:   userRole.ID,
+
 		Email:       newRequest.Email,
 		PhoneNumber: newRequest.PhoneNumber,
 		IsActivated: true,
@@ -427,24 +425,20 @@ func (service *Service) UpdateParentAssign(
 		SchoolID: newRequest.SchoolID,
 		UserID:   foundItem.UserID,
 
-		StudentListID: newRequest.StudentListID,
-
+		StudentListID:  newRequest.StudentListID,
 		Status:         newRequest.StudentListID,
 		StatusFeedback: newRequest.StudentListID,
-
-		Message: newRequest.Message,
-
-		Gender:        newRequest.Gender,
-		FirstName:     newRequest.FirstName,
-		LastName:      newRequest.LastName,
-		Birthday:      newRequest.Birthday,
-		BirthLocation: newRequest.BirthLocation,
-
-		Document1: newRequest.Document1,
-		Document2: newRequest.Document2,
-		Document3: newRequest.Document3,
-		Document4: newRequest.Document4,
-		Document5: newRequest.Document5,
+		Message:        newRequest.Message,
+		Gender:         newRequest.Gender,
+		FirstName:      newRequest.FirstName,
+		LastName:       newRequest.LastName,
+		Birthday:       newRequest.Birthday,
+		BirthLocation:  newRequest.BirthLocation,
+		Document1:      newRequest.Document1,
+		Document2:      newRequest.Document2,
+		Document3:      newRequest.Document3,
+		Document4:      newRequest.Document4,
+		Document5:      newRequest.Document5,
 	}
 
 	// Check unique

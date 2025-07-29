@@ -28,15 +28,21 @@ func (repository *Repository) Create(item *model.UniversityDomain) (*model.Unive
 
 func (repository *Repository) UpdateByID(id int64, item *model.UniversityDomain) (*model.UniversityDomain, error) {
 	result := &model.UniversityDomain{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.UniversityDomain{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":     item.SchoolID,
-			"department_id": item.DepartmentID,
+	fields := map[string]any{
+		"school_id":     item.SchoolID,
+		"department_id": item.DepartmentID,
 
-			"name":        item.Name,
-			"description": item.Description,
-		},
-	).Find(result).Error
+		"name":        item.Name,
+		"description": item.Description,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.UniversityDomain{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -45,6 +51,9 @@ func (repository *Repository) DeleteByID(id int64) (int64, error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {

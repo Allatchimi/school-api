@@ -28,21 +28,27 @@ func (repository *Repository) Create(item *model.UniversityUnit) (*model.Univers
 
 func (repository *Repository) UpdateByID(id int64, item *model.UniversityUnit) (*model.UniversityUnit, error) {
 	result := &model.UniversityUnit{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.UniversityUnit{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":       item.SchoolID,
-			"level_domain_id": item.LevelDomainID,
-			"semester_id":     item.SemesterID,
+	fields := map[string]any{
+		"school_id":       item.SchoolID,
+		"level_domain_id": item.LevelDomainID,
+		"semester_id":     item.SemesterID,
 
-			"name":         item.Name,
-			"description":  item.Description,
-			"credit":       item.Credit,
-			"program":      item.Program,
-			"requirements": item.Requirements,
-			"is_valid":     item.IsValid,
-			"invalid_date": item.InvalidDate,
-		},
-	).Find(result).Error
+		"name":         item.Name,
+		"description":  item.Description,
+		"credit":       item.Credit,
+		"program":      item.Program,
+		"requirements": item.Requirements,
+		"is_valid":     item.IsValid,
+		"invalid_date": item.InvalidDate,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.UniversityUnit{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -51,6 +57,9 @@ func (repository *Repository) DeleteByID(id int64) (int64, error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {

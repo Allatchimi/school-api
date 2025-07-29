@@ -7,7 +7,7 @@ import (
 	whatsappHelper "api/common/helpers/message/whatsapp"
 	"api/common/utils"
 	webpushConfig "api/config/webpush"
-	"api/services/common/notification"
+	"api/services/others/notification"
 	modelSchool "api/services/school/common/school/model"
 	"api/services/user/user"
 	modelUser "api/services/user/user/model"
@@ -27,11 +27,11 @@ var UserService *user.Service
 var NotificationService *notification.Service
 
 func InjectServices(
-	userSvc *user.Service,
-	notificationSvc *notification.Service,
+	userService *user.Service,
+	notificationService *notification.Service,
 ) {
-	UserService = userSvc
-	NotificationService = notificationSvc
+	UserService = userService
+	NotificationService = notificationService
 }
 
 func SendMessage(

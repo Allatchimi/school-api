@@ -266,23 +266,27 @@ func RegisterEndpoints(
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID:   "get-school-id-public",
-			Summary:       "Get school by id public",
-			Description:   "Return one school with matching id public",
-			Method:        http.MethodGet,
-			Path:          fmt.Sprintf("%s/{id}/public", endpointConfig.Group),
-			Tags:          endpointConfig.Tag,
+			OperationID: "get-school-id-public",
+			Summary:     "Get school by id public",
+			Description: "Return one school with matching id public",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/public", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+				},
+			},
 			MaxBodyBytes:  constants.DefaultBodySize,
 			DefaultStatus: http.StatusOK,
 			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
 		},
 		func(
 			ctx context.Context,
-			input *struct {
-				data.SchoolID
-			},
+			input *struct{},
 		) (*struct{ Body data.SchoolResponse }, error) {
-			result, errCode, err := controller.Get(&ctx, input)
+			result, errCode, err := controller.GetPublic(&ctx)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}

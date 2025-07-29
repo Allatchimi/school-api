@@ -15,7 +15,7 @@ type RequestResponse struct {
 	School       *schoolData.SchoolPublicResponse   `json:"school" required:"false" doc:"School"`
 	Year         *yearData.YearResponse             `json:"year" required:"false" doc:"Year"`
 	ClassSubject *classData.ClassSubjectResponse    `json:"classSubject" required:"false" doc:"Class subject"`
-	Sequence     *sequenceData.SequenceResponse     `json:"semester" required:"false" doc:"Sequence"`
+	Sequence     *sequenceData.SequenceResponse     `json:"sequence" required:"false" doc:"Sequence"`
 	Unit         *unitData.UnitResponse             `json:"unit" required:"false" doc:"Unit"`
 	Student      *studentData.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
 

@@ -9,9 +9,9 @@ type RequestID struct {
 type RequestRequest struct {
 	SchoolID       int64 `json:"schoolID" required:"true" doc:"School id"`
 	YearID         int64 `json:"yearID" required:"true" doc:"Year id"`
-	ClassSubjectID int64 `json:"classSubjectID" required:"true" doc:"Class Subject id"`
-	SequenceID     int64 `json:"sequenceID" required:"true" doc:"Sequence id"`
-	UnitID         int64 `json:"unitID" required:"true" doc:"Unit id"`
+	ClassSubjectID int64 `json:"classSubjectID" required:"false" doc:"Class Subject id"`
+	SequenceID     int64 `json:"sequenceID" required:"false" doc:"Sequence id"`
+	UnitID         int64 `json:"unitID" required:"false" doc:"Unit id"`
 
 	Audience  string `json:"audience" required:"true" enum:"teacher,director" doc:"Audience"`
 	Title     string `json:"title" required:"true" doc:"Title"`

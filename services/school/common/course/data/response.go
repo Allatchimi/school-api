@@ -67,7 +67,7 @@ type CourseVideoResponseList struct {
 	Data []CourseVideoResponse `json:"data" required:"false" doc:"List of video"`
 }
 
-type CourseCpmmentResponseList struct {
+type CourseCommentResponseList struct {
 	types.PaginatedResponse
 	Data []CourseCommentResponse `json:"data" required:"false" doc:"List of comment"`
 }

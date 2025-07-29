@@ -20,6 +20,7 @@ type ScheduleResponse struct {
 
 	IsCommon       bool       `json:"isCommon" required:"false" doc:"Is common"`
 	Type           string     `json:"type" required:"false" doc:"Type"`
+	Description    string     `json:"description" required:"false" doc:"Description"`
 	DayOfTheWeek   string     `json:"dayOfTheWeek" required:"false" doc:"Day of the week"`
 	RepeatCount    int        `json:"repeatCount" required:"false" doc:"Repeat count"`
 	RepeatType     string     `json:"repeatType" required:"false" doc:"Repeat type"`

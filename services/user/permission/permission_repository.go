@@ -32,20 +32,24 @@ func (repository *Repository) UpdateByID(
 	data *model.Permission,
 ) (result *model.Permission, err error) {
 	result = &model.Permission{}
-	tmpErr := repository.Db.Preload(clause.Associations).Model(&model.Permission{}).Where("role_id = ?", roleID).Where("table_name = ?", tableName).Updates(
-		map[string]any{
-			"role_id": data.RoleID,
+	fields := map[string]any{
+		"role_id": data.RoleID,
 
-			"table_name": data.TableName,
-			"create":     data.Create,
-			"read":       data.Read,
-			"update":     data.Update,
-			"delete":     data.Delete,
-		},
-	).Find(result).Error
-
-	err = tmpErr
-	return
+		"table_name": data.TableName,
+		"create":     data.Create,
+		"read":       data.Read,
+		"update":     data.Update,
+		"delete":     data.Delete,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Permission{}).
+		Where("role_id = ?", roleID).
+		Where("table_name = ?", tableName).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (result int64, err error) {
@@ -57,6 +61,9 @@ func (repository *Repository) DeleteByID(id int64) (result int64, err error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	tmpResult := repository.Db.Where(where).Delete(&model.Permission{})
 

@@ -21,53 +21,70 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(data *model.Exam) (*model.Exam, error) {
-	result := *data
+func (repository *Repository) Create(item *model.Exam) (*model.Exam, error) {
+	result := *item
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) CreateType(data *model.ExamType) (*model.ExamType, error) {
-	result := *data
+func (repository *Repository) CreateType(item *model.ExamType) (*model.ExamType, error) {
+	result := *item
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) UpdateByID(id int64, data *model.Exam) (*model.Exam, error) {
+func (repository *Repository) UpdateByID(id int64, item *model.Exam) (*model.Exam, error) {
 	result := &model.Exam{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":        data.SchoolID,
-			"year_id":          data.YearID,
-			"type_id":          data.TypeID,
-			"unit_id":          data.UnitID,
-			"class_subject_id": data.ClassSubjectID,
-			"sequence_id":      data.SequenceID,
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+		"year_id":   item.YearID,
+		"type_id":   item.TypeID,
 
-			"status":           data.Status,
-			"notation":         data.Notation,
-			"percentage":       data.Percentage,
-			"description":      data.Description,
-			"location_type":    data.LocationType,
-			"location_details": data.LocationDetails,
-			"requirements":     data.Requirements,
-			"allowed_items":    data.AllowedItems,
-			"start_date":       data.StartDate,
-			"end_date":         data.EndDate,
-
-			"is_retry":    data.IsRetry,
-			"retry_count": data.RetryCount,
-		},
-	).Find(result).Error
+		"status":           item.Status,
+		"notation":         item.Notation,
+		"percentage":       item.Percentage,
+		"description":      item.Description,
+		"location_type":    item.LocationType,
+		"location_details": item.LocationDetails,
+		"requirements":     item.Requirements,
+		"allowed_items":    item.AllowedItems,
+		"start_date":       item.StartDate,
+		"end_date":         item.EndDate,
+		"is_retry":         item.IsRetry,
+		"retry_count":      item.RetryCount,
+	}
+	if item.ClassSubjectID > 0 {
+		fields["class_subject_id"] = item.ClassSubjectID
+		if item.SequenceID > 0 {
+			fields["sequence_id"] = item.SequenceID
+		}
+	} else if item.UnitID > 0 {
+		fields["unit_id"] = item.UnitID
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Exam{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) UpdateExamTypeByID(id int64, data *model.ExamType) (*model.ExamType, error) {
 	result := &model.ExamType{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.ExamType{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":   data.SchoolID,
-			"name":        data.Name,
-			"description": data.Description,
-		},
-	).Find(result).Error
+	fields := map[string]any{
+		"school_id": data.SchoolID,
+
+		"name":        data.Name,
+		"description": data.Description,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.ExamType{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -81,6 +98,9 @@ func (repository *Repository) DeleteExamTypeByID(id int64) (int64, error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -94,6 +114,9 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 }
 
 func (repository *Repository) DeleteMultipleExamTypeByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -305,9 +328,10 @@ func (repository *Repository) GetAll(
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
 		Preload("ClassSubject.Subject").
-		Preload("Unit.Domain").
-		Preload("Unit.Domain.Department").
-		Preload("Unit.Level").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
 		Preload("Unit.Semester").
 		Scopes(
 			helpers.PaginationScopeV2(

@@ -6,20 +6,28 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
+	"api/services/school/common/meeting"
+	dataMeeting "api/services/school/common/meeting/data"
 	"api/services/school/common/school"
 	"api/services/school/highschool/class/data"
 	"api/services/school/highschool/class/model"
 )
 
 type Service struct {
-	Repository    *Repository
-	SchoolService *school.Service
+	Repository     *Repository
+	SchoolService  *school.Service
+	MeetingService *meeting.Service
 }
 
-func NewService(repository *Repository, schoolService *school.Service) *Service {
+func NewService(
+	repository *Repository,
+	schoolService *school.Service,
+	meetingService *meeting.Service,
+) *Service {
 	return &Service{
-		Repository:    repository,
-		SchoolService: schoolService,
+		Repository:     repository,
+		SchoolService:  schoolService,
+		MeetingService: meetingService,
 	}
 }
 
@@ -134,13 +142,21 @@ func (service *Service) CreateClassSubject(
 		item.InvalidDate = invalidDate
 	}
 
-	// Insert
+	// Create
 	result, err = service.Repository.CreateClassSubject(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+
+	// Create the meeting
+	go func() {
+		service.MeetingService.Create(ctxData, &dataMeeting.MeetingRoomRequest{
+			SchoolID: result.SchoolID,
+			UnitID:   result.ID,
+		})
+	}()
 	return
 }
 
@@ -302,6 +318,14 @@ func (service *Service) UpdateClassSubject(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+
+	// Create the meeting
+	go func() {
+		service.MeetingService.Create(ctxData, &dataMeeting.MeetingRoomRequest{
+			SchoolID: result.SchoolID,
+			UnitID:   result.ID,
+		})
+	}()
 	return
 }
 

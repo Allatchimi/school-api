@@ -29,27 +29,23 @@ type ParentStudentResponse struct {
 
 type ParentAssignResponse struct {
 	types.BaseGormModelResponse
-	StudentListID string `json:"studentListID" required:"false" doc:"Student list id"`
-
-	Status         string `json:"status" required:"false" doc:"Status"`
-	StatusFeedback string `json:"statusFeedback" required:"false" doc:"Status feedback"`
-
-	Message string `json:"message" required:"false" doc:"Message"`
-
-	Gender        string     `json:"gender" required:"false" doc:"Gender"`
-	FirstName     string     `json:"firstName" required:"false" doc:"First name"`
-	LastName      string     `json:"lastName" required:"false" doc:"Last name"`
-	Birthday      *time.Time `json:"birthday" required:"false" doc:"Birthday"`
-	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
-
-	Document1 string `json:"document1" required:"false" doc:"Document 1"`
-	Document2 string `json:"document2" required:"false" doc:"Document 2"`
-	Document3 string `json:"Document3" required:"false" doc:"Document 3"`
-	Document4 string `json:"document4" required:"false" doc:"Document 4"`
-	Document5 string `json:"document5" required:"false" doc:"Document 5"`
-
 	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
 	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
+
+	StudentListID  string     `json:"studentListID" required:"false" doc:"Student list id"`
+	Status         string     `json:"status" required:"false" doc:"Status"`
+	StatusFeedback string     `json:"statusFeedback" required:"false" doc:"Status feedback"`
+	Message        string     `json:"message" required:"false" doc:"Message"`
+	Gender         string     `json:"gender" required:"false" doc:"Gender"`
+	FirstName      string     `json:"firstName" required:"false" doc:"First name"`
+	LastName       string     `json:"lastName" required:"false" doc:"Last name"`
+	Birthday       *time.Time `json:"birthday" required:"false" doc:"Birthday"`
+	BirthLocation  string     `json:"birthLocation" required:"false" doc:"Birth location"`
+	Document1      string     `json:"document1" required:"false" doc:"Document 1"`
+	Document2      string     `json:"document2" required:"false" doc:"Document 2"`
+	Document3      string     `json:"Document3" required:"false" doc:"Document 3"`
+	Document4      string     `json:"document4" required:"false" doc:"Document 4"`
+	Document5      string     `json:"document5" required:"false" doc:"Document 5"`
 }
 
 type ParentResponseList struct {

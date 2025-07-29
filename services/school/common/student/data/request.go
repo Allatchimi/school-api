@@ -60,8 +60,8 @@ type StudentPreEnrollRequest struct {
 }
 
 type StudentPreEnrollStatusRequest struct {
-	Status         string `json:"status" required:"true" enum:"initiated,pending,accepted,declined" doc:"Status"`
-	StatusFeedback string `json:"statusFeedback" required:"false" minLength:"3" max:"100" doc:"Status feedback"`
+	Status         string `json:"status" required:"true" enum:"initiated,pending,enrolled,rejected" doc:"Status"`
+	StatusFeedback string `json:"statusFeedback" required:"false" doc:"Status feedback"`
 }
 
 type GetAllRequest struct {

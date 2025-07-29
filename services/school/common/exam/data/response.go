@@ -13,7 +13,7 @@ import (
 type ExamResponse struct {
 	types.BaseGormModelResponse
 	School       *schoolData.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Year         *yearData.YearResponse           `json:"Year" required:"false" doc:"Year"`
+	Year         *yearData.YearResponse           `json:"year" required:"false" doc:"Year"`
 	ClassSubject *classData.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Class subject"`
 	Sequence     *sequenceData.SequenceResponse   `json:"semester" required:"false" doc:"Sequence"`
 	Unit         *unitData.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
@@ -29,9 +29,8 @@ type ExamResponse struct {
 	AllowedItems    string     `json:"allowedItems" required:"false" doc:"Allowed items"`
 	StartDate       *time.Time `json:"startDate" required:"false" doc:"Start date"`
 	EndDate         *time.Time `json:"endDate" required:"false" doc:"End date"`
-
-	IsRetry    bool  `json:"isRetry" required:"false" doc:"Is retry"`
-	RetryCount int64 `json:"retryCount" required:"false" doc:"Retry count"`
+	IsRetry         bool       `json:"isRetry" required:"false" doc:"Is retry"`
+	RetryCount      int64      `json:"retryCount" required:"false" doc:"Retry count"`
 }
 
 type ExamTypeResponse struct {

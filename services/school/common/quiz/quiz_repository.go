@@ -43,30 +43,51 @@ func (repository *Repository) CreateQuizAnswer(item *model.QuizAnswer) (*model.Q
 
 func (repository *Repository) UpdateByID(id int64, item *model.Quiz) (*model.Quiz, error) {
 	result := &model.Quiz{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.Quiz{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":        item.SchoolID,
-			"year_id":          item.YearID,
-			"class_subject_id": item.ClassSubjectID,
-			"unit_id":          item.UnitID,
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+		"year_id":   item.YearID,
 
-			"title":       item.Title,
-			"description": item.Description,
-			"status":      item.Status,
-		},
-	).Find(result).Error
+		"title":       item.Title,
+		"description": item.Description,
+		"status":      item.Status,
+	}
+	if item.ClassSubjectID > 0 {
+		fields["class_subject_id"] = item.ClassSubjectID
+	} else if item.UnitID > 0 {
+		fields["unit_id"] = item.UnitID
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.Semester").
+		Preload("Questions.Options").
+		Preload("Questions.Solution").
+		Model(&model.Quiz{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) UpdateQuizQuestionSolutionByID(id int64, item *model.QuizQuestion) (*model.QuizQuestion, error) {
 	result := &model.QuizQuestion{}
+	fields := map[string]any{
+		"solution_id": item.SolutionID,
+	}
 	return result, repository.Db.
 		Preload(clause.Associations).
 		Model(&model.QuizQuestion{}).
-		Where("id = ?", id).Updates(
-		map[string]any{
-			"solution_id": item.SolutionID,
-		},
-	).Find(result).Error
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -84,7 +105,66 @@ func (repository *Repository) DeleteQuizQuestionOptionByID(id int64) (int64, err
 	return result.RowsAffected, result.Error
 }
 
+func (repository *Repository) DeleteQuizQuestionByQuizID(quizID int64) (int64, error) {
+	result := repository.Db.
+		Where("quiz_id = ?", quizID).
+		Delete(&model.QuizQuestion{})
+	return result.RowsAffected, result.Error
+}
+
+func (repository *Repository) DeleteAllQuizQuestionOptionByQuizID(quizID int64) (result int64, err error) {
+	listFound := make([]model.QuizQuestionOption, 0)
+	err = repository.Db.
+		Model(&model.QuizQuestionOption{}).
+		Joins("LEFT JOIN quiz_questions ON quiz_question_options.quiz_question_id = quiz_questions.id").
+		Where("quiz_questions.quiz_id = ?", quizID).
+		Find(&listFound).Error
+	if err != nil {
+		return
+	}
+	if len(listFound) < 1 {
+		panic("EMPTYYYYYYYYYYYYYYYYYYYYY")
+		return
+	}
+
+	where := fmt.Sprintf("quiz_question_id IN (%s)", utils.ListIntToString(model.ToQuizQuestionOptionIDList(listFound)))
+	query := repository.Db.
+		Where(where).
+		Delete(&model.QuizQuestionOption{})
+
+	result = query.RowsAffected
+	err = query.Error
+	return
+}
+
+func (repository *Repository) DeleteAllQuizAnswerByQuizID(quizID int64) (result int64, err error) {
+	listFound := make([]model.QuizAnswer, 0)
+	err = repository.Db.
+		Model(&model.QuizAnswer{}).
+		Joins("LEFT JOIN quiz_questions ON quiz_answers.quiz_question_id = quiz_questions.id").
+		Where("quiz_questions.quiz_id = ?", quizID).
+		Find(&listFound).Error
+	if err != nil {
+		return
+	}
+	if len(listFound) < 1 {
+		return
+	}
+
+	where := fmt.Sprintf("quiz_question_id IN (%s)", utils.ListIntToString(model.ToQuizQuestionAnswerIDList(listFound)))
+	query := repository.Db.
+		Where(where).
+		Delete(&model.QuizAnswer{})
+
+	result = query.RowsAffected
+	err = query.Error
+	return
+}
+
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -97,33 +177,35 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 	return
 }
 
-func (repository *Repository) DeleteMultipleQuizQuestionByID(list []int64) (result int64, err error) {
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.QuizQuestion{})
-
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
-	return
-}
-
-func (repository *Repository) DeleteMultipleQuizQuestionOptionByID(list []int64) (result int64, err error) {
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.QuizQuestionOption{})
-
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
-	return
-}
-
 func (repository *Repository) GetByID(id int64) (*model.Quiz, error) {
 	result := &model.Quiz{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.Semester").
+		Preload("Questions.Options").
+		Preload("Questions.Solution").
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Quiz, error) {
 	result := &model.Quiz{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.Semester").
+		Preload("Questions.Options").
+		Preload("Questions.Solution").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
@@ -132,8 +214,10 @@ func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.
 func (repository *Repository) GetAllQuizAnswerByStudentIDQuizQuestionIDs(studentID int64, list []int64) (*model.QuizAnswer, error) {
 	result := &model.QuizAnswer{}
 	where := fmt.Sprintf("quiz_question_id IN (%s)", utils.ListIntToString(list))
-	return result, repository.Db.Preload(clause.Associations).
-		Where("student_id = ?", studentID).Where(where).Limit(1).Find(result).Error
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Where("student_id = ?", studentID).
+		Where(where).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetAll(
@@ -196,9 +280,13 @@ func (repository *Repository) GetAll(
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
 		Preload("ClassSubject.Subject").
-		Preload("Unit.Domain").
-		Preload("Unit.Level").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
 		Preload("Unit.Semester").
+		Preload("Questions.Options").
+		Preload("Questions.Solution").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,

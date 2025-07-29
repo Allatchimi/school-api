@@ -26,16 +26,16 @@ func (item *Parent) ToResponse() *data.ParentResponse {
 		School: &dataSchool.SchoolPublicResponse{},
 		User:   &dataUser.UserResponse{},
 	}
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
+
 	if item.School != nil {
 		resp.School = item.School.ToPublicResponse()
 	}
 	if item.User != nil {
 		resp.User = item.User.ToResponse()
 	}
-
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 
@@ -47,16 +47,16 @@ func (item *Parent) ToPublicResponse() *data.ParentPublicResponse {
 		School: &dataSchool.SchoolPublicResponse{},
 		User:   &dataUser.UserPublicResponse{},
 	}
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
+
 	if item.School != nil {
 		resp.School = item.School.ToPublicResponse()
 	}
 	if item.User != nil {
 		resp.User = item.User.ToPublicResponse()
 	}
-
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

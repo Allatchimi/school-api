@@ -43,29 +43,44 @@ func (repository *Repository) CreateCourseComment(item *model.CourseComment) (*m
 
 func (repository *Repository) UpdateByID(id int64, item *model.Course) (*model.Course, error) {
 	result := &model.Course{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.Course{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":        item.SchoolID,
-			"year_id":          item.YearID,
-			"class_subject_id": item.ClassSubjectID,
-			"unit_id":          item.UnitID,
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+		"year_id":   item.YearID,
 
-			"title":       item.Title,
-			"description": item.Description,
-			"content":     item.Content,
-		},
-	).Find(result).Error
+		"title":       item.Title,
+		"description": item.Description,
+		"content":     item.Content,
+	}
+	if item.ClassSubjectID > 0 {
+		fields["class_subject_id"] = item.ClassSubjectID
+	} else if item.UnitID > 0 {
+		fields["unit_id"] = item.UnitID
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Course{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) UpdateCourseCommentByID(id int64, item *model.CourseComment) (*model.CourseComment, error) {
 	result := &model.CourseComment{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.CourseComment{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"message":    item.Message,
-			"rate":       item.Rate,
-			"is_deleted": item.IsDeleted,
-		},
-	).Find(result).Error
+	fields := map[string]any{
+		"message":    item.Message,
+		"rate":       item.Rate,
+		"is_deleted": item.IsDeleted,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.CourseComment{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -93,6 +108,9 @@ func (repository *Repository) DeleteCourseVideoByCourseID(
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -107,19 +125,36 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 
 func (repository *Repository) GetByID(id int64) (*model.Course, error) {
 	result := &model.Course{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.Semester").
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetCourseCommentByID(id int64) (*model.CourseComment, error) {
 	result := &model.CourseComment{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Course, error) {
 	result := &model.Course{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.Semester").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
@@ -127,7 +162,8 @@ func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.
 
 func (repository *Repository) GetCourseCommentByIDSchoolID(id int64, schoolID int64) (*model.CourseComment, error) {
 	result := &model.CourseComment{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
 		Joins("LEFT JOIN courses ON course_comments.course_id = courses.id").
 		Where("id = ?", id).
 		Where("courses.school_id = ?", schoolID).
@@ -191,8 +227,10 @@ func (repository *Repository) GetAll(
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
 		Preload("ClassSubject.Subject").
-		Preload("Unit.Domain").
-		Preload("Unit.Level").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
 		Preload("Unit.Semester").
 		Scopes(
 			helpers.PaginationScopeV2(
@@ -225,13 +263,13 @@ func (repository *Repository) GetAllCourseComment(
 	where := ""
 	args := []any{}
 	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, "courses.school_id = ?")
+			args = append(args, request.SchoolID)
+		}
 		if request.CourseID > 0 {
 			where = helpers.AppendWhereClause(where, "comments.course_id = ?")
 			args = append(args, request.CourseID)
-		}
-		if request.UserID > 0 {
-			where = helpers.AppendWhereClause(where, "comments.user_id = ?")
-			args = append(args, request.UserID)
 		}
 	}
 
@@ -243,8 +281,6 @@ func (repository *Repository) GetAllCourseComment(
 		// Securely append search conditions
 		searchClause := `(
 			CAST(comments.id AS TEXT) = ? OR
-			courses.title ILIKE ? OR
-			courses.description ILIKE ? OR
 			schools.name ILIKE ? OR
 			schools.type ILIKE ? OR
 			university_units.name ILIKE ? OR
@@ -254,26 +290,25 @@ func (repository *Repository) GetAllCourseComment(
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
-		args = append(args, search, like, like, like, like, like, like, like, like)
+		args = append(args, search, like, like, like, like, like, like)
 	}
 
 	// Perform query with preloads and custom pagination scope
 	err = repository.Db.
 		Preload(clause.Associations).
-		Preload("Course.User").
-		Preload("Course.User.Info").
+		Preload("User.Info").
+		Preload("User.Role").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
 				`SELECT comments.*
 				FROM course_comments comments
-				LEFT JOIN courses ON course_comments.course_id = courses.id
+				LEFT JOIN courses ON comments.course_id = courses.id
 				LEFT JOIN schools ON courses.school_id = schools.id
-				LEFT JOIN courses ON courses.year_id = courses.id
+				LEFT JOIN years ON courses.year_id = years.id
 				LEFT JOIN highschool_class_subjects ON courses.class_subject_id = highschool_class_subjects.id
 				LEFT JOIN university_units ON courses.unit_id = university_units.id
-				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id
-				LEFT JOIN users ON course_comments.user_id = users.id`,
+				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id`,
 				where,
 				pagination,
 				filter,

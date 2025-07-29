@@ -61,8 +61,8 @@ func (service *Service) Create(
 			// Insert question
 			createdQuestion, errQt := service.Repository.CreateQuizQuestion(
 				&model.QuizQuestion{
-					Title:       question.Title,
-					Description: question.Description,
+					Title:       question.Question.Title,
+					Description: question.Question.Description,
 					QuizID:      createdQuiz.ID,
 				},
 			)
@@ -217,41 +217,34 @@ func (service *Service) Update(
 		return
 	}
 
-	// Delete all quiz questions and options
-	var errDelete error
-	questionsIDs := make([]int64, len(foundItem.Questions))
-	for i := range questionsIDs {
-		questionsIDs[i] = foundItem.Questions[i].ID
-
-		// Delete options for this question
-		optionsIDs := make([]int64, len(foundItem.Questions[i].Options))
-		for j := range optionsIDs {
-			optionsIDs[i] = foundItem.Questions[i].Options[j].ID
-		}
-		_, errDelete = service.Repository.DeleteMultipleQuizQuestionOptionByID(optionsIDs)
-	}
-	if errDelete != nil {
+	// Delete quiz data in order
+	_, err = service.Repository.DeleteAllQuizQuestionOptionByQuizID(id)
+	if err != nil {
 		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		// err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	_, err = service.Repository.DeleteAllQuizAnswerByQuizID(id)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		// err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	_, err = service.Repository.DeleteQuizQuestionByQuizID(id)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		// err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
 
-	_, errDeleteQt := service.Repository.DeleteMultipleQuizQuestionByID(questionsIDs)
-	errDelete = errDeleteQt
-	if errDelete != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-
-	// Insert every question and option
+	// Create new question and option
 	if len(newRequest.Questions) > 0 {
 		for _, question := range newRequest.Questions {
-			// Insert question
+			// Create question
 			createdQuestion, errQt := service.Repository.CreateQuizQuestion(
 				&model.QuizQuestion{
-					Title:       question.Title,
-					Description: question.Description,
+					Title:       question.Question.Title,
+					Description: question.Question.Description,
 					QuizID:      updatedItem.ID,
 				},
 			)
@@ -262,7 +255,7 @@ func (service *Service) Update(
 			}
 			if len(question.Options) > 0 {
 				for _, option := range question.Options {
-					// Insert option
+					// Create option
 					createdOption, errOpt := service.Repository.CreateQuizQuestionOption(
 						&model.QuizQuestionOption{
 							Title:          option.Title,

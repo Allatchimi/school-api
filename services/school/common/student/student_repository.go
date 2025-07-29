@@ -38,64 +38,93 @@ func (repository *Repository) CreateStudentEnroll(item *model.StudentEnroll) (*m
 
 func (repository *Repository) UpdateByID(id int64, item *model.Student) (*model.Student, error) {
 	result := &model.Student{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.Student{}).Where("id = ?", item.ID).Updates(
-		map[string]any{
-			"school_id": item.SchoolID,
-			"user_id":   item.UserID,
-			"uid":       item.UID,
-		},
-	).Find(result).Error
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+		"user_id":   item.UserID,
+
+		"uid": item.UID,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Student{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) UpdateStudentEnrollByID(id int64, item *model.StudentEnroll) (*model.StudentEnroll, error) {
 	result := &model.StudentEnroll{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.StudentEnroll{}).Where("id = ?", item.ID).Updates(
-		map[string]any{
-			"school_id":       item.SchoolID,
-			"year_id":         item.YearID,
-			"class_id":        item.ClassID,
-			"level_domain_id": item.LevelDomainID,
-			"student_id":      item.StudentID,
+	fields := map[string]any{
+		"school_id":  item.SchoolID,
+		"year_id":    item.YearID,
+		"student_id": item.StudentID,
 
-			"origin":          item.Origin,
-			"origin_feedback": item.OriginFeedback,
-		},
-	).Find(result).Error
+		"origin":          item.Origin,
+		"origin_feedback": item.OriginFeedback,
+	}
+	if item.ClassID > 0 {
+		fields["class_id"] = item.ClassID
+	} else if item.LevelDomainID > 0 {
+		fields["level_domain_id"] = item.LevelDomainID
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.StudentEnroll{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) UpdateStudentPreEnrollByID(id int64, item *model.StudentPreEnroll) (*model.StudentPreEnroll, error) {
 	result := &model.StudentPreEnroll{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.StudentPreEnroll{}).Where("id = ?", item.ID).Updates(
-		map[string]any{
-			"school_id":       item.SchoolID,
-			"year_id":         item.YearID,
-			"class_id":        item.ClassID,
-			"level_domain_id": item.LevelDomainID,
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+		"year_id":   item.YearID,
 
-			"message": item.Message,
-
-			"gender":     item.Gender,
-			"first_name": item.FirstName,
-			"last_name":  item.LastName,
-			"birthday":   item.Birthday,
-
-			"document1": item.Document1,
-			"document2": item.Document2,
-			"document3": item.Document3,
-			"document4": item.Document4,
-			"document5": item.Document5,
-		},
-	).Find(result).Error
+		"message":    item.Message,
+		"gender":     item.Gender,
+		"first_name": item.FirstName,
+		"last_name":  item.LastName,
+		"birthday":   item.Birthday,
+		"document1":  item.Document1,
+		"document2":  item.Document2,
+		"document3":  item.Document3,
+		"document4":  item.Document4,
+		"document5":  item.Document5,
+	}
+	if item.ClassID > 0 {
+		fields["class_id"] = item.ClassID
+	} else if item.LevelDomainID > 0 {
+		fields["level_domain_id"] = item.LevelDomainID
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.StudentPreEnroll{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) UpdateStudentPreEnrollStatusByID(id int64, item *model.StudentPreEnroll) (*model.StudentPreEnroll, error) {
 	result := &model.StudentPreEnroll{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.StudentPreEnroll{}).Where("id = ?", item.ID).Updates(
-		map[string]any{
-			"status":          item.Status,
-			"status_feedback": item.StatusFeedback,
-		},
-	).Find(result).Error
+	fields := map[string]any{
+		"status":          item.Status,
+		"status_feedback": item.StatusFeedback,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.StudentPreEnroll{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -114,6 +143,9 @@ func (repository *Repository) DeleteStudentPreEnrollByID(id int64) (int64, error
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -127,6 +159,9 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 }
 
 func (repository *Repository) DeleteMultipleStudentEnrollByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -140,6 +175,9 @@ func (repository *Repository) DeleteMultipleStudentEnrollByID(list []int64, scho
 }
 
 func (repository *Repository) DeleteMultipleStudentPreEnrollByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -196,7 +234,7 @@ func (repository *Repository) GetStudentPreEnrollByID(id int64) (*model.StudentP
 		Preload("LevelDomain.Domain").
 		Preload("LevelDomain.Domain.Department").
 		Preload("LevelDomain.Domain.Department.Faculty").
-		Preload("Student.User.Info").
+		Preload("User.Info").
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
@@ -234,7 +272,7 @@ func (repository *Repository) GetStudentPreEnrollByIDSchoolID(id int64, schoolID
 		Preload("LevelDomain.Domain").
 		Preload("LevelDomain.Domain.Department").
 		Preload("LevelDomain.Domain.Department.Faculty").
-		Preload("Student.User.Info").
+		Preload("User.Info").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
@@ -295,20 +333,10 @@ func (repository *Repository) AreStudentEnrollSameUniqueObjects(item1 *model.Stu
 
 func (repository *Repository) GetStudentPreEnrollUniqueObject(item *model.StudentPreEnroll) (*model.StudentPreEnroll, error) {
 	result := &model.StudentPreEnroll{}
-	return result, repository.Db.Preload(clause.Associations).Where(&model.StudentPreEnroll{
-		UserID:        item.UserID,
-		YearID:        item.YearID,
-		LevelDomainID: item.LevelDomainID,
-		ClassID:       item.ClassID,
-	}).Limit(1).Find(result).Error
+	return result, nil
 }
 
 func (repository *Repository) AreStudentPreEnrollSameUniqueObjects(item1 *model.StudentPreEnroll, item2 *model.StudentPreEnroll) bool {
-	if item1 != nil && item2 != nil &&
-		(item1.UserID == item2.UserID &&
-			item1.YearID == item2.YearID && item1.LevelDomainID == item2.LevelDomainID && item1.ClassID == item2.ClassID) {
-		return true
-	}
 	return false
 }
 
@@ -442,7 +470,6 @@ func (repository *Repository) GetAllStudentEnroll(
 		Preload("LevelDomain.Domain.Department.Faculty").
 		Preload("Student.User").
 		Preload("Student.User.Info").
-		Preload("Student.User.Role").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
@@ -536,11 +563,13 @@ func (repository *Repository) GetAllStudentPreEnroll(
 		Preload("LevelDomain.Domain").
 		Preload("LevelDomain.Domain.Department").
 		Preload("LevelDomain.Domain.Department.Faculty").
+		Preload("User").
+		Preload("User.Info").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
 				`SELECT pre_enrolls.*
-				FROM student_pre_enrolls
+				FROM student_pre_enrolls pre_enrolls
 				LEFT JOIN schools ON pre_enrolls.school_id = schools.id
 				LEFT JOIN years ON pre_enrolls.year_id = years.id
 				LEFT JOIN highschool_classes ON pre_enrolls.class_id = highschool_classes.id

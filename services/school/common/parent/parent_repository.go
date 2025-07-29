@@ -38,60 +38,81 @@ func (repository *Repository) CreateParentAssign(item *model.ParentAssign) (*mod
 
 func (repository *Repository) UpdateByID(id int64, item *model.Parent) (*model.Parent, error) {
 	result := &model.Parent{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.ParentStudent{}).Where("id = ?", item.ID).Updates(
-		map[string]any{
-			"user_id": item.UserID,
-		},
-	).Find(result).Error
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+		"user_id":   item.UserID,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Parent{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) UpdateParentStudentByID(id int64, item *model.ParentStudent) (*model.ParentStudent, error) {
 	result := &model.ParentStudent{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.ParentStudent{}).Where("id = ?", item.ID).Updates(
-		map[string]any{
-			"parent_id":  item.ParentID,
-			"student_id": item.StudentID,
-		},
-	).Find(result).Error
+	fields := map[string]any{
+		"parent_id":  item.ParentID,
+		"student_id": item.StudentID,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.ParentStudent{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) UpdateParentAssignByID(id int64, item *model.ParentAssign) (*model.ParentAssign, error) {
 	result := &model.ParentAssign{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.ParentAssign{}).Where("id = ?", item.ID).Updates(
-		map[string]any{
-			"school_id": item.SchoolID,
-			"user_id":   item.UserID,
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+		"user_id":   item.UserID,
 
-			"student_list_id": item.StudentListID,
-
-			"status":          item.Status,
-			"status_feedback": item.StatusFeedback,
-
-			"message": item.Message,
-
-			"gender":         item.Gender,
-			"first_name":     item.FirstName,
-			"last_name":      item.LastName,
-			"birthday":       item.Birthday,
-			"birth_location": item.BirthLocation,
-
-			"document1": item.Document1,
-			"document2": item.Document2,
-			"document3": item.Document3,
-			"document4": item.Document4,
-			"document5": item.Document5,
-		},
-	).Find(result).Error
+		"student_list_id": item.StudentListID,
+		"status":          item.Status,
+		"status_feedback": item.StatusFeedback,
+		"message":         item.Message,
+		"gender":          item.Gender,
+		"first_name":      item.FirstName,
+		"last_name":       item.LastName,
+		"birthday":        item.Birthday,
+		"birth_location":  item.BirthLocation,
+		"document1":       item.Document1,
+		"document2":       item.Document2,
+		"document3":       item.Document3,
+		"document4":       item.Document4,
+		"document5":       item.Document5,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.ParentAssign{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) UpdateParentAssignStatusByID(id int64, item *model.ParentAssign) (*model.ParentAssign, error) {
 	result := &model.ParentAssign{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.ParentAssign{}).Where("id = ?", item.ID).Updates(
-		map[string]any{
-			"status":          item.Status,
-			"status_feedback": item.StatusFeedback,
-		},
-	).Find(result).Error
+	fields := map[string]any{
+		"status":          item.Status,
+		"status_feedback": item.StatusFeedback,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.ParentAssign{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -110,6 +131,9 @@ func (repository *Repository) DeleteParentAssignByID(id int64) (int64, error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -123,6 +147,9 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 }
 
 func (repository *Repository) DeleteMultipleParentStudentByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -136,6 +163,9 @@ func (repository *Repository) DeleteMultipleParentStudentByID(list []int64, scho
 }
 
 func (repository *Repository) DeleteMultipleParentAssignByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {

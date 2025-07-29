@@ -26,21 +26,27 @@ func (repository *Repository) Create(item *model.Payment) (*model.Payment, error
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, item *model.Payment) (*model.Payment, error) {
+func (repository *Repository) UpdateByID(id int64, item *model.Payment) (*model.Payment, error) {
 	result := &model.Payment{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.Payment{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":         item.SchoolID,
-			"student_enroll_id": item.StudentEnrollID,
+	fields := map[string]any{
+		"school_id":         item.SchoolID,
+		"student_enroll_id": item.StudentEnrollID,
 
-			"amount":   item.Amount,
-			"currency": item.Currency,
-			"date":     item.Date,
-			"method":   item.Method,
-			"status":   item.Status,
-			"message":  item.Message,
-		},
-	).Find(result).Error
+		"amount":   item.Amount,
+		"currency": item.Currency,
+		"date":     item.Date,
+		"method":   item.Method,
+		"status":   item.Status,
+		"message":  item.Message,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Payment{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -49,6 +55,9 @@ func (repository *Repository) DeleteByID(id int64) (int64, error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -104,15 +113,22 @@ func (repository *Repository) GetAll(
 		// Securely append search conditions
 		searchClause := `(
 			CAST(payments.id AS TEXT) = ? OR
+			CAST(payments.amount AS TEXT) = ? OR
 			payments.method ILIKE ? OR
 			payments.status ILIKE ? OR
 			schools.name ILIKE ? OR
 			schools.type ILIKE ? OR
-			students.uid ILIKE ?
+			students.uid ILIKE ? OR
+			highschool_classes.name ? OR
+			highschool_classes.description ? OR
+			university_levels.name ? OR
+			university_levels.description ? OR
+			highschool_domains.name ? OR
+			highschool_domains.description ? OR
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
-		args = append(args, search, like, like, like, like, like)
+		args = append(args, search, search, like, like, like, like, like, like, like, like, like, like, like)
 	}
 
 	// Perform query with preloads and custom pagination scope
@@ -134,7 +150,11 @@ func (repository *Repository) GetAll(
 				FROM payments
 				LEFT JOIN schools ON payments.school_id = schools.id
 				LEFT JOIN student_enrolls ON payments.student_enroll_id = student_enrolls.id
-				LEFT JOIN students ON student_enrolls.student_id = students.id`,
+				LEFT JOIN students ON student_enrolls.student_id = students.id
+				LEFT JOIN highschool_classes ON student_enrolls.class_id = highschool_classes.id
+				LEFT JOIN university_level_domains ON student_enrolls.level_domain_id = university_level_domains.id
+				LEFT JOIN university_levels ON university_level_domains.level_id = university_levels.id
+				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id`,
 				where,
 				pagination,
 				filter,

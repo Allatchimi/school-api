@@ -28,15 +28,21 @@ func (repository *Repository) Create(data *model.Result) (*model.Result, error) 
 
 func (repository *Repository) Update(id int64, data *model.Result) (*model.Result, error) {
 	result := &model.Result{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.Result{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":  data.SchoolID,
-			"student_id": data.StudentID,
-			"exam_id":    data.ExamID,
+	fields := map[string]any{
+		"school_id":  data.SchoolID,
+		"student_id": data.StudentID,
+		"exam_id":    data.ExamID,
 
-			"value": data.Value,
-		},
-	).Find(result).Error
+		"value": data.Value,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Result{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -45,6 +51,9 @@ func (repository *Repository) DeleteByID(id int64) (int64, error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -59,13 +68,43 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 
 func (repository *Repository) GetByID(id int64) (*model.Result, error) {
 	result := &model.Result{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("Student.User").
+		Preload("Student.User.Info").
+		Preload("Exam.School").
+		Preload("Exam.Year").
+		Preload("Exam.Type").
+		Preload("Exam.ClassSubject").
+		Preload("Exam.ClassSubject.Class").
+		Preload("Exam.ClassSubject.Subject").
+		Preload("Exam.Sequence").
+		Preload("Exam.Unit").
+		Preload("Exam.Unit.LevelDomain").
+		Preload("Exam.Unit.LevelDomain.Level").
+		Preload("Exam.Unit.LevelDomain.Domain").
+		Preload("Exam.Unit.Semester").
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Result, error) {
 	result := &model.Result{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("Student.User").
+		Preload("Student.User.Info").
+		Preload("Exam.School").
+		Preload("Exam.Year").
+		Preload("Exam.Type").
+		Preload("Exam.ClassSubject").
+		Preload("Exam.ClassSubject.Class").
+		Preload("Exam.ClassSubject.Subject").
+		Preload("Exam.Sequence").
+		Preload("Exam.Unit").
+		Preload("Exam.Unit.LevelDomain").
+		Preload("Exam.Unit.LevelDomain.Level").
+		Preload("Exam.Unit.LevelDomain.Domain").
+		Preload("Exam.Unit.Semester").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
@@ -183,22 +222,23 @@ func (repository *Repository) GetAll(
 		Preload("Exam.ClassSubject.Subject").
 		Preload("Exam.Sequence").
 		Preload("Exam.Unit").
-		Preload("Exam.Unit.Level").
-		Preload("Exam.Unit.Domain").
+		Preload("Exam.Unit.LevelDomain").
+		Preload("Exam.Unit.LevelDomain.Level").
+		Preload("Exam.Unit.LevelDomain.Domain").
 		Preload("Exam.Unit.Semester").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
 				`SELECT results.*
 				FROM results
-				LEFT JOIN schools ON exams.school_id = schools.id
-				LEFT JOIN years ON exams.year_id = years.id
+				LEFT JOIN schools ON results.school_id = schools.id
+				LEFT JOIN exams ON results.exam_id = exams.id
+				LEFT JOIN students ON results.student_id = students.id
 				LEFT JOIN highschool_class_subjects ON exams.class_subject_id = highschool_class_subjects.id
 				LEFT JOIN highschool_sequences ON exams.sequence_id = highschool_sequences.id
 				LEFT JOIN university_units ON exams.unit_id = university_units.id
-				LEFT JOIN exams ON results.exam_id = exams.id
+				LEFT JOIN years ON exams.year_id = years.id
 				LEFT JOIN exam_types ON exams.type_id = exam_types.id
-				LEFT JOIN students ON results.student_id = students.id
 				LEFT JOIN highschool_classes ON highschool_class_subjects.class_id = highschool_classes.id
 				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id`,
 				where,

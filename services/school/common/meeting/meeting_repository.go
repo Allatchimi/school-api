@@ -30,7 +30,7 @@ func (repository *Repository) Create(item *model.MeetingRoom) (*model.MeetingRoo
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
-func (repository *Repository) ApiCreateRoom() (*data.ApiCreateRoomResponse, error) {
+func (repository *Repository) CreateApiRoom() (*data.ApiCreateRoomResponse, error) {
 	roomID := fmt.Sprintf("%d_%s", time.Now().Unix(), utils.GenerateRandomAlphaNumeric(10))
 	room := &data.ApiCreateRoomRequest{
 		RoomID: roomID,
@@ -118,12 +118,37 @@ func (repository *Repository) ApiCreateRoom() (*data.ApiCreateRoomResponse, erro
 	return apiResp, err
 }
 
+func (repository *Repository) UpdateByID(id int64, item *model.MeetingRoom) (*model.MeetingRoom, error) {
+	result := &model.MeetingRoom{}
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+
+		"api_room_id": item.ApiRoomID,
+	}
+	if item.ClassSubjectID > 0 {
+		fields["class_subject_id"] = item.ClassSubjectID
+	} else if item.UnitID > 0 {
+		fields["unit_id"] = item.UnitID
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.MeetingRoom{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
+}
+
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.MeetingRoom{})
 	return result.RowsAffected, result.Error
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -144,7 +169,15 @@ func (repository *Repository) GetByID(id int64) (*model.MeetingRoom, error) {
 
 func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.MeetingRoom, error) {
 	result := &model.MeetingRoom{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain.").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.Semester").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
@@ -226,9 +259,10 @@ func (repository *Repository) GetAll(
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
 		Preload("ClassSubject.Subject").
-		Preload("Unit.Level").
-		Preload("Unit.Domain").
-		Preload("Unit.Domain.Department").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
 		Preload("Unit.Semester").
 		Scopes(
 			helpers.PaginationScopeV2(

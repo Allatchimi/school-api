@@ -33,33 +33,44 @@ func (repository *Repository) CreateClassSubject(item *model.HighschoolClassSubj
 
 func (repository *Repository) UpdateByID(id int64, item *model.HighschoolClass) (*model.HighschoolClass, error) {
 	result := &model.HighschoolClass{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.HighschoolClass{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":    item.SchoolID,
-			"specialty_id": item.SpecialtyID,
+	fields := map[string]any{
+		"school_id":    item.SchoolID,
+		"specialty_id": item.SpecialtyID,
 
-			"name":        item.Name,
-			"description": item.Description,
-		},
-	).Find(result).Error
+		"name":        item.Name,
+		"description": item.Description,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.HighschoolClass{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) UpdateClassSubjectByID(id int64, item *model.HighschoolClassSubject) (*model.HighschoolClassSubject, error) {
 	result := &model.HighschoolClassSubject{}
-	fmt.Println(item)
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":  item.SchoolID,
-			"subject_id": item.SubjectID,
-			"class_id":   item.ClassID,
+	fields := map[string]any{
+		"school_id":  item.SchoolID,
+		"subject_id": item.SubjectID,
+		"class_id":   item.ClassID,
 
-			"coefficient":  item.Coefficient,
-			"program":      item.Program,
-			"requirements": item.Requirements,
-			"is_valid":     item.IsValid,
-			"invalid_date": item.InvalidDate,
-		},
-	).Error
+		"coefficient":  item.Coefficient,
+		"program":      item.Program,
+		"requirements": item.Requirements,
+		"is_valid":     item.IsValid,
+		"invalid_date": item.InvalidDate,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.HighschoolClassSubject{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -73,6 +84,9 @@ func (repository *Repository) DeleteClassSubjectByID(id int64) (int64, error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -86,6 +100,9 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 }
 
 func (repository *Repository) DeleteMultipleClassSubjectByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {

@@ -21,31 +21,41 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(data *model.Schedule) (*model.Schedule, error) {
-	result := *data
+func (repository *Repository) Create(item *model.Schedule) (*model.Schedule, error) {
+	result := *item
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) UpdateByID(id int64, data *model.Schedule) (*model.Schedule, error) {
+func (repository *Repository) UpdateByID(id int64, item *model.Schedule) (*model.Schedule, error) {
 	result := &model.Schedule{}
-	return result, repository.Db.Preload(clause.Associations).Model(&model.Schedule{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":        data.SchoolID,
-			"year_id":          data.YearID,
-			"class_subject_id": data.ClassSubjectID,
-			"unit_id":          data.UnitID,
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+		"year_id":   item.YearID,
 
-			"is_common":       data.IsCommon,
-			"type":            data.Type,
-			"day_of_the_week": data.DayOfTheWeek,
-			"repeat_count":    data.RepeatCount,
-			"repeat_type":     data.RepeatType,
-			"start_time":      data.StartTime,
-			"end_time":        data.EndTime,
-			"is_valid":        data.IsValid,
-			"invalid_date":    data.InvalidDate,
-		},
-	).Find(result).Error
+		"is_common":       item.IsCommon,
+		"type":            item.Type,
+		"description":     item.Description,
+		"day_of_the_week": item.DayOfTheWeek,
+		"repeat_count":    item.RepeatCount,
+		"repeat_type":     item.RepeatType,
+		"start_time":      item.StartTime,
+		"end_time":        item.EndTime,
+		"is_valid":        item.IsValid,
+		"invalid_date":    item.InvalidDate,
+	}
+	if item.ClassSubjectID > 0 {
+		fields["class_subject_id"] = item.ClassSubjectID
+	} else if item.UnitID > 0 {
+		fields["unit_id"] = item.UnitID
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Schedule{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -54,6 +64,9 @@ func (repository *Repository) DeleteByID(id int64) (int64, error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	var query *gorm.DB = repository.Db.Where(where)
 	if schoolID > 0 {
@@ -153,6 +166,7 @@ func (repository *Repository) GetAll(
 		searchClause := `(
 			CAST(schedules.id AS TEXT) = ? OR
 			schedules.type ILIKE ? OR
+			schedules.description ILIKE ? OR
 			schedules.day_of_the_week ILIKE ? OR
 			schedules.repeat_type ILIKE ? OR
 			schedules.start_time ILIKE ? OR
@@ -169,7 +183,7 @@ func (repository *Repository) GetAll(
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
-		args = append(args, search, like, like, like, like, like, like, like, like, like, like, like, like, like, like)
+		args = append(args, search, like, like, like, like, like, like, like, like, like, like, like, like, like, like, like)
 	}
 
 	// Perform query with preloads and custom pagination scope
@@ -178,8 +192,9 @@ func (repository *Repository) GetAll(
 		Preload("ClassSubject.Class").
 		Preload("ClassSubject.Subject").
 		Preload("Unit.LevelDomain").
-		Preload("Unit.LevelDomain.Domain").
 		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
 		Preload("Unit.Semester").
 		Scopes(
 			helpers.PaginationScopeV2(

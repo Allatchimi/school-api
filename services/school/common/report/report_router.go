@@ -788,4 +788,56 @@ func RegisterEndpoints(
 			}{Body: *result}, nil
 		},
 	)
+
+	// Get all report table
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-report-table-list",
+			Summary:     "Get all report table",
+			Description: "Get all report table with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/tables", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Feature
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllReportTableRequest
+			},
+		) (*struct {
+			Body data.ReportTableResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllTable(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+
+			return &struct {
+				Body data.ReportTableResponseList
+			}{Body: *result}, nil
+		},
+	)
 }

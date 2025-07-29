@@ -63,23 +63,31 @@ func (service *Service) Create(
 		return
 	}
 
-	// Call external meeting API to create a new room
-	apiResp, err := service.Repository.ApiCreateRoom()
-	if err != nil || apiResp == nil || apiResp.RoomInfo == nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	// Update the room id
-	item.ApiRoomID = apiResp.RoomInfo.RoomID
-
-	// Insert
-	result, err = service.Repository.Create(item)
+	// Create
+	createdItem, err := service.Repository.Create(item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+
+	// Call external meeting API to create a new room
+	apiResp, err := service.Repository.CreateApiRoom()
+	if err != nil || apiResp == nil || apiResp.RoomInfo == nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+
+	// Update the room id
+	createdItem.ApiRoomID = apiResp.RoomInfo.RoomID
+	result, err = service.Repository.UpdateByID(createdItem.ID, item)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+
 	return
 }
 

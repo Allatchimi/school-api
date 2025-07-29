@@ -38,16 +38,19 @@ func (repository *Repository) Create(role *model.Role) (result *model.Role, err 
 
 func (repository *Repository) UpdateByID(id int64, role *model.Role) (result *model.Role, err error) {
 	result = &model.Role{}
-	tmpErr := repository.Db.Preload(clause.Associations).Model(&model.Role{}).Where("id = ?", id).Updates(
-		map[string]any{
-			"feature":     role.Feature,
-			"name":        role.Name,
-			"description": role.Description,
-		},
-	).Find(result).Error
-
-	err = tmpErr
-	return
+	fields := map[string]any{
+		"feature":     role.Feature,
+		"name":        role.Name,
+		"description": role.Description,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Role{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (result int64, err error) {
@@ -59,6 +62,9 @@ func (repository *Repository) DeleteByID(id int64) (result int64, err error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	tmpResult := repository.Db.Where(where).Delete(&model.Role{})
 
@@ -108,9 +114,9 @@ func (repository *Repository) GetAll(
 		// Securely append search conditions
 		searchClause := `(
 			CAST(roles.id AS TEXT) = ? OR
-			infos.feature ILIKE ? OR
+			roles.feature ILIKE ? OR
 			roles.name ILIKE ? OR
-			infos.description ILIKE ?
+			roles.description ILIKE ?
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)

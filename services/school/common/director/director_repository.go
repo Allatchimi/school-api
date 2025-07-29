@@ -32,18 +32,21 @@ func (repository *Repository) UpdateByID(
 	id int64,
 	item *model.Director,
 ) (*model.Director, error) {
-	tempDirector, err := repository.GetByID(id)
-	if err != nil || tempDirector == nil || tempDirector.ID != id {
-		return nil, err
-	}
 	result := &model.Director{}
-	return result, repository.Db.Model(&model.Director{}).Where("id = ?", item.ID).Updates(
-		map[string]any{
-			"school_id": item.SchoolID,
-			"user_id":   item.UserID,
-			"uid":       item.UID,
-		},
-	).Find(result).Error
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+		"user_id":   item.UserID,
+
+		"uid": item.UID,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Director{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(
@@ -58,6 +61,9 @@ func (repository *Repository) DeleteByID(
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	tmpResult := repository.Db.Where(where).Delete(&model.Director{})
 

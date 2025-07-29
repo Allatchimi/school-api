@@ -47,3 +47,11 @@ func ToQuizQuestionOptionResponseList(itemList []QuizQuestionOption) []data.Quiz
 	}
 	return resp
 }
+
+func ToQuizQuestionOptionIDList(itemList []QuizQuestionOption) []int64 {
+	resp := make([]int64, len(itemList))
+	for index, item := range itemList {
+		resp[index] = item.ID
+	}
+	return resp
+}

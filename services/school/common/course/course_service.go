@@ -105,7 +105,7 @@ func (service *Service) Create(
 	return
 }
 
-func (service *Service) CreateComment(
+func (service *Service) CreateCourseComment(
 	ctxData *types.ContextData,
 	courseID int64,
 	request *data.CourseCommentRequest,
@@ -252,7 +252,7 @@ func (service *Service) Update(
 	return
 }
 
-func (service *Service) UpdateComment(
+func (service *Service) UpdateCourseComment(
 	ctxData *types.ContextData,
 	id int64,
 	request *data.CourseCommentRequest,
@@ -335,16 +335,17 @@ func (service *Service) Delete(
 	return
 }
 
-func (service *Service) DeleteComment(
+func (service *Service) DeleteCourseComment(
 	ctxData *types.ContextData,
-	id int64,
+	courseID int64,
+	commentID int64,
 ) (affectedRows int64, errCode int, err error) {
 	// Check if the item exists
 	var foundItem *model.CourseComment
 	if ctxData.User.Feature != constants.FeatureAdmin {
-		foundItem, err = service.Repository.GetCourseCommentByIDSchoolID(id, ctxData.Jwt.SchoolID)
+		foundItem, err = service.Repository.GetCourseCommentByIDSchoolID(commentID, ctxData.Jwt.SchoolID)
 	} else {
-		foundItem, err = service.Repository.GetCourseCommentByID(id)
+		foundItem, err = service.Repository.GetCourseCommentByID(commentID)
 	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -357,9 +358,16 @@ func (service *Service) DeleteComment(
 		return
 	}
 
+	// Check macthing with course id
+	if foundItem.CourseID != courseID {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
 	// Perform soft delete
 	_, err = service.Repository.UpdateCourseCommentByID(
-		id,
+		commentID,
 		&model.CourseComment{
 			Message:   "",
 			Rate:      foundItem.Rate,
@@ -436,12 +444,21 @@ func (service *Service) GetAll(
 	return
 }
 
-func (service *Service) GetAllComment(
+func (service *Service) GetAllCourseComment(
 	ctxData *types.ContextData,
 	filter *types.Filter,
 	pagination *types.Pagination,
+	courseID int64,
 	request *data.GetAllCourseCommentRequest,
 ) (result []model.CourseComment, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+	newRequest.CourseID = courseID
+
+	// Get
 	result, err = service.Repository.GetAllCourseComment(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError

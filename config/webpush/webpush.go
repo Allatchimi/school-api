@@ -4,8 +4,8 @@ import (
 	"api/common/helpers"
 	"api/config"
 	wsConfig "api/config/ws"
-	"api/services/common/notification"
-	modelNotification "api/services/common/notification/model"
+	"api/services/others/notification"
+	modelNotification "api/services/others/notification/model"
 	"api/services/user/user"
 	modelUser "api/services/user/user/model"
 

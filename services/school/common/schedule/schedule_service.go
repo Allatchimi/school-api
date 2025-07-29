@@ -40,6 +40,7 @@ func (service *Service) Create(
 
 		IsCommon:     newRequest.IsCommon,
 		Type:         newRequest.Type,
+		Description:  newRequest.Description,
 		DayOfTheWeek: newRequest.DayOfTheWeek,
 		RepeatCount:  newRequest.RepeatCount,
 		RepeatType:   newRequest.RepeatType,
@@ -121,7 +122,9 @@ func (service *Service) Update(
 		ClassSubjectID: newRequest.ClassSubjectID,
 		UnitID:         newRequest.UnitID,
 
+		IsCommon:     newRequest.IsCommon,
 		Type:         newRequest.Type,
+		Description:  newRequest.Description,
 		DayOfTheWeek: newRequest.DayOfTheWeek,
 		RepeatCount:  newRequest.RepeatCount,
 		RepeatType:   newRequest.RepeatType,

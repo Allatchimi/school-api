@@ -95,8 +95,8 @@ func (service *Service) Update(
 		Message:  newRequest.Message,
 	}
 
-	// Update payment
-	result, err = service.Repository.Update(id, item)
+	// Update
+	result, err = service.Repository.UpdateByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
