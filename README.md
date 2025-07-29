@@ -39,7 +39,7 @@ cp .env.example app.env
 
 Remove comment line on this file docker/cdn/Dockerfile:
 
-````
+```
 # COPY --from=builder /app/app.env ./app.env
 ```
 
@@ -49,7 +49,7 @@ Remove comment line on this file docker/cdn/Dockerfile:
 
 - Build and start postgres container with the command `make docker-postgres`
 
-````
+```
 
 make build
 
@@ -96,4 +96,7 @@ Go to this link: [GitHub Action Secrets](https://github.com/EMENEC-FINANCE/schoo
 # Additional Notes
 
 By following these steps and customizing the Makefile to fit your specific needs, you can effectively manage your project using Docker and Make.
+
+```
+
 ```
