@@ -37,7 +37,7 @@ Add env file:
 cp .env.example app.env
 ```
 
-Remove comment line on this file docker/cdn/Dockerfile:
+Uncomment this line on this file docker/cdn/Dockerfile:
 
 ```
 # COPY --from=builder /app/app.env ./app.env
