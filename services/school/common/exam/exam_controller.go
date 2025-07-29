@@ -18,19 +18,6 @@ func NewController(service *Service) *Controller {
 	return &Controller{Service: service}
 }
 
-func (controller *Controller) CreateType(
-	ctx *context.Context,
-	input *struct {
-		Body data.ExamTypeRequest
-	},
-) (result *model.ExamType, errCode int, err error) {
-	result, errCode, err = controller.Service.CreateType(
-		httpHelper.GetJwtContext(ctx),
-		&input.Body,
-	)
-	return
-}
-
 func (controller *Controller) Create(
 	ctx *context.Context,
 	input *struct {
@@ -38,21 +25,20 @@ func (controller *Controller) Create(
 	},
 ) (result *model.Exam, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		&input.Body,
 	)
 	return
 }
 
-func (controller *Controller) UpdateType(
+func (controller *Controller) CreateType(
 	ctx *context.Context,
 	input *struct {
-		data.ExamTypeID
 		Body data.ExamTypeRequest
 	},
 ) (result *model.ExamType, errCode int, err error) {
-	result, errCode, err = controller.Service.UpdateType(
-		httpHelper.GetJwtContext(ctx), input.ID,
+	result, errCode, err = controller.Service.CreateType(
+		httpHelper.GetContextData(ctx),
 		&input.Body,
 	)
 	return
@@ -66,23 +52,23 @@ func (controller *Controller) Update(
 	},
 ) (result *model.Exam, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		httpHelper.GetJwtContext(ctx), input.ID,
+		httpHelper.GetContextData(ctx), input.ID,
 		&input.Body,
 	)
 	return
 }
 
-func (controller *Controller) DeleteType(
+func (controller *Controller) UpdateType(
 	ctx *context.Context,
 	input *struct {
 		data.ExamTypeID
+		Body data.ExamTypeRequest
 	},
-) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteType(httpHelper.GetJwtContext(ctx), input.ID)
-	if err != nil {
-		return
-	}
-	result = affectedRows
+) (result *model.ExamType, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateType(
+		httpHelper.GetContextData(ctx), input.ID,
+		&input.Body,
+	)
 	return
 }
 
@@ -92,7 +78,21 @@ func (controller *Controller) Delete(
 		data.ExamID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.Delete(httpHelper.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.Delete(httpHelper.GetContextData(ctx), input.ID)
+	if err != nil {
+		return
+	}
+	result = affectedRows
+	return
+}
+
+func (controller *Controller) DeleteType(
+	ctx *context.Context,
+	input *struct {
+		data.ExamTypeID
+	},
+) (result int64, errCode int, err error) {
+	affectedRows, errCode, err := controller.Service.DeleteType(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -106,7 +106,7 @@ func (controller *Controller) DeleteMultiple(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetJwtContext(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetContextData(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -114,17 +114,17 @@ func (controller *Controller) DeleteMultiple(
 	return
 }
 
-func (controller *Controller) GetType(
+func (controller *Controller) DeleteMultipleType(
 	ctx *context.Context,
 	input *struct {
-		data.ExamTypeID
+		Body types.DeleteMultipleRequest
 	},
-) (result *model.ExamType, errCode int, err error) {
-	exam, errCode, err := controller.Service.GetType(httpHelper.GetJwtContext(ctx), input.ID)
+) (result int64, errCode int, err error) {
+	affectedRows, errCode, err := controller.Service.DeleteMultipleType(httpHelper.GetContextData(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
-	result = exam
+	result = affectedRows
 	return
 }
 
@@ -134,7 +134,7 @@ func (controller *Controller) Get(
 		data.ExamID
 	},
 ) (result *model.Exam, errCode int, err error) {
-	exam, errCode, err := controller.Service.Get(httpHelper.GetJwtContext(ctx), input.ID)
+	exam, errCode, err := controller.Service.Get(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -142,24 +142,17 @@ func (controller *Controller) Get(
 	return
 }
 
-func (controller *Controller) GetAllExamType(
+func (controller *Controller) GetType(
 	ctx *context.Context,
 	input *struct {
-		types.Filter
-		types.PaginationRequest
-		data.GetAllExamTypeRequest
+		data.ExamTypeID
 	},
-) (result *data.ExamTypeResponseList, errCode int, err error) {
-	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	examList, errCode, err := controller.Service.GetAllExamType(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllExamTypeRequest)
+) (result *model.ExamType, errCode int, err error) {
+	exam, errCode, err := controller.Service.GetType(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
-	result = &data.ExamTypeResponseList{
-		Data: model.ToExamTypeResponseList(examList),
-	}
-	result.Filter = newFilter
-	result.Pagination = newPagination
+	result = exam
 	return
 }
 
@@ -172,12 +165,33 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.ExamResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	examList, errCode, err := controller.Service.GetAll(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
+	examList, errCode, err := controller.Service.GetAll(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}
 	result = &data.ExamResponseList{
 		Data: model.ToExamResponseList(examList),
+	}
+	result.Filter = newFilter
+	result.Pagination = newPagination
+	return
+}
+
+func (controller *Controller) GetAllExamType(
+	ctx *context.Context,
+	input *struct {
+		types.Filter
+		types.PaginationRequest
+		data.GetAllExamTypeRequest
+	},
+) (result *data.ExamTypeResponseList, errCode int, err error) {
+	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
+	examList, errCode, err := controller.Service.GetAllExamType(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllExamTypeRequest)
+	if err != nil {
+		return
+	}
+	result = &data.ExamTypeResponseList{
+		Data: model.ToExamTypeResponseList(examList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

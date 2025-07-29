@@ -2,7 +2,7 @@ package utils
 
 import "fmt"
 
-func InterfaceToError(recovery interface{}) (err error) {
+func InterfaceToError(recovery any) (err error) {
 	if castedErr, ok := recovery.(error); ok {
 		err = castedErr
 	} else {

@@ -7,7 +7,6 @@ import (
 	modelYear "api/services/school/common/year/model"
 	modelClass "api/services/school/highschool/class/model"
 	modelLevel "api/services/school/university/level/model"
-	"time"
 )
 
 type StudentEnroll struct {
@@ -23,111 +22,39 @@ type StudentEnroll struct {
 	Class   *modelClass.HighschoolClass `gorm:"default:null;foreignKey:ClassID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	LevelDomainID int64                             `gorm:"default:null"`
-	LevelDomain   *modelLevel.UniversityLevelDomain `gorm:"default:null;foreignKey:LevelID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	LevelDomain   *modelLevel.UniversityLevelDomain `gorm:"default:null;foreignKey:LevelDomainID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	StudentID int64    `gorm:"default:null"`
 	Student   *Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Email       string `gorm:"default:null"`
-	PhoneNumber uint64 `gorm:"default:null"`
-
 	Origin         string `gorm:"default:null"`
-	Status         string `gorm:"default:null"`
-	StatusFeedback string `gorm:"default:null;type:text"`
-
-	Message string `gorm:"default:null;type:text"`
-
-	Gender        string     `gorm:"default:null"`
-	FirstName     string     `gorm:"default:null"`
-	LastName      string     `gorm:"default:null"`
-	Birthday      *time.Time `gorm:"default:null"`
-	BirthLocation string     `gorm:"default:null"`
-
-	Document1 string `gorm:"default:null"`
-	Document2 string `gorm:"default:null"`
-	Document3 string `gorm:"default:null"`
-	Document4 string `gorm:"default:null"`
-	Document5 string `gorm:"default:null"`
+	OriginFeedback string `gorm:"default:null;type:text"`
 }
 
-func (item *StudentEnroll) ToStudentEnrollResponse() *data.StudentEnrollResponse {
+func (item *StudentEnroll) ToResponse() *data.StudentEnrollResponse {
 	if item == nil {
 		return nil
 	}
 	resp := &data.StudentEnrollResponse{}
-	resp.Email = item.Email
-	resp.PhoneNumber = item.PhoneNumber
-
-	resp.Origin = item.Origin
-	resp.Status = item.Status
-	resp.StatusFeedback = item.StatusFeedback
-
-	resp.Message = item.Message
-
-	resp.Gender = item.Gender
-	resp.FirstName = item.FirstName
-	resp.Birthday = item.Birthday
-	resp.BirthLocation = item.BirthLocation
-
-	resp.Document1 = item.Document1
-	resp.Document2 = item.Document2
-	resp.Document3 = item.Document3
-	resp.Document4 = item.Document4
-	resp.Document5 = item.Document5
-
-	resp.School = item.School.ToPublicResponse()
-	resp.Year = item.Year.ToResponse()
-	resp.LevelDomain = item.LevelDomain.ToLevelDomainResponse()
-	resp.Class = item.Class.ToResponse()
-	resp.Student = item.Student.ToStudentResponse()
-
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
-	return resp
-}
-
-func (item *StudentEnroll) ToStudentEnrollPublicResponse() *data.StudentEnrollPublicResponse {
-	if item == nil {
-		return nil
-	}
-	resp := &data.StudentEnrollPublicResponse{}
-	resp.Email = item.Email
-	resp.PhoneNumber = item.PhoneNumber
-
-	resp.Origin = item.Origin
-	resp.Status = item.Status
-	resp.StatusFeedback = item.StatusFeedback
-
-	resp.Message = item.Message
-
-	resp.Gender = item.Gender
-	resp.FirstName = item.FirstName
-	resp.Birthday = item.Birthday
-	resp.BirthLocation = item.BirthLocation
-
-	resp.Document1 = item.Document1
-	resp.Document2 = item.Document2
-	resp.Document3 = item.Document3
-	resp.Document4 = item.Document4
-	resp.Document5 = item.Document5
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Year = item.Year.ToResponse()
-	resp.LevelDomain = item.LevelDomain.ToLevelDomainResponse()
 	resp.Class = item.Class.ToResponse()
-	resp.Student = item.Student.ToStudentPublicResponse()
+	resp.LevelDomain = item.LevelDomain.ToResponse()
+	resp.Student = item.Student.ToPublicResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.Origin = item.Origin
+	resp.OriginFeedback = item.OriginFeedback
 	return resp
 }
 
 func ToStudentEnrollResponseList(itemList []StudentEnroll) []data.StudentEnrollResponse {
 	resp := make([]data.StudentEnrollResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToStudentEnrollResponse()
+		resp[index] = *item.ToResponse()
 	}
 	return resp
 }

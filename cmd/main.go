@@ -5,7 +5,6 @@ import (
 	"api/cmd/di"
 	"api/cmd/fixture"
 	"api/cmd/migrate"
-	"api/cmd/test"
 	"api/common/helpers"
 	securityUtil "api/common/utils/security"
 	"api/config"
@@ -17,6 +16,10 @@ import (
 var errInit error
 
 func main() {
+	// Enable logger
+	helpers.EnableLogger()
+	defer helpers.Logger.Sync()
+
 	// Check if there are any errors when initializing the app
 	if errInit != nil {
 		helpers.Logger.Warn(
@@ -36,8 +39,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	test.Testssssss()
+	helpers.Logger.Info("Fixtures loaded!")
 
 	di.InjectDependencies()
 	api.StartGin()
@@ -46,7 +48,9 @@ func main() {
 // Called before the main entry point. It's useful for setting up
 // configurations before starting the application.
 func init() {
+	// Enable logger
 	helpers.EnableLogger()
+	defer helpers.Logger.Sync()
 
 	// Load env
 	errEnv := config.LoadEnv()
@@ -81,7 +85,7 @@ func init() {
 			zap.String("Error", errArgon2id.Error()),
 		)
 	} else {
-		helpers.Logger.Info("Argon2id initialized ok!")
+		helpers.Logger.Info("Argon2id initialized!")
 	}
 
 	// Connect redis

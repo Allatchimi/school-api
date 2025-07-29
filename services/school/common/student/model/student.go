@@ -18,41 +18,42 @@ type Student struct {
 	UID string `gorm:"default:null"`
 }
 
-func (item *Student) ToStudentResponse() *data.StudentResponse {
+func (item *Student) ToResponse() *data.StudentResponse {
 	if item == nil {
 		return nil
 	}
 	resp := &data.StudentResponse{}
-	resp.UID = item.UID
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.School = item.School.ToPublicResponse()
 	resp.User = item.User.ToResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.UID = item.UID
 	return resp
 }
 
-func (item *Student) ToStudentPublicResponse() *data.StudentPublicResponse {
+func (item *Student) ToPublicResponse() *data.StudentPublicResponse {
 	if item == nil {
 		return nil
 	}
 	resp := &data.StudentPublicResponse{}
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.School = item.School.ToPublicResponse()
 	resp.User = item.User.ToPublicResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.UID = item.UID
 	return resp
 }
 
 func ToStudentResponseList(itemList []Student) []data.StudentResponse {
 	resp := make([]data.StudentResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToStudentResponse()
+		resp[index] = *item.ToResponse()
 	}
 	return resp
 }

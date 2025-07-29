@@ -24,7 +24,9 @@ type Schedule struct {
 	UnitID int64                     `gorm:"default:null"`
 	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
+	IsCommon       bool       `gorm:"default:null"`
 	Type           string     `gorm:"default:null"`
+	Description    string     `gorm:"default:null"`
 	DayOfTheWeek   string     `gorm:"default:null"`
 	RepeatCount    int        `gorm:"default:null"`
 	RepeatType     string     `gorm:"default:null"`
@@ -40,7 +42,18 @@ func (item *Schedule) ToResponse() *data.ScheduleResponse {
 		return nil
 	}
 	resp := &data.ScheduleResponse{}
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
+
+	resp.School = item.School.ToPublicResponse()
+	resp.Year = item.Year.ToResponse()
+	resp.ClassSubject = item.ClassSubject.ToResponse()
+	resp.Unit = item.Unit.ToResponse()
+
+	resp.IsCommon = item.IsCommon
 	resp.Type = item.Type
+	resp.Description = item.Description
 	resp.DayOfTheWeek = item.DayOfTheWeek
 	resp.RepeatCount = item.RepeatCount
 	resp.RepeatType = item.RepeatType
@@ -49,15 +62,6 @@ func (item *Schedule) ToResponse() *data.ScheduleResponse {
 	resp.StartCountDate = item.StartCountDate
 	resp.IsValid = item.IsValid
 	resp.InvalidDate = item.InvalidDate
-
-	resp.School = item.School.ToPublicResponse()
-	resp.Year = item.Year.ToResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
-	resp.Unit = item.Unit.ToResponse()
-
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 
@@ -114,43 +118,4 @@ func ToScheduleWeeklyViewResponseList(itemList []Schedule) []data.ScheduleWeekly
 	}
 
 	return result
-}
-
-func ListAppendGenericSchedules(dest []Schedule, src []ScheduleGeneric) []Schedule {
-	defaultSize := len(dest)
-	genericSize := len(src)
-	result := make([]Schedule, defaultSize+genericSize)
-	copy(result, dest)
-	for index := range src {
-		schedule := ConvertScheduleGenericToSchedule(&src[index])
-		if schedule != nil {
-			result[defaultSize+index] = *schedule
-		}
-	}
-	return result
-}
-
-func ConvertScheduleGenericToSchedule(item *ScheduleGeneric) (result *Schedule) {
-	if item == nil {
-		return
-	}
-	result = &Schedule{
-		SchoolID: item.SchoolID,
-		School:   item.School,
-		YearID:   item.YearID,
-		Year:     item.Year,
-
-		Type:         item.Type,
-		DayOfTheWeek: item.DayOfTheWeek,
-		RepeatCount:  item.RepeatCount,
-		RepeatType:   item.RepeatType,
-		StartTime:    item.StartTime,
-		EndTime:      item.EndTime,
-		IsValid:      item.IsValid,
-		InvalidDate:  item.InvalidDate,
-	}
-	result.ID = item.ID
-	result.CreatedAt = item.CreatedAt
-	result.UpdatedAt = item.UpdatedAt
-	return
 }

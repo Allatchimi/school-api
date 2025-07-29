@@ -34,11 +34,13 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
 					},
@@ -74,11 +76,13 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionUpdate, // Operation
 					},
@@ -115,11 +119,13 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -149,17 +155,19 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-domain-multiple",
 			Summary:     "Delete multiple domain",
-			Description: "Delete multiple domain by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple domain by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -195,14 +203,16 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -238,14 +248,16 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -269,16 +281,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			// Generate items
-			tempResult := make([]data.DomainResponse, 10)
-			for i := range result.Data {
-				tempModel := data.DomainResponse{}
-				tempModel.ID = int64(i)
-
-				tempResult[i] = tempModel
-			}
-			result.Data = tempResult
 
 			return &struct {
 				Body data.DomainResponseList

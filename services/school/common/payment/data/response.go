@@ -9,18 +9,18 @@ import (
 
 type PaymentResponse struct {
 	types.BaseGormModelResponse
-	Amount        float64    `json:"amount" required:"false" doc:"Amount"`
-	Currency      string     `json:"currency" required:"false" doc:"Currency"`
-	PaymentDate   *time.Time `json:"paymentDate" required:"false" doc:"Payment date"`
-	PaymentMethod string     `json:"paymentMethod" required:"false" doc:"Payment method"`
-	PaymentStatus string     `json:"paymentStatus" required:"false" doc:"Payment status"`
-	PaymentNote   string     `json:"paymentNote" required:"false" doc:"Payment note"`
+	School        *dataSchool.SchoolPublicResponse   `json:"school" required:"false" doc:"School"`
+	StudentEnroll *dataStudent.StudentEnrollResponse `json:"studentEnroll" required:"false" doc:"Student Enroll"`
 
-	School        *dataSchool.SchoolPublicResponse         `json:"school" required:"false" doc:"School"`
-	StudentEnroll *dataStudent.StudentEnrollPublicResponse `json:"studentEnroll" required:"false" doc:"Student Enroll"`
+	Amount   float64    `json:"amount" required:"false" doc:"Amount"`
+	Currency string     `json:"currency" required:"false" doc:"Currency"`
+	Date     *time.Time `json:"date" required:"false" doc:"Date"`
+	Method   string     `json:"method" required:"false" doc:"Method"`
+	Status   string     `json:"status" required:"false" doc:"Status"`
+	Message  string     `json:"message" required:"false" doc:"Message"`
 }
 
 type PaymentResponseList struct {
 	types.PaginatedResponse
-	Data []PaymentResponse `json:"data" required:"false" doc:"List of academic Payments"`
+	Data []PaymentResponse `json:"data" required:"false" doc:"List of payment"`
 }

@@ -19,24 +19,31 @@ type ReportEntryRequest struct {
 	YearID        int64 `json:"yearID" required:"true" doc:"Year id"`
 	ClassID       int64 `json:"classID" required:"false" doc:"Class id"`
 	LevelDomainID int64 `json:"levelDomainID" required:"false" doc:"Level domain id"`
+
+	PeriodType string `json:"periodType" required:"true" enum:"final,semester,quarter,sequence" doc:"Period type"`
+	QuarterID  int64  `json:"quarterID" required:"false" doc:"Quarter id"`
+	SequenceID int64  `json:"sequenceID" required:"false" doc:"Sequence id"`
+	SemesterID int64  `json:"semesterID" required:"false" doc:"Semester id"`
 }
 
 type ReportGradeRequest struct {
 	SchoolID int64 `json:"schoolID" required:"true" doc:"School id"`
 
-	MinimumResult        float64 `json:"minimumResult" required:"true" doc:"Minimum result"`
-	MaximumResult        float64 `json:"maximumResult" required:"true" doc:"Maximum result"`
-	IncludeMinimumResult bool    `json:"includeMinimumResult" required:"true" doc:"Include minimum result"`
-	Correspondence       float64 `json:"correspondence" required:"true" doc:"Correspondence"`
-	Grade                string  `json:"grade" required:"false" doc:"Grade"`
-	GradeDescription     string  `json:"gradeDescription" required:"false" doc:"Grade description"`
+	Type           string  `json:"type" required:"true" enum:"average,report" doc:"Type"`
+	Name           string  `json:"name" required:"true" doc:"Name"`
+	Description    string  `json:"description" required:"false" doc:"Description"`
+	Minimum        float64 `json:"minimum" required:"true" doc:"Minimum"`
+	Maximum        float64 `json:"maximum" required:"true" doc:"Maximum"`
+	IncludeMinimum bool    `json:"includeMinimum" required:"true" doc:"Include minimum"`
+	IncludeMaximum bool    `json:"includeMaximum" required:"true" doc:"Include maximum"`
 }
 
 type ReportConfigRequest struct {
 	SchoolID int64 `json:"schoolID" required:"true" doc:"School id"`
 
-	Notation               float64 `json:"notation" required:"true" doc:"Notation"`
-	NotationMinimumSuccess float64 `json:"notationMinimumSuccess" required:"true" doc:"Notation minimum success"`
+	NotationAverage               float64 `json:"notationAverage" required:"true" doc:"Notation average"`
+	NotationReport                float64 `json:"notationReport" required:"true" doc:"Notation report"`
+	MinimumRequiredValueToPromote float64 `json:"minimumRequiredValueToPromote" required:"true" doc:"Minimum required value to promote"`
 }
 
 type GetAllReportEntryRequest struct {
@@ -47,9 +54,16 @@ type GetAllReportEntryRequest struct {
 }
 
 type GetAllReportGradeRequest struct {
-	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
+	SchoolID int64  `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
+	Type     string `json:"type" query:"type" required:"false" doc:"Type"`
 }
 
 type GetAllReportConfigRequest struct {
 	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
+}
+
+type GetAllReportTableRequest struct {
+	types.FilterSchoolYearClassLevelDomainRequest
+	PeriodType string `json:"periodType" query:"periodType" required:"false" doc:"Period type"`
+	PeriodName string `json:"periodName" query:"periodName" required:"false" doc:"Period name"`
 }

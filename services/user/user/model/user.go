@@ -20,17 +20,16 @@ type User struct {
 	RoleID int64           `gorm:"default:null"`
 	Role   *modelRole.Role `gorm:"default:null;foreignKey:RoleID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	UserInfoID int64     `gorm:"default:null"`
-	Info       *UserInfo `gorm:"default:null;foreignKey:UserInfoID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	InfoID int64     `gorm:"default:null"`
+	Info   *UserInfo `gorm:"default:null;foreignKey:InfoID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	UserConfigID int64       `gorm:"default:null"`
-	Config       *UserConfig `gorm:"default:null;foreignKey:UserConfigID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	ConfigID int64       `gorm:"default:null"`
+	Config   *UserConfig `gorm:"default:null;foreignKey:ConfigID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Email       string `gorm:"default:null"`
-	PhoneNumber uint64 `gorm:"default:null"`
-	Password    string `gorm:"default:null"`
-	Status      string `gorm:"default:null"`
-
+	Email          string     `gorm:"default:null"`
+	PhoneNumber    uint64     `gorm:"default:null"`
+	Password       string     `gorm:"default:null"`
+	Status         string     `gorm:"default:null"`
 	LoginMethod    string     `gorm:"default:null"`
 	Provider       string     `gorm:"default:null"`
 	ProviderUserID string     `gorm:"default:null"`
@@ -53,24 +52,23 @@ func (item *User) ToResponse() *data.UserResponse {
 		return nil
 	}
 	resp := &data.UserResponse{}
-	resp.Email = item.Email
-	resp.PhoneNumber = item.PhoneNumber
-	resp.Status = item.Status
-
-	resp.LoginMethod = item.LoginMethod
-	resp.Provider = item.Provider
-	resp.ProviderUserID = item.ProviderUserID
-	resp.IsActivated = item.IsActivated
-	resp.ActivatedAt = item.ActivatedAt
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Role = item.Role.ToResponse()
 	resp.Info = item.Info.ToResponse()
 	resp.Config = item.Config.ToResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.Email = item.Email
+	resp.PhoneNumber = item.PhoneNumber
+	resp.Status = item.Status
+	resp.LoginMethod = item.LoginMethod
+	resp.Provider = item.Provider
+	resp.ProviderUserID = item.ProviderUserID
+	resp.IsActivated = item.IsActivated
+	resp.ActivatedAt = item.ActivatedAt
 	return resp
 }
 
@@ -79,12 +77,16 @@ func (item *User) ToPublicResponse() *data.UserPublicResponse {
 		return nil
 	}
 	resp := &data.UserPublicResponse{}
-	resp.Email = item.Email
-	resp.Status = item.Status
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Role = item.Role.ToResponse()
 	resp.Info = item.Info.ToPublicResponse()
+
+	resp.Email = item.Email
+	resp.Status = item.Status
 	return resp
 }
 

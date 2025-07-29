@@ -18,6 +18,12 @@ func SendMessage(botToken string, message string, users []model.User) (err error
 	go safeStartWorker(config.RedisClient, botToken)
 
 	for _, user := range users {
+		if user.Config.TelegramChatID < 1 {
+			continue
+		}
+
+		helpers.Logger.Info("Sending telegram message to user: ", zap.Int64("userID", user.ID), zap.String("email", user.Email))
+
 		job := &TelegramJob{
 			BotToken:   botToken,
 			ChatID:     user.Config.TelegramChatID,

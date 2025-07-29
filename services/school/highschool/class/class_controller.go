@@ -25,7 +25,7 @@ func (controller *Controller) Create(
 	},
 ) (result *model.HighschoolClass, errCode int, err error) {
 	result, errCode, err = controller.Service.Create(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		&input.Body,
 	)
 	return
@@ -38,7 +38,7 @@ func (controller *Controller) CreateClassSubject(
 	},
 ) (result *model.HighschoolClassSubject, errCode int, err error) {
 	result, errCode, err = controller.Service.CreateClassSubject(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		&input.Body,
 	)
 	return
@@ -52,7 +52,7 @@ func (controller *Controller) Update(
 	},
 ) (result *model.HighschoolClass, errCode int, err error) {
 	result, errCode, err = controller.Service.Update(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		input.ID,
 		&input.Body,
 	)
@@ -67,7 +67,7 @@ func (controller *Controller) UpdateClassSubject(
 	},
 ) (result *model.HighschoolClassSubject, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateClassSubject(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		input.ID,
 		&input.Body,
 	)
@@ -80,7 +80,7 @@ func (controller *Controller) Delete(
 		data.ClassID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.Delete(httpHelper.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.Delete(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -94,7 +94,7 @@ func (controller *Controller) DeleteClassSubject(
 		data.ClassSubjectID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteClassSubject(httpHelper.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.DeleteClassSubject(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -108,7 +108,7 @@ func (controller *Controller) DeleteMultiple(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetJwtContext(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetContextData(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -122,7 +122,7 @@ func (controller *Controller) DeleteMultipleClassSubject(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultipleClassSubject(httpHelper.GetJwtContext(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultipleClassSubject(httpHelper.GetContextData(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -136,7 +136,7 @@ func (controller *Controller) Get(
 		data.ClassID
 	},
 ) (result *model.HighschoolClass, errCode int, err error) {
-	class, errCode, err := controller.Service.Get(httpHelper.GetJwtContext(ctx), input.ID)
+	class, errCode, err := controller.Service.Get(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -150,7 +150,7 @@ func (controller *Controller) GetClassSubject(
 		data.ClassSubjectID
 	},
 ) (result *model.HighschoolClassSubject, errCode int, err error) {
-	classSubject, errCode, err := controller.Service.GetClassSubject(httpHelper.GetJwtContext(ctx), input.ID)
+	classSubject, errCode, err := controller.Service.GetClassSubject(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -167,7 +167,7 @@ func (controller *Controller) GetAll(
 	},
 ) (result *data.ClassResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	classList, errCode, err := controller.Service.GetAll(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllRequest)
+	classList, errCode, err := controller.Service.GetAll(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return
 	}
@@ -188,7 +188,7 @@ func (controller *Controller) GetAllClassSubject(
 	},
 ) (result *data.ClassSubjectResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	classList, errCode, err := controller.Service.GetAllClassSubject(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllClassSubjectRequest)
+	classList, errCode, err := controller.Service.GetAllClassSubject(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllClassSubjectRequest)
 	if err != nil {
 		return
 	}

@@ -8,13 +8,14 @@ import (
 
 type SpecialtyResponse struct {
 	types.BaseGormModelResponse
-	School      *dataSchool.SchoolPublicResponse `json:"school" doc:"School"`
-	Section     *dataSection.SectionResponse     `json:"section" doc:"Section"`
-	Name        string                           `json:"name" required:"false" doc:"Specialty name"`
-	Description string                           `json:"description" required:"false" doc:"Specialty description"`
+	School  *dataSchool.SchoolPublicResponse `json:"school" doc:"School"`
+	Section *dataSection.SectionResponse     `json:"section" doc:"Section"`
+
+	Name        string `json:"name" required:"false" doc:"Specialty name"`
+	Description string `json:"description" required:"false" doc:"Specialty description"`
 }
 
 type SpecialtyResponseList struct {
 	types.PaginatedResponse
-	Data []SpecialtyResponse `json:"data" required:"false" doc:"List of specialties" example:"[]"`
+	Data []SpecialtyResponse `json:"data" required:"false" doc:"List of specialtie"`
 }

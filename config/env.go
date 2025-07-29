@@ -12,10 +12,11 @@ type Environment struct {
 	AppName string `mapstructure:"APP_NAME"`
 
 	// API config
-	ApiGroup     string `mapstructure:"API_GROUP"`
-	ApiBaseURL   string `mapstructure:"API_BASE_URL"`
-	GinMode      string `mapstructure:"GIN_MODE"`
-	AllowedHosts string `mapstructure:"ALLOWED_HOSTS"`
+	ApiGroup       string `mapstructure:"API_GROUP"`
+	WebsiteBaseURL string `mapstructure:"WEBSITE_BASE_URL"`
+	ApiBaseURL     string `mapstructure:"API_BASE_URL"`
+	GinMode        string `mapstructure:"GIN_MODE"`
+	AllowedHosts   string `mapstructure:"ALLOWED_HOSTS"`
 
 	// Redis for fast memory key-value storage
 	RedisHost     string `mapstructure:"SERVER_REDIS_HOST"`

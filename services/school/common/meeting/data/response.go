@@ -14,9 +14,10 @@ type MeetingRoomResponse struct {
 	Unit         *dataUnit.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
 
 	ApiRoomID string `json:"apiRoomID" required:"false" doc:"Room id for the API"`
+	IsRunning bool   `json:"isRunning" required:"false" doc:"Is running"`
 }
 
 type MeetingRoomResponseList struct {
 	types.PaginatedResponse
-	Data []MeetingRoomResponse `json:"data" required:"false" doc:"List of rooms"`
+	Data []MeetingRoomResponse `json:"data" required:"false" doc:"List of meeting room"`
 }

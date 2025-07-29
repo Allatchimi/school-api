@@ -26,31 +26,31 @@ type HighschoolClassSubject struct {
 	InvalidDate  *time.Time `gorm:"default:null"`
 }
 
-func (item *HighschoolClassSubject) ToClassSubjectResponse() *data.ClassSubjectResponse {
+func (item *HighschoolClassSubject) ToResponse() *data.ClassSubjectResponse {
 	if item == nil {
 		return nil
 	}
 	resp := &data.ClassSubjectResponse{}
-	resp.Coefficient = item.Coefficient
-	resp.Program = item.Program
-	resp.Requirements = item.Requirements
-	resp.IsValid = item.IsValid
-	resp.InvalidDate = item.InvalidDate
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Subject = item.Subject.ToResponse()
 	resp.Class = item.Class.ToResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.Coefficient = item.Coefficient
+	resp.Program = item.Program
+	resp.Requirements = item.Requirements
+	resp.IsValid = item.IsValid
+	resp.InvalidDate = item.InvalidDate
 	return resp
 }
 
 func ToClassSubjectResponseList(itemList []HighschoolClassSubject) []data.ClassSubjectResponse {
 	resp := make([]data.ClassSubjectResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToClassSubjectResponse()
+		resp[index] = *item.ToResponse()
 	}
 	return resp
 }

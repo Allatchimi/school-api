@@ -3,12 +3,12 @@ package api
 import (
 	"github.com/danielgtaylor/huma/v2"
 
-	"api/services/common/communication"
-	"api/services/common/contact"
-	"api/services/common/health"
-	"api/services/common/monitoring"
-	"api/services/common/notification"
-	"api/services/common/telegram"
+	"api/services/others/communication"
+	"api/services/others/contact"
+	"api/services/others/health"
+	"api/services/others/monitoring"
+	"api/services/others/notification"
+	"api/services/others/telegram"
 	"api/services/school/common/course"
 	"api/services/school/common/director"
 	"api/services/school/common/exam"

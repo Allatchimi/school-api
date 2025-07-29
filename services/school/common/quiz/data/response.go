@@ -15,21 +15,21 @@ type QuizResponse struct {
 	Year         *dataYear.YearResponse           `json:"year" required:"false" doc:"Year"`
 	ClassSubject *dataClass.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Subject for specific class"`
 	Unit         *dataUnit.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
-	Questions    []QuizQuestionResponseV2         `json:"questions" required:"false" doc:"Questions"`
+	Questions    []QuizQuestionListResponse       `json:"questions" required:"false" doc:"Questions"`
 
 	Title       string `json:"title" required:"false" doc:"Title"`
 	Description string `json:"description" required:"false" doc:"Description"`
-	Status      string `json:"status" required:"false" doc:"Status" example:""`
+	Status      string `json:"status" required:"false" doc:"Status"`
 }
 
-type QuizQuestionResponseV2 struct {
+type QuizQuestionListResponse struct {
 	Question *QuizQuestionResponse        `json:"question" required:"false" doc:"Question"`
 	Options  []QuizQuestionOptionResponse `json:"options" required:"false" doc:"Options"`
 }
 
 type QuizQuestionResponse struct {
 	types.BaseGormModelResponse
-	Quiz     *QuizResponse               `json:"quiz" required:"false" doc:"Quiz"`
+	QuizID   int64                       `json:"quizID" required:"false" doc:"Quiz id"`
 	Solution *QuizQuestionOptionResponse `json:"solution" required:"false" doc:"Solution"`
 
 	Title       string `json:"title" required:"false" doc:"Title"`
@@ -38,7 +38,7 @@ type QuizQuestionResponse struct {
 
 type QuizQuestionOptionResponse struct {
 	types.BaseGormModelResponse
-	QuizQuestion *QuizQuestionResponse `json:"quizQuestion" required:"false" doc:"Quiz question"`
+	QuizQuestionID int64 `json:"quizQuestionID" required:"false" doc:"Quiz question id"`
 
 	Title       string `json:"title" required:"false" doc:"Title"`
 	Description string `json:"description" required:"false" doc:"Description"`
@@ -46,20 +46,15 @@ type QuizQuestionOptionResponse struct {
 
 type QuizAnswerResponse struct {
 	types.BaseGormModelResponse
-	Quiz    *QuizResponse                      `json:"quiz" required:"false" doc:"Quiz"`
+	QuizID  int64                              `json:"quizID" required:"false" doc:"Quiz id"`
 	Student *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
 
 	Answers []QuizAnswersResponse `json:"answers" required:"false" doc:"Answers"`
 }
 
 type QuizAnswersResponse struct {
-	Question *QuizQuestionResponse       `json:"question" required:"false" doc:"Question" example:""`
-	Answer   *QuizQuestionOptionResponse `json:"answer" required:"false" doc:"Answer" example:""`
-}
-
-type QuizResponseList struct {
-	types.PaginatedResponse
-	Data []QuizResponse `json:"data" required:"false" doc:"List of quiz"`
+	Question *QuizQuestionResponse       `json:"question" required:"false" doc:"Question"`
+	Answer   *QuizQuestionOptionResponse `json:"answer" required:"false" doc:"Answer"`
 }
 
 type QuizResultResponse struct {
@@ -67,7 +62,17 @@ type QuizResultResponse struct {
 	Result  float64                            `json:"result" required:"false" doc:"Result"`
 }
 
+type QuizResponseList struct {
+	types.PaginatedResponse
+	Data []QuizResponse `json:"data" required:"false" doc:"List of quiz"`
+}
+
+type QuizAnswerResponseList struct {
+	types.PaginatedResponse
+	Data []QuizAnswerResponse `json:"data" required:"false" doc:"List of quiz answer"`
+}
+
 type QuizResultResponseList struct {
 	types.PaginatedResponse
-	Data []QuizResultResponse `json:"data" required:"false" doc:"List of quiz results"`
+	Data []QuizResultResponse `json:"data" required:"false" doc:"List of quiz result"`
 }

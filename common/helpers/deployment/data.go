@@ -14,9 +14,6 @@ CDN_KEY="{{ .CdnKey }}"
 NEXT_AUTH_URL="{{ .NextAuthUrl }}"
 NEXT_AUTH_SECRET="{{ .NextAuthSecret }}"
 
-GOOGLE_CLIENT_ID="459098306223-7b9ln9s1s6ccv67r9mr2vp2o52j0f7hv.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET="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"
-
 SCHOOL_ID={{ .SchoolID }}
 SCHOOL_TYPE="{{ .SchoolType }}"
 SCHOOL_API_KEY="{{ .SchoolApiKey }}"
@@ -24,15 +21,31 @@ SCHOOL_API_KEY="{{ .SchoolApiKey }}"
 
 	// App colors templates
 	colorTemplateContent = `
-export const COLOR_PRIMARY = "{{ .Primary }}";
-export const COLOR_PRIMARY_BG = "{{ .PrimaryBg }}";
-export const COLOR_PRIMARY_BG_HOVER = "{{ .PrimaryBgHover }}";
+interface ColorScheme {
+  primary: string;
+  primaryBg: string;
+  primaryBgHover: string;
+}
 
-export const COLORS = [COLOR_PRIMARY, COLOR_PRIMARY_BG, COLOR_PRIMARY_BG_HOVER];
+export const COLOR_SCHEME_DEFAULT: ColorScheme = {
+  primary: "{{ .Primary }}",
+  primaryBg: "{{ .PrimaryBg }}",
+  primaryBgHover: "{{ .PrimaryBgHover }}",
+};
+
+export const COLOR_SCHEME = COLOR_SCHEME_DEFAULT;
+
+export const COLOR_SCHEMES = [
+  COLOR_SCHEME_DEFAULT,
+];
 `
 
-	// Deployment templates
-	domainNameDeploymentTemplateContent = `{{ .DomainName }}`
+	// Kubernetes templates
+	kubernetesWebsiteDomainNameTemplateContent = `{{ .WebsiteDomainName }}`
+
+	// SMTP templates
+	smtpDomainNameDeploymentTemplateContent = `{{ .SmtpDomainName }}`
+	smtpSelectorDeploymentTemplateContent   = `{{ .SmtpSelector }}`
 )
 
 type AppEnvData struct {
@@ -58,6 +71,14 @@ type AppColorData struct {
 	PrimaryBgHover string
 }
 
-type DeploymentData struct {
-	DomainName string
+type KubernetesWebsiteDomainNameData struct {
+	WebsiteDomainName string
+}
+
+type SmtpDomainNameData struct {
+	SmtpDomainName string
+}
+
+type SmtpSelectorData struct {
+	SmtpSelector string
 }

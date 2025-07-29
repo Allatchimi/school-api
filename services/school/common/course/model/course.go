@@ -24,8 +24,8 @@ type Course struct {
 	UnitID int64                     `gorm:"default:null"`
 	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Documents []CourseDocument `gorm:"foreignKey:CourseID;references:ID"`
-	Videos    []CourseVideo    `gorm:"foreignKey:CourseID;references:ID"`
+	Documents []CourseDocument `gorm:"default:null;foreignKey:CourseID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Videos    []CourseVideo    `gorm:"default:null;foreignKey:CourseID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	Title       string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
@@ -43,7 +43,7 @@ func (item *Course) ToResponse() *data.CourseResponse {
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Year = item.Year.ToResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.ClassSubject = item.ClassSubject.ToResponse()
 	resp.Unit = item.Unit.ToResponse()
 	resp.Documents = ToCourseDocumentResponseList(item.Documents)
 	resp.Videos = ToCourseVideoResponseList(item.Videos)

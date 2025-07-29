@@ -34,12 +34,14 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
 					},
@@ -63,6 +65,140 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Create course comment
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "post-course-comment",
+			Summary:     "Create course comment",
+			Description: "Create new course comment and return created object.",
+			Method:      http.MethodPost,
+			Path:        fmt.Sprintf("%s/{id}/comments", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionCreate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.CourseID
+				Body data.CourseCommentRequest
+			},
+		) (*struct{ Body data.CourseCommentResponse }, error) {
+			result, errCode, err := controller.CreateCourseComment(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.CourseCommentResponse }{Body: *result.ToResponse()}, nil
+		},
+	)
+
+	// Update course with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "update-course",
+			Summary:     "Update course",
+			Description: "Update existing course with matching id and return the new course object.",
+			Method:      http.MethodPut,
+			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionUpdate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.CourseID
+				Body data.CourseRequest
+			},
+		) (*struct{ Body data.CourseResponse }, error) {
+			result, errCode, err := controller.Update(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.CourseResponse }{Body: *result.ToResponse()}, nil
+		},
+	)
+
+	// Update course comment with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "update-course-comment",
+			Summary:     "Update course comment",
+			Description: "Update existing course comment with matching id and return the new course object.",
+			Method:      http.MethodPut,
+			Path:        fmt.Sprintf("%s/comments/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionUpdate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.CourseID
+				Body data.CourseCommentRequest
+			},
+		) (*struct{ Body data.CourseCommentResponse }, error) {
+			result, errCode, err := controller.UpdateCourseComment(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.CourseCommentResponse }{Body: *result.ToResponse()}, nil
+		},
+	)
+
 	// Delete course with id
 	huma.Register(
 		*humaApi,
@@ -75,12 +211,14 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -104,23 +242,70 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Delete course comment with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "delete-course-comment",
+			Summary:     "Delete course comment",
+			Description: "Delete existing course comment with matching id and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/{id}/comments/{commentID}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.CourseID
+				data.CourseCommentID
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteCourseComment(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
 	// Delete multiple course
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "delete-course-multiple",
 			Summary:     "Delete multiple course",
-			Description: "Delete multiple course by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple course by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -156,14 +341,16 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -199,14 +386,16 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -231,17 +420,61 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			// Generate items
-			tempResults := make([]data.CourseResponse, 10)
-			for i := range tempResults {
-				tmpModel := data.CourseResponse{}
-				tmpModel.ID = int64(i)
-				tempResults[i] = tmpModel
-			}
-			result.Data = tempResults
-
 			return &struct {
 				Body data.CourseResponseList
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get all course comment
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-course-comment-list",
+			Summary:     "Get all course comment",
+			Description: "Get all course comment with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/{id}/comments", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Feature
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.CourseID
+				data.GetAllCourseCommentRequest
+			},
+		) (*struct {
+			Body data.CourseCommentResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllCourseComment(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+
+			return &struct {
+				Body data.CourseCommentResponseList
 			}{Body: *result}, nil
 		},
 	)

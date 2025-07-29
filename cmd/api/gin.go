@@ -14,7 +14,7 @@ import (
 	"api/middlewares"
 )
 
-// Start Set up and start the API: set up API documentation,
+// StartGin Set up and start the API: set up API documentation,
 // configure middlewares, and security measures.
 func StartGin() {
 	// Set up gin for your API
@@ -71,16 +71,21 @@ func StartGin() {
 	humaApi.UseMiddleware(
 		middlewares.HeadersMiddleware(humaApi),
 		middlewares.CorsMiddleware(humaApi),
+		middlewares.SchoolMiddleware(humaApi),
 		middlewares.AuthMiddleware(humaApi),
 		middlewares.PermissionMiddleware(
 			humaApi,
 			AllControllers.UserController.Service.Repository,
 			AllControllers.PermissionController.Service.Repository,
+			AllControllers.DirectorController.Service.Repository,
+			AllControllers.TeacherController.Service.Repository,
+			AllControllers.StudentController.Service.Repository,
+			AllControllers.ParentController.Service.Repository,
 		),
 	)
 
-	// Serve static files as favicon
-	engine.StaticFS("/assets", http.Dir(constants.AssetAppPath))
+	// Serve public static files as favicon
+	engine.StaticFS("/assets", http.Dir(constants.AssetPublicAppPath))
 
 	// Register websocket
 	wsManager := configWS.SetupWebsocket()
@@ -89,7 +94,19 @@ func StartGin() {
 
 	// Register API endpoints
 	ginGroup.GET("/docs", func(ctx *gin.Context) {
-		ctx.Data(200, "text/html", []byte(*config.OpenAPITemplates.Scalar))
+		ctx.Data(200, "text/html", config.OpenAPITemplates.Docs)
+	})
+	ginGroup.GET("/docs/scalar", func(ctx *gin.Context) {
+		ctx.Data(200, "text/html", config.OpenAPITemplates.Scalar)
+	})
+	ginGroup.GET("/docs/swagger", func(ctx *gin.Context) {
+		ctx.Data(200, "text/html", config.OpenAPITemplates.Swagger)
+	})
+	ginGroup.GET("/docs/redocly", func(ctx *gin.Context) {
+		ctx.Data(200, "text/html", config.OpenAPITemplates.Redocly)
+	})
+	ginGroup.GET("/docs/stoplight", func(ctx *gin.Context) {
+		ctx.Data(200, "text/html", config.OpenAPITemplates.Stoplight)
 	})
 	registerEndpoints(&humaApi)
 

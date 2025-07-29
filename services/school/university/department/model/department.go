@@ -24,15 +24,15 @@ func (item *UniversityDepartment) ToResponse() *data.DepartmentResponse {
 		return nil
 	}
 	resp := &data.DepartmentResponse{}
-	resp.Name = item.Name
-	resp.Description = item.Description
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.School = item.School.ToPublicResponse()
 	resp.Faculty = item.Faculty.ToResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.Name = item.Name
+	resp.Description = item.Description
 	return resp
 }
 

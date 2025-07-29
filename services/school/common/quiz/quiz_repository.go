@@ -43,27 +43,51 @@ func (repository *Repository) CreateQuizAnswer(item *model.QuizAnswer) (*model.Q
 
 func (repository *Repository) UpdateByID(id int64, item *model.Quiz) (*model.Quiz, error) {
 	result := &model.Quiz{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":        item.SchoolID,
-			"year_id":          item.YearID,
-			"class_subject_id": item.ClassSubjectID,
-			"unit_id":          item.UnitID,
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+		"year_id":   item.YearID,
 
-			"title":       item.Title,
-			"description": item.Description,
-			"status":      item.Status,
-		},
-	).Error
+		"title":       item.Title,
+		"description": item.Description,
+		"status":      item.Status,
+	}
+	if item.ClassSubjectID > 0 {
+		fields["class_subject_id"] = item.ClassSubjectID
+	} else if item.UnitID > 0 {
+		fields["unit_id"] = item.UnitID
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.Semester").
+		Preload("Questions.Options").
+		Preload("Questions.Solution").
+		Model(&model.Quiz{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) UpdateQuizQuestionSolutionByID(id int64, item *model.QuizQuestion) (*model.QuizQuestion, error) {
 	result := &model.QuizQuestion{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"solution_id": item.SolutionID,
-		},
-	).Error
+	fields := map[string]any{
+		"solution_id": item.SolutionID,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.QuizQuestion{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -81,45 +105,119 @@ func (repository *Repository) DeleteQuizQuestionOptionByID(id int64) (int64, err
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.Quiz{})
+func (repository *Repository) DeleteQuizQuestionByQuizID(quizID int64) (int64, error) {
+	result := repository.Db.
+		Where("quiz_id = ?", quizID).
+		Delete(&model.QuizQuestion{})
+	return result.RowsAffected, result.Error
+}
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+func (repository *Repository) DeleteAllQuizQuestionOptionByQuizID(quizID int64) (result int64, err error) {
+	listFound := make([]model.QuizQuestionOption, 0)
+	err = repository.Db.
+		Model(&model.QuizQuestionOption{}).
+		Joins("LEFT JOIN quiz_questions ON quiz_question_options.quiz_question_id = quiz_questions.id").
+		Where("quiz_questions.quiz_id = ?", quizID).
+		Find(&listFound).Error
+	if err != nil {
+		return
+	}
+	if len(listFound) < 1 {
+		panic("EMPTYYYYYYYYYYYYYYYYYYYYY")
+		return
+	}
+
+	where := fmt.Sprintf("quiz_question_id IN (%s)", utils.ListIntToString(model.ToQuizQuestionOptionIDList(listFound)))
+	query := repository.Db.
+		Where(where).
+		Delete(&model.QuizQuestionOption{})
+
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
-func (repository *Repository) DeleteMultipleQuizQuestionByID(list []int64) (result int64, err error) {
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.QuizQuestion{})
+func (repository *Repository) DeleteAllQuizAnswerByQuizID(quizID int64) (result int64, err error) {
+	listFound := make([]model.QuizAnswer, 0)
+	err = repository.Db.
+		Model(&model.QuizAnswer{}).
+		Joins("LEFT JOIN quiz_questions ON quiz_answers.quiz_question_id = quiz_questions.id").
+		Where("quiz_questions.quiz_id = ?", quizID).
+		Find(&listFound).Error
+	if err != nil {
+		return
+	}
+	if len(listFound) < 1 {
+		return
+	}
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	where := fmt.Sprintf("quiz_question_id IN (%s)", utils.ListIntToString(model.ToQuizQuestionAnswerIDList(listFound)))
+	query := repository.Db.
+		Where(where).
+		Delete(&model.QuizAnswer{})
+
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
-func (repository *Repository) DeleteMultipleQuizQuestionOptionByID(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.QuizQuestionOption{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.Quiz{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.Quiz, error) {
 	result := &model.Quiz{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.Semester").
 		Preload("Questions.Options").
+		Preload("Questions.Solution").
 		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Quiz, error) {
+	result := &model.Quiz{}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.Semester").
+		Preload("Questions.Options").
+		Preload("Questions.Solution").
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetAllQuizAnswerByStudentIDQuizQuestionIDs(studentID int64, list []int64) (*model.QuizAnswer, error) {
 	result := &model.QuizAnswer{}
 	where := fmt.Sprintf("quiz_question_id IN (%s)", utils.ListIntToString(list))
-	return result, repository.Db.Preload(clause.Associations).
-		Where("student_id = ?", studentID).Where(where).Limit(1).Find(result).Error
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Where("student_id = ?", studentID).
+		Where(where).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetAll(
@@ -128,57 +226,85 @@ func (repository *Repository) GetAll(
 	request *data.GetAllRequest,
 ) (result []model.Quiz, err error) {
 	result = make([]model.Quiz, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("quizzes.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "quizzes.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 		if request.YearID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("quizzes.year_id = %d", request.YearID))
+			where = helpers.AppendWhereClause(where, "quizzes.year_id = ?")
+			args = append(args, request.YearID)
 		}
 		if request.ClassSubjectID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("quizzes.class_subject_id = %d", request.ClassSubjectID))
+			where = helpers.AppendWhereClause(where, "quizzes.class_subject_id = ?")
+			args = append(args, request.ClassSubjectID)
 		}
 		if request.UnitID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("quizzes.unit_id = %d", request.UnitID))
+			where = helpers.AppendWhereClause(where, "quizzes.unit_id = ?")
+			args = append(args, request.UnitID)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"WHERE CAST(quizzes.id AS TEXT) = '%s' OR quizzes.title ILIKE '%s' OR quizzes.description ILIKE '%s' OR schools.name ILIKE '%s' OR years.name ILIKE '%s' OR highschool_class_subjects.name ILIKE '%s' OR university_units.name ILIKE '%s'",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(quizzes.id AS TEXT) = ? OR
+			quizzes.title ILIKE ? OR
+			quizzes.description ILIKE ? OR
+			quizzes.status ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			years.name ILIKE ? OR
+			highschool_classes.name ILIKE ? OR
+			highschool_classes.description ILIKE ? OR
+			highschool_subjects.name ILIKE ? OR
+			highschool_subjects.description ILIKE ? OR
+			university_units.name ILIKE ? OR
+			university_units.description ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like, like, like, like, like, like, like, like)
 	}
-	tmpErr := repository.Db.Preload(clause.Associations).
-		Preload("Questions.Options").
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
+		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
 		Preload("ClassSubject.Subject").
-		Preload("Unit.Domain").
-		Preload("Unit.Level").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
 		Preload("Unit.Semester").
+		Preload("Questions.Options").
+		Preload("Questions.Solution").
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT quizzes.* "+
-					"FROM quizzes "+
-					"LEFT JOIN schools ON quizzes.school_id = schools.id "+
-					"LEFT JOIN years ON quizzes.year_id = years.id "+
-					"LEFT JOIN highschool_class_subjects ON quizzes.class_subject_id = highschool_class_subjects.id "+
-					"LEFT JOIN university_units ON quizzes.unit_id = university_units.id ",
+				`SELECT quizzes.*
+				FROM quizzes
+				LEFT JOIN schools ON quizzes.school_id = schools.id
+				LEFT JOIN years ON quizzes.year_id = years.id
+				LEFT JOIN highschool_class_subjects ON quizzes.class_subject_id = highschool_class_subjects.id
+				LEFT JOIN university_units ON quizzes.unit_id = university_units.id
+				LEFT JOIN highschool_classes ON highschool_class_subjects.class_id = highschool_classes.id
+				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }
 
@@ -188,54 +314,59 @@ func (repository *Repository) GetAllQuizAnswer(
 	request *data.GetAllQuizAnswerRequest,
 ) (result []model.QuizAnswer, err error) {
 	result = make([]model.QuizAnswer, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
-		if request.QuizID.ID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("quiz_questions.quiz_id = %d", request.QuizID.ID))
-		}
-		if request.QuizQuestionID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("quiz_answers.quiz_question_id = %d", request.QuizQuestionID))
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, "students.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 		if request.StudentID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("quiz_answers.student_id = %d", request.StudentID))
+			where = helpers.AppendWhereClause(where, "quiz_answers.student_id = ?")
+			args = append(args, request.StudentID)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"CAST(quiz_answers.id AS TEXT) = '%s' OR quizzes.title ILIKE '%s' OR quizzes.description ILIKE '%s' OR students.uid ILIKE '%s' OR years.name ILIKE '%s' OR highschool_class_subjects.name ILIKE '%s' OR university_units.name ILIKE '%s'",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(quiz_answers.id AS TEXT) = ? OR
+			quiz_questions.title ILIKE ? OR
+			quiz_questions.description ILIKE ? OR
+			students.uid ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Preload("Student.User").
 		Preload("Student.User.Info").
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT quiz_answers.* "+
-					"FROM quiz_answers "+
-					"LEFT JOIN students ON quiz_answers.student_id = students.id "+
-					"LEFT JOIN quiz_questions ON quiz_answers.quiz_question_id = quiz_questions.id "+
-					"LEFT JOIN quiz_question_options ON quiz_answers.quiz_question_option_id = quiz_question_options.id "+
-					"LEFT JOIN quizzes ON quiz_questions.quiz_id = quizzes.id "+
-					"LEFT JOIN schools ON quizzes.school_id = schools.id "+
-					"LEFT JOIN years ON quizzes.year_id = years.id "+
-					"LEFT JOIN highschool_class_subjects ON quizzes.class_subject_id = highschool_class_subjects.id "+
-					"LEFT JOIN university_units ON quizzes.unit_id = university_units.id ",
+				`SELECT quiz_answers.*
+				FROM quiz_answers
+				LEFT JOIN quiz_questions ON quiz_answers.quiz_question_id = quiz_questions.id
+				LEFT JOIN students ON quiz_answers.student_id = students.id
+				LEFT JOIN schools ON students.school_id = schools.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }

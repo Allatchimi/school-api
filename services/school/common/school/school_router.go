@@ -34,10 +34,12 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
 					},
@@ -73,10 +75,12 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionUpdate, // Operation
 					},
@@ -148,10 +152,12 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -181,16 +187,18 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-school-multiple",
 			Summary:     "Delete multiple school",
-			Description: "Delete multiple school by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple school by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -226,10 +234,12 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -256,23 +266,27 @@ func RegisterEndpoints(
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID:   "get-school-id-public",
-			Summary:       "Get school by id public",
-			Description:   "Return one school with matching id public",
-			Method:        http.MethodGet,
-			Path:          fmt.Sprintf("%s/{id}/public", endpointConfig.Group),
-			Tags:          endpointConfig.Tag,
+			OperationID: "get-school-id-public",
+			Summary:     "Get school by id public",
+			Description: "Return one school with matching id public",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/public", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+				},
+			},
 			MaxBodyBytes:  constants.DefaultBodySize,
 			DefaultStatus: http.StatusOK,
 			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
 		},
 		func(
 			ctx context.Context,
-			input *struct {
-				data.SchoolID
-			},
+			input *struct{},
 		) (*struct{ Body data.SchoolResponse }, error) {
-			result, errCode, err := controller.Get(&ctx, input)
+			result, errCode, err := controller.GetPublic(&ctx)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -294,10 +308,12 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s",
 							constants.FeatureAdmin,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -321,16 +337,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			// Generate items
-			tempResult := make([]data.SchoolResponse, 10)
-			for i := range result.Data {
-				tempModel := data.SchoolResponse{}
-				tempModel.ID = int64(i)
-
-				tempResult[i] = tempModel
-			}
-			result.Data = tempResult
 
 			return &struct {
 				Body data.SchoolResponseList

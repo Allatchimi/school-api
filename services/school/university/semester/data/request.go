@@ -5,7 +5,8 @@ type SemesterID struct {
 }
 
 type SemesterRequest struct {
-	SchoolID    int64  `json:"schoolID" required:"true" doc:"School id"`
+	SchoolID int64 `json:"schoolID" required:"true" doc:"School id"`
+
 	Name        string `json:"name" required:"true" doc:"Semester name"`
 	Description string `json:"description" required:"false" doc:"Semester description"`
 }

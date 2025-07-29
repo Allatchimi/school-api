@@ -27,20 +27,22 @@ func (repository *Repository) Create(data *model.Result) (*model.Result, error) 
 }
 
 func (repository *Repository) Update(id int64, data *model.Result) (*model.Result, error) {
-	foundItem, err := repository.GetByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return nil, err
-	}
-
 	result := &model.Result{}
-	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"student_id": data.StudentID,
-			"exam_id":    data.ExamID,
+	fields := map[string]any{
+		"school_id":  data.SchoolID,
+		"student_id": data.StudentID,
+		"exam_id":    data.ExamID,
 
-			"value": data.Value,
-		},
-	).Error
+		"value": data.Value,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Result{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -48,78 +50,25 @@ func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.Result{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.Result{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.Result, error) {
 	result := &model.Result{}
-	return result, repository.Db.Model(&model.Result{}).Where("id = ?", id).Limit(1).Find(result).Error
-}
-
-func (repository *Repository) GetUniqueObject(item *model.Result) (*model.Result, error) {
-	result := &model.Result{}
-	return result, repository.Db.Preload(clause.Associations).Where(&model.Result{
-		StudentID: item.StudentID,
-		ExamID:    item.ExamID,
-	}).Limit(1).Find(result).Error
-}
-
-func (repository *Repository) AreSameUniqueObjects(item1 *model.Result, item2 *model.Result) bool {
-	if item1 != nil && item2 != nil &&
-		(item1.StudentID == item2.StudentID &&
-			item1.ExamID == item2.ExamID) {
-		return true
-	}
-	return false
-}
-
-func (repository *Repository) GetAll(
-	filter *types.Filter, pagination *types.Pagination,
-	request *data.GetAllRequest,
-) (result []model.Result, err error) {
-	result = make([]model.Result, 0)
-	var where string = ""
-	if request != nil {
-		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("exams.school_id = %d", request.SchoolID))
-		}
-		if request.YearID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("exams.year_id = %d", request.YearID))
-		}
-		if request.TypeID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("exams.type_id = %d", request.TypeID))
-		}
-		if request.UnitID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("exams.unit_id = %d", request.UnitID))
-		}
-		if request.ClassSubjectID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("exams.class_subject_id = %d", request.ClassSubjectID))
-		}
-		if request.SequenceID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("exams.sequence_id = %d", request.SequenceID))
-		}
-		if request.StudentID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("results.student_id = %d", request.StudentID))
-		}
-		if request.ExamID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("results.exam_id = %d", request.ExamID))
-		}
-	}
-	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(results.id AS TEXT) = '%s' OR exams.description ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
-	}
-	tmpErr := repository.Db.
+	return result, repository.Db.
 		Preload(clause.Associations).
 		Preload("Student.User").
 		Preload("Student.User.Info").
@@ -131,22 +80,173 @@ func (repository *Repository) GetAll(
 		Preload("Exam.ClassSubject.Subject").
 		Preload("Exam.Sequence").
 		Preload("Exam.Unit").
-		Preload("Exam.Unit.Level").
-		Preload("Exam.Unit.Domain").
+		Preload("Exam.Unit.LevelDomain").
+		Preload("Exam.Unit.LevelDomain.Level").
+		Preload("Exam.Unit.LevelDomain.Domain").
+		Preload("Exam.Unit.Semester").
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Result, error) {
+	result := &model.Result{}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("Student.User").
+		Preload("Student.User.Info").
+		Preload("Exam.School").
+		Preload("Exam.Year").
+		Preload("Exam.Type").
+		Preload("Exam.ClassSubject").
+		Preload("Exam.ClassSubject.Class").
+		Preload("Exam.ClassSubject.Subject").
+		Preload("Exam.Sequence").
+		Preload("Exam.Unit").
+		Preload("Exam.Unit.LevelDomain").
+		Preload("Exam.Unit.LevelDomain.Level").
+		Preload("Exam.Unit.LevelDomain.Domain").
+		Preload("Exam.Unit.Semester").
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetUniqueObject(item *model.Result) (*model.Result, error) {
+	result := &model.Result{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.Result{
+		SchoolID:  item.SchoolID,
+		StudentID: item.StudentID,
+		ExamID:    item.ExamID,
+	}).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) AreSameUniqueObjects(item1 *model.Result, item2 *model.Result) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID &&
+			item1.StudentID == item2.StudentID &&
+			item1.ExamID == item2.ExamID) {
+		return true
+	}
+	return false
+}
+
+func (repository *Repository) GetAll(
+	filter *types.Filter, pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.Result, err error) {
+	result = make([]model.Result, 0)
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, "exams.school_id = ?")
+			args = append(args, request.SchoolID)
+		}
+		if request.YearID > 0 {
+			where = helpers.AppendWhereClause(where, "exams.year_id = ?")
+			args = append(args, request.YearID)
+		}
+		if request.ClassSubjectID > 0 {
+			where = helpers.AppendWhereClause(where, "exams.class_subject_id = ?")
+			args = append(args, request.ClassSubjectID)
+		}
+		if request.SequenceID > 0 {
+			where = helpers.AppendWhereClause(where, "exams.sequence_id = ?")
+			args = append(args, request.SequenceID)
+		}
+		if request.UnitID > 0 {
+			where = helpers.AppendWhereClause(where, "exams.unit_id = ?")
+			args = append(args, request.UnitID)
+		}
+		if request.SemesterID > 0 {
+			where = helpers.AppendWhereClause(where, "university_units.semester_id = ?")
+			args = append(args, request.SemesterID)
+		}
+		if request.ExamID > 0 {
+			where = helpers.AppendWhereClause(where, "results.exam_id = ?")
+			args = append(args, request.ExamID)
+		}
+		if request.ExamTypeID > 0 {
+			where = helpers.AppendWhereClause(where, "exams.type_id = ?")
+			args = append(args, request.ExamTypeID)
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, "results.student_id = ?")
+			args = append(args, request.StudentID)
+		}
+	}
+
+	// Handle search filter securely
+	if filter != nil && len(filter.Search) > 0 {
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(results.id AS TEXT) = ? OR
+			CAST(results.value AS TEXT) = ? OR
+			exams.status ILIKE ? OR
+			exams.description ILIKE ? OR
+			exams.location_type ILIKE ? OR
+			students.uid ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			years.name ILIKE ? OR
+			highschool_classes.name ILIKE ? OR
+			highschool_classes.description ILIKE ? OR
+			highschool_subjects.name ILIKE ? OR
+			highschool_subjects.description ILIKE ? OR
+			highschool_sequences.name ILIKE ? OR
+			highschool_sequences.description ILIKE ? OR
+			university_units.name ILIKE ? OR
+			university_units.description ILIKE ? OR
+			exam_types.name ILIKE ? OR
+			exam_types.description ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, search, like, like, like, like, like, like, like, like, like, like, like, like, like, like, like, like, like)
+	}
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
+		Preload(clause.Associations).
+		Preload("Student.User").
+		Preload("Student.User.Info").
+		Preload("Exam.School").
+		Preload("Exam.Year").
+		Preload("Exam.Type").
+		Preload("Exam.ClassSubject").
+		Preload("Exam.ClassSubject.Class").
+		Preload("Exam.ClassSubject.Subject").
+		Preload("Exam.Sequence").
+		Preload("Exam.Unit").
+		Preload("Exam.Unit.LevelDomain").
+		Preload("Exam.Unit.LevelDomain.Level").
+		Preload("Exam.Unit.LevelDomain.Domain").
 		Preload("Exam.Unit.Semester").
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT results.* "+
-					"FROM results "+
-					"LEFT JOIN students ON results.student_id = students.id "+
-					"LEFT JOIN exams ON results.exam_id = exams.id ",
+				`SELECT results.*
+				FROM results
+				LEFT JOIN schools ON results.school_id = schools.id
+				LEFT JOIN exams ON results.exam_id = exams.id
+				LEFT JOIN students ON results.student_id = students.id
+				LEFT JOIN highschool_class_subjects ON exams.class_subject_id = highschool_class_subjects.id
+				LEFT JOIN highschool_sequences ON exams.sequence_id = highschool_sequences.id
+				LEFT JOIN university_units ON exams.unit_id = university_units.id
+				LEFT JOIN years ON exams.year_id = years.id
+				LEFT JOIN exam_types ON exams.type_id = exam_types.id
+				LEFT JOIN highschool_classes ON highschool_class_subjects.class_id = highschool_classes.id
+				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }

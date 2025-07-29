@@ -34,11 +34,13 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
 					},
@@ -74,11 +76,13 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionUpdate, // Operation
 					},
@@ -115,11 +119,13 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -143,23 +149,25 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete schedule generic with id
+	// Delete multiple schedule
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-schedule-generic",
-			Summary:     "Delete schedule generic",
-			Description: "Delete existing schedule generic with matching id and return affected rows in database.",
+			OperationID: "delete-schedule-multiple",
+			Summary:     "Delete multiple schedule",
+			Description: "Delete multiple schedule by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/generic/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -172,57 +180,14 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.ScheduleID
+				Body types.DeleteMultipleRequest
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteGeneric(&ctx, input)
+			result, errCode, err := controller.DeleteMultiple(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
-		},
-	)
-
-	// Get schedule generic by id
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "get-schedule-generic-id",
-			Summary:     "Get schedule generic by id",
-			Description: "Return one schedule generic with matching id",
-			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/generic/{id}", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecuritySchemeBearerToken: { // Authentication
-						fmt.Sprintf("%s,%s,%s,%s,%s",
-							constants.FeatureAdmin,
-							constants.FeatureDirector,
-							constants.FeatureTeacher,
-							constants.FeatureStudent,
-							constants.FeatureParent,
-						), // Features scope
-						tableName,                // Table name
-						constants.PermissionRead, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				data.ScheduleID
-			},
-		) (*struct{ Body data.ScheduleResponse }, error) {
-			result, errCode, err := controller.GetGeneric(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct{ Body data.ScheduleResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -238,14 +203,16 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -281,14 +248,16 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -313,16 +282,6 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			// Generate items
-			tempResult := make([]data.ScheduleResponse, 10)
-			for i := range result.Data {
-				tempModel := data.ScheduleResponse{}
-				tempModel.ID = int64(i)
-
-				tempResult[i] = tempModel
-			}
-			result.Data = tempResult
-
 			return &struct {
 				Body data.ScheduleResponseList
 			}{Body: *result}, nil
@@ -337,18 +296,20 @@ func RegisterEndpoints(
 			Summary:     "Get all schedule weekly view",
 			Description: "Get all schedule with weekly view support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/weekly-view", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/weeklyview", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -372,24 +333,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			// Generate items
-			tempResults := make([]data.ScheduleWeeklyViewResponse, 10)
-			for i := range tempResults {
-				tmpModel := data.ScheduleWeeklyViewResponse{
-					StartTime: fmt.Sprintf("%02d:00", i),
-					EndTime:   fmt.Sprintf("%02d:00", i+1),
-				}
-				tmpModel.Monday = make([]data.ScheduleResponse, 1)
-				tmpModel.Tuesday = make([]data.ScheduleResponse, 1)
-				tmpModel.Wednesday = make([]data.ScheduleResponse, 1)
-				tmpModel.Thursday = make([]data.ScheduleResponse, 1)
-				tmpModel.Friday = make([]data.ScheduleResponse, 1)
-				tmpModel.Saturday = make([]data.ScheduleResponse, 1)
-				tmpModel.Sunday = make([]data.ScheduleResponse, 1)
-				tempResults[i] = tmpModel
-			}
-			result.Data = tempResults
 
 			return &struct {
 				Body data.ScheduleWeeklyViewResponseList

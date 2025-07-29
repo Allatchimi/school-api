@@ -19,7 +19,10 @@ func Load() (err error) {
 	var permissionRepo = permission.NewRepository(config.DB)
 
 	// Add role admin
-	roleAdmin, _ := roleRepo.GetByName(config.Env.FixtureRoleAdmin)
+	roleAdmin, err := roleRepo.GetByName(config.Env.FixtureRoleAdmin)
+	if err != nil {
+		return
+	}
 	if !(roleAdmin != nil && roleAdmin.Name == config.Env.FixtureRoleAdmin) {
 		roleAdmin, _ = roleRepo.Create(&roleModel.Role{
 			Name:        config.Env.FixtureRoleAdmin,
@@ -28,7 +31,10 @@ func Load() (err error) {
 		})
 	}
 	// Add role default
-	roleDefault, _ := roleRepo.GetByName(config.Env.FixtureRoleDefault)
+	roleDefault, err := roleRepo.GetByName(config.Env.FixtureRoleDefault)
+	if err != nil {
+		return
+	}
 	if !(roleDefault != nil && roleDefault.Name == config.Env.FixtureRoleDefault) {
 		_, _ = roleRepo.Create(&roleModel.Role{
 			Name:        config.Env.FixtureRoleDefault,
@@ -37,7 +43,10 @@ func Load() (err error) {
 		})
 	}
 	// Add role director
-	roleDirector, _ := roleRepo.GetByName(config.Env.FixtureRoleDirector)
+	roleDirector, err := roleRepo.GetByName(config.Env.FixtureRoleDirector)
+	if err != nil {
+		return
+	}
 	if !(roleDirector != nil && roleDirector.Name == config.Env.FixtureRoleDirector) {
 		_, _ = roleRepo.Create(&roleModel.Role{
 			Name:        config.Env.FixtureRoleDirector,
@@ -46,7 +55,10 @@ func Load() (err error) {
 		})
 	}
 	// Add role teacher
-	roleTeacher, _ := roleRepo.GetByName(config.Env.FixtureRoleTeacher)
+	roleTeacher, err := roleRepo.GetByName(config.Env.FixtureRoleTeacher)
+	if err != nil {
+		return
+	}
 	if !(roleTeacher != nil && roleTeacher.Name == config.Env.FixtureRoleTeacher) {
 		_, _ = roleRepo.Create(&roleModel.Role{
 			Name:        config.Env.FixtureRoleTeacher,
@@ -55,16 +67,25 @@ func Load() (err error) {
 		})
 	}
 	// Add role student
-	roleStudent, _ := roleRepo.GetByName(config.Env.FixtureRoleStudent)
+	roleStudent, err := roleRepo.GetByName(config.Env.FixtureRoleStudent)
+	if err != nil {
+		return
+	}
 	if !(roleStudent != nil && roleStudent.Name == config.Env.FixtureRoleStudent) {
-		_, _ = roleRepo.Create(&roleModel.Role{
+		_, err = roleRepo.Create(&roleModel.Role{
 			Name:        config.Env.FixtureRoleStudent,
 			Feature:     constants.FeatureStudent,
 			Description: "Student role",
 		})
+		if err != nil {
+			return
+		}
 	}
 	// Add role parent
-	roleParent, _ := roleRepo.GetByName(config.Env.FixtureRoleParent)
+	roleParent, err := roleRepo.GetByName(config.Env.FixtureRoleParent)
+	if err != nil {
+		return
+	}
 	if !(roleParent != nil && roleParent.Name == config.Env.FixtureRoleParent) {
 		_, _ = roleRepo.Create(&roleModel.Role{
 			Name:        config.Env.FixtureRoleParent,
@@ -74,7 +95,10 @@ func Load() (err error) {
 	}
 
 	// Add user admin
-	userAdmin, _ := userRepo.GetByEmail(config.Env.FixtureUserAdminEmail)
+	userAdmin, err := userRepo.GetByEmailSchoolID(config.Env.FixtureUserAdminEmail, 0)
+	if err != nil {
+		return
+	}
 	if !(userAdmin != nil && userAdmin.Email == config.Env.FixtureUserAdminEmail) {
 		userInfoAdmin, _ := userRepo.CreateUserInfo(&userModel.UserInfo{
 			Username: "Admin",
@@ -87,13 +111,15 @@ func Load() (err error) {
 			Email:    config.Env.FixtureUserAdminEmail,
 			Password: config.Env.FixtureUserAdminPassword,
 
+			Status: constants.USER_STATUS_ENABLED,
+
 			LoginMethod: constants.AuthLoginMethodDefault,
 			IsActivated: true,
 			ActivatedAt: &tmpActivatedAt,
 
-			RoleID:       roleAdmin.ID,
-			UserInfoID:   userInfoAdmin.ID,
-			UserConfigID: userConfigAdmin.ID,
+			RoleID:   roleAdmin.ID,
+			InfoID:   userInfoAdmin.ID,
+			ConfigID: userConfigAdmin.ID,
 		})
 	}
 
@@ -102,9 +128,12 @@ func Load() (err error) {
 	}
 
 	// Add permissions for admin
-	foundPermission, _ := permissionRepo.GetByRoleIDTableName(roleAdmin.ID, "*")
+	foundPermission, err := permissionRepo.GetByRoleIDTableName(roleAdmin.ID, "*")
+	if err != nil {
+		return
+	}
 	if foundPermission == nil || foundPermission.RoleID != roleAdmin.ID {
-		_, _ = permissionRepo.Create(&permissionModel.Permission{
+		_, err = permissionRepo.Create(&permissionModel.Permission{
 			RoleID:    roleAdmin.ID,
 			TableName: "*",
 			Create:    true,
@@ -112,7 +141,6 @@ func Load() (err error) {
 			Update:    true,
 			Delete:    true,
 		})
-		return
 	}
 
 	return

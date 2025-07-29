@@ -45,8 +45,8 @@ func ToQuizAnswerResponseList(itemList []QuizAnswer) []data.QuizAnswerResponse {
 		if !exists {
 			// Create new answer
 			qar = &data.QuizAnswerResponse{
-				Quiz:    qa.QuizQuestion.Quiz.ToResponse(),
-				Student: qa.Student.ToStudentPublicResponse(),
+				QuizID:  qa.QuizQuestion.QuizID,
+				Student: qa.Student.ToPublicResponse(),
 				Answers: []data.QuizAnswersResponse{},
 			}
 			studentResponsesMap[studentID] = qar
@@ -85,7 +85,7 @@ func ToQuizAnswerResultResponseList(itemList []QuizAnswer) []data.QuizResultResp
 		if !exists {
 			// Create new student notation
 			sr = &data.QuizResultResponse{
-				Student: student.ToStudentPublicResponse(),
+				Student: student.ToPublicResponse(),
 				Result:  0,
 			}
 			resultsMap[student.ID] = sr
@@ -111,4 +111,12 @@ func ToQuizAnswerResultResponseList(itemList []QuizAnswer) []data.QuizResultResp
 	})
 
 	return result
+}
+
+func ToQuizQuestionAnswerIDList(itemList []QuizAnswer) []int64 {
+	resp := make([]int64, len(itemList))
+	for index, item := range itemList {
+		resp[index] = item.ID
+	}
+	return resp
 }

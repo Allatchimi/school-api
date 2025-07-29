@@ -20,14 +20,13 @@ type UniversityUnit struct {
 	SemesterID int64                             `gorm:"default:null"`
 	Semester   *modelSemester.UniversitySemester `gorm:"default:null;foreignKey:SemesterID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Name         string `gorm:"default:null"`
-	Description  string `gorm:"default:null"`
-	Credit       int    `gorm:"default:1"`
-	Program      string `gorm:"default null"`
-	Requirements string `gorm:"default null"`
-
-	IsValid     bool       `gorm:"default:true"`
-	InvalidDate *time.Time `gorm:"default:null"`
+	Name         string     `gorm:"default:null"`
+	Description  string     `gorm:"default:null"`
+	Credit       int        `gorm:"default:null"`
+	Program      string     `gorm:"default null"`
+	Requirements string     `gorm:"default null"`
+	IsValid      bool       `gorm:"default:true"`
+	InvalidDate  *time.Time `gorm:"default:null"`
 }
 
 func (item *UniversityUnit) ToResponse() *data.UnitResponse {
@@ -35,6 +34,14 @@ func (item *UniversityUnit) ToResponse() *data.UnitResponse {
 		return nil
 	}
 	resp := &data.UnitResponse{}
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
+
+	resp.School = item.School.ToPublicResponse()
+	resp.LevelDomain = item.LevelDomain.ToResponse()
+	resp.Semester = item.Semester.ToResponse()
+
 	resp.Name = item.Name
 	resp.Description = item.Description
 	resp.Credit = item.Credit
@@ -42,14 +49,6 @@ func (item *UniversityUnit) ToResponse() *data.UnitResponse {
 	resp.Requirements = item.Requirements
 	resp.IsValid = item.IsValid
 	resp.InvalidDate = item.InvalidDate
-
-	resp.School = item.School.ToPublicResponse()
-	resp.LevelDomain = item.LevelDomain.ToLevelDomainResponse()
-	resp.Semester = item.Semester.ToResponse()
-
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

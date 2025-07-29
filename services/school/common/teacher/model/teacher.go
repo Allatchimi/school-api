@@ -18,41 +18,42 @@ type Teacher struct {
 	UID string `gorm:"default:null"`
 }
 
-func (item *Teacher) ToTeacherResponse() *data.TeacherResponse {
+func (item *Teacher) ToResponse() *data.TeacherResponse {
 	if item == nil {
 		return nil
 	}
 	resp := &data.TeacherResponse{}
-	resp.UID = item.UID
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.School = item.School.ToPublicResponse()
 	resp.User = item.User.ToResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.UID = item.UID
 	return resp
 }
 
-func (item *Teacher) ToTeacherPublicResponse() *data.TeacherPublicResponse {
+func (item *Teacher) ToPublicResponse() *data.TeacherPublicResponse {
 	if item == nil {
 		return nil
 	}
 	resp := &data.TeacherPublicResponse{}
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.School = item.School.ToPublicResponse()
 	resp.User = item.User.ToPublicResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.UID = item.UID
 	return resp
 }
 
 func ToTeacherResponseList(itemList []Teacher) []data.TeacherResponse {
 	resp := make([]data.TeacherResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToTeacherResponse()
+		resp[index] = *item.ToResponse()
 	}
 	return resp
 }

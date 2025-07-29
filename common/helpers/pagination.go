@@ -38,7 +38,16 @@ func PaginationScope(db *gorm.DB, selection string, where string, pagination *ty
 			pagination.Limit,
 			pagination.Offset,
 		)
+	} else if pagination == nil && filter != nil {
+		if pagination != nil && filter != nil {
+			paginationFilter = fmt.Sprintf(
+				"ORDER BY %s %s",
+				filter.OrderBy,
+				filter.Sort,
+			)
+		}
 	}
+
 	return func(db *gorm.DB) *gorm.DB {
 		return db.Raw(fmt.Sprintf("%s %s %s;",
 			selection,
@@ -73,6 +82,14 @@ func PaginationScopeV2(
 			pagination.Limit,
 			pagination.Offset,
 		)
+	} else if pagination == nil && filter != nil {
+		if pagination != nil && filter != nil {
+			paginationFilter = fmt.Sprintf(
+				"ORDER BY %s %s",
+				filter.OrderBy,
+				filter.Sort,
+			)
+		}
 	}
 
 	// Return scoped function to apply raw SQL with parameters

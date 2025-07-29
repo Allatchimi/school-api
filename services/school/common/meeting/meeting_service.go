@@ -28,12 +28,26 @@ func NewService(repository *Repository, userService *user.Service, teacherServic
 	}
 }
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.MeetingRoomRequest) (result *model.MeetingRoom, errCode int, err error) {
+func (service *Service) Create(
+	ctxData *types.ContextData,
+	request *data.MeetingRoomRequest,
+) (result *model.MeetingRoom, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
 	// Format request
 	item := &model.MeetingRoom{
-		SchoolID:       request.SchoolID,
-		ClassSubjectID: request.ClassSubjectID,
-		UnitID:         request.UnitID,
+		SchoolID:       newRequest.SchoolID,
+		ClassSubjectID: newRequest.ClassSubjectID,
+		UnitID:         newRequest.UnitID,
+	}
+	if newRequest.ClassSubjectID < 1 && newRequest.UnitID < 1 {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessageV2("class subject id or unit id(you should provide one of these fields)")
+		return
 	}
 
 	// Check unique
@@ -49,28 +63,58 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Meet
 		return
 	}
 
+	// Create
+	createdItem, err := service.Repository.Create(item)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+
 	// Call external meeting API to create a new room
-	apiResp, err := service.Repository.ApiCreateRoom()
+	apiResp, err := service.Repository.CreateApiRoom()
 	if err != nil || apiResp == nil || apiResp.RoomInfo == nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+
 	// Update the room id
-	item.ApiRoomID = apiResp.RoomInfo.RoomID
-
-	// Insert
-	result, err = service.Repository.Create(item)
+	createdItem.ApiRoomID = apiResp.RoomInfo.RoomID
+	result, err = service.Repository.UpdateByID(createdItem.ID, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(id)
+func (service *Service) Delete(
+	ctxData *types.ContextData,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
+	// Check if the item exists
+	var foundItem *model.MeetingRoom
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetByID(id)
+	}
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundItem == nil || foundItem.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Delete
+	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -84,8 +128,11 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteMultiple(list)
+func (service *Service) DeleteMultiple(
+	ctxData *types.ContextData,
+	list []int64,
+) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteMultipleByID(list, ctxData.Jwt.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -99,8 +146,15 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.MeetingRoom, errCode int, err error) {
-	result, err = service.Repository.GetByID(id)
+func (service *Service) Get(
+	ctxData *types.ContextData,
+	id int64,
+) (result *model.MeetingRoom, errCode int, err error) {
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		result, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		result, err = service.Repository.GetByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -114,8 +168,20 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.MeetingRoom, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, request)
+func (service *Service) GetAll(
+	ctxData *types.ContextData,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.MeetingRoom, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Get
+	result, err = service.Repository.GetAll(filter, pagination, &newRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -123,9 +189,12 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 	return
 }
 
-func (service *Service) Join(inputJwtToken *types.JwtToken, id int64) (result string, errCode int, err error) {
+func (service *Service) Join(
+	ctxData *types.ContextData,
+	id int64,
+) (result string, errCode int, err error) {
 	// Check if the meeting room exists
-	meetingRoom, errCode, err := service.Get(inputJwtToken, id)
+	meetingRoom, errCode, err := service.Get(ctxData, id)
 	if err != nil || meetingRoom == nil || meetingRoom.ID <= 0 || meetingRoom.ID != id {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
@@ -133,7 +202,7 @@ func (service *Service) Join(inputJwtToken *types.JwtToken, id int64) (result st
 	}
 
 	// Get the user
-	user, err := service.UserService.Repository.GetByID(inputJwtToken.UserID)
+	user, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
 	if err != nil || user == nil || user.ID <= 0 {
 		errCode = http.StatusForbidden
 		err = constants.Http403InvalidPermissionErrorMessage()
@@ -142,7 +211,7 @@ func (service *Service) Join(inputJwtToken *types.JwtToken, id int64) (result st
 
 	// Get the teacher and check if it's the teacher for this room(room is associated to unit/class subject)
 	var isAdmin bool = false
-	teacher, _ := service.TeacherService.Repository.GetByUserID(inputJwtToken.UserID)
+	teacher, _ := service.TeacherService.Repository.GetByUserID(ctxData.Jwt.UserID)
 	if teacher != nil && teacher.ID > 0 {
 		if meetingRoom.School.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
 			teacherClassSubject, _ := service.TeacherService.Repository.GetTeacherClassSubjectUnitByUserIDClassSubjectID(teacher.ID, meetingRoom.ClassSubjectID)

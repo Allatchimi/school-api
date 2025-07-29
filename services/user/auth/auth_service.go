@@ -32,20 +32,24 @@ func NewAuthService(userService *user.Service, roleService *role.Service) *Servi
 const MODEL_NAME = "user"
 const DEFAULT_ERROR_MESSAGE = "interact with auth service"
 
-func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice) (accessToken string, accessExpires *time.Time, activateAccountToken string, errCode int, err error) {
+func (service *Service) Login(
+	schoolID int64,
+	request *data.LoginRequest,
+	device *data.LoginDevice,
+) (accessToken string, accessExpires *time.Time, activateAccountToken string, errCode int, err error) {
 	// Find user
 	var userFound *model.User
 	var errMsg string
-	if utils.IsEmailValid(input.Email) {
-		userFound, err = service.UserService.Repository.GetByEmailSchoolID(input.Email, input.SchoolID)
+	if utils.IsEmailValid(request.Email) {
+		userFound, err = service.UserService.Repository.GetByEmailSchoolID(request.Email, schoolID)
 		errMsg = "Invalid email or password! Please enter valid information."
 	}
-	if err != nil || userFound == nil || userFound.Email != input.Email {
+	if err != nil || userFound == nil || userFound.Email != request.Email {
 		errCode = http.StatusNotFound
 		err = fmt.Errorf("%s", errMsg)
 		return
 	}
-	isPasswordMatches, err := securityUtil.CompareArgon2id(input.Password, userFound.Password)
+	isPasswordMatches, err := securityUtil.CompareArgon2id(request.Password, userFound.Password)
 	if err != nil || !isPasswordMatches {
 		errCode = http.StatusNotFound
 		err = fmt.Errorf("%s", errMsg)
@@ -65,12 +69,14 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 		accessJwtToken, accessToken, err = securityUtil.EncodeJWTToken(
 			&types.JwtToken{
 				UserID:   userFound.ID,
+				SchoolID: userFound.SchoolID,
+
 				Platform: device.Platform,
 				Device:   device.DeviceName,
 				App:      device.App,
 			},
 			constants.JwtIssuerSession,
-			securityUtil.NewExpiresDateLogin(input.StayConnected),
+			securityUtil.NewExpiresDateLogin(request.StayConnected),
 			config.Keys.JwtPrivateKey,
 			config.AppendToRedisStringList,
 		)
@@ -99,6 +105,8 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	activateAccountJwtToken, activateAccountToken, err = securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
+			SchoolID: userFound.SchoolID,
+
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -118,12 +126,15 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	err = fmt.Errorf("%s", "Account found but not activated! Please activate your account to start using your services.")
 
 	// Send code to email
-	if utils.IsEmailValid(input.Email) {
+	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+		return
+	}
+	if utils.IsEmailValid(request.Email) {
 		go func() {
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailDataCheckCode{
 				EmailData: smtpHelper.EmailData{
-					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.DomainName),
+					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
 					Logo:         userFound.School.Logo,
 					Title:        constants.MailVerifyEmailCheckCode.Title,
 					Message:      constants.MailVerifyEmailCheckCode.Message,
@@ -150,18 +161,28 @@ func (service *Service) Login(input *data.LoginRequest, device *data.LoginDevice
 	return
 }
 
-func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, device *data.LoginDevice) (accessToken string, accessExpires *time.Time, errCode int, err error) {
+func (service *Service) LoginWithProvider(
+	schoolID int64,
+	request *data.LoginWithProviderRequest,
+	device *data.LoginDevice,
+) (accessToken string, accessExpires *time.Time, errCode int, err error) {
 	// Validate provider token and update user
+	isProviderValid := utils.IsAuthProviderValid(request.Provider)
+	if !isProviderValid {
+		errCode = http.StatusBadRequest
+		err = fmt.Errorf("%s", "Invalid or empty provider! Please enter valid information.")
+		return
+	}
 	var newUser = &model.User{
-		SchoolID: input.SchoolID,
-		Provider: input.Provider,
+		SchoolID: schoolID,
+		Provider: request.Provider,
 		Info:     &model.UserInfo{},
 		Config:   &model.UserConfig{},
 	}
 	var expires int64 = 0
-	switch input.Provider {
+	switch request.Provider {
 	case constants.AuthProviderGoogle:
-		googleUser, errGoogleUser := authHelper.VerifyGoogleIDToken(input.Token)
+		googleUser, errGoogleUser := authHelper.VerifyGoogleIDToken(request.Token)
 		if errGoogleUser != nil || googleUser == nil || len(googleUser.ID) <= 0 {
 			errCode = http.StatusUnprocessableEntity
 			err = fmt.Errorf("%s", "Invalid provider or token! Please enter valid information.")
@@ -175,7 +196,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 		expires = googleUser.Expires
 		newUser.FromGoogleUser(googleUser)
 	case constants.AuthProviderFacebook:
-		facebookUser, errFacebookUser := authHelper.VerifyFacebookToken(input.Token)
+		facebookUser, errFacebookUser := authHelper.VerifyFacebookToken(request.Token)
 		if errFacebookUser != nil || facebookUser == nil || len(facebookUser.ID) <= 0 {
 			errCode = http.StatusUnprocessableEntity
 			err = fmt.Errorf("%s", "Invalid provider or token! Please enter valid information.")
@@ -195,7 +216,7 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 	}
 
 	// Save user if it's not in database
-	userFound, err := service.UserService.Repository.GetByProviderSchoolID(input.Provider, newUser.ProviderUserID, input.SchoolID)
+	userFound, err := service.UserService.Repository.GetByProviderSchoolID(request.Provider, newUser.ProviderUserID, schoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -232,20 +253,28 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 		tmpActivatedAt := time.Now()
 		userFound, err = service.UserService.Repository.Create(
 			&model.User{
-				SchoolID:       input.SchoolID,
+				SchoolID:       schoolID,
 				Email:          newUser.Email,
 				Status:         constants.USER_STATUS_ENABLED,
-				Provider:       input.Provider,
+				Provider:       request.Provider,
 				ProviderUserID: newUser.ProviderUserID,
 				LoginMethod:    constants.AuthLoginMethodProvider,
 				RoleID:         defaultRole.ID,
 				IsActivated:    true,
 				ActivatedAt:    &tmpActivatedAt,
-				UserInfoID:     userInfo.ID,
-				UserConfigID:   userConfig.ID,
+				InfoID:         userInfo.ID,
+				ConfigID:       userConfig.ID,
 			},
 		)
 		if err != nil {
+			pgState, errPgState := utils.ExtractSQLState(err.Error())
+			if errPgState == nil {
+				if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+					errCode = http.StatusConflict
+					err = constants.Http409ConflictErrorMessage()
+					return
+				}
+			}
 			errCode = http.StatusInternalServerError
 			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
@@ -264,6 +293,8 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 	jwtToken, accessToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
+			SchoolID: userFound.SchoolID,
+
 			Platform: device.Platform,
 			Device:   device.DeviceName,
 			App:      device.App,
@@ -282,12 +313,40 @@ func (service *Service) LoginWithProvider(input *data.LoginWithProviderRequest, 
 	return
 }
 
-func (service *Service) Register(input *data.RegisterRequest) (activateAccountToken string, errCode int, err error) {
+func (service *Service) Register(
+	schoolID int64,
+	request *data.RegisterRequest,
+) (activateAccountToken string, errCode int, err error) {
+	// Check inputs
+	isEmailValid := utils.IsEmailValid(request.Email)
+	isPasswordValid, missingPasswordChars := utils.IsPasswordValid(request.Password)
+	if !isEmailValid && !isPasswordValid {
+		errCode = http.StatusBadRequest
+		err = fmt.Errorf("%s %s",
+			"Invalid email and password! Password missing",
+			missingPasswordChars,
+		)
+		return
+	}
+	if !isEmailValid {
+		errCode = http.StatusBadRequest
+		err = fmt.Errorf("%s", "Invalid email! Please enter valid information.")
+		return
+	}
+	if !isPasswordValid {
+		errCode = http.StatusBadRequest
+		err = fmt.Errorf("%s %s",
+			"Invalid password! Password missing",
+			missingPasswordChars,
+		)
+		return
+	}
+
 	// Check if user exists
 	var userFound *model.User
 	var errMsg string
-	if utils.IsEmailValid(input.Email) {
-		userFound, err = service.UserService.Repository.GetByEmailSchoolID(input.Email, input.SchoolID)
+	if utils.IsEmailValid(request.Email) {
+		userFound, err = service.UserService.Repository.GetByEmailSchoolID(request.Email, schoolID)
 		errMsg = "user email"
 	}
 	if err != nil {
@@ -295,7 +354,7 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if userFound != nil && userFound.Email == input.Email {
+	if userFound != nil && userFound.Email == request.Email {
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage(errMsg)
 		return
@@ -310,13 +369,23 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 		return
 	}
 	// Create new user
-	userFound.Email = input.Email
-	userFound.Password = input.Password
+	userFound = &model.User{}
+	userFound.Email = request.Email
+	userFound.Password = request.Password
 	userFound.LoginMethod = constants.AuthLoginMethodDefault
-	userFound.SchoolID = input.SchoolID
+	userFound.SchoolID = schoolID
 	userFound.RoleID = defaultRole.ID
+	userFound.Status = constants.USER_STATUS_ENABLED
 	createdUser, err := service.UserService.Repository.Create(userFound)
 	if err != nil {
+		pgState, errPgState := utils.ExtractSQLState(err.Error())
+		if errPgState == nil {
+			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+				errCode = http.StatusConflict
+				err = constants.Http409ConflictErrorMessage()
+				return
+			}
+		}
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
@@ -337,6 +406,8 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	activateAccountJwtToken, activateAccountToken, err = securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   createdUser.ID,
+			SchoolID: userFound.SchoolID,
+
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -353,12 +424,15 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	}
 
 	// Send code to email
-	if utils.IsEmailValid(input.Email) {
+	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+		return
+	}
+	if utils.IsEmailValid(request.Email) {
 		go func() {
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailDataCheckCode{
 				EmailData: smtpHelper.EmailData{
-					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.DomainName),
+					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
 					Logo:         userFound.School.Logo,
 					Title:        constants.MailVerifyEmailCheckCode.Title,
 					Message:      constants.MailVerifyEmailCheckCode.Message,
@@ -385,10 +459,12 @@ func (service *Service) Register(input *data.RegisterRequest) (activateAccountTo
 	return
 }
 
-func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (activatedAt *time.Time, errCode int, err error) {
+func (service *Service) ActivateAccount(
+	request *data.ActivateAccountRequest,
+) (activatedAt *time.Time, errCode int, err error) {
 	// Extract token information and validate the token
 	errMsg := "Invalid or expired token! Please enter valid information."
-	jwtToken, err := securityUtil.DecodeJWTToken(input.Token, config.Keys.JwtPublicKey)
+	jwtToken, err := securityUtil.DecodeJWTToken(request.Token, config.Keys.JwtPublicKey)
 	if err != nil {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", errMsg)
@@ -399,7 +475,7 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 		err = fmt.Errorf("%s", errMsg)
 		return
 	}
-	isTokenValid := securityUtil.ValidateJWTToken(input.Token, jwtToken, config.GetRedisString)
+	isTokenValid := securityUtil.ValidateJWTToken(request.Token, jwtToken, config.GetRedisString)
 	if !isTokenValid {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", errMsg)
@@ -407,7 +483,7 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	}
 
 	// Check if code is valid
-	if jwtToken.Code < 1 || jwtToken.Code != input.Code {
+	if jwtToken.Code < 1 || jwtToken.Code != request.Code {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", "Invalid code! Please enter valid information.")
 		return
@@ -442,12 +518,20 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 
 	// Update account
 	tmpActivatedAt := time.Now()
-	userFound.UserInfoID = newUserInfo.ID
-	userFound.UserConfigID = newUserConfig.ID
+	userFound.InfoID = newUserInfo.ID
+	userFound.ConfigID = newUserConfig.ID
 	userFound.ActivatedAt = &tmpActivatedAt
 	userFound.IsActivated = true
 	updatedUser, err := service.UserService.Repository.UpdateActivationByID(userFound.ID, userFound)
 	if err != nil {
+		pgState, errPgState := utils.ExtractSQLState(err.Error())
+		if errPgState == nil {
+			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+				errCode = http.StatusConflict
+				err = constants.Http409ConflictErrorMessage()
+				return
+			}
+		}
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
@@ -458,11 +542,14 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	_, _ = config.DeleteRedisString(securityUtil.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
 
 	// Send welcome message
+	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+		return
+	}
 	if utils.IsEmailValid(updatedUser.Email) {
 		go func() {
 			fromEmail, fromUsername := updatedUser.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailData{
-				HomePageLink: fmt.Sprintf("https://%s", updatedUser.School.Config.DomainName),
+				HomePageLink: fmt.Sprintf("https://%s", updatedUser.School.Config.WebsiteDomainName),
 				Logo:         updatedUser.School.Logo,
 				Title:        constants.MailWelcomeVerifiedEmail.Title,
 				Message:      constants.MailWelcomeVerifiedEmail.Message,
@@ -486,13 +573,16 @@ func (service *Service) ActivateAccount(input *data.ActivateAccountRequest) (act
 	return
 }
 
-func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest) (token string, errCode int, err error) {
-	// Check input
+func (service *Service) ForgotPasswordInit(
+	ctxData *types.ContextData,
+	request *data.ForgotPasswordInitRequest,
+) (token string, errCode int, err error) {
+	// Check request
 	var errMsg string
 	var isInputValid bool
-	if utils.IsEmailValid(input.Email) {
+	if utils.IsEmailValid(request.Email) {
 		errMsg = "email"
-		isInputValid = utils.IsEmailValid(input.Email)
+		isInputValid = utils.IsEmailValid(request.Email)
 	}
 	if !isInputValid {
 		errCode = http.StatusBadRequest
@@ -503,9 +593,9 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 
 	// Check if user exists
 	var userFound *model.User
-	if utils.IsEmailValid(input.Email) {
+	if utils.IsEmailValid(request.Email) {
 		errMsg = "User with this email"
-		userFound, err = service.UserService.Repository.GetByEmail(input.Email)
+		userFound, err = service.UserService.Repository.GetByEmailSchoolID(request.Email, ctxData.Jwt.SchoolID)
 	}
 	if err != nil || userFound.ID <= 0 {
 		errCode = http.StatusNotFound
@@ -524,6 +614,8 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 	newJwtToken, newToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
+			SchoolID: userFound.SchoolID,
+
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -542,12 +634,15 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 	token = newToken
 
 	// Send code to email
-	if utils.IsEmailValid(input.Email) {
+	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+		return
+	}
+	if utils.IsEmailValid(request.Email) {
 		go func() {
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailDataCheckCode{
 				EmailData: smtpHelper.EmailData{
-					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.DomainName),
+					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
 					Logo:         userFound.School.Logo,
 					Title:        constants.MailForgotPasswordCheckCode.Title,
 					Message:      constants.MailForgotPasswordCheckCode.Message,
@@ -574,19 +669,21 @@ func (service *Service) ForgotPasswordInit(input *data.ForgotPasswordInitRequest
 	return
 }
 
-func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest) (token string, errCode int, err error) {
-	// Check input
-	if len(input.Token) < 1 && input.Code < 1 {
+func (service *Service) ForgotPasswordCode(
+	request *data.ForgotPasswordCodeRequest,
+) (token string, errCode int, err error) {
+	// Check request
+	if len(request.Token) < 1 && request.Code < 1 {
 		errCode = http.StatusBadRequest
 		err = fmt.Errorf("%s", "Invalid token and code! Please enter valid information.")
 		return
 	}
-	if len(input.Token) < 1 {
+	if len(request.Token) < 1 {
 		errCode = http.StatusBadRequest
 		err = fmt.Errorf("%s", "Invalid token! Please enter valid information.")
 		return
 	}
-	if input.Code < 10000 {
+	if request.Code < 10000 {
 		errCode = http.StatusBadRequest
 		err = fmt.Errorf("%s", "Invalid code! Please enter valid information.")
 		return
@@ -594,7 +691,7 @@ func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest
 
 	// Extract token information and validate the token
 	errMsg := "Invalid or expired token! Please enter valid information."
-	jwtToken, err := securityUtil.DecodeJWTToken(input.Token, config.Keys.JwtPublicKey)
+	jwtToken, err := securityUtil.DecodeJWTToken(request.Token, config.Keys.JwtPublicKey)
 	if err != nil {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", errMsg)
@@ -605,7 +702,7 @@ func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest
 		err = fmt.Errorf("%s", errMsg)
 		return
 	}
-	isTokenValid := securityUtil.ValidateJWTToken(input.Token, jwtToken, config.GetRedisString)
+	isTokenValid := securityUtil.ValidateJWTToken(request.Token, jwtToken, config.GetRedisString)
 	if !isTokenValid {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", errMsg)
@@ -613,7 +710,7 @@ func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest
 	}
 
 	// Check if the code is valid
-	if jwtToken.Code < 1 || jwtToken.Code != input.Code {
+	if jwtToken.Code < 1 || jwtToken.Code != request.Code {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", "Invalid code! Please enter valid information.")
 		return
@@ -634,6 +731,8 @@ func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest
 	newJwtToken, newToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
 			UserID:   userFound.ID,
+			SchoolID: userFound.SchoolID,
+
 			Platform: "*",
 			Device:   "*",
 			App:      "*",
@@ -651,9 +750,11 @@ func (service *Service) ForgotPasswordCode(input *data.ForgotPasswordCodeRequest
 	return
 }
 
-func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewPasswordRequest) (errCode int, err error) {
-	// Check input
-	if len(input.Token) < 1 {
+func (service *Service) ForgotPasswordNewPassword(
+	request *data.ForgotPasswordNewPasswordRequest,
+) (errCode int, err error) {
+	// Check request
+	if len(request.Token) < 1 {
 		errCode = http.StatusBadRequest
 		err = fmt.Errorf("%s", "Invalid token! Please enter valid information.")
 		return
@@ -661,7 +762,7 @@ func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewP
 
 	// Extract token information and validate the token
 	errMsg := "Invalid or expired token! Please enter valid information."
-	jwtToken, err := securityUtil.DecodeJWTToken(input.Token, config.Keys.JwtPublicKey)
+	jwtToken, err := securityUtil.DecodeJWTToken(request.Token, config.Keys.JwtPublicKey)
 	if err != nil {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", errMsg)
@@ -672,7 +773,7 @@ func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewP
 		err = fmt.Errorf("%s", errMsg)
 		return
 	}
-	isTokenValid := securityUtil.ValidateJWTToken(input.Token, jwtToken, config.GetRedisString)
+	isTokenValid := securityUtil.ValidateJWTToken(request.Token, jwtToken, config.GetRedisString)
 	if !isTokenValid {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", errMsg)
@@ -688,8 +789,16 @@ func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewP
 	}
 
 	// Update user password
-	userUpdated, err := service.UserService.Repository.UpdatePasswordByID(jwtToken.UserID, input.NewPassword)
+	userUpdated, err := service.UserService.Repository.UpdatePasswordByID(jwtToken.UserID, request.NewPassword)
 	if err != nil || userUpdated == nil {
+		pgState, errPgState := utils.ExtractSQLState(err.Error())
+		if errPgState == nil {
+			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+				errCode = http.StatusConflict
+				err = constants.Http409ConflictErrorMessage()
+				return
+			}
+		}
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
@@ -700,9 +809,12 @@ func (service *Service) ForgotPasswordNewPassword(input *data.ForgotPasswordNewP
 	return
 }
 
-func (service *Service) Logout(jwtToken *types.JwtToken, bearerToken string) (errCode int, err error) {
+func (service *Service) Logout(
+	ctxData *types.ContextData,
+	bearerToken string,
+) (errCode int, err error) {
 	// Invalidate the token
-	sessions, err := config.GetRedisStringList(securityUtil.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
+	sessions, err := config.GetRedisStringList(securityUtil.GetJWTCachedKey(ctxData.Jwt.UserID, ctxData.Jwt.Issuer))
 	if err != nil {
 		errCode = http.StatusUnauthorized
 		err = constants.Http401InvalidTokenErrorMessage()
@@ -714,7 +826,7 @@ func (service *Service) Logout(jwtToken *types.JwtToken, bearerToken string) (er
 		err = constants.Http401InvalidTokenErrorMessage()
 		return
 	}
-	err = config.RemoveFromRedisStringList(fmt.Sprintf("%d", jwtToken.UserID), int64(tokenIndex))
+	err = config.RemoveFromRedisStringList(fmt.Sprintf("%d", ctxData.Jwt.UserID), int64(tokenIndex))
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

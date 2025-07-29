@@ -26,12 +26,22 @@ func NewService(repository *Repository, schoolService *school.Service) *Service 
 const MODEL_NAME = "level"
 const DEFAULT_ERROR_MESSAGE = "interact with level model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.LevelRequest) (result *model.UniversityLevel, errCode int, err error) {
+func (service *Service) Create(
+	ctxData *types.ContextData,
+	request *data.LevelRequest,
+) (result *model.UniversityLevel, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
 	// Format request
 	item := &model.UniversityLevel{
-		SchoolID:    request.SchoolID,
-		Name:        request.Name,
-		Description: request.Description,
+		SchoolID: newRequest.SchoolID,
+
+		Name:        newRequest.Name,
+		Description: newRequest.Description,
 	}
 
 	// Check if the school type is university
@@ -69,16 +79,26 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Leve
 	}
 	return
 }
-func (service *Service) CreateLevelDomain(inputJwtToken *types.JwtToken, request *data.LevelDomainRequest) (result *model.UniversityLevelDomain, errCode int, err error) {
+func (service *Service) CreateLevelDomain(
+	ctxData *types.ContextData,
+	request *data.LevelDomainRequest,
+) (result *model.UniversityLevelDomain, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
 	// Format request
 	item := &model.UniversityLevelDomain{
-		SchoolID: request.SchoolID,
-		LevelID:  request.LevelID,
-		DomainID: request.DomainID,
+		SchoolID: newRequest.SchoolID,
+		LevelID:  newRequest.LevelID,
+		DomainID: newRequest.DomainID,
 
-		Program:      request.Program,
-		Requirements: request.Requirements,
-		IsValid:      request.IsValid,
+		Fees:         newRequest.Fees,
+		Program:      newRequest.Program,
+		Requirements: newRequest.Requirements,
+		IsValid:      newRequest.IsValid,
 	}
 
 	// Check unique
@@ -111,39 +131,43 @@ func (service *Service) CreateLevelDomain(inputJwtToken *types.JwtToken, request
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.LevelRequest) (result *model.UniversityLevel, errCode int, err error) {
-	// Format request
-	item := &model.UniversityLevel{
-		SchoolID:    request.SchoolID,
-		Name:        request.Name,
-		Description: request.Description,
+func (service *Service) Update(
+	ctxData *types.ContextData,
+	id int64,
+	request *data.LevelRequest,
+) (result *model.UniversityLevel, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
 	}
 
-	// Check if the school type is university
-	foundSchool, err := service.SchoolService.Repository.GetByID(item.SchoolID)
+	// Check if the item exists
+	var foundItem *model.UniversityLevel
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetByIDSchoolID(id, newRequest.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundSchool.Type != constants.SCHOOL_TYPE_UNIVERSITY {
-		errCode = http.StatusBadRequest
-		err = constants.Http400BadRequestErrorMessage()
-		return
-	}
-
-	// Check if exists
-	foundItem, err := service.Repository.GetByID(id)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundItem == nil || foundItem.ID != id {
+	if foundItem == nil || foundItem.ID < 1 {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
+
+	// Format request
+	item := &model.UniversityLevel{
+		SchoolID: newRequest.SchoolID,
+
+		Name:        newRequest.Name,
+		Description: newRequest.Description,
+	}
+
 	// Check if the school type is university
 	if foundItem.School.Type != constants.SCHOOL_TYPE_UNIVERSITY {
 		errCode = http.StatusBadRequest
@@ -164,8 +188,8 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 		return
 	}
 
-	// Update level
-	result, err = service.Repository.Update(id, item)
+	// Update
+	result, err = service.Repository.UpdateByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -174,43 +198,47 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	return
 }
 
-func (service *Service) UpdateLevelDomain(inputJwtToken *types.JwtToken, id int64, request *data.LevelDomainRequest) (result *model.UniversityLevelDomain, errCode int, err error) {
-	// Format request
-	item := &model.UniversityLevelDomain{
-		SchoolID: request.SchoolID,
-		LevelID:  request.LevelID,
-		DomainID: request.DomainID,
-
-		Program:      request.Program,
-		Requirements: request.Requirements,
-		IsValid:      request.IsValid,
+func (service *Service) UpdateLevelDomain(
+	ctxData *types.ContextData,
+	id int64,
+	request *data.LevelDomainRequest,
+) (result *model.UniversityLevelDomain, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
 	}
 
-	// Check if the school type is university
-	foundSchool, err := service.SchoolService.Repository.GetByID(item.SchoolID)
+	// Check if the item exists
+	var foundItem *model.UniversityLevelDomain
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetLevelDomainByIDSchoolID(id, newRequest.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetLevelDomainByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundSchool.Type != constants.SCHOOL_TYPE_UNIVERSITY {
-		errCode = http.StatusBadRequest
-		err = constants.Http400BadRequestErrorMessage()
-		return
-	}
-
-	// Check if exists
-	foundItem, err := service.Repository.GetLevelDomainByID(id)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundItem == nil || foundItem.ID != id {
+	if foundItem == nil || foundItem.ID < 1 {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
+
+	// Format request
+	item := &model.UniversityLevelDomain{
+		SchoolID: newRequest.SchoolID,
+		LevelID:  newRequest.LevelID,
+		DomainID: newRequest.DomainID,
+
+		Fees:         newRequest.Fees,
+		Program:      newRequest.Program,
+		Requirements: newRequest.Requirements,
+		IsValid:      newRequest.IsValid,
+	}
+
 	// Check if the school type is university
 	if foundItem.School.Type != constants.SCHOOL_TYPE_UNIVERSITY {
 		errCode = http.StatusBadRequest
@@ -231,8 +259,17 @@ func (service *Service) UpdateLevelDomain(inputJwtToken *types.JwtToken, id int6
 		return
 	}
 
-	// Update level
-	result, err = service.Repository.UpdateLevelDomain(id, item)
+	// Check invalid date
+	if !item.IsValid && foundItem.IsValid {
+		invalidDate := new(time.Time)
+		*invalidDate = time.Now()
+		item.InvalidDate = invalidDate
+	} else if item.IsValid && !foundItem.IsValid {
+		item.InvalidDate = nil
+	}
+
+	// Update
+	result, err = service.Repository.UpdateLevelDomainByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -241,8 +278,30 @@ func (service *Service) UpdateLevelDomain(inputJwtToken *types.JwtToken, id int6
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.Delete(id)
+func (service *Service) Delete(
+	ctxData *types.ContextData,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
+	// Check if the item exists
+	var foundItem *model.UniversityLevel
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetByID(id)
+	}
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundItem == nil || foundItem.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Delete
+	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -256,8 +315,30 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteLevelDomain(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteLevelDomain(id)
+func (service *Service) DeleteLevelDomain(
+	ctxData *types.ContextData,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
+	// Check if the item exists
+	var foundItem *model.UniversityLevelDomain
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetLevelDomainByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetLevelDomainByID(id)
+	}
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundItem == nil || foundItem.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Delete
+	affectedRows, err = service.Repository.DeleteLevelDomainByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -271,8 +352,11 @@ func (service *Service) DeleteLevelDomain(inputJwtToken *types.JwtToken, id int6
 	return
 }
 
-func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteMultiple(list)
+func (service *Service) DeleteMultiple(
+	ctxData *types.ContextData,
+	list []int64,
+) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteMultipleByID(list, ctxData.Jwt.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -286,8 +370,11 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) DeleteMultipleLevelDomain(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteMultipleLevelDomain(list)
+func (service *Service) DeleteMultipleLevelDomain(
+	ctxData *types.ContextData,
+	list []int64,
+) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteMultipleLevelDomainByID(list, ctxData.Jwt.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -301,8 +388,15 @@ func (service *Service) DeleteMultipleLevelDomain(inputJwtToken *types.JwtToken,
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.UniversityLevel, errCode int, err error) {
-	result, err = service.Repository.GetByID(id)
+func (service *Service) Get(
+	ctxData *types.ContextData,
+	id int64,
+) (result *model.UniversityLevel, errCode int, err error) {
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		result, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		result, err = service.Repository.GetByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -316,8 +410,15 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetLevelDomain(inputJwtToken *types.JwtToken, id int64) (result *model.UniversityLevelDomain, errCode int, err error) {
-	result, err = service.Repository.GetLevelDomainByID(id)
+func (service *Service) GetLevelDomain(
+	ctxData *types.ContextData,
+	id int64,
+) (result *model.UniversityLevelDomain, errCode int, err error) {
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		result, err = service.Repository.GetLevelDomainByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		result, err = service.Repository.GetLevelDomainByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -331,8 +432,20 @@ func (service *Service) GetLevelDomain(inputJwtToken *types.JwtToken, id int64) 
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.UniversityLevel, errCode int, err error) {
-	result, err = service.Repository.GetAll(filter, pagination, request)
+func (service *Service) GetAll(
+	ctxData *types.ContextData,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.UniversityLevel, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Get
+	result, err = service.Repository.GetAll(filter, pagination, &newRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -340,8 +453,20 @@ func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filt
 	return
 }
 
-func (service *Service) GetAllLevelDomain(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllLevelDomainRequest) (result []model.UniversityLevelDomain, errCode int, err error) {
-	result, err = service.Repository.GetAllLevelDomain(filter, pagination, request)
+func (service *Service) GetAllLevelDomain(
+	ctxData *types.ContextData,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllLevelDomainRequest,
+) (result []model.UniversityLevelDomain, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Get
+	result, err = service.Repository.GetAllLevelDomain(filter, pagination, &newRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

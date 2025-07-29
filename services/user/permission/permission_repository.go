@@ -32,20 +32,24 @@ func (repository *Repository) UpdateByID(
 	data *model.Permission,
 ) (result *model.Permission, err error) {
 	result = &model.Permission{}
-	tmpErr := repository.Db.Preload(clause.Associations).Model(result).Where("role_id = ?", roleID).Where("table_name = ?", tableName).Updates(
-		map[string]any{
-			"role_id": data.RoleID,
+	fields := map[string]any{
+		"role_id": data.RoleID,
 
-			"table_name": data.TableName,
-			"create":     data.Create,
-			"read":       data.Read,
-			"update":     data.Update,
-			"delete":     data.Delete,
-		},
-	).Error
-
-	err = tmpErr
-	return
+		"table_name": data.TableName,
+		"create":     data.Create,
+		"read":       data.Read,
+		"update":     data.Update,
+		"delete":     data.Delete,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Permission{}).
+		Where("role_id = ?", roleID).
+		Where("table_name = ?", tableName).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (result int64, err error) {
@@ -57,6 +61,9 @@ func (repository *Repository) DeleteByID(id int64) (result int64, err error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	tmpResult := repository.Db.Where(where).Delete(&model.Permission{})
 
@@ -88,37 +95,53 @@ func (repository *Repository) GetAll(
 	request *data.GetAllRequest,
 ) (result []model.Permission, err error) {
 	result = make([]model.Permission, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.RoleID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("permissions.role_id = %d", request.RoleID))
+			where = helpers.AppendWhereClause(where, "permissions.role_id = ?")
+			args = append(args, request.RoleID)
 		}
 		if len(request.TableName) > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("permissions.table_name = %s", request.TableName))
+			where = helpers.AppendWhereClause(where, "permissions.table_name = ?")
+			args = append(args, request.TableName)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(permissions.id AS TEXT) = '%s' OR CAST(permissions.role_id AS TEXT) ILIKE '%s' OR permissions.table_name ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(permissions.id AS TEXT) = ? OR
+			permissions.table_name ILIKE ? OR
+			roles.name ILIKE ? OR
+			roles.description ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT permissions.* "+
-					"FROM permissions ",
+				`SELECT permissions.*
+				FROM permissions
+				LEFT JOIN roles ON permissions.role_id = roles.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }

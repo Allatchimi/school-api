@@ -19,9 +19,6 @@ type Exam struct {
 	YearID int64           `gorm:"default:null"`
 	Year   *modelYear.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	TypeID int64     `gorm:"default:null"`
-	Type   *ExamType `gorm:"default:null;foreignKey:TypeID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-
 	ClassSubjectID int64                              `gorm:"default:null"`
 	ClassSubject   *modelClass.HighschoolClassSubject `gorm:"default:null;foreignKey:ClassSubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
@@ -31,7 +28,11 @@ type Exam struct {
 	UnitID int64                     `gorm:"default:null"`
 	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
+	TypeID int64     `gorm:"default:null"`
+	Type   *ExamType `gorm:"default:null;foreignKey:TypeID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
 	Status          string     `gorm:"default:null"`
+	Notation        float64    `gorm:"default:null"`
 	Percentage      int        `gorm:"default:null"`
 	Description     string     `gorm:"default:null"`
 	LocationType    string     `gorm:"default:null"`
@@ -40,6 +41,8 @@ type Exam struct {
 	AllowedItems    string     `gorm:"default:null"`
 	StartDate       *time.Time `gorm:"default:null"`
 	EndDate         *time.Time `gorm:"default:null"`
+	IsRetry         bool       `gorm:"default:null"`
+	RetryCount      int64      `gorm:"default:null"`
 }
 
 func (item *Exam) ToResponse() *data.ExamResponse {
@@ -48,6 +51,7 @@ func (item *Exam) ToResponse() *data.ExamResponse {
 	}
 	resp := &data.ExamResponse{}
 	resp.Status = item.Status
+	resp.Notation = item.Notation
 	resp.Percentage = item.Percentage
 	resp.Description = item.Description
 	resp.LocationType = item.LocationType
@@ -57,12 +61,15 @@ func (item *Exam) ToResponse() *data.ExamResponse {
 	resp.StartDate = item.StartDate
 	resp.EndDate = item.EndDate
 
+	resp.IsRetry = item.IsRetry
+	resp.RetryCount = item.RetryCount
+
 	resp.School = item.School.ToPublicResponse()
 	resp.Year = item.Year.ToResponse()
-	resp.Type = item.Type.ToResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.ClassSubject = item.ClassSubject.ToResponse()
 	resp.Sequence = item.Sequence.ToResponse()
 	resp.Unit = item.Unit.ToResponse()
+	resp.Type = item.Type.ToResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

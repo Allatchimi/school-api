@@ -9,6 +9,18 @@ type Filter struct {
 type FilterSchoolYearClassSubjectUnitRequest struct {
 	SchoolID       int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
 	YearID         int64 `json:"yearID" query:"yearID" required:"false" doc:"Year id"`
-	ClassSubjectID int64 `json:"classID" query:"classSubjectID" required:"false" doc:"Class subject id"`
+	ClassSubjectID int64 `json:"classSubjectID" query:"classSubjectID" required:"false" doc:"Class subject id"`
 	UnitID         int64 `json:"unitID" query:"unitID" required:"false" doc:"Unit id"`
+}
+
+type FilterSchoolYearClassLevelDomainRequest struct {
+	SchoolID      int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
+	YearID        int64 `json:"yearID" query:"yearID" required:"false" doc:"Year id"`
+	ClassID       int64 `json:"classID" query:"classID" required:"false" doc:"Class id"`
+	LevelDomainID int64 `json:"levelDomainID" query:"levelDomainID" required:"false" doc:"Level domain id"`
+}
+
+type FilterTeacherStudentRequest struct {
+	TeacherID int64 `json:"teacherID" query:"teacherID" required:"false" doc:"Teacher id"`
+	StudentID int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id"`
 }

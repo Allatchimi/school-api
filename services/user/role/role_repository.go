@@ -38,16 +38,19 @@ func (repository *Repository) Create(role *model.Role) (result *model.Role, err 
 
 func (repository *Repository) UpdateByID(id int64, role *model.Role) (result *model.Role, err error) {
 	result = &model.Role{}
-	tmpErr := repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"name":        role.Name,
-			"feature":     role.Feature,
-			"description": role.Description,
-		},
-	).Error
-
-	err = tmpErr
-	return
+	fields := map[string]any{
+		"feature":     role.Feature,
+		"name":        role.Name,
+		"description": role.Description,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Role{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(id int64) (result int64, err error) {
@@ -59,6 +62,9 @@ func (repository *Repository) DeleteByID(id int64) (result int64, err error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	tmpResult := repository.Db.Where(where).Delete(&model.Role{})
 
@@ -83,37 +89,54 @@ func (repository *Repository) GetByName(name string) (result *model.Role, err er
 	return
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Role, err error) {
+func (repository *Repository) GetAll(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.Role, err error) {
 	result = make([]model.Role, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if len(request.Feature) > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("roles.feature = %s", request.Feature))
+			where = helpers.AppendWhereClause(where, "roles.feature = ?")
+			args = append(args, request.Feature)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(roles.id AS TEXT) = '%s' OR roles.name ILIKE '%s' OR roles.feature ILIKE '%s' OR roles.description ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(roles.id AS TEXT) = ? OR
+			roles.feature ILIKE ? OR
+			roles.name ILIKE ? OR
+			roles.description ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT roles.* "+
-					"FROM roles ",
+				`SELECT roles.*
+				FROM roles`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }

@@ -21,161 +21,280 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) CreateReportEntry(data *model.ReportEntry) (*model.ReportEntry, error) {
-	result := *data
+func (repository *Repository) CreateReportEntry(item *model.ReportEntry) (*model.ReportEntry, error) {
+	result := *item
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) CreateReportGrade(data *model.ReportGrade) (*model.ReportGrade, error) {
-	result := *data
+func (repository *Repository) CreateReportGrade(item *model.ReportGrade) (*model.ReportGrade, error) {
+	result := *item
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) CreateReportConfig(data *model.ReportConfig) (*model.ReportConfig, error) {
-	result := *data
+func (repository *Repository) CreateReportConfig(item *model.ReportConfig) (*model.ReportConfig, error) {
+	result := *item
 	return &result, repository.Db.Create(&result).Error
 }
 
-func (repository *Repository) UpdateReportEntryByID(id int64, data *model.ReportEntry) (*model.ReportEntry, error) {
-	foundItem, err := repository.GetReportEntryByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return nil, err
-	}
+func (repository *Repository) CreateReportTable(item *model.ReportTable) (*model.ReportTable, error) {
+	result := *item
+	return &result, repository.Db.Create(&result).Error
+}
 
+func (repository *Repository) UpdateReportEntryByID(id int64, item *model.ReportEntry) (*model.ReportEntry, error) {
 	result := &model.ReportEntry{}
-	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":        data.SchoolID,
-			"year_id":          data.YearID,
-			"class_subject_id": data.ClassSubjectID,
-			"sequence_id":      data.SequenceID,
-			"unit_id":          data.UnitID,
-			"student_id":       data.StudentID,
+	fields := map[string]any{
+		"school_id":  item.SchoolID,
+		"year_id":    item.YearID,
+		"student_id": item.StudentID,
 
-			"coefficient": data.Coefficient,
-			"credit":      data.Credit,
-			"value":       data.Value,
-			"notation":    data.Notation,
-		},
-	).Error
+		"coefficient":   item.Coefficient,
+		"credit":        item.Credit,
+		"value":         item.Value,
+		"notation":      item.Notation,
+		"is_retry":      item.IsRetry,
+		"retry_count":   item.RetryCount,
+		"retry_details": item.RetryDetails,
+	}
+	if item.ClassSubjectID > 0 {
+		fields["class_subject_id"] = item.ClassSubjectID
+		if item.SequenceID > 0 {
+			fields["sequence_id"] = item.SequenceID
+		}
+	} else if item.UnitID > 0 {
+		fields["unit_id"] = item.UnitID
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.ReportEntry{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
-func (repository *Repository) UpdateReportGradeByID(id int64, data *model.ReportGrade) (*model.ReportGrade, error) {
-	foundItem, err := repository.GetReportGradeByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return nil, err
-	}
-
+func (repository *Repository) UpdateReportGradeByID(id int64, item *model.ReportGrade) (*model.ReportGrade, error) {
 	result := &model.ReportGrade{}
-	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id": data.SchoolID,
+	fields := map[string]any{
+		"school_id": item.SchoolID,
 
-			"minimum_result":         data.MinimumResult,
-			"maximum_result":         data.MaximumResult,
-			"include_minimum_result": data.IncludeMinimumResult,
-			"include_maximum_result": data.IncludeMaximumResult,
-			"correspondence":         data.Correspondence,
-			"grade":                  data.Grade,
-			"grade_description":      data.GradeDescription,
-		},
-	).Error
+		"type":            item.Type,
+		"name":            item.Name,
+		"description":     item.Description,
+		"minimum":         item.Minimum,
+		"maximum":         item.Maximum,
+		"include_minimum": item.IncludeMinimum,
+		"include_maximum": item.IncludeMaximum,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.ReportGrade{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
-func (repository *Repository) UpdateReportConfigByID(id int64, data *model.ReportConfig) (*model.ReportConfig, error) {
-	foundItem, err := repository.GetReportConfigByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return nil, err
-	}
-
+func (repository *Repository) UpdateReportConfigByID(id int64, item *model.ReportConfig) (*model.ReportConfig, error) {
 	result := &model.ReportConfig{}
-	return result, repository.Db.Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id": data.SchoolID,
+	fields := map[string]any{
+		"school_id": item.SchoolID,
 
-			"notation":                 data.Notation,
-			"notation_minimum_success": data.NotationMinimumSuccess,
-		},
-	).Error
+		"notation_average":                  item.NotationAverage,
+		"notation_report":                   item.NotationReport,
+		"minimum_required_value_to_promote": item.MinimumRequiredValueToPromote,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.ReportConfig{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
+}
+
+func (repository *Repository) UpdateReportTableByID(id int64, item *model.ReportTable) (*model.ReportTable, error) {
+	result := &model.ReportTable{}
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+		"year_id":   item.YearID,
+
+		"period_type":                       item.PeriodType,
+		"period_name":                       item.PeriodName,
+		"status":                            item.Status,
+		"notation":                          item.Notation,
+		"minimum_required_value_to_promote": item.MinimumRequiredValueToPromote,
+		"grade_name":                        item.GradeName,
+		"grade_description":                 item.GradeDescription,
+	}
+	if item.ClassID > 0 {
+		fields["class_id"] = item.ClassID
+	} else if item.LevelDomainID > 0 {
+		fields["level_domain_id"] = item.LevelDomainID
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.ReportTable{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteReportEntryByID(id int64) (int64, error) {
-	foundItem, err := repository.GetReportEntryByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return -1, err
-	}
-
 	result := repository.Db.Where("id = ?", id).Delete(&model.ReportEntry{})
 	return result.RowsAffected, result.Error
 }
 
 func (repository *Repository) DeleteReportGradeByID(id int64) (int64, error) {
-	foundItem, err := repository.GetReportGradeByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return -1, err
-	}
-
 	result := repository.Db.Where("id = ?", id).Delete(&model.ReportGrade{})
 	return result.RowsAffected, result.Error
 }
 
 func (repository *Repository) DeleteReportConfigByID(id int64) (int64, error) {
-	foundItem, err := repository.GetReportConfigByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return -1, err
-	}
-
 	result := repository.Db.Where("id = ?", id).Delete(&model.ReportConfig{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultipleReportEntryByID(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleReportEntryByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.ReportEntry{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.ReportEntry{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
-func (repository *Repository) DeleteMultipleReportGradeByID(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleReportGradeByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.ReportGrade{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.ReportGrade{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
-func (repository *Repository) DeleteMultipleReportConfigByID(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleReportConfigByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.ReportConfig{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.ReportConfig{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
 func (repository *Repository) GetReportEntryByID(id int64) (*model.ReportEntry, error) {
 	result := &model.ReportEntry{}
-	return result, repository.Db.Model(&model.ReportEntry{}).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetReportGradeByID(id int64) (*model.ReportGrade, error) {
 	result := &model.ReportGrade{}
-	return result, repository.Db.Model(&model.ReportGrade{}).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetReportConfigByID(id int64) (*model.ReportConfig, error) {
 	result := &model.ReportConfig{}
-	return result, repository.Db.Model(&model.ReportConfig{}).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetReportEntryByIDSchoolID(id int64, schoolID int64) (*model.ReportEntry, error) {
+	result := &model.ReportEntry{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetReportGradeByIDSchoolID(id int64, schoolID int64) (*model.ReportGrade, error) {
+	result := &model.ReportGrade{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetReportConfigByIDSchoolID(id int64, schoolID int64) (*model.ReportConfig, error) {
+	result := &model.ReportConfig{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetUniqueObjectReportEntry(item *model.ReportEntry) (*model.ReportEntry, error) {
+	result := &model.ReportEntry{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.ReportEntry{
+		SchoolID:       item.SchoolID,
+		YearID:         item.YearID,
+		ClassSubjectID: item.ClassSubjectID,
+		SequenceID:     item.SequenceID,
+		UnitID:         item.UnitID,
+		StudentID:      item.StudentID,
+	}).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) AreSameUniqueObjectsReportEntry(item1 *model.ReportEntry, item2 *model.ReportEntry) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID &&
+			item1.YearID == item2.YearID &&
+			item1.ClassSubjectID == item2.ClassSubjectID &&
+			item1.SequenceID == item2.SequenceID &&
+			item1.UnitID == item2.UnitID &&
+			item1.StudentID == item2.StudentID) {
+		return true
+	}
+	return false
 }
 
 func (repository *Repository) GetUniqueObjectReportGrade(item *model.ReportGrade) (*model.ReportGrade, error) {
 	result := &model.ReportGrade{}
 	return result, repository.Db.Preload(clause.Associations).Where(&model.ReportGrade{
 		SchoolID: item.SchoolID,
+		Type:     item.Type,
+		Name:     item.Name,
+		Minimum:  item.Maximum,
+		Maximum:  item.Maximum,
 	}).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) AreSameUniqueObjectsReportGrade(item1 *model.ReportGrade, item2 *model.ReportGrade) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID &&
+			item1.Type == item2.Type &&
+			item1.Minimum == item2.Minimum &&
+			item1.Maximum == item2.Maximum) {
+		return true
+	}
+	return false
 }
 
 func (repository *Repository) GetUniqueObjectReportConfig(item *model.ReportConfig) (*model.ReportConfig, error) {
@@ -183,14 +302,6 @@ func (repository *Repository) GetUniqueObjectReportConfig(item *model.ReportConf
 	return result, repository.Db.Preload(clause.Associations).Where(&model.ReportConfig{
 		SchoolID: item.SchoolID,
 	}).Limit(1).Find(result).Error
-}
-
-func (repository *Repository) AreSameUniqueObjectsReportGrade(item1 *model.ReportGrade, item2 *model.ReportGrade) bool {
-	if item1 != nil && item2 != nil &&
-		(item1.SchoolID == item2.SchoolID) {
-		return true
-	}
-	return false
 }
 
 func (repository *Repository) AreSameUniqueObjectsReportConfig(item1 *model.ReportConfig, item2 *model.ReportConfig) bool {
@@ -201,70 +312,132 @@ func (repository *Repository) AreSameUniqueObjectsReportConfig(item1 *model.Repo
 	return false
 }
 
+func (repository *Repository) GetUniqueObjectReportTable(item *model.ReportTable) (*model.ReportTable, error) {
+	result := &model.ReportTable{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.ReportTable{
+		SchoolID:      item.SchoolID,
+		YearID:        item.YearID,
+		ClassID:       item.ClassID,
+		LevelDomainID: item.LevelDomainID,
+		PeriodType:    item.PeriodType,
+		PeriodName:    item.PeriodName,
+	}).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) AreSameUniqueObjectsReportTable(item1 *model.ReportTable, item2 *model.ReportTable) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID &&
+			item1.YearID == item2.YearID &&
+			item1.ClassID == item2.ClassID &&
+			item1.LevelDomainID == item2.LevelDomainID &&
+			item1.PeriodType == item2.PeriodType &&
+			item1.PeriodName == item2.PeriodName) {
+		return true
+	}
+	return false
+}
+
 func (repository *Repository) GetAllReportEntry(
 	filter *types.Filter, pagination *types.Pagination,
 	request *data.GetAllReportEntryRequest,
 ) (result []model.ReportEntry, err error) {
 	result = make([]model.ReportEntry, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("report_entries.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "report_entries.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 		if request.YearID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("report_entries.year_id = %d", request.YearID))
-		}
-		if request.UnitID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("report_entries.unit_id = %d", request.UnitID))
+			where = helpers.AppendWhereClause(where, "report_entries.year_id = ?")
+			args = append(args, request.YearID)
 		}
 		if request.ClassSubjectID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("report_entries.class_subject_id = %d", request.ClassSubjectID))
+			where = helpers.AppendWhereClause(where, "report_entries.class_subject_id = ?")
+			args = append(args, request.ClassSubjectID)
 		}
 		if request.SequenceID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("report_entries.sequence_id = %d", request.SequenceID))
+			where = helpers.AppendWhereClause(where, "report_entries.sequence_id = ?")
+			args = append(args, request.SequenceID)
 		}
 		if request.UnitID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("report_entries.unit_id = %d", request.UnitID))
+			where = helpers.AppendWhereClause(where, "report_entries.unit_id = ?")
+			args = append(args, request.UnitID)
+		}
+		if request.SemesterID > 0 {
+			where = helpers.AppendWhereClause(where, "university_units.semester_id = ?")
+			args = append(args, request.SemesterID)
 		}
 		if request.StudentID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("report_entries.student_id = %d", request.StudentID))
+			where = helpers.AppendWhereClause(where, "report_entries.student_id = ?")
+			args = append(args, request.StudentID)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(report_entries.id AS TEXT) = '%s')",
-			filter.Search,
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(report_entries.id AS TEXT) = ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			years.name ILIKE ? OR
+			highschool_classes.name ILIKE ? OR
+			highschool_classes.description ILIKE ? OR
+			highschool_subjects.name ILIKE ? OR
+			highschool_subjects.description ILIKE ? OR
+			highschool_sequences.name ILIKE ? OR
+			highschool_sequences.description ILIKE ? OR
+			university_units.name ILIKE ? OR
+			university_units.description ILIKE ? OR
+			university_semesters.name ILIKE ? OR
+			university_semesters.description ILIKE ? OR
+			students.uid ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like, like, like, like, like, like, like, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
 		Preload("ClassSubject.Subject").
 		Preload("Unit.LevelDomain").
 		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
 		Preload("Unit.Semester").
 		Preload("Student.User").
 		Preload("Student.User.Info").
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT report_entries.* "+
-					"FROM report_entries "+
-					"LEFT JOIN schools ON report_entries.school_id = schools.id "+
-					"LEFT JOIN years ON report_entries.year_id = years.id "+
-					"LEFT JOIN highschool_class_subjects ON report_entries.class_subject_id = highschool_class_subjects.id "+
-					"LEFT JOIN highschool_sequences ON report_entries.sequence_id = highschool_sequences.id "+
-					"LEFT JOIN university_units ON report_entries.unit_id = university_units.id "+
-					"LEFT JOIN students ON report_entries.student_id = students.id ",
+				`SELECT report_entries.* 
+				FROM report_entries 
+				LEFT JOIN schools ON report_entries.school_id = schools.id
+				LEFT JOIN years ON report_entries.year_id = years.id
+				LEFT JOIN highschool_class_subjects ON report_entries.class_subject_id = highschool_class_subjects.id
+				LEFT JOIN highschool_sequences ON report_entries.sequence_id = highschool_sequences.id
+				LEFT JOIN university_units ON report_entries.unit_id = university_units.id
+				LEFT JOIN students ON report_entries.student_id = students.id
+				LEFT JOIN highschool_classes ON highschool_class_subjects.class_id = highschool_classes.id
+				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id
+				LEFT JOIN university_semesters ON university_units.semester_id = university_semesters.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }
 
@@ -273,34 +446,56 @@ func (repository *Repository) GetAllReportGrade(
 	request *data.GetAllReportGradeRequest,
 ) (result []model.ReportGrade, err error) {
 	result = make([]model.ReportGrade, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("report_grades.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "report_grades.school_id = ?")
+			args = append(args, request.SchoolID)
+		}
+		if len(request.Type) > 0 {
+			where = helpers.AppendWhereClause(where, "report_grades.type = ?")
+			args = append(args, request.Type)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(report_grades.id AS TEXT) = '%s')",
-			filter.Search,
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(report_grades.id AS TEXT) = ? OR
+			report_grades.name ILIKE ? OR
+			report_grades.description ILIKE ? OR
+			report_grades.type ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT report_grades.* "+
-					"FROM report_grades "+
-					"LEFT JOIN schools ON report_grades.school_id = schools.id ",
+				`SELECT report_grades.* 
+				FROM report_grades 
+				LEFT JOIN schools ON report_grades.school_id = schools.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }
 
@@ -309,33 +504,294 @@ func (repository *Repository) GetAllReportConfig(
 	request *data.GetAllReportConfigRequest,
 ) (result []model.ReportConfig, err error) {
 	result = make([]model.ReportConfig, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("report_configs.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "report_configs.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(report_configs.id AS TEXT) = '%s')",
-			filter.Search,
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(report_configs.id AS TEXT) = ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT report_configs.* "+
-					"FROM report_configs "+
-					"LEFT JOIN schools ON report_configs.school_id = schools.id ",
+				`SELECT report_configs.* 
+				FROM report_configs 
+				LEFT JOIN schools ON report_configs.school_id = schools.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
+	return
+}
+
+func (repository *Repository) GetAllReportTable(
+	filter *types.Filter, pagination *types.Pagination,
+	request *data.GetAllReportTableRequest,
+) (result []model.ReportTable, err error) {
+	result = make([]model.ReportTable, 0)
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.school_id = ?")
+			args = append(args, request.SchoolID)
+		}
+		if request.YearID > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.year_id = ?")
+			args = append(args, request.YearID)
+		}
+		if request.ClassID > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.class_id = ?")
+			args = append(args, request.ClassID)
+		}
+		if request.LevelDomainID > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.level_domain = ?")
+			args = append(args, request.LevelDomainID)
+		}
+		if len(request.PeriodType) > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.period_type = ?")
+			args = append(args, request.PeriodType)
+		}
+		if len(request.PeriodName) > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.period_name = ?")
+			args = append(args, request.PeriodName)
+		}
+	}
+
+	// Handle search filter securely
+	if filter != nil && len(filter.Search) > 0 {
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(report_tables.id AS TEXT) = ? OR
+			report_tables.period_type ILIKE ? OR
+			report_tables.period_name ILIKE ? OR
+			report_tables.status ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			years.name ILIKE ? OR
+			highschool_classes.name ILIKE ? OR
+			highschool_classes.description ILIKE ? OR
+			university_levels.name ILIKE ? OR
+			university_levels.description ILIKE ? OR
+			university_domains.name ILIKE ? OR
+			university_domains.description ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like, like, like, like, like, like, like, like, like)
+	}
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScopeV2(
+				repository.Db,
+				`SELECT report_tables.* 
+				FROM report_tables 
+				LEFT JOIN schools ON report_tables.school_id = schools.id
+				LEFT JOIN years ON report_tables.year_id = years.id
+				LEFT JOIN highschool_classes ON report_tables.class_id = highschool_classes.id
+				LEFT JOIN university_level_domains ON report_tables.level_domain_id = university_level_domains.id
+				LEFT JOIN university_levels ON university_level_domains.level_id = university_levels.id
+				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id`,
+				where,
+				pagination,
+				filter,
+				args...,
+			),
+		).Find(&result).Error
+
+	return
+}
+
+func (repository *Repository) GetAllReportTableHighschool(
+	filter *types.Filter, pagination *types.Pagination,
+	request *data.GetAllReportTableRequest,
+) (result []model.ReportTable, err error) {
+	result = make([]model.ReportTable, 0)
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.school_id = ?")
+			args = append(args, request.SchoolID)
+		}
+		if request.YearID > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.year_id = ?")
+			args = append(args, request.YearID)
+		}
+		if request.ClassID > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.class_id = ?")
+			args = append(args, request.ClassID)
+		}
+		if len(request.PeriodType) > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.period_type = ?")
+			args = append(args, request.PeriodType)
+		}
+		if len(request.PeriodName) > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.period_name = ?")
+			args = append(args, request.PeriodName)
+		}
+	}
+
+	// Handle search filter securely
+	if filter != nil && len(filter.Search) > 0 {
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(report_tables.id AS TEXT) = ? OR
+			report_tables.period_type ILIKE ? OR
+			report_tables.period_name ILIKE ? OR
+			report_tables.status ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			years.name ILIKE ? OR
+			highschool_classes.name ILIKE ? OR
+			highschool_classes.description ILIKE ? OR
+			students.uid ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like, like, like, like, like, like, like, like, like)
+	}
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScopeV2(
+				repository.Db,
+				`SELECT report_tables.* 
+				FROM report_tables 
+				LEFT JOIN schools ON report_tables.school_id = schools.id
+				LEFT JOIN years ON report_tables.year_id = years.id
+				LEFT JOIN highschool_classes ON report_tables.class_id = highschool_classes.id
+				LEFT JOIN student_enrolls ON highschool_classes.id = student_enrolls.class_id
+				LEFT JOIN students ON student_enrolls.student_id = students.id`,
+				where,
+				pagination,
+				filter,
+				args...,
+			),
+		).Find(&result).Error
+
+	return
+}
+
+func (repository *Repository) GetAllReportTableUniversity(
+	filter *types.Filter, pagination *types.Pagination,
+	request *data.GetAllReportTableRequest,
+) (result []model.ReportTable, err error) {
+	result = make([]model.ReportTable, 0)
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.school_id = ?")
+			args = append(args, request.SchoolID)
+		}
+		if request.YearID > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.year_id = ?")
+			args = append(args, request.YearID)
+		}
+		if request.ClassID > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.class_id = ?")
+			args = append(args, request.ClassID)
+		}
+		if len(request.PeriodType) > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.period_type = ?")
+			args = append(args, request.PeriodType)
+		}
+		if len(request.PeriodName) > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.period_name = ?")
+			args = append(args, request.PeriodName)
+		}
+	}
+
+	// Handle search filter securely
+	if filter != nil && len(filter.Search) > 0 {
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(report_tables.id AS TEXT) = ? OR
+			report_tables.period_type ILIKE ? OR
+			report_tables.period_name ILIKE ? OR
+			report_tables.status ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			years.name ILIKE ? OR
+			university_levels.name ILIKE ? OR
+			university_levels.description ILIKE ? OR
+			university_domains.name ILIKE ? OR
+			university_domains.description ILIKE ? OR
+			students.uid ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like, like, like, like, like, like, like, like, like)
+	}
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScopeV2(
+				repository.Db,
+				`SELECT report_tables.* 
+				FROM report_tables 
+				LEFT JOIN schools ON report_tables.school_id = schools.id
+				LEFT JOIN years ON report_tables.year_id = years.id
+				LEFT JOIN university_level_domains ON report_tables.level_domain_id = university_level_domains.id
+				LEFT JOIN university_levels ON university_level_domains.level_id = university_levels.id
+				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id
+				LEFT JOIN student_enrolls ON university_level_domains.id = student_enrolls.level_domain_id
+				LEFT JOIN students ON student_enrolls.student_id = students.id`,
+				where,
+				pagination,
+				filter,
+				args...,
+			),
+		).Find(&result).Error
+
 	return
 }

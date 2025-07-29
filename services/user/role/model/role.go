@@ -7,8 +7,8 @@ import (
 
 type Role struct {
 	types.BaseGormModel
-	Name        string `gorm:"unique;not null"`
 	Feature     string `gorm:"default:null"`
+	Name        string `gorm:"unique;not null"`
 	Description string `gorm:"default:null"`
 }
 
@@ -17,13 +17,13 @@ func (item *Role) ToResponse() *data.RoleResponse {
 		return nil
 	}
 	resp := &data.RoleResponse{}
-	resp.Name = item.Name
-	resp.Feature = item.Feature
-	resp.Description = item.Description
-
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt
 	resp.UpdatedAt = item.UpdatedAt
+
+	resp.Feature = item.Feature
+	resp.Name = item.Name
+	resp.Description = item.Description
 	return resp
 }
 

@@ -24,8 +24,8 @@ func (controller *Controller) CreateEntry(
 		Body data.ReportEntryRequest
 	},
 ) (result *model.ReportEntry, errCode int, err error) {
-	result, errCode, err = controller.Service.Create(
-		httpHelper.GetJwtContext(ctx),
+	result, errCode, err = controller.Service.CreateEntry(
+		httpHelper.GetContextData(ctx),
 		&input.Body,
 	)
 	return
@@ -38,7 +38,7 @@ func (controller *Controller) CreateGrade(
 	},
 ) (result *model.ReportGrade, errCode int, err error) {
 	result, errCode, err = controller.Service.CreateGrade(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		&input.Body,
 	)
 	return
@@ -51,7 +51,7 @@ func (controller *Controller) CreateConfig(
 	},
 ) (result *model.ReportConfig, errCode int, err error) {
 	result, errCode, err = controller.Service.CreateConfig(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		&input.Body,
 	)
 	return
@@ -65,7 +65,7 @@ func (controller *Controller) UpdateGrade(
 	},
 ) (result *model.ReportGrade, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateGrade(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		input.ID,
 		&input.Body,
 	)
@@ -80,7 +80,7 @@ func (controller *Controller) UpdateConfig(
 	},
 ) (result *model.ReportConfig, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateConfig(
-		httpHelper.GetJwtContext(ctx),
+		httpHelper.GetContextData(ctx),
 		input.ID,
 		&input.Body,
 	)
@@ -93,7 +93,7 @@ func (controller *Controller) DeleteEntry(
 		data.ReportEntryID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.Delete(httpHelper.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.DeleteEntry(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -107,7 +107,7 @@ func (controller *Controller) DeleteGrade(
 		data.ReportGradeID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteGrade(httpHelper.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.DeleteGrade(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -121,7 +121,7 @@ func (controller *Controller) DeleteConfig(
 		data.ReportConfigID
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteConfig(httpHelper.GetJwtContext(ctx), input.ID)
+	affectedRows, errCode, err := controller.Service.DeleteConfig(httpHelper.GetContextData(ctx), input.ID)
 	if err != nil {
 		return
 	}
@@ -135,7 +135,7 @@ func (controller *Controller) DeleteMultipleEntry(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultiple(httpHelper.GetJwtContext(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultipleEntry(httpHelper.GetContextData(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -149,7 +149,7 @@ func (controller *Controller) DeleteMultipleGrade(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultipleGrade(httpHelper.GetJwtContext(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultipleGrade(httpHelper.GetContextData(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -163,7 +163,7 @@ func (controller *Controller) DeleteMultipleConfig(
 		Body types.DeleteMultipleRequest
 	},
 ) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultipleConfig(httpHelper.GetJwtContext(ctx), input.Body.List)
+	affectedRows, errCode, err := controller.Service.DeleteMultipleConfig(httpHelper.GetContextData(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -177,7 +177,7 @@ func (controller *Controller) GetEntry(
 		data.ReportEntryID
 	},
 ) (result *model.ReportEntry, errCode int, err error) {
-	result, errCode, err = controller.Service.Get(httpHelper.GetJwtContext(ctx), input.ID)
+	result, errCode, err = controller.Service.GetEntry(httpHelper.GetContextData(ctx), input.ID)
 	return
 }
 
@@ -187,7 +187,7 @@ func (controller *Controller) GetGrade(
 		data.ReportGradeID
 	},
 ) (result *model.ReportGrade, errCode int, err error) {
-	result, errCode, err = controller.Service.GetGrade(httpHelper.GetJwtContext(ctx), input.ID)
+	result, errCode, err = controller.Service.GetGrade(httpHelper.GetContextData(ctx), input.ID)
 	return
 }
 
@@ -197,7 +197,7 @@ func (controller *Controller) GetConfig(
 		data.ReportConfigID
 	},
 ) (result *model.ReportConfig, errCode int, err error) {
-	result, errCode, err = controller.Service.GetConfig(httpHelper.GetJwtContext(ctx), input.ID)
+	result, errCode, err = controller.Service.GetConfig(httpHelper.GetContextData(ctx), input.ID)
 	return
 }
 
@@ -210,7 +210,7 @@ func (controller *Controller) GetAllEntry(
 	},
 ) (result *data.ReportEntryResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	resultList, errCode, err := controller.Service.GetAll(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllReportEntryRequest)
+	resultList, errCode, err := controller.Service.GetAllEntry(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllReportEntryRequest)
 	if err != nil {
 		return
 	}
@@ -231,7 +231,7 @@ func (controller *Controller) GetAllGrade(
 	},
 ) (result *data.ReportGradeResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	resultList, errCode, err := controller.Service.GetAllGrade(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllReportGradeRequest)
+	resultList, errCode, err := controller.Service.GetAllGrade(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllReportGradeRequest)
 	if err != nil {
 		return
 	}
@@ -252,12 +252,33 @@ func (controller *Controller) GetAllConfig(
 	},
 ) (result *data.ReportConfigResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
-	resultList, errCode, err := controller.Service.GetAllConfig(httpHelper.GetJwtContext(ctx), newFilter, newPagination, &input.GetAllReportConfigRequest)
+	resultList, errCode, err := controller.Service.GetAllConfig(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllReportConfigRequest)
 	if err != nil {
 		return
 	}
 	result = &data.ReportConfigResponseList{
 		Data: model.ToReportConfigResponseList(resultList),
+	}
+	result.Filter = newFilter
+	result.Pagination = newPagination
+	return
+}
+
+func (controller *Controller) GetAllTable(
+	ctx *context.Context,
+	input *struct {
+		types.Filter
+		types.PaginationRequest
+		data.GetAllReportTableRequest
+	},
+) (result *data.ReportTableResponseList, errCode int, err error) {
+	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
+	resultList, errCode, err := controller.Service.GetAllTable(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllReportTableRequest)
+	if err != nil {
+		return
+	}
+	result = &data.ReportTableResponseList{
+		Data: model.ToReportTableResponseList(resultList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

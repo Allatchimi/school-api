@@ -18,7 +18,7 @@ type Parent struct {
 	User   *modelUser.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 }
 
-func (item *Parent) ToParentResponse() *data.ParentResponse {
+func (item *Parent) ToResponse() *data.ParentResponse {
 	if item == nil {
 		return nil
 	}
@@ -26,20 +26,20 @@ func (item *Parent) ToParentResponse() *data.ParentResponse {
 		School: &dataSchool.SchoolPublicResponse{},
 		User:   &dataUser.UserResponse{},
 	}
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
+
 	if item.School != nil {
 		resp.School = item.School.ToPublicResponse()
 	}
 	if item.User != nil {
 		resp.User = item.User.ToResponse()
 	}
-
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 
-func (item *Parent) ToParentPublicResponse() *data.ParentPublicResponse {
+func (item *Parent) ToPublicResponse() *data.ParentPublicResponse {
 	if item == nil {
 		return nil
 	}
@@ -47,23 +47,23 @@ func (item *Parent) ToParentPublicResponse() *data.ParentPublicResponse {
 		School: &dataSchool.SchoolPublicResponse{},
 		User:   &dataUser.UserPublicResponse{},
 	}
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
+
 	if item.School != nil {
 		resp.School = item.School.ToPublicResponse()
 	}
 	if item.User != nil {
 		resp.User = item.User.ToPublicResponse()
 	}
-
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 
 func ToParentResponseList(itemList []Parent) []data.ParentResponse {
 	resp := make([]data.ParentResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToParentResponse()
+		resp[index] = *item.ToResponse()
 	}
 	return resp
 }

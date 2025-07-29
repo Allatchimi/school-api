@@ -21,11 +21,14 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "role"
 const DEFAULT_ERROR_MESSAGE = "interact with role model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.RoleRequest) (result *model.Role, errCode int, err error) {
+func (service *Service) Create(
+	ctxData *types.ContextData,
+	request *data.RoleRequest,
+) (result *model.Role, errCode int, err error) {
 	// Format item
 	item := &model.Role{
-		Name:        request.Name,
 		Feature:     request.Feature,
+		Name:        request.Name,
 		Description: request.Description,
 	}
 
@@ -39,8 +42,12 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Role
 				err = constants.Http302ErrorMessage(MODEL_NAME)
 				return
 			}
+			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+				errCode = http.StatusConflict
+				err = constants.Http409ConflictErrorMessage()
+				return
+			}
 		}
-
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
@@ -48,7 +55,11 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Role
 	return
 }
 
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.RoleRequest) (result *model.Role, errCode int, err error) {
+func (service *Service) Update(
+	ctxData *types.ContextData,
+	id int64,
+	request *data.RoleRequest,
+) (result *model.Role, errCode int, err error) {
 	// Check unique
 	foundRole, err := service.Repository.GetByID(id)
 	if err != nil {
@@ -64,8 +75,8 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 
 	// Format item
 	item := &model.Role{
-		Name:        request.Name,
 		Feature:     request.Feature,
+		Name:        request.Name,
 		Description: request.Description,
 	}
 
@@ -85,6 +96,14 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	// Update
 	result, err = service.Repository.UpdateByID(id, item)
 	if err != nil {
+		pgState, errPgState := utils.ExtractSQLState(err.Error())
+		if errPgState == nil {
+			if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+				errCode = http.StatusConflict
+				err = constants.Http409ConflictErrorMessage()
+				return
+			}
+		}
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
@@ -92,7 +111,10 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	return
 }
 
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) Delete(
+	ctxData *types.ContextData,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -107,7 +129,10 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteMultiple(
+	ctxData *types.ContextData,
+	list []int64,
+) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultipleByID(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -122,7 +147,10 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) GetByID(inputJwtToken *types.JwtToken, id int64) (result *model.Role, errCode int, err error) {
+func (service *Service) GetByID(
+	ctxData *types.ContextData,
+	id int64,
+) (result *model.Role, errCode int, err error) {
 	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -137,7 +165,12 @@ func (service *Service) GetByID(inputJwtToken *types.JwtToken, id int64) (result
 	return
 }
 
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Role, errCode int, err error) {
+func (service *Service) GetAll(
+	ctxData *types.ContextData,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.Role, errCode int, err error) {
 	result, err = service.Repository.GetAll(filter, pagination, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError

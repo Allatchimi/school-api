@@ -26,40 +26,62 @@ func (repository *Repository) Create(item *model.Payment) (*model.Payment, error
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, item *model.Payment) (*model.Payment, error) {
+func (repository *Repository) UpdateByID(id int64, item *model.Payment) (*model.Payment, error) {
 	result := &model.Payment{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":         item.SchoolID,
-			"student_enroll_id": item.StudentEnrollID,
+	fields := map[string]any{
+		"school_id":         item.SchoolID,
+		"student_enroll_id": item.StudentEnrollID,
 
-			"amount":         item.Amount,
-			"currency":       item.Currency,
-			"payment_date":   item.PaymentDate,
-			"payment_method": item.PaymentMethod,
-			"payment_status": item.PaymentStatus,
-			"payment_note":   item.PaymentNote,
-		},
-	).Error
+		"amount":   item.Amount,
+		"currency": item.Currency,
+		"date":     item.Date,
+		"method":   item.Method,
+		"status":   item.Status,
+		"message":  item.Message,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Payment{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
-func (repository *Repository) Delete(id int64) (int64, error) {
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.Payment{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.Payment{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.Payment{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.Payment, error) {
 	result := &model.Payment{}
-	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Payment, error) {
+	result := &model.Payment{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetAll(
@@ -68,28 +90,49 @@ func (repository *Repository) GetAll(
 	request *data.GetAllRequest,
 ) (result []model.Payment, err error) {
 	result = make([]model.Payment, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("payments.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "payments.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 		if request.StudentEnrollID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("payments.student_enroll_id = %d", request.StudentEnrollID))
+			where = helpers.AppendWhereClause(where, "payments.student_enroll_id = ?")
+			args = append(args, request.StudentEnrollID)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"CAST(payments.id AS TEXT) = '%s' OR payments.currency ILIKE '%s' OR payments.payment_method ILIKE '%s' OR payments.payment_status ILIKE '%s' OR payments.payment_note ILIKE '%s' OR schools.name ILIKE '%s'",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(payments.id AS TEXT) = ? OR
+			CAST(payments.amount AS TEXT) = ? OR
+			payments.method ILIKE ? OR
+			payments.status ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			students.uid ILIKE ? OR
+			highschool_classes.name ? OR
+			highschool_classes.description ? OR
+			university_levels.name ? OR
+			university_levels.description ? OR
+			highschool_domains.name ? OR
+			highschool_domains.description ? OR
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, search, like, like, like, like, like, like, like, like, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Preload("School").
 		Preload("StudentEnroll.Student").
@@ -101,18 +144,23 @@ func (repository *Repository) GetAll(
 		Preload("StudentEnroll.LevelDomain.Level").
 		Preload("StudentEnroll.LevelDomain.Domain").
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT payments.* "+
-					"FROM payments "+
-					"LEFT JOIN schools ON payments.school_id = schools.id "+
-					"LEFT JOIN student_enrolls ON payments.student_enroll_id = student_enrolls.id ",
+				`SELECT payments.*
+				FROM payments
+				LEFT JOIN schools ON payments.school_id = schools.id
+				LEFT JOIN student_enrolls ON payments.student_enroll_id = student_enrolls.id
+				LEFT JOIN students ON student_enrolls.student_id = students.id
+				LEFT JOIN highschool_classes ON student_enrolls.class_id = highschool_classes.id
+				LEFT JOIN university_level_domains ON student_enrolls.level_domain_id = university_level_domains.id
+				LEFT JOIN university_levels ON university_level_domains.level_id = university_levels.id
+				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }

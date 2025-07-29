@@ -5,31 +5,29 @@ import (
 	"api/common/utils"
 	"api/config"
 	"api/services/school/common/school/data"
+	"fmt"
 )
 
 type School struct {
 	types.BaseGormModel
-	Name   string `gorm:"unique;not null"`
-	Type   string `gorm:"default:null"`
-	Status string `gorm:"default:null"`
+	Config *SchoolConfig `gorm:"default:null;foreignKey:ConfigID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
+	InfoID int64       `gorm:"default:null"`
+	Info   *SchoolInfo `gorm:"default:null;foreignKey:InfoID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	Name               string `gorm:"unique;default:null"`
+	Type               string `gorm:"default:null"`
+	Status             string `gorm:"default:null"`
 	DeploymentRequest  string `gorm:"default:null"`
 	DeploymentStatus   string `gorm:"default:null"`
 	DeploymentFeedback string `gorm:"default:null;type:text"`
 	DeploymentCount    int64  `gorm:"default:null"`
-
-	Favicon   string `gorm:"default:null"`
-	Logo      string `gorm:"default:null"`
-	LogoWhite string `gorm:"default:null"`
-
-	Currency     string `gorm:"default:null"`
-	PaymentCount int64  `gorm:"default:1"`
-
-	ConfigID int64         `gorm:"default:null"`
-	Config   *SchoolConfig `gorm:"default:null;foreignKey:ConfigID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-
-	InfoID int64       `gorm:"default:null"`
-	Info   *SchoolInfo `gorm:"default:null;foreignKey:InfoID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Favicon            string `gorm:"default:null"`
+	Logo               string `gorm:"default:null"`
+	LogoWhite          string `gorm:"default:null"`
+	Currency           string `gorm:"default:null"`
+	PaymentCount       int64  `gorm:"default:1"`
+	ConfigID           int64  `gorm:"default:null"`
 }
 
 func (item *School) ToResponse() *data.SchoolResponse {
@@ -37,28 +35,25 @@ func (item *School) ToResponse() *data.SchoolResponse {
 		return nil
 	}
 	resp := &data.SchoolResponse{}
-	resp.Name = item.Name
-	resp.Type = item.Type
-	resp.Status = item.Status
-
-	resp.DeploymentRequest = item.DeploymentRequest
-	resp.DeploymentStatus = item.DeploymentStatus
-	resp.DeploymentFeedback = item.DeploymentFeedback
-	resp.DeploymentCount = item.DeploymentCount
-
-	resp.Favicon = item.Favicon
-	resp.Logo = item.Logo
-	resp.LogoWhite = item.LogoWhite
-
-	resp.Currency = item.Currency
-	resp.PaymentCount = item.PaymentCount
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
 
 	resp.Info = item.Info.ToResponse()
 	resp.Config = item.Config.ToResponse()
 
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
+	resp.Name = item.Name
+	resp.Type = item.Type
+	resp.Status = item.Status
+	resp.DeploymentRequest = item.DeploymentRequest
+	resp.DeploymentStatus = item.DeploymentStatus
+	resp.DeploymentFeedback = item.DeploymentFeedback
+	resp.DeploymentCount = item.DeploymentCount
+	resp.Favicon = item.Favicon
+	resp.Logo = item.Logo
+	resp.LogoWhite = item.LogoWhite
+	resp.Currency = item.Currency
+	resp.PaymentCount = item.PaymentCount
 	return resp
 }
 
@@ -67,18 +62,20 @@ func (item *School) ToPublicResponse() *data.SchoolPublicResponse {
 		return nil
 	}
 	resp := &data.SchoolPublicResponse{}
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
+
+	resp.Info = item.Info.ToResponse()
+
 	resp.Name = item.Name
 	resp.Type = item.Type
 	resp.Status = item.Status
-
 	resp.Favicon = item.Favicon
 	resp.Logo = item.Logo
 	resp.LogoWhite = item.LogoWhite
-
 	resp.Currency = item.Currency
 	resp.PaymentCount = item.PaymentCount
-
-	resp.Info = item.Info.ToResponse()
 	return resp
 }
 
@@ -90,13 +87,31 @@ func ToSchoolResponseList(itemList []School) []data.SchoolResponse {
 	return resp
 }
 
+func (item *School) WebsiteUrl() (url string) {
+	if item == nil {
+		url = config.Env.WebsiteBaseURL
+		return
+	}
+	url = fmt.Sprintf("https://%s", item.Config.WebsiteDomainName)
+	return
+}
+
+func (item *School) LogoUrl() (url string) {
+	if item == nil {
+		url = fmt.Sprintf("%s/assets/images/logos/logo.png", config.Env.WebsiteBaseURL)
+		return
+	}
+	url = item.Logo
+	return
+}
+
 func (item *School) SMTPNoReplySender() (senderEmail string, senderName string) {
 	if item == nil {
 		senderEmail = config.Env.SmtpUserNoReply + "@" + config.Env.SmtpDomainName
 		senderName = config.Env.AppName
 		return
 	}
-	senderEmail = config.Env.SmtpUserNoReply + "@" + item.Config.DomainName
+	senderEmail = config.Env.SmtpUserNoReply + "@" + item.Config.UserEmailDomainName
 	senderName = item.Name
 	return
 }
@@ -113,7 +128,16 @@ func (item *School) SMTPSupportSender() (senderEmail string, senderName string) 
 		senderName = "Support " + item.Name
 		return
 	}
-	senderEmail = config.Env.SmtpUserSupport + "@" + item.Config.DomainName
+	senderEmail = config.Env.SmtpUserSupport + "@" + item.Config.UserEmailDomainName
 	senderName = "Support " + item.Name
 	return
+}
+
+func (item *School) IsSameDeploymentAsRequest(itemRequest *data.SchoolRequest) bool {
+	if item == nil || itemRequest == nil {
+		return false
+	}
+	return (item.Favicon == itemRequest.Favicon) &&
+		(item.Logo == itemRequest.Logo) &&
+		(item.LogoWhite == itemRequest.LogoWhite)
 }

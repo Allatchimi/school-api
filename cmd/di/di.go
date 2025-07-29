@@ -3,13 +3,13 @@ package di
 import (
 	"api/cmd/api"
 	"api/config"
-	"api/services/common/communication"
-	"api/services/common/contact"
-	"api/services/common/health"
-	"api/services/common/monitoring"
-	"api/services/common/notification"
-	"api/services/common/permissionchecker"
-	"api/services/common/telegram"
+	serviceHelper "api/services/helper"
+	"api/services/others/communication"
+	"api/services/others/contact"
+	"api/services/others/health"
+	"api/services/others/monitoring"
+	"api/services/others/notification"
+	"api/services/others/telegram"
 	"api/services/school/common/course"
 	"api/services/school/common/director"
 	"api/services/school/common/exam"
@@ -186,6 +186,7 @@ func InjectDependencies() {
 	api.AllControllers.RequestController = request.NewController(
 		request.NewService(
 			requestRepo,
+			api.AllControllers.StudentController.Service,
 		),
 	)
 	api.AllControllers.ResultController = result.NewController(
@@ -206,6 +207,7 @@ func InjectDependencies() {
 	api.AllControllers.ReportController = report.NewController(
 		report.NewService(
 			reportRepo,
+			api.AllControllers.SchoolController.Service,
 		),
 	)
 	api.AllControllers.MonitoringController = monitoring.NewController(
@@ -255,6 +257,7 @@ func InjectDependencies() {
 		class.NewService(
 			classRepo,
 			api.AllControllers.SchoolController.Service,
+			api.AllControllers.MeetingController.Service,
 		),
 	)
 	api.AllControllers.SubjectController = subject.NewController(
@@ -305,6 +308,7 @@ func InjectDependencies() {
 		unit.NewService(
 			unitRepo,
 			api.AllControllers.SchoolController.Service,
+			api.AllControllers.MeetingController.Service,
 		),
 	)
 
@@ -316,12 +320,8 @@ func InjectDependencies() {
 	)
 
 	// Permissions checker
-	permissionchecker.InjectServices(
+	serviceHelper.InjectServices(
 		api.AllControllers.UserController.Service,
-		api.AllControllers.SchoolController.Service,
-		api.AllControllers.DirectorController.Service,
-		api.AllControllers.TeacherController.Service,
-		api.AllControllers.StudentController.Service,
-		api.AllControllers.ParentController.Service,
+		api.AllControllers.NotificationController.Service,
 	)
 }

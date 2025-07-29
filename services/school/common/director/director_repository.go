@@ -32,18 +32,21 @@ func (repository *Repository) UpdateByID(
 	id int64,
 	item *model.Director,
 ) (*model.Director, error) {
-	tempDirector, err := repository.GetByID(id)
-	if err != nil || tempDirector == nil || tempDirector.ID != id {
-		return nil, err
-	}
 	result := &model.Director{}
-	return result, repository.Db.Model(result).Where("id = ?", item.ID).Updates(
-		map[string]any{
-			"school_id": item.SchoolID,
-			"user_id":   item.UserID,
-			"uid":       item.UID,
-		},
-	).Error
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+		"user_id":   item.UserID,
+
+		"uid": item.UID,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.Director{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
 func (repository *Repository) DeleteByID(
@@ -58,20 +61,14 @@ func (repository *Repository) DeleteByID(
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
 	tmpResult := repository.Db.Where(where).Delete(&model.Director{})
 
 	result = tmpResult.RowsAffected
 	err = tmpResult.Error
-	return
-}
-
-func (repository *Repository) CountAll(schoolID int64) (result int64, err error) {
-	if schoolID <= 1 {
-		err = repository.Db.Model(&model.Director{}).Count(&result).Error
-		return
-	}
-	err = repository.Db.Model(&model.Director{}).Where("school_id = ?", schoolID).Count(&result).Error
 	return
 }
 
@@ -139,56 +136,60 @@ func (repository *Repository) AreSameUniqueObjectsByUID(
 	return false
 }
 
-func (repository *Repository) GetByUserIDSchoolID(
-	userID int64,
-	schoolID int64,
-) (*model.Director, error) {
-	result := &model.Director{}
-	return result, repository.Db.
-		Preload(clause.Associations).
-		Preload("User.Info").
-		Where("user_id = ?", userID).Where("school_id = ?", schoolID).
-		Limit(1).Find(result).Error
-}
-
 func (repository *Repository) GetAll(
 	filter *types.Filter,
 	pagination *types.Pagination,
 	request *data.GetAllRequest,
 ) (result []model.Director, err error) {
 	result = make([]model.Director, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("directors.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "directors.school_id = ?")
+			args = append(args, request.SchoolID)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(directors.id AS TEXT) = '%s' OR directors.uid ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s' OR users.email ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		where = helpers.AppendWhereClause(where, tempWhere)
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(directors.id AS TEXT) = ? OR
+			directors.uid ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			users.email ILIKE ? OR
+			CAST(users.phone_number AS TEXT) ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("User.Info").
+		Preload("User.Role").
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT directors.* "+
-					"FROM directors "+
-					"LEFT JOIN schools ON directors.school_id = schools.id "+
-					"LEFT JOIN users ON directors.user_id = users.id ",
+				`SELECT directors.*
+				FROM directors
+				LEFT JOIN schools ON directors.school_id = schools.id
+				LEFT JOIN users ON directors.user_id = users.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }

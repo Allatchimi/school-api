@@ -2,7 +2,6 @@ package sequence
 
 import (
 	"fmt"
-	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -27,34 +26,58 @@ func (repository *Repository) Create(item *model.HighschoolSequence) (*model.Hig
 	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
 }
 
-func (repository *Repository) Update(id int64, item *model.HighschoolSequence) (*model.HighschoolSequence, error) {
+func (repository *Repository) UpdateByID(id int64, item *model.HighschoolSequence) (*model.HighschoolSequence, error) {
 	result := &model.HighschoolSequence{}
-	return result, repository.Db.Preload(clause.Associations).Model(result).Where("id = ?", id).Updates(
-		map[string]any{
-			"school_id":   item.SchoolID,
-			"name":        item.Name,
-			"description": item.Description,
-		},
-	).Error
+	fields := map[string]any{
+		"school_id":  item.SchoolID,
+		"quarter_id": item.QuarterID,
+
+		"name":        item.Name,
+		"description": item.Description,
+	}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Model(&model.HighschoolSequence{}).
+		Where("id = ?", id).
+		Updates(
+			fields,
+		).
+		Find(result).Error
 }
 
-func (repository *Repository) Delete(id int64) (int64, error) {
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.HighschoolSequence{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
 	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.HighschoolSequence{})
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.HighschoolSequence{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.HighschoolSequence, error) {
 	result := &model.HighschoolSequence{}
-	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.HighschoolSequence, error) {
+	result := &model.HighschoolSequence{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.HighschoolSequence) (*model.HighschoolSequence, error) {
@@ -74,43 +97,63 @@ func (repository *Repository) AreSameUniqueObjects(item1 *model.HighschoolSequen
 	return false
 }
 
-func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.HighschoolSequence, err error) {
+func (repository *Repository) GetAll(
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.HighschoolSequence, err error) {
 	result = make([]model.HighschoolSequence, 0)
-	var where string = ""
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, fmt.Sprintf("sequences.school_id = %d", request.SchoolID))
+			where = helpers.AppendWhereClause(where, "sequences.school_id = ?")
+			args = append(args, request.SchoolID)
+		}
+		if request.QuarterID > 0 {
+			where = helpers.AppendWhereClause(where, "sequences.quarter_id = ?")
+			args = append(args, request.QuarterID)
 		}
 	}
+
+	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
-		tempWhere := fmt.Sprintf(
-			"(CAST(sequences.id AS TEXT) = '%s' OR sequences.name ILIKE '%s' OR sequences.description ILIKE '%s' OR schools.name ILIKE '%s' OR schools.type ILIKE '%s')",
-			filter.Search,
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-			"%"+filter.Search+"%",
-		)
-		if strings.HasPrefix(where, "WHERE") {
-			where = fmt.Sprintf("%s AND (%s)", where, tempWhere)
-		} else {
-			where = fmt.Sprintf("WHERE %s", tempWhere)
-		}
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(sequences.id AS TEXT) = ? OR
+			sequences.name ILIKE ? OR
+			sequences.description ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			highschool_quarters.name ILIKE ? OR
+			highschool_quarters.description ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like, like)
 	}
-	tmpErr := repository.Db.
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
 		Preload(clause.Associations).
 		Scopes(
-			helpers.PaginationScope(
+			helpers.PaginationScopeV2(
 				repository.Db,
-				"SELECT sequences.* "+
-					"FROM highschool_sequences sequences "+
-					"LEFT JOIN schools ON sequences.school_id = schools.id",
+				`SELECT sequences.*
+				FROM highschool_sequences sequences
+				LEFT JOIN schools ON sequences.school_id = schools.id
+				LEFT JOIN highschool_quarters ON sequences.quarter_id = highschool_quarters.id`,
 				where,
 				pagination,
 				filter,
+				args...,
 			),
 		).Find(&result).Error
 
-	err = tmpErr
 	return
 }

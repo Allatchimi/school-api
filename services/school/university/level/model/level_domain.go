@@ -19,38 +19,38 @@ type UniversityLevelDomain struct {
 	DomainID int64                         `gorm:"default:null"`
 	Domain   *modelDomain.UniversityDomain `gorm:"default:null;foreignKey:DomainID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Fees         int64      `gorm:"default null"`
+	Fees         float64    `gorm:"default null"`
 	Program      string     `gorm:"default null"`
 	Requirements string     `gorm:"default null"`
 	IsValid      bool       `gorm:"default:true"`
 	InvalidDate  *time.Time `gorm:"default:null"`
 }
 
-func (item *UniversityLevelDomain) ToLevelDomainResponse() *data.LevelDomainResponse {
+func (item *UniversityLevelDomain) ToResponse() *data.LevelDomainResponse {
 	if item == nil {
 		return nil
 	}
 	resp := &data.LevelDomainResponse{}
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
+
+	resp.School = item.School.ToPublicResponse()
+	resp.Level = item.Level.ToResponse()
+	resp.Domain = item.Domain.ToResponse()
+
 	resp.Fees = item.Fees
 	resp.Program = item.Program
 	resp.Requirements = item.Requirements
 	resp.IsValid = item.IsValid
 	resp.InvalidDate = item.InvalidDate
-
-	resp.School = item.School.ToPublicResponse()
-	resp.Domain = item.Domain.ToResponse()
-	resp.Level = item.Level.ToResponse()
-
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 
 func ToLevelDomainResponseList(itemList []UniversityLevelDomain) []data.LevelDomainResponse {
 	resp := make([]data.LevelDomainResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToLevelDomainResponse()
+		resp[index] = *item.ToResponse()
 	}
 	return resp
 }

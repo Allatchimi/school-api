@@ -16,18 +16,20 @@ type QuizRequest struct {
 	ClassSubjectID int64 `json:"classSubjectID" required:"false" doc:"Class subject id"`
 	UnitID         int64 `json:"unitID" required:"false" doc:"Unit id"`
 
-	Title       string `json:"title" required:"true" doc:"Title"`
-	Description string `json:"description" required:"false" doc:"Description"`
-	Status      string `json:"status" required:"false" enum:"draft,published,closed,result" doc:"Status"`
+	Title       string                     `json:"title" required:"true" doc:"Title"`
+	Description string                     `json:"description" required:"false" doc:"Description"`
+	Status      string                     `json:"status" required:"false" enum:"draft,published,closed,result" doc:"Status"`
+	Questions   []QuizQuestionGroupRequest `json:"questions" required:"false" doc:"Questions"`
+}
 
-	Questions []QuizQuestionRequest `json:"questions" required:"false" doc:"Questions"`
+type QuizQuestionGroupRequest struct {
+	Question QuizQuestionRequest         `json:"question" required:"false" doc:"Question"`
+	Options  []QuizQuestionOptionRequest `json:"options" required:"false" doc:"Options"`
 }
 
 type QuizQuestionRequest struct {
 	Title       string `json:"title" required:"true" doc:"Title"`
 	Description string `json:"description" required:"false" doc:"Description"`
-
-	Options []QuizQuestionOptionRequest `json:"options" required:"false" doc:"Options"`
 }
 
 type QuizQuestionOptionRequest struct {
@@ -60,6 +62,12 @@ type GetAllRequest struct {
 
 type GetAllQuizAnswerRequest struct {
 	QuizID
-	QuizQuestionID int64 `json:"quizQuestionID" query:"quizQuestionID" required:"false" doc:"Quiz question id"`
-	StudentID      int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id"`
+	SchoolID  int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
+	StudentID int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id"`
+}
+
+type GetAllQuizResultRequest struct {
+	QuizID
+	SchoolID  int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
+	StudentID int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id"`
 }

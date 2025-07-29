@@ -9,6 +9,8 @@ import (
 
 	"api/common/utils"
 	"api/config"
+
+	"go.uber.org/zap"
 )
 
 const (
@@ -18,56 +20,42 @@ const (
 )
 
 // gitPush pushes to the repository.
-func gitPush(commitMessage string, branch string) (ok bool, err error) {
-	// Check for changes
-	cmd := exec.Command("git", "status", "--porcelain")
-	output, err := cmd.Output()
-	if err != nil {
-		errMsg := "Failed to check git status!"
-		err = fmt.Errorf("%s: %s %w", errMsg, err.Error(), err)
-		return
-	}
-	if len(output) < 1 {
-		return
-	}
-
-	// Commit and push the changes to GitHub
+func gitPush(repoDir string, commitMessage string, branch string) (err error) {
+	Logger.Info("Pushing changes to GitHub...")
 	commands := [][]string{
 		{"git", "add", "."},
 		{"git", "commit", "-m", commitMessage},
 		{"git", "push", "origin", branch},
 	}
-
 	for _, args := range commands {
-		cmd := exec.Command(args[0], args[1:]...)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		if err = cmd.Run(); err != nil {
+		commitCmd := exec.Command(args[0], args[1:]...)
+		commitCmd.Dir = repoDir
+		if errCommit := commitCmd.Run(); errCommit != nil {
 			errMsg := "Failed to push changes to GitHub!"
-			err = fmt.Errorf("%s: %s %w", errMsg, err.Error(), err)
+			err = fmt.Errorf("%s: %s %w", errMsg, errCommit.Error(), errCommit)
 			return
 		}
 	}
-	ok = true
 	return
 }
 
 // gitClone clones the repository into a directory.
-func gitClone(outputDir string, branch string, withSubmodules bool) (err error) {
-	if err != nil {
+func gitClone(repoDir string, branch string, withSubmodules bool) (err error) {
+	Logger.Info("Cloning repository...")
+	if withSubmodules {
 		if err = exec.Command(
-			"git", "clone", "--recurse-submodules", config.Env.GitRepoSshUrl, outputDir,
+			"git", "clone", "--recurse-submodules", config.Env.GitRepoSshUrl, repoDir,
 		).Run(); err != nil {
 			errMsg := "Failed to clone repo!"
-			err = fmt.Errorf("%s: %s %s %w", errMsg, outputDir, err.Error(), err)
+			err = fmt.Errorf("%s: %s %s %w", errMsg, repoDir, err.Error(), err)
 			return
 		}
 	} else {
 		if err = exec.Command(
-			"git", "clone", config.Env.GitRepoSshUrl, outputDir,
+			"git", "clone", config.Env.GitRepoSshUrl, repoDir,
 		).Run(); err != nil {
 			errMsg := "Failed to clone repo!"
-			err = fmt.Errorf("%s: %s %s %w", errMsg, outputDir, err.Error(), err)
+			err = fmt.Errorf("%s: %s %s %w", errMsg, repoDir, err.Error(), err)
 			return
 		}
 	}
@@ -76,16 +64,39 @@ func gitClone(outputDir string, branch string, withSubmodules bool) (err error) 
 	if len(branch) < 1 {
 		branch = "main" // Default branch if not specified
 	}
-	if err = exec.Command("git", "checkout", branch).Run(); err != nil {
-		errMsg := "Failed to switch to git branch!"
-		err = fmt.Errorf("%s: %s %w", errMsg, branch, err)
+	Logger.Info("Checking out repository...")
+	checkoutCmd := exec.Command("git", "checkout", branch)
+	checkoutCmd.Dir = repoDir
+	if outCheckout, errCheckout := checkoutCmd.CombinedOutput(); errCheckout != nil {
+		Logger.Warn("Failed to switch to git branch! Creating branch and switching to branch instead...", zap.String("gitOutput", string(outCheckout)))
+		createBranchCmd := exec.Command("git", "checkout", "-b", branch)
+		createBranchCmd.Dir = repoDir
+		if outCreate, errCreate := createBranchCmd.CombinedOutput(); errCreate != nil {
+			errMsg := "Failed to create and switch to git branch!"
+			Logger.Error(errMsg, zap.String("git output", string(outCreate)))
+			err = fmt.Errorf("%s: %s\nGit output: %s", errMsg, branch, string(outCreate))
+			return
+		}
+	}
+	return
+}
+
+// gitClone clones the repository into a directory.
+func gitPull(repoDir string, branch string) (err error) {
+	Logger.Info("Pulling repository...")
+	pullCmd := exec.Command("git", "pull", "origin", branch)
+	pullCmd.Dir = repoDir
+	if outPull, errPull := pullCmd.CombinedOutput(); errPull != nil {
+		errMsg := "Failed to pull git changes!"
+		Logger.Error(errMsg, zap.String("git output", string(outPull)))
+		err = fmt.Errorf("%s: %s\nGit output: %s", errMsg, branch, string(outPull))
 		return
 	}
 	return
 }
 
 // GitPushSchoolDeployment pushes the generated files to the repository.
-func GitPushSchoolDeployment(schoolID string, baseDir string, filesDir string) (ok bool, err error) {
+func GitPushSchoolDeployment(schoolID string, baseDir string, filesDir string) (err error) {
 	repoDir := filepath.Join(baseDir, repoDir)
 	os.RemoveAll(repoDir)
 
@@ -93,7 +104,15 @@ func GitPushSchoolDeployment(schoolID string, baseDir string, filesDir string) (
 	if err = config.GitDistributedLock(func() error {
 		return gitClone(repoDir, config.Env.GitRepoBranch, false)
 	}); err != nil {
+		Logger.Error("Failed to clone repo!", zap.Error(err))
 		return
+	}
+
+	// Pull the changes from main branch
+	if err = config.GitDistributedLock(func() error {
+		return gitPull(repoDir, "main")
+	}); err != nil {
+		Logger.Warn("Failed to pull git changes! Skipping...")
 	}
 
 	// Define source and destination directories for the school deployment files
@@ -128,7 +147,7 @@ func GitPushSchoolDeployment(schoolID string, baseDir string, filesDir string) (
 
 	// Push the changes to GitHub
 	err = config.GitDistributedLock(func() error {
-		ok, err = gitPush(fmt.Sprintf("Deploy school %s", schoolID), config.Env.GitRepoBranch)
+		err = gitPush(repoDir, fmt.Sprintf("Deploy school %s", schoolID), config.Env.GitRepoBranch)
 		return err
 	})
 
@@ -136,7 +155,7 @@ func GitPushSchoolDeployment(schoolID string, baseDir string, filesDir string) (
 }
 
 // GitPushDeletedSchoolDeployment pushes the deleted school files to the repository.
-func GitPushDeletedSchoolDeployment(schoolID string, baseDir string) (ok bool, err error) {
+func GitPushDeletedSchoolDeployment(schoolID string, baseDir string) (err error) {
 	repoDir := filepath.Join(baseDir, repoDir)
 
 	// Clone the repo into a directory
@@ -144,6 +163,13 @@ func GitPushDeletedSchoolDeployment(schoolID string, baseDir string) (ok bool, e
 		return gitClone(repoDir, config.Env.GitRepoBranch, false)
 	}); err != nil {
 		return
+	}
+
+	// Pull the changes from GitHub
+	if err = config.GitDistributedLock(func() error {
+		return gitPull(repoDir, config.Env.GitRepoBranch)
+	}); err != nil {
+		Logger.Warn("Failed to pull git changes! Skipping...")
 	}
 
 	// Add school to deleted folder by creating a directory and adding a .gitkeep file
@@ -168,7 +194,7 @@ func GitPushDeletedSchoolDeployment(schoolID string, baseDir string) (ok bool, e
 
 	// Push the changes to GitHub
 	err = config.GitDistributedLock(func() error {
-		ok, err = gitPush(fmt.Sprintf("Deploy school %s", schoolID), config.Env.GitRepoBranch)
+		err = gitPush(repoDir, fmt.Sprintf("Deploy school %s", schoolID), config.Env.GitRepoBranch)
 		return err
 	})
 	return

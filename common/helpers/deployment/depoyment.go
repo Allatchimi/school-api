@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
+	"time"
 
 	"api/common/helpers"
 	htmlHelper "api/common/helpers/html"
@@ -21,8 +23,8 @@ const (
 )
 
 // DeploySchool generates configuration files and pushes them to the repository.
-func DeploySchool(school *model.School) (ok bool, err error) {
-	if school == nil || school.ID < 1 || school.Config == nil || len(school.Config.DomainName) < 1 {
+func DeploySchool(school *model.School) (err error) {
+	if school == nil || school.ID < 1 || school.Config == nil || len(school.Config.WebsiteDomainName) < 1 {
 		errMsg := "School is nil or have invalid fields!"
 		err = fmt.Errorf("%s", errMsg)
 		return
@@ -38,7 +40,7 @@ func DeploySchool(school *model.School) (ok bool, err error) {
 	defer os.RemoveAll(tempDir)
 
 	// Generate website URL
-	websiteURL := fmt.Sprintf("https://%s", school.Config.DomainName)
+	websiteURL := fmt.Sprintf("https://%s", school.Config.WebsiteDomainName)
 	// Generate API key using HMAC SHA256
 	apiKey, err := securityUtil.GenerateHMAC_SHA256_Base64URL(
 		fmt.Sprintf("%d", school.ID),
@@ -75,18 +77,31 @@ func DeploySchool(school *model.School) (ok bool, err error) {
 		PrimaryBgHover: school.Config.ColorPrimaryBgHover,
 	}
 	// Generate deployment data
-	deploymentData := DeploymentData{
-		DomainName: school.Config.DomainName,
+	kubernetesDeploymentData := KubernetesWebsiteDomainNameData{
+		WebsiteDomainName: school.Config.WebsiteDomainName,
+	}
+	smtpDomainNameData := SmtpDomainNameData{
+		SmtpDomainName: school.Config.UserEmailDomainName,
+	}
+	var selector string = strings.ReplaceAll(strings.ToLower(strings.TrimSpace(school.Config.UserEmailDomainName)), ".", "")
+	if len(selector) > 100 {
+		selector = fmt.Sprintf("school%dselector", school.ID)
+	}
+	selector = fmt.Sprintf("%s%d", selector, time.Now().Year())
+	smtpSelectorData := SmtpSelectorData{
+		SmtpSelector: selector,
 	}
 	// Define output directory structure
 	outputDir := filepath.Join(tempDir, fmt.Sprintf("%d", school.ID))
 	deploymentDir := filepath.Join(outputDir, "deployment")
+	deploymentKubernetesDir := filepath.Join(deploymentDir, "kubernetes")
+	deploymentSmtpDir := filepath.Join(deploymentDir, "smtp")
 	websiteDir := filepath.Join(outputDir, "website")
-	colorDir := filepath.Join(websiteDir, "src", "lib", "api", "constants", "common")
+	colorDir := filepath.Join(websiteDir, "src", "lib", "constants", "common")
 	faviconDir := filepath.Join(websiteDir, "src", "app")
-	logosDir := filepath.Join(websiteDir, "public", "images", "logos")
+	logosDir := filepath.Join(websiteDir, "public", "assets", "images", "logos")
 	// Create required directories
-	for _, dir := range []string{outputDir, deploymentDir, websiteDir, colorDir, faviconDir, logosDir} {
+	for _, dir := range []string{outputDir, deploymentDir, deploymentKubernetesDir, deploymentSmtpDir, websiteDir, colorDir, faviconDir, logosDir} {
 		if err = os.MkdirAll(dir, os.ModePerm); err != nil {
 			errMsg := "Failed to create directory!"
 			err = fmt.Errorf("%s: %s %w", errMsg, dir, err)
@@ -104,10 +119,21 @@ func DeploySchool(school *model.School) (ok bool, err error) {
 		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(colorDir, "color.ts"), colorTemplateContent, err)
 		return
 	}
-	// Generate deployment files
-	if err = htmlHelper.RenderTemplate(filepath.Join(deploymentDir, "domainname.txt"), domainNameDeploymentTemplateContent, deploymentData); err != nil {
+	// Generate kubernetes deployment files
+	if err = htmlHelper.RenderTemplate(filepath.Join(deploymentKubernetesDir, "domainname.txt"), kubernetesWebsiteDomainNameTemplateContent, kubernetesDeploymentData); err != nil {
 		errMsg := "Failed to render template!"
-		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentDir, "domainname.txt"), domainNameDeploymentTemplateContent, err)
+		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentKubernetesDir, "domainname.txt"), kubernetesWebsiteDomainNameTemplateContent, err)
+		return
+	}
+	// Generate smtp deployment files
+	if err = htmlHelper.RenderTemplate(filepath.Join(deploymentSmtpDir, "domainname.txt"), smtpDomainNameDeploymentTemplateContent, smtpDomainNameData); err != nil {
+		errMsg := "Failed to render template!"
+		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentSmtpDir, "domainname.txt"), smtpDomainNameDeploymentTemplateContent, err)
+		return
+	}
+	if err = htmlHelper.RenderTemplate(filepath.Join(deploymentSmtpDir, "selector.txt"), smtpSelectorDeploymentTemplateContent, smtpSelectorData); err != nil {
+		errMsg := "Failed to render template!"
+		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentSmtpDir, "selector.txt"), smtpSelectorDeploymentTemplateContent, err)
 		return
 	}
 	// Download favicon if available
@@ -139,21 +165,17 @@ func DeploySchool(school *model.School) (ok bool, err error) {
 	}
 
 	// Push deployment
-	ok, err = helpers.GitPushSchoolDeployment(fmt.Sprintf("%d", school.ID), tempDir, outputDir)
+	err = helpers.GitPushSchoolDeployment(fmt.Sprintf("%d", school.ID), tempDir, outputDir)
 	if err != nil {
 		helpers.Logger.Error("Failed to push school deployment!", zap.String("Error", err.Error()))
-		return false, err
+		return
 	}
-	if !ok {
-		helpers.Logger.Warn(fmt.Sprintf("School deployment skipped! No changes detected for school %d!", school.ID))
-	} else {
-		helpers.Logger.Info(fmt.Sprintf("School deployment successfully added for school %d!", school.ID))
-	}
+	helpers.Logger.Info(fmt.Sprintf("School deployment successfully added for school %d!", school.ID))
 	return
 }
 
 // DeleteSchoolDeployment deletes a school deployment from the repository.
-func DeleteSchoolDeployment(schoolID int64) (ok bool, err error) {
+func DeleteSchoolDeployment(schoolID int64) (err error) {
 	if schoolID < 1 {
 		errMsg := "School ID is invalid!"
 		err = fmt.Errorf("%s", errMsg)
@@ -180,15 +202,11 @@ func DeleteSchoolDeployment(schoolID int64) (ok bool, err error) {
 	}
 
 	// Push deployment to delete school
-	ok, err = helpers.GitPushDeletedSchoolDeployment(fmt.Sprintf("%d", schoolID), tempDir)
+	err = helpers.GitPushDeletedSchoolDeployment(fmt.Sprintf("%d", schoolID), tempDir)
 	if err != nil {
 		helpers.Logger.Error("Failed to push deleted school deployment!", zap.String("Error", err.Error()))
-		return false, err
+		return
 	}
-	if !ok {
-		helpers.Logger.Warn(fmt.Sprintf("School deployment deletion skipped! No changes detected for school %d!", schoolID))
-	} else {
-		helpers.Logger.Info(fmt.Sprintf("School deployment successfully deleted for school %d!", schoolID))
-	}
+	helpers.Logger.Info(fmt.Sprintf("School deployment successfully deleted for school %d!", schoolID))
 	return
 }

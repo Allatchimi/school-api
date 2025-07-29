@@ -11,7 +11,9 @@ type MeetingRoomRequest struct {
 }
 
 type GetAllRequest struct {
-	SchoolID      int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
-	LevelDomainID int64 `json:"levelDomainID" query:"levelDomainID" required:"false" doc:"Level domain id"`
-	ClassID       int64 `json:"classID" query:"classID" required:"false" doc:"Class id"`
+	SchoolID       int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
+	ClassID        int64 `json:"classID" query:"classID" required:"false" doc:"Class id"`
+	LevelDomainID  int64 `json:"levelDomainID" query:"levelDomainID" required:"false" doc:"Level domain id"`
+	ClassSubjectID int64 `json:"classSubjectID" query:"classSubjectID" required:"false" doc:"Subject class id"`
+	UnitID         int64 `json:"unitID" query:"unitID" required:"false" doc:"Unit id"`
 }

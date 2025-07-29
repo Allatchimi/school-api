@@ -35,10 +35,8 @@ func RegisterEndpoints(
 
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
-						fmt.Sprintf("%s",
-							constants.FeatureAdmin,
-						), // Features scope
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s", constants.FeatureAdmin), // Feature
 						tableName,                  // Table name
 						constants.PermissionUpdate, // Operation
 					},
@@ -81,10 +79,8 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
-						fmt.Sprintf("%s",
-							constants.FeatureAdmin,
-						), // Features scope
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s", constants.FeatureAdmin), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -114,16 +110,14 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-permission-multiple",
 			Summary:     "Delete multiple permission",
-			Description: "Delete multiple permission by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple permission by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
-						fmt.Sprintf("%s",
-							constants.FeatureAdmin,
-						), // Features scope
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s", constants.FeatureAdmin), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -159,10 +153,8 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
-						fmt.Sprintf("%s",
-							constants.FeatureAdmin,
-						), // Features scope
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s", constants.FeatureAdmin), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -186,16 +178,6 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-
-			// Generate items
-			tempResult := make([]data.PermissionResponse, 10)
-			for i := range result.Data {
-				tempModel := data.PermissionResponse{}
-				tempModel.ID = int64(i)
-
-				tempResult[i] = tempModel
-			}
-			result.Data = tempResult
 
 			return &struct {
 				Body data.PermissionListResponse

@@ -12,7 +12,15 @@ import (
 
 type ExamResponse struct {
 	types.BaseGormModelResponse
+	School       *schoolData.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	Year         *yearData.YearResponse           `json:"year" required:"false" doc:"Year"`
+	ClassSubject *classData.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Class subject"`
+	Sequence     *sequenceData.SequenceResponse   `json:"semester" required:"false" doc:"Sequence"`
+	Unit         *unitData.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
+	Type         *ExamTypeResponse                `json:"type" required:"false" doc:"Type"`
+
 	Status          string     `json:"status" required:"false" doc:"Status"`
+	Notation        float64    `json:"notation" required:"false" doc:"Notation"`
 	Percentage      int        `json:"percentage" required:"false" doc:"Percentage"`
 	Description     string     `json:"description" required:"false" doc:"Description"`
 	LocationType    string     `json:"locationType" required:"false" doc:"Location type"`
@@ -21,29 +29,24 @@ type ExamResponse struct {
 	AllowedItems    string     `json:"allowedItems" required:"false" doc:"Allowed items"`
 	StartDate       *time.Time `json:"startDate" required:"false" doc:"Start date"`
 	EndDate         *time.Time `json:"endDate" required:"false" doc:"End date"`
-
-	School       *schoolData.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Year         *yearData.YearResponse           `json:"Year" required:"false" doc:"Year"`
-	Type         *ExamTypeResponse                `json:"type" required:"false" doc:"Type"`
-	ClassSubject *classData.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Class subject"`
-	Sequence     *sequenceData.SequenceResponse   `json:"semester" required:"false" doc:"Sequence"`
-	Unit         *unitData.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
+	IsRetry         bool       `json:"isRetry" required:"false" doc:"Is retry"`
+	RetryCount      int64      `json:"retryCount" required:"false" doc:"Retry count"`
 }
 
 type ExamTypeResponse struct {
 	types.BaseGormModelResponse
+	School *schoolData.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+
 	Name        string `json:"name" required:"false" doc:"Name"`
 	Description string `json:"description" required:"false" doc:"Description"`
-
-	School *schoolData.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
 }
 
 type ExamResponseList struct {
 	types.PaginatedResponse
-	Data []ExamResponse `json:"data" required:"false" doc:"List of exams"`
+	Data []ExamResponse `json:"data" required:"false" doc:"List of exam"`
 }
 
 type ExamTypeResponseList struct {
 	types.PaginatedResponse
-	Data []ExamTypeResponse `json:"data" required:"false" doc:"List of exam types"`
+	Data []ExamTypeResponse `json:"data" required:"false" doc:"List of exam type"`
 }

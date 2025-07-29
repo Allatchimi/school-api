@@ -10,9 +10,6 @@ import (
 
 type MeetingRoom struct {
 	types.BaseGormModel
-
-	ApiRoomID string `gorm:"default:null"`
-
 	SchoolID int64               `gorm:"default:null"`
 	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
@@ -21,6 +18,8 @@ type MeetingRoom struct {
 
 	UnitID int64                     `gorm:"default:null"`
 	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
+	ApiRoomID string `gorm:"default:null"`
 }
 
 func (item *MeetingRoom) ToResponse() *data.MeetingRoomResponse {
@@ -31,7 +30,7 @@ func (item *MeetingRoom) ToResponse() *data.MeetingRoomResponse {
 	resp.ApiRoomID = item.ApiRoomID
 
 	resp.School = item.School.ToPublicResponse()
-	resp.ClassSubject = item.ClassSubject.ToClassSubjectResponse()
+	resp.ClassSubject = item.ClassSubject.ToResponse()
 	resp.Unit = item.Unit.ToResponse()
 
 	resp.ID = item.ID

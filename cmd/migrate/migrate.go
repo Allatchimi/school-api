@@ -3,9 +3,9 @@ package migrate
 import (
 	"api/common/helpers"
 	"api/config"
-	communicationModel "api/services/common/communication/model"
-	contactModel "api/services/common/contact/model"
-	notificationModel "api/services/common/notification/model"
+	communicationModel "api/services/others/communication/model"
+	contactModel "api/services/others/contact/model"
+	notificationModel "api/services/others/notification/model"
 	courseModel "api/services/school/common/course/model"
 	directorModel "api/services/school/common/director/model"
 	examModel "api/services/school/common/exam/model"
@@ -76,8 +76,8 @@ func Apply() error {
 		// ----------- School -----------
 		// School
 		&schoolModel.School{},
-		&schoolModel.SchoolInfo{},
 		&schoolModel.SchoolConfig{},
+		&schoolModel.SchoolInfo{},
 		// Director
 		&directorModel.Director{},
 		// Teacher
@@ -85,12 +85,12 @@ func Apply() error {
 		&teacherModel.TeacherClassSubjectUnit{},
 		// Student
 		&studentModel.Student{},
+		&studentModel.StudentPreEnroll{},
 		&studentModel.StudentEnroll{},
 		// Parent
 		&parentModel.Parent{},
 		&parentModel.ParentStudent{},
 		&parentModel.ParentAssign{},
-		&parentModel.ParentAssignStudent{},
 		// Year
 		&yearModel.Year{},
 		// Course
@@ -114,9 +114,9 @@ func Apply() error {
 		&reportModel.ReportEntry{},
 		&reportModel.ReportGrade{},
 		&reportModel.ReportConfig{},
+		&reportModel.ReportTable{},
 		// Schedule
 		&scheduleModel.Schedule{},
-		&scheduleModel.ScheduleGeneric{},
 		// Request
 		&requestModel.Request{},
 		// Payment
@@ -132,7 +132,6 @@ func Apply() error {
 		&classModel.HighschoolClassSubject{},
 		// Quarter
 		&quarterModel.HighschoolQuarter{},
-		&quarterModel.HighschoolQuarterSequence{},
 		// Sequence
 		&sequenceModel.HighschoolSequence{},
 		// Subject

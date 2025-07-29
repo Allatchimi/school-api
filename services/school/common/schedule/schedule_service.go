@@ -21,21 +21,39 @@ func NewService(repository *Repository) *Service {
 const MODEL_NAME = "schedule"
 const DEFAULT_ERROR_MESSAGE = "interact with schedule model"
 
-func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.ScheduleRequest) (result *model.Schedule, errCode int, err error) {
+func (service *Service) Create(
+	ctxData *types.ContextData,
+	request *data.ScheduleRequest,
+) (result *model.Schedule, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
 	// Format request
 	item := &model.Schedule{
-		SchoolID:       request.SchoolID,
-		YearID:         request.YearID,
-		ClassSubjectID: request.ClassSubjectID,
-		UnitID:         request.UnitID,
+		SchoolID:       newRequest.SchoolID,
+		YearID:         newRequest.YearID,
+		ClassSubjectID: newRequest.ClassSubjectID,
+		UnitID:         newRequest.UnitID,
 
-		Type:         request.Type,
-		DayOfTheWeek: request.DayOfTheWeek,
-		RepeatCount:  request.RepeatCount,
-		RepeatType:   request.RepeatType,
-		StartTime:    request.StartTime,
-		EndTime:      request.EndTime,
-		IsValid:      request.IsValid,
+		IsCommon:     newRequest.IsCommon,
+		Type:         newRequest.Type,
+		Description:  newRequest.Description,
+		DayOfTheWeek: newRequest.DayOfTheWeek,
+		RepeatCount:  newRequest.RepeatCount,
+		RepeatType:   newRequest.RepeatType,
+		StartTime:    newRequest.StartTime,
+		EndTime:      newRequest.EndTime,
+		IsValid:      newRequest.IsValid,
+	}
+	if !newRequest.IsCommon {
+		if newRequest.ClassSubjectID < 1 && newRequest.UnitID < 1 {
+			errCode = http.StatusBadRequest
+			err = constants.Http400BadRequestErrorMessageV2("class subject id or unit id(you should provide one of these fields)")
+			return
+		}
 	}
 
 	// Check unique
@@ -68,99 +86,58 @@ func (service *Service) Create(inputJwtToken *types.JwtToken, request *data.Sche
 	return
 }
 
-func (service *Service) CreateGeneric(inputJwtToken *types.JwtToken, request *data.ScheduleRequest) (result *model.Schedule, errCode int, err error) {
-	// Format request
-	item := &model.ScheduleGeneric{
-		SchoolID: request.SchoolID,
-		YearID:   request.YearID,
-
-		Type:         request.Type,
-		DayOfTheWeek: request.DayOfTheWeek,
-		RepeatCount:  request.RepeatCount,
-		RepeatType:   request.RepeatType,
-		StartTime:    request.StartTime,
-		EndTime:      request.EndTime,
-		IsValid:      request.IsValid,
+func (service *Service) Update(
+	ctxData *types.ContextData,
+	id int64,
+	request *data.ScheduleRequest,
+) (result *model.Schedule, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
 	}
 
-	// Check unique
-	foundUnique, err := service.Repository.GetScheduleGenericUniqueObject(item)
+	// Check if the item exists
+	var foundItem *model.Schedule
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetByIDSchoolID(id, newRequest.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if service.Repository.AreScheduleGenericSameUniqueObjects(foundUnique, item) {
-		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage(MODEL_NAME)
-		return
-	}
-
-	// Check invalid date
-	if !item.IsValid {
-		invalidDate := new(time.Time)
-		*invalidDate = time.Now()
-		item.InvalidDate = invalidDate
-	}
-
-	// Insert schedule
-	resultGeneric, err := service.Repository.CreateScheduleGeneric(item)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-
-	// Cast to Schedule
-	result = &model.Schedule{
-		SchoolID: resultGeneric.SchoolID,
-		School:   resultGeneric.School,
-		YearID:   resultGeneric.YearID,
-		Year:     resultGeneric.Year,
-
-		Type:         resultGeneric.Type,
-		DayOfTheWeek: resultGeneric.DayOfTheWeek,
-		RepeatCount:  resultGeneric.RepeatCount,
-		RepeatType:   resultGeneric.RepeatType,
-		StartTime:    resultGeneric.StartTime,
-		EndTime:      resultGeneric.EndTime,
-		IsValid:      resultGeneric.IsValid,
-		InvalidDate:  resultGeneric.InvalidDate,
-	}
-	result.ID = resultGeneric.ID
-	result.CreatedAt = resultGeneric.CreatedAt
-	result.UpdatedAt = resultGeneric.UpdatedAt
-	return
-}
-
-func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request *data.ScheduleRequest) (result *model.Schedule, errCode int, err error) {
-	// Format request
-	item := &model.Schedule{
-		SchoolID:       request.SchoolID,
-		YearID:         request.YearID,
-		ClassSubjectID: request.ClassSubjectID,
-		UnitID:         request.UnitID,
-
-		Type:         request.Type,
-		DayOfTheWeek: request.DayOfTheWeek,
-		RepeatCount:  request.RepeatCount,
-		RepeatType:   request.RepeatType,
-		StartTime:    request.StartTime,
-		EndTime:      request.EndTime,
-		IsValid:      request.IsValid,
-	}
-
-	// Check if schedule already exists
-	foundItem, err := service.Repository.GetByID(id)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundItem == nil {
+	if foundItem == nil || foundItem.ID < 1 {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
+	}
+
+	// Format request
+	item := &model.Schedule{
+		SchoolID:       newRequest.SchoolID,
+		YearID:         newRequest.YearID,
+		ClassSubjectID: newRequest.ClassSubjectID,
+		UnitID:         newRequest.UnitID,
+
+		IsCommon:     newRequest.IsCommon,
+		Type:         newRequest.Type,
+		Description:  newRequest.Description,
+		DayOfTheWeek: newRequest.DayOfTheWeek,
+		RepeatCount:  newRequest.RepeatCount,
+		RepeatType:   newRequest.RepeatType,
+		StartTime:    newRequest.StartTime,
+		EndTime:      newRequest.EndTime,
+		IsValid:      newRequest.IsValid,
+	}
+	if !newRequest.IsCommon {
+		if newRequest.ClassSubjectID < 1 && newRequest.UnitID < 1 {
+			errCode = http.StatusBadRequest
+			err = constants.Http400BadRequestErrorMessageV2("class subject id or unit id(you should provide one of these fields)")
+			return
+		}
 	}
 
 	// Check unique
@@ -186,7 +163,7 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	}
 
 	// Update schedule
-	result, err = service.Repository.Update(id, item)
+	result, err = service.Repository.UpdateByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -195,87 +172,29 @@ func (service *Service) Update(inputJwtToken *types.JwtToken, id int64, request 
 	return
 }
 
-func (service *Service) UpdateGeneric(inputJwtToken *types.JwtToken, id int64, request *data.ScheduleRequest) (result *model.Schedule, errCode int, err error) {
-	// Format request
-	item := &model.ScheduleGeneric{
-		SchoolID: request.SchoolID,
-		YearID:   request.YearID,
-
-		Type:         request.Type,
-		DayOfTheWeek: request.DayOfTheWeek,
-		RepeatCount:  request.RepeatCount,
-		RepeatType:   request.RepeatType,
-		StartTime:    request.StartTime,
-		EndTime:      request.EndTime,
-		IsValid:      request.IsValid,
+func (service *Service) Delete(
+	ctxData *types.ContextData,
+	id int64,
+) (affectedRows int64, errCode int, err error) {
+	// Check if the item exists
+	var foundItem *model.Schedule
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetByID(id)
 	}
-
-	// Check if schedule already exists
-	foundItem, err := service.Repository.GetScheduleGenericByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem == nil {
+	if foundItem == nil || foundItem.ID < 1 {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 
-	// Check unique
-	foundUnique, err := service.Repository.GetScheduleGenericUniqueObject(item)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if service.Repository.AreScheduleGenericSameUniqueObjects(foundUnique, item) && !service.Repository.AreScheduleGenericSameUniqueObjects(foundUnique, foundItem) {
-		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage(MODEL_NAME)
-		return
-	}
-
-	// Check invalid date
-	if !item.IsValid && foundItem.IsValid {
-		invalidDate := new(time.Time)
-		*invalidDate = time.Now()
-		item.InvalidDate = invalidDate
-	} else if item.IsValid && !foundItem.IsValid {
-		item.InvalidDate = nil
-	}
-
-	// Update schedule
-	resultGeneric, err := service.Repository.UpdateScheduleGeneric(id, item)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-
-	// Cast to Schedule
-	result = &model.Schedule{
-		SchoolID: resultGeneric.SchoolID,
-		School:   resultGeneric.School,
-		YearID:   resultGeneric.YearID,
-		Year:     resultGeneric.Year,
-
-		Type:         resultGeneric.Type,
-		DayOfTheWeek: resultGeneric.DayOfTheWeek,
-		RepeatCount:  resultGeneric.RepeatCount,
-		RepeatType:   resultGeneric.RepeatType,
-		StartTime:    resultGeneric.StartTime,
-		EndTime:      resultGeneric.EndTime,
-		IsValid:      resultGeneric.IsValid,
-		InvalidDate:  resultGeneric.InvalidDate,
-	}
-	result.ID = resultGeneric.ID
-	result.CreatedAt = resultGeneric.CreatedAt
-	result.UpdatedAt = resultGeneric.UpdatedAt
-	return
-}
-
-func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
+	// Delete
 	affectedRows, err = service.Repository.DeleteByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -290,8 +209,11 @@ func (service *Service) Delete(inputJwtToken *types.JwtToken, id int64) (affecte
 	return
 }
 
-func (service *Service) DeleteGeneric(inputJwtToken *types.JwtToken, id int64) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteScheduleGenericByID(id)
+func (service *Service) DeleteMultiple(
+	ctxData *types.ContextData,
+	list []int64,
+) (affectedRows int64, errCode int, err error) {
+	affectedRows, err = service.Repository.DeleteMultipleByID(list, ctxData.Jwt.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -305,8 +227,15 @@ func (service *Service) DeleteGeneric(inputJwtToken *types.JwtToken, id int64) (
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Schedule, errCode int, err error) {
-	result, err = service.Repository.GetByID(id)
+func (service *Service) Get(
+	ctxData *types.ContextData,
+	id int64,
+) (result *model.Schedule, errCode int, err error) {
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		result, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		result, err = service.Repository.GetByID(id)
+	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -320,60 +249,23 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 	return
 }
 
-func (service *Service) GetGeneric(inputJwtToken *types.JwtToken, id int64) (result *model.Schedule, errCode int, err error) {
-	resultGeneric, err := service.Repository.GetScheduleGenericByID(id)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if resultGeneric == nil {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-	result = model.ConvertScheduleGenericToSchedule(resultGeneric)
-	return
-}
-
-func (service *Service) GetAll(inputJwtToken *types.JwtToken, filter *types.Filter, pagination *types.Pagination, request *data.GetAllRequest) (result []model.Schedule, errCode int, err error) {
-	// Get default schedules
-	if request.Type == "default" {
-		resultDefault, errDefault := service.Repository.GetAll(filter, pagination, request)
-		if errDefault != nil {
-			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			return
-		}
-		result = resultDefault
-		return
-	}
-	// Get generic schedules
-	if request.Type == "generic" {
-		resultGeneric, errGeneric := service.Repository.GetAllScheduleGeneric(filter, pagination, request)
-		if errGeneric != nil {
-			errCode = http.StatusInternalServerError
-			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			return
-		}
-		resultDefault := make([]model.Schedule, 0)
-		result = model.ListAppendGenericSchedules(resultDefault, resultGeneric)
-		return
+func (service *Service) GetAll(
+	ctxData *types.ContextData,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.Schedule, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
 	}
 
-	// Get all schedules
-	resultDefault, err := service.Repository.GetAll(filter, pagination, request)
+	// Get
+	result, err = service.Repository.GetAll(filter, pagination, &newRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
 	}
-	resultGeneric, err := service.Repository.GetAllScheduleGeneric(filter, pagination, request)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	result = model.ListAppendGenericSchedules(resultDefault, resultGeneric)
 	return
 }

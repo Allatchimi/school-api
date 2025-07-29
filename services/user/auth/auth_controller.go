@@ -7,7 +7,6 @@ import (
 	"time"
 
 	httpHelper "api/common/helpers/http"
-	"api/common/utils"
 	"api/services/user/auth/data"
 )
 
@@ -26,21 +25,12 @@ func (controller *Controller) LoginWithEmail(
 		Body data.LoginWithEmailRequest
 	},
 ) (result *data.LoginResponse, errCode int, err error) {
-	// Check input
-	isEmailValid := utils.IsEmailValid(input.Body.Email)
-	if !isEmailValid {
-		errCode = http.StatusBadRequest
-		err = fmt.Errorf("%s", "Invalid email! Please enter valid information.")
-		return
-	}
-
-	// Execute the service
 	accessToken, accessExpires, activateAccountToken, errCode, err := controller.Service.Login(
+		httpHelper.GetSchoolContext(ctx),
 		&data.LoginRequest{
 			Email:         input.Body.Email,
 			Password:      input.Body.Password,
 			StayConnected: input.Body.StayConnected,
-			SchoolID:      input.Body.SchoolID,
 		},
 		&input.LoginDevice,
 	)
@@ -63,18 +53,13 @@ func (controller *Controller) LoginWithProvider(
 		Body data.LoginWithProviderRequest
 	},
 ) (result *data.LoginResponse, errCode int, err error) {
-	// Check input
-	isProviderValid := utils.IsAuthProviderValid(input.Body.Provider)
-	if !isProviderValid {
-		errCode = http.StatusBadRequest
-		err = fmt.Errorf("%s", "Invalid or empty provider! Please enter valid information.")
-		return
-	}
-
-	// Execute the service
-	accessToken := ""
+	var accessToken string
 	var accessExpires *time.Time
-	accessToken, accessExpires, errCode, err = controller.Service.LoginWithProvider(&input.Body, &input.LoginDevice)
+	accessToken, accessExpires, errCode, err = controller.Service.LoginWithProvider(
+		httpHelper.GetSchoolContext(ctx),
+		&input.Body,
+		&input.LoginDevice,
+	)
 	if err != nil {
 		return
 	}
@@ -91,34 +76,9 @@ func (controller *Controller) RegisterWithEmail(
 		Body data.RegisterWithEmailRequest
 	},
 ) (result *data.RegisterResponse, errCode int, err error) {
-	// Check input
-	isEmailValid := utils.IsEmailValid(input.Body.Email)
-	isPasswordValid, missingPasswordChars := utils.IsPasswordValid(input.Body.Password)
-	if !isEmailValid && !isPasswordValid {
-		errCode = http.StatusBadRequest
-		err = fmt.Errorf("%s %s",
-			"Invalid email and password! Password missing",
-			missingPasswordChars,
-		)
-		return
-	}
-	if !isEmailValid {
-		errCode = http.StatusBadRequest
-		err = fmt.Errorf("%s", "Invalid email! Please enter valid information.")
-		return
-	}
-	if !isPasswordValid {
-		errCode = http.StatusBadRequest
-		err = fmt.Errorf("%s %s",
-			"Invalid password! Password missing",
-			missingPasswordChars,
-		)
-		return
-	}
-
-	// Execute the service
 	var activateAccountToken string
 	activateAccountToken, errCode, err = controller.Service.Register(
+		httpHelper.GetSchoolContext(ctx),
 		&data.RegisterRequest{
 			Email:    input.Body.Email,
 			Password: input.Body.Password,
@@ -157,6 +117,7 @@ func (controller *Controller) ForgotPasswordEmailInit(
 	},
 ) (result *data.ForgotPasswordInitResponse, errCode int, err error) {
 	token, errCode, err := controller.Service.ForgotPasswordInit(
+		httpHelper.GetContextData(ctx),
 		&data.ForgotPasswordInitRequest{
 			Email: input.Body.Email,
 		},
@@ -210,7 +171,7 @@ func (controller *Controller) ForgotPasswordNewPassword(
 func (controller *Controller) Logout(
 	ctx *context.Context,
 ) (result *data.LogoutResponse, errCode int, err error) {
-	errCode, err = controller.Service.Logout(httpHelper.GetJwtContext(ctx), httpHelper.ExtractBearerContext(ctx))
+	errCode, err = controller.Service.Logout(httpHelper.GetContextData(ctx), httpHelper.ExtractBearerContext(ctx))
 	if err != nil {
 		return
 	}

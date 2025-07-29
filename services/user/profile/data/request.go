@@ -4,10 +4,9 @@ import "time"
 
 // Update profile information
 type UpdateProfileInfoRequest struct {
-	Username  string `json:"username" required:"false" minLength:"2" maxLength:"30" doc:"User name"`
-	FirstName string `json:"firstName" required:"true" minLength:"2" maxLength:"30" doc:"First name"`
-	LastName  string `json:"lastName" required:"true" minLength:"2" maxLength:"30" doc:"Last name"`
-
+	Username      string     `json:"username" required:"false" minLength:"2" maxLength:"30" doc:"User name"`
+	FirstName     string     `json:"firstName" required:"true" minLength:"2" maxLength:"30" doc:"First name"`
+	LastName      string     `json:"lastName" required:"true" minLength:"2" maxLength:"30" doc:"Last name"`
 	Gender        string     `json:"Gender" required:"true" enum:"male,female" doc:"Gender"`
 	Birthday      *time.Time `json:"birthday" required:"false" doc:"Birthday date time"`
 	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`

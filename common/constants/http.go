@@ -13,6 +13,15 @@ const (
 	CodeKey     = "code"
 )
 
+const (
+	RoleIDKey     = "roleID"
+	FeatureKey    = "feature"
+	DirectorIDKey = "directorID"
+	TeacherIDKey  = "teacherID"
+	StudentIDKey  = "studentID"
+	ParentIDKey   = "parentID"
+)
+
 var Http500ErrorMessage = func(message string) error {
 	return fmt.Errorf("%s", fmt.Sprintf("Error occurred when trying to %s! Please try again later.", message))
 }
@@ -41,12 +50,12 @@ var Http409ConflictErrorMessage = func() error {
 	return fmt.Errorf("%s", "Can't process now because of conflict! Please enter valid information.")
 }
 
-var Http423LockedErrorMessage = func() error {
-	return fmt.Errorf("%s", "Can't process now because this operation is locked! Please try again later.")
+var Http422InvalidInputsErrorMessage = func() error {
+	return fmt.Errorf("%s", "Invalid inputs! Please enter valid information.")
 }
 
-var Http406ErrorMessage = func() error {
-	return fmt.Errorf("%s", "The inputs are not acceptable! Please enter valid information.")
+var Http423LockedErrorMessage = func() error {
+	return fmt.Errorf("%s", "Can't process now because this operation is locked! Please try again later.")
 }
 
 var Http404ErrorMessage = func(message string) error {

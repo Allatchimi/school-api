@@ -18,7 +18,7 @@ type Director struct {
 	UID string `gorm:"default:null"`
 }
 
-func (item *Director) ToDirectorResponse() *data.DirectorResponse {
+func (item *Director) ToResponse() *data.DirectorResponse {
 	if item == nil {
 		return nil
 	}
@@ -52,7 +52,7 @@ func (item *Director) ToDirectorPublicResponse() *data.DirectorpublicResponse {
 func ToDirectorResponseList(itemList []Director) []data.DirectorResponse {
 	resp := make([]data.DirectorResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToDirectorResponse()
+		resp[index] = *item.ToResponse()
 	}
 	return resp
 }

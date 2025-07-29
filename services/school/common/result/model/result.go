@@ -4,11 +4,15 @@ import (
 	"api/common/types"
 	modelExam "api/services/school/common/exam/model"
 	"api/services/school/common/result/data"
+	modelSchool "api/services/school/common/school/model"
 	modelStudent "api/services/school/common/student/model"
 )
 
 type Result struct {
 	types.BaseGormModel
+	SchoolID int64               `gorm:"default:null"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+
 	StudentID int64                 `gorm:"default:null"`
 	Student   *modelStudent.Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
@@ -25,7 +29,8 @@ func (item *Result) ToResponse() *data.ResultResponse {
 	resp := &data.ResultResponse{}
 	resp.Value = item.Value
 
-	resp.Student = item.Student.ToStudentPublicResponse()
+	resp.School = item.School.ToPublicResponse()
+	resp.Student = item.Student.ToPublicResponse()
 	resp.Exam = item.Exam.ToResponse()
 
 	resp.ID = item.ID

@@ -11,17 +11,19 @@ type ReportConfig struct {
 	SchoolID int64               `gorm:"default:null"`
 	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Notation               float64 `gorm:"default:null"`
-	NotationMinimumSuccess float64 `gorm:"default:null"`
+	NotationAverage               float64 `gorm:"default:null"`
+	NotationReport                float64 `gorm:"default:null"`
+	MinimumRequiredValueToPromote float64 `gorm:"default:null"`
 }
 
-func (item *ReportConfig) ToReportConfigResponse() *data.ReportConfigResponse {
+func (item *ReportConfig) ToResponse() *data.ReportConfigResponse {
 	if item == nil {
 		return nil
 	}
 	resp := &data.ReportConfigResponse{}
-	resp.Notation = item.Notation
-	resp.NotationMinimumSuccess = item.NotationMinimumSuccess
+	resp.NotationAverage = item.NotationAverage
+	resp.NotationReport = item.NotationReport
+	resp.MinimumRequiredValueToPromote = item.MinimumRequiredValueToPromote
 
 	resp.School = item.School.ToPublicResponse()
 
@@ -34,7 +36,7 @@ func (item *ReportConfig) ToReportConfigResponse() *data.ReportConfigResponse {
 func ToReportConfigResponseList(itemList []ReportConfig) []data.ReportConfigResponse {
 	resp := make([]data.ReportConfigResponse, len(itemList))
 	for index, item := range itemList {
-		resp[index] = *item.ToReportConfigResponse()
+		resp[index] = *item.ToResponse()
 	}
 	return resp
 }

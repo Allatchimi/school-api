@@ -10,7 +10,6 @@ import (
 	"api/common/constants"
 	"api/common/types"
 	"api/services/school/common/report/data"
-	"api/services/school/common/report/model"
 )
 
 func RegisterEndpoints(
@@ -18,10 +17,10 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/schools/reportentries",
-		Tag:   []string{"Report entries"},
+		Group: "/schools/reports",
+		Tag:   []string{"Reports"},
 	}
-	const tableName = "report_entries"
+	const tableName = "reports"
 
 	// Create report entry
 	huma.Register(
@@ -31,15 +30,17 @@ func RegisterEndpoints(
 			Summary:     "Create report entry",
 			Description: "Create new report entry and return created object.",
 			Method:      http.MethodPost,
-			Path:        endpointConfig.Group,
+			Path:        fmt.Sprintf("%s/entries", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
 					},
@@ -71,15 +72,17 @@ func RegisterEndpoints(
 			Summary:     "Create report grade",
 			Description: "Create new report grade and return created object.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/grade", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/grades", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
 					},
@@ -99,7 +102,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ReportGradeResponse }{Body: *result.ToReportGradeResponse()}, nil
+			return &struct{ Body data.ReportGradeResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -111,15 +114,17 @@ func RegisterEndpoints(
 			Summary:     "Create report config",
 			Description: "Create new report config and return created object.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/config", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/configs", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
 					},
@@ -143,7 +148,7 @@ func RegisterEndpoints(
 			}
 			return &struct {
 				Body data.ReportConfigResponse
-			}{Body: *result.ToReportConfigResponse()}, nil
+			}{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -155,15 +160,17 @@ func RegisterEndpoints(
 			Summary:     "Update report grade",
 			Description: "Update existing report grade with matching id and return the new report grade object.",
 			Method:      http.MethodPut,
-			Path:        fmt.Sprintf("%s/grade/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/grades/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionUpdate, // Operation
 					},
@@ -184,7 +191,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ReportGradeResponse }{Body: *result.ToReportGradeResponse()}, nil
+			return &struct{ Body data.ReportGradeResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -196,15 +203,17 @@ func RegisterEndpoints(
 			Summary:     "Update report config",
 			Description: "Update existing report config with matching id and return the new report config object.",
 			Method:      http.MethodPut,
-			Path:        fmt.Sprintf("%s/config/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/configs/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionUpdate, // Operation
 					},
@@ -229,27 +238,29 @@ func RegisterEndpoints(
 			}
 			return &struct {
 				Body data.ReportConfigResponse
-			}{Body: *result.ToReportConfigResponse()}, nil
+			}{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Delete report with id
+	// Delete report entry with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-report",
-			Summary:     "Delete report",
-			Description: "Delete existing report with matching id and return affected rows in database.",
+			OperationID: "delete-report-entry",
+			Summary:     "Delete report entry",
+			Description: "Delete existing report entry with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/entries/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -281,15 +292,17 @@ func RegisterEndpoints(
 			Summary:     "Delete report grade",
 			Description: "Delete existing report grade with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/grade/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/grades/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -321,15 +334,17 @@ func RegisterEndpoints(
 			Summary:     "Delete report config",
 			Description: "Delete existing report config with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/config/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/configs/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -353,23 +368,25 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete multiple report
+	// Delete multiple report entry
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-report-multiple",
-			Summary:     "Delete multiple report",
-			Description: "Delete multiple report by providing a lis of IDs and return affected rows in database.",
+			OperationID: "delete-report-entry-multiple",
+			Summary:     "Delete multiple report entry",
+			Description: "Delete multiple report entry by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/entries/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -399,17 +416,19 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-report-grade-multiple",
 			Summary:     "Delete multiple report grade",
-			Description: "Delete multiple report grade by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple report grade by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/grade/multiple/delete", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/grades/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -439,17 +458,19 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-report-config-multiple",
 			Summary:     "Delete multiple report config",
-			Description: "Delete multiple report config by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple report config by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/config/multiple/delete", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/configs/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -473,26 +494,28 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Get report by id
+	// Get report entry by id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-report-id",
-			Summary:     "Get report by id",
-			Description: "Return one report with matching id",
+			OperationID: "get-report-entry-id",
+			Summary:     "Get report entry by id",
+			Description: "Return one report entry with matching id",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/entries/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -524,18 +547,20 @@ func RegisterEndpoints(
 			Summary:     "Get report grade by id",
 			Description: "Return one report grade with matching id",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/grade/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/grades/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -555,7 +580,7 @@ func RegisterEndpoints(
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
-			return &struct{ Body data.ReportGradeResponse }{Body: *result.ToReportGradeResponse()}, nil
+			return &struct{ Body data.ReportGradeResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -567,18 +592,20 @@ func RegisterEndpoints(
 			Summary:     "Get report config by id",
 			Description: "Return one report config with matching id",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/config/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/configs/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -602,30 +629,32 @@ func RegisterEndpoints(
 			}
 			return &struct {
 				Body data.ReportConfigResponse
-			}{Body: *result.ToReportConfigResponse()}, nil
+			}{Body: *result.ToResponse()}, nil
 		},
 	)
 
-	// Get all report
+	// Get all report entry
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-report-list",
-			Summary:     "Get all report",
-			Description: "Get all report with support for search, filter and pagination",
+			OperationID: "get-report-entry-list",
+			Summary:     "Get all report entry",
+			Description: "Get all report entry with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        endpointConfig.Group,
+			Path:        fmt.Sprintf("%s/entries", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -650,14 +679,6 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			tempReportEntrys := make([]model.ReportEntry, 10)
-			for i := range tempReportEntrys {
-				tmpModel := model.ReportEntry{}
-				tmpModel.ID = int64(i)
-				tempReportEntrys[i] = tmpModel
-			}
-			result.Data = model.ToReportEntryResponseList(tempReportEntrys)
-
 			return &struct {
 				Body data.ReportEntryResponseList
 			}{Body: *result}, nil
@@ -672,18 +693,20 @@ func RegisterEndpoints(
 			Summary:     "Get all report grade",
 			Description: "Get all report grade with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/grade", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/grades", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -708,14 +731,6 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			tempReportEntrys := make([]model.ReportGrade, 10)
-			for i := range tempReportEntrys {
-				tmpModel := model.ReportGrade{}
-				tmpModel.ID = int64(i)
-				tempReportEntrys[i] = tmpModel
-			}
-			result.Data = model.ToReportGradeResponseList(tempReportEntrys)
-
 			return &struct {
 				Body data.ReportGradeResponseList
 			}{Body: *result}, nil
@@ -730,18 +745,20 @@ func RegisterEndpoints(
 			Summary:     "Get all report config",
 			Description: "Get all report config with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/config", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/configs", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -766,16 +783,60 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			tempReportEntrys := make([]model.ReportConfig, 10)
-			for i := range tempReportEntrys {
-				tmpModel := model.ReportConfig{}
-				tmpModel.ID = int64(i)
-				tempReportEntrys[i] = tmpModel
-			}
-			result.Data = model.ToReportConfigResponseList(tempReportEntrys)
-
 			return &struct {
 				Body data.ReportConfigResponseList
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get all report table
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-report-table-list",
+			Summary:     "Get all report table",
+			Description: "Get all report table with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/tables", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Feature
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllReportTableRequest
+			},
+		) (*struct {
+			Body data.ReportTableResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllTable(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+
+			return &struct {
+				Body data.ReportTableResponseList
 			}{Body: *result}, nil
 		},
 	)

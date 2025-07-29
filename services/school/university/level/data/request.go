@@ -20,9 +20,10 @@ type LevelDomainRequest struct {
 	LevelID  int64 `json:"levelID" required:"true" doc:"Level id"`
 	DomainID int64 `json:"domainID" required:"true" doc:"Domain id"`
 
-	Program      string `json:"program" required:"true" doc:"Program"`
-	Requirements string `json:"requirements" required:"false" doc:"Requirements"`
-	IsValid      bool   `json:"isValid" required:"false" doc:"Is valid"`
+	Fees         float64 `json:"fees" required:"false" doc:"Level domain fees"`
+	Program      string  `json:"program" required:"false" doc:"Program"`
+	Requirements string  `json:"requirements" required:"false" doc:"Requirements"`
+	IsValid      bool    `json:"isValid" required:"false" doc:"Is valid"`
 }
 
 type GetAllRequest struct {

@@ -23,17 +23,17 @@ func (item *Permission) ToResponse() *data.PermissionResponse {
 		return nil
 	}
 	resp := &data.PermissionResponse{}
+	resp.ID = item.ID
+	resp.CreatedAt = item.CreatedAt
+	resp.UpdatedAt = item.UpdatedAt
+
+	resp.Role = item.Role.ToResponse()
+
 	resp.TableName = item.TableName
 	resp.Create = item.Create
 	resp.Read = item.Read
 	resp.Update = item.Update
 	resp.Delete = item.Delete
-
-	resp.Role = item.Role.ToResponse()
-
-	resp.ID = item.ID
-	resp.CreatedAt = item.CreatedAt
-	resp.UpdatedAt = item.UpdatedAt
 	return resp
 }
 

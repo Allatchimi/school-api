@@ -44,7 +44,7 @@ const DEFAULT_ERROR_MESSAGE = "interact with director model"
 const uidAcceptedLetters = "D"
 
 func (service *Service) Create(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	request *data.DirectorRequest,
 ) (result *model.Director, errCode int, err error) {
 	// Get role
@@ -68,28 +68,36 @@ func (service *Service) Create(
 		return
 	}
 
-	// Check email
-	newEmail := request.Email
-	if request.AutoGenerateEmail {
-		newEmail = helpers.GenerateEmailFromFullName(
-			request.Info.FirstName,
-			request.Info.LastName,
-			foundSchool.Config.DomainName,
-		)
-	}
-
-	// Format request
+	// Check request
 	if request == nil || request.Info == nil {
 		errCode = http.StatusBadRequest
 		err = constants.Http400BadRequestErrorMessage()
 		return
 	}
+
+	// Check email
+	newEmail := request.Email
+	if request.AutoGenerateEmail {
+		if foundSchool.Config == nil {
+			errCode = http.StatusNotFound
+			err = constants.Http404ErrorMessage("school")
+			return
+		}
+		newEmail = helpers.GenerateEmailFromFullName(
+			request.Info.FirstName,
+			request.Info.LastName,
+			foundSchool.Config.UserEmailDomainName,
+		)
+	}
+
+	// Format request
 	var item = &dataUser.UserRequest{
 		SchoolID:    request.SchoolID,
 		RoleID:      userRole.ID,
 		Email:       newEmail,
 		PhoneNumber: request.PhoneNumber,
 		IsActivated: true,
+		Status:      request.Status,
 		Info: &dataUser.UserInfoRequest{
 			Gender:        request.Info.Gender,
 			Username:      request.Info.Username,
@@ -111,7 +119,7 @@ func (service *Service) Create(
 	)
 
 	// Create user
-	createdUser, errCodeCreate, errCreate := service.UserService.Create(nil, item, &password)
+	createdUser, errCodeCreate, errCreate := service.UserService.Create(ctxData, item, &password)
 	if errCreate != nil {
 		errCode = errCodeCreate
 		err = errCreate
@@ -166,7 +174,7 @@ func (service *Service) Create(
 }
 
 func (service *Service) Update(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	id int64,
 	request *data.DirectorRequest,
 ) (result *model.Director, errCode int, err error) {
@@ -198,6 +206,7 @@ func (service *Service) Update(
 		Email:       request.Email,
 		PhoneNumber: request.PhoneNumber,
 		IsActivated: true,
+		Status:      request.Status,
 		Info: &dataUser.UserInfoRequest{
 			Gender:        request.Info.Gender,
 			Username:      request.Info.Username,
@@ -210,7 +219,7 @@ func (service *Service) Update(
 			Image:         request.Info.Image,
 		},
 	}
-	_, errCodeUser, errUser := service.UserService.Update(nil, foundItem.UserID, &user)
+	_, errCodeUser, errUser := service.UserService.Update(ctxData, foundItem.UserID, &user)
 	if errUser != nil {
 		errCode = errCodeUser
 		err = errUser
@@ -285,7 +294,7 @@ func (service *Service) Update(
 }
 
 func (service *Service) Delete(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	id int64,
 ) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteByID(id)
@@ -302,7 +311,7 @@ func (service *Service) Delete(
 	return
 }
 
-func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int64) (affectedRows int64, errCode int, err error) {
+func (service *Service) DeleteMultiple(ctxData *types.ContextData, list []int64) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultipleByID(list)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -317,7 +326,7 @@ func (service *Service) DeleteMultiple(inputJwtToken *types.JwtToken, list []int
 	return
 }
 
-func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *model.Director, errCode int, err error) {
+func (service *Service) Get(ctxData *types.ContextData, id int64) (result *model.Director, errCode int, err error) {
 	result, err = service.Repository.GetByID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -333,7 +342,7 @@ func (service *Service) Get(inputJwtToken *types.JwtToken, id int64) (result *mo
 }
 
 func (service *Service) GetAll(
-	inputJwtToken *types.JwtToken,
+	ctxData *types.ContextData,
 	filter *types.Filter,
 	pagination *types.Pagination,
 	schoolID int64,

@@ -34,12 +34,14 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
 					},
@@ -71,14 +73,16 @@ func RegisterEndpoints(
 			Summary:     "Create quiz answer",
 			Description: "Create quiz answer.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/{id}/questions/answers", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/{id}/answers", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s",
 							constants.FeatureStudent,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
 					},
@@ -123,12 +127,14 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionUpdate, // Operation
 					},
@@ -161,16 +167,18 @@ func RegisterEndpoints(
 			Summary:     "Update quiz solution",
 			Description: "Update solution for an existing quiz.",
 			Method:      http.MethodPut,
-			Path:        fmt.Sprintf("%s/{id}/questions/solutions", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/{id}/solutions", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionUpdate, // Operation
 					},
@@ -207,12 +215,14 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -242,18 +252,20 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "delete-quiz-multiple",
 			Summary:     "Delete multiple quiz",
-			Description: "Delete multiple quiz by providing a lis of IDs and return affected rows in database.",
+			Description: "Delete multiple quiz by providing a list of IDs and return affected rows in database.",
 			Method:      http.MethodDelete,
 			Path:        fmt.Sprintf("%s/multiple/delete", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
-						), // Features scope
+						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
 					},
@@ -289,14 +301,16 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -332,14 +346,16 @@ func RegisterEndpoints(
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -364,42 +380,34 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			// TODO: Remove this
-			tempResults := make([]data.QuizResponse, 10)
-			for i := range tempResults {
-				tmpModel := data.QuizResponse{}
-				tmpModel.ID = int64(i)
-
-				tempResults[i] = tmpModel
-			}
-			result.Data = tempResults
-
 			return &struct {
 				Body data.QuizResponseList
 			}{Body: *result}, nil
 		},
 	)
 
-	// Get all quiz result
+	// Get all quiz answer
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "get-quiz-result-list",
-			Summary:     "Get all result for quiz",
-			Description: "Get all result for quiz with support for search, filter and pagination",
+			OperationID: "get-quiz-answer-list",
+			Summary:     "Get all answer for quiz",
+			Description: "Get all answer for quiz with support for search, filter and pagination",
 			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/{id}/results", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/{id}/answers", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
-					constants.SecuritySchemeBearerToken: { // Authentication
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
 						fmt.Sprintf("%s,%s,%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 							constants.FeatureTeacher,
 							constants.FeatureStudent,
 							constants.FeatureParent,
-						), // Features scope
+						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
 					},
@@ -418,6 +426,59 @@ func RegisterEndpoints(
 				data.GetAllQuizAnswerRequest
 			},
 		) (*struct {
+			Body data.QuizAnswerResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllQuizAnswer(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+
+			return &struct {
+				Body data.QuizAnswerResponseList
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get all quiz result
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-quiz-result-list",
+			Summary:     "Get all result for quiz",
+			Description: "Get all result for quiz with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/{id}/results", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Feature
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.QuizID
+				data.GetAllQuizResultRequest
+			},
+		) (*struct {
 			Body data.QuizResultResponseList
 		}, error) {
 			result, errCode, err := controller.GetAllQuizResult(&ctx, input)
@@ -425,19 +486,9 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 
-			tempResults := make([]data.QuizResultResponse, 10)
-			for i := range tempResults {
-				tmpModel := data.QuizResultResponse{}
-				tmpModel.Student = nil
-				tmpModel.Result = float64(i)
-				tempResults[i] = tmpModel
-			}
-			result.Data = tempResults
-
 			return &struct {
 				Body data.QuizResultResponseList
 			}{Body: *result}, nil
 		},
 	)
-
 }
