@@ -21,23 +21,53 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(item *model.School) (*model.School, error) {
-	result := *item
-	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
+func (repository *Repository) Create(item *model.School) (result *model.School, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.School{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) CreateSchoolInfo(item *model.SchoolInfo) (*model.SchoolInfo, error) {
-	result := *item
-	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
+func (repository *Repository) CreateSchoolInfo(item *model.SchoolInfo) (result *model.SchoolInfo, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.SchoolInfo{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) CreateSchoolConfig(item *model.SchoolConfig) (*model.SchoolConfig, error) {
-	result := *item
-	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
+func (repository *Repository) CreateSchoolConfig(item *model.SchoolConfig) (result *model.SchoolConfig, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.SchoolConfig{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) UpdateByID(id int64, item *model.School) (*model.School, error) {
-	result := &model.School{}
+func (repository *Repository) UpdateByID(id int64, item *model.School) (result *model.School, err error) {
+	// Update the item
 	fields := map[string]any{
 		"name":                item.Name,
 		"type":                item.Type,
@@ -52,50 +82,71 @@ func (repository *Repository) UpdateByID(id int64, item *model.School) (*model.S
 		"currency":            item.Currency,
 		"payment_count":       item.PaymentCount,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.School{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.School{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateDeploymentStatusByID(id int64, request *data.SchoolDeploymentStatusRequest) (*model.School, error) {
-	result := &model.School{}
+func (repository *Repository) UpdateDeploymentStatusByID(id int64, request *data.SchoolDeploymentStatusRequest) (result *model.School, err error) {
+	// Update the item
 	fields := map[string]any{
 		"deployment_status":   request.Status,
 		"deployment_feedback": request.Feedback,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.School{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.School{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateConfigInfoByID(id int64, configID int64, infoID int64) (*model.School, error) {
-	result := &model.School{}
+func (repository *Repository) UpdateConfigInfoByID(id int64, configID int64, infoID int64) (result *model.School, err error) {
+	// Update the item
 	fields := map[string]any{
 		"config_id": configID,
 		"info_id":   infoID,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.School{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.School{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateSchoolInfoByID(id int64, item *model.SchoolInfo) (*model.SchoolInfo, error) {
-	result := &model.SchoolInfo{}
+func (repository *Repository) UpdateSchoolInfoByID(id int64, item *model.SchoolInfo) (result *model.SchoolInfo, err error) {
+	// Update the item
 	fields := map[string]any{
 		"full_name":             item.FullName,
 		"description":           item.Description,
@@ -123,18 +174,25 @@ func (repository *Repository) UpdateSchoolInfoByID(id int64, item *model.SchoolI
 		"image4":                item.Image4,
 		"image5":                item.Image5,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.SchoolInfo{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.SchoolInfo{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateSchoolConfigByID(id int64, item *model.SchoolConfig) (*model.SchoolConfig, error) {
-	result := &model.SchoolConfig{}
+func (repository *Repository) UpdateSchoolConfigByID(id int64, item *model.SchoolConfig) (result *model.SchoolConfig, err error) {
+	// Update the item
 	fields := map[string]any{
 		"website_domain_name":                item.WebsiteDomainName,
 		"user_email_domain_name":             item.UserEmailDomainName,
@@ -151,14 +209,21 @@ func (repository *Repository) UpdateSchoolConfigByID(id int64, item *model.Schoo
 		"color_primary_bg":                   item.ColorPrimaryBg,
 		"color_primary_bg_hover":             item.ColorPrimaryBgHover,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.SchoolConfig{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.SchoolConfig{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {

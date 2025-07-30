@@ -21,22 +21,45 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(item *model.Exam) (*model.Exam, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) Create(item *model.Exam) (result *model.Exam, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.Exam{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) CreateType(item *model.ExamType) (*model.ExamType, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) CreateType(item *model.ExamType) (result *model.ExamType, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.ExamType{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) UpdateByID(id int64, item *model.Exam) (*model.Exam, error) {
-	result := &model.Exam{}
+func (repository *Repository) UpdateByID(id int64, item *model.Exam) (result *model.Exam, err error) {
+	// Update the item
 	fields := map[string]any{
-		"school_id": item.SchoolID,
-		"year_id":   item.YearID,
-		"type_id":   item.TypeID,
+		"school_id":        item.SchoolID,
+		"year_id":          item.YearID,
+		"class_subject_id": nil,
+		"sequence_id":      nil,
+		"unit_id":          nil,
+		"type_id":          item.TypeID,
 
 		"status":           item.Status,
 		"notation":         item.Notation,
@@ -56,35 +79,50 @@ func (repository *Repository) UpdateByID(id int64, item *model.Exam) (*model.Exa
 		if item.SequenceID > 0 {
 			fields["sequence_id"] = item.SequenceID
 		}
-	} else if item.UnitID > 0 {
+	}
+	if item.UnitID > 0 {
 		fields["unit_id"] = item.UnitID
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.Exam{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.Exam{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateExamTypeByID(id int64, data *model.ExamType) (*model.ExamType, error) {
-	result := &model.ExamType{}
+func (repository *Repository) UpdateExamTypeByID(id int64, data *model.ExamType) (result *model.ExamType, err error) {
+	// Update the item
 	fields := map[string]any{
 		"school_id": data.SchoolID,
 
 		"name":        data.Name,
 		"description": data.Description,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.ExamType{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.ExamType{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {

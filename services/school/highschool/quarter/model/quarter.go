@@ -17,7 +17,7 @@ type HighschoolQuarter struct {
 
 func (item *HighschoolQuarter) ToResponse() *data.QuarterResponse {
 	if item == nil {
-		return nil
+		return &data.QuarterResponse{}
 	}
 	resp := &data.QuarterResponse{}
 	resp.ID = item.ID

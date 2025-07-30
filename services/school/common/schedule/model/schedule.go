@@ -39,7 +39,7 @@ type Schedule struct {
 
 func (item *Schedule) ToResponse() *data.ScheduleResponse {
 	if item == nil {
-		return nil
+		return &data.ScheduleResponse{}
 	}
 	resp := &data.ScheduleResponse{}
 	resp.ID = item.ID

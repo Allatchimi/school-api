@@ -22,7 +22,7 @@ type UserInfo struct {
 
 func (item *UserInfo) ToResponse() *data.UserInfoResponse {
 	if item == nil {
-		return nil
+		return &data.UserInfoResponse{}
 	}
 	resp := &data.UserInfoResponse{}
 	resp.Gender = item.Gender
@@ -39,7 +39,7 @@ func (item *UserInfo) ToResponse() *data.UserInfoResponse {
 
 func (item *UserInfo) ToPublicResponse() *data.UserInfoPublicResponse {
 	if item == nil {
-		return nil
+		return &data.UserInfoPublicResponse{}
 	}
 	resp := &data.UserInfoPublicResponse{}
 	resp.Gender = item.Gender

@@ -7,7 +7,8 @@ import (
 
 type QuizQuestionOption struct {
 	types.BaseGormModel
-	QuizQuestionID int64 `gorm:"default:null"`
+	QuizQuestionID int64         `gorm:"default:null"`
+	QuizQuestion   *QuizQuestion `gorm:"foreignKey:QuizQuestionID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	Title       string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
@@ -26,7 +27,7 @@ func (QuizQuestionOptionWithoutFk) TableName() string {
 
 func (item *QuizQuestionOption) ToResponse() *data.QuizQuestionOptionResponse {
 	if item == nil {
-		return nil
+		return &data.QuizQuestionOptionResponse{}
 	}
 	resp := &data.QuizQuestionOptionResponse{}
 	resp.Title = item.Title

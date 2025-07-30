@@ -21,55 +21,99 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(item *model.Parent) (*model.Parent, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) Create(item *model.Parent) (result *model.Parent, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.Parent{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) CreateParentStudent(item *model.ParentStudent) (*model.ParentStudent, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) CreateParentStudent(item *model.ParentStudent) (result *model.ParentStudent, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.ParentStudent{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) CreateParentAssign(item *model.ParentAssign) (*model.ParentAssign, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) CreateParentAssign(item *model.ParentAssign) (result *model.ParentAssign, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.ParentAssign{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) UpdateByID(id int64, item *model.Parent) (*model.Parent, error) {
-	result := &model.Parent{}
+func (repository *Repository) UpdateByID(id int64, item *model.Parent) (result *model.Parent, err error) {
+	// Update the item
 	fields := map[string]any{
 		"school_id": item.SchoolID,
 		"user_id":   item.UserID,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.Parent{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.Parent{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateParentStudentByID(id int64, item *model.ParentStudent) (*model.ParentStudent, error) {
-	result := &model.ParentStudent{}
+func (repository *Repository) UpdateParentStudentByID(id int64, item *model.ParentStudent) (result *model.ParentStudent, err error) {
+	// Update the item
 	fields := map[string]any{
 		"parent_id":  item.ParentID,
 		"student_id": item.StudentID,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.ParentStudent{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.ParentStudent{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateParentAssignByID(id int64, item *model.ParentAssign) (*model.ParentAssign, error) {
-	result := &model.ParentAssign{}
+func (repository *Repository) UpdateParentAssignByID(id int64, item *model.ParentAssign) (result *model.ParentAssign, err error) {
+	// Update the item
 	fields := map[string]any{
 		"school_id": item.SchoolID,
 		"user_id":   item.UserID,
@@ -89,30 +133,44 @@ func (repository *Repository) UpdateParentAssignByID(id int64, item *model.Paren
 		"document4":       item.Document4,
 		"document5":       item.Document5,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.ParentAssign{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.ParentAssign{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateParentAssignStatusByID(id int64, item *model.ParentAssign) (*model.ParentAssign, error) {
-	result := &model.ParentAssign{}
+func (repository *Repository) UpdateParentAssignStatusByID(id int64, item *model.ParentAssign) (result *model.ParentAssign, err error) {
+	// Update the item
 	fields := map[string]any{
 		"status":          item.Status,
 		"status_feedback": item.StatusFeedback,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.ParentAssign{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.ParentAssign{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {

@@ -20,7 +20,7 @@ type Permission struct {
 
 func (item *Permission) ToResponse() *data.PermissionResponse {
 	if item == nil {
-		return nil
+		return &data.PermissionResponse{}
 	}
 	resp := &data.PermissionResponse{}
 	resp.ID = item.ID

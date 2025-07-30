@@ -47,7 +47,7 @@ type Exam struct {
 
 func (item *Exam) ToResponse() *data.ExamResponse {
 	if item == nil {
-		return nil
+		return &data.ExamResponse{}
 	}
 	resp := &data.ExamResponse{}
 	resp.Status = item.Status

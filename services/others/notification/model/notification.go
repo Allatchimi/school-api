@@ -21,7 +21,7 @@ type Notification struct {
 
 func (item *Notification) ToResponse() *data.NotificationResponse {
 	if item == nil {
-		return nil
+		return &data.NotificationResponse{}
 	}
 	resp := &data.NotificationResponse{}
 	resp.ID = item.ID

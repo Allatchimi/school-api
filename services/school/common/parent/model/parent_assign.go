@@ -35,7 +35,7 @@ type ParentAssign struct {
 
 func (item *ParentAssign) ToResponse() *data.ParentAssignResponse {
 	if item == nil {
-		return nil
+		return &data.ParentAssignResponse{}
 	}
 	resp := &data.ParentAssignResponse{}
 	resp.ID = item.ID

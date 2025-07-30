@@ -23,11 +23,11 @@ type Quiz struct {
 	UnitID int64                     `gorm:"default:null"`
 	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Questions []QuizQuestion `gorm:"default:null;foreignKey:QuizID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-
 	Title       string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
 	Status      string `gorm:"default:null"`
+
+	Questions []QuizQuestion `gorm:"foreignKey:QuizID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 }
 type QuizWithoutFk struct {
 	types.BaseGormModel
@@ -47,7 +47,7 @@ func (QuizWithoutFk) TableName() string {
 
 func (item *Quiz) ToResponse() *data.QuizResponse {
 	if item == nil {
-		return nil
+		return &data.QuizResponse{}
 	}
 	resp := &data.QuizResponse{}
 	resp.Title = item.Title

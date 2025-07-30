@@ -19,7 +19,7 @@ type Contact struct {
 
 func (item *Contact) ToResponse() *data.ContactResponse {
 	if item == nil {
-		return nil
+		return &data.ContactResponse{}
 	}
 	resp := &data.ContactResponse{}
 	resp.ID = item.ID

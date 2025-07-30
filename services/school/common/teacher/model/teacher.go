@@ -20,7 +20,7 @@ type Teacher struct {
 
 func (item *Teacher) ToResponse() *data.TeacherResponse {
 	if item == nil {
-		return nil
+		return &data.TeacherResponse{}
 	}
 	resp := &data.TeacherResponse{}
 	resp.ID = item.ID
@@ -36,7 +36,7 @@ func (item *Teacher) ToResponse() *data.TeacherResponse {
 
 func (item *Teacher) ToPublicResponse() *data.TeacherPublicResponse {
 	if item == nil {
-		return nil
+		return &data.TeacherPublicResponse{}
 	}
 	resp := &data.TeacherPublicResponse{}
 	resp.ID = item.ID

@@ -17,7 +17,7 @@ type HighschoolSubject struct {
 
 func (item *HighschoolSubject) ToResponse() *data.SubjectResponse {
 	if item == nil {
-		return nil
+		return &data.SubjectResponse{}
 	}
 	resp := &data.SubjectResponse{}
 	resp.ID = item.ID

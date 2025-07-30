@@ -29,7 +29,7 @@ type TeacherClassSubjectUnit struct {
 
 func (item *TeacherClassSubjectUnit) ToResponse() *data.TeacherClassSubjectUnitResponse {
 	if item == nil {
-		return nil
+		return &data.TeacherClassSubjectUnitResponse{}
 	}
 	resp := &data.TeacherClassSubjectUnitResponse{}
 	resp.ID = item.ID

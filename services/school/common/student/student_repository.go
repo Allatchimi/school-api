@@ -21,66 +21,113 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(item *model.Student) (*model.Student, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) Create(item *model.Student) (result *model.Student, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.Student{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) CreateStudentPreEnroll(item *model.StudentPreEnroll) (*model.StudentPreEnroll, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) CreateStudentPreEnroll(item *model.StudentPreEnroll) (result *model.StudentPreEnroll, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.StudentPreEnroll{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) CreateStudentEnroll(item *model.StudentEnroll) (*model.StudentEnroll, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) CreateStudentEnroll(item *model.StudentEnroll) (result *model.StudentEnroll, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.StudentEnroll{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) UpdateByID(id int64, item *model.Student) (*model.Student, error) {
-	result := &model.Student{}
+func (repository *Repository) UpdateByID(id int64, item *model.Student) (result *model.Student, err error) {
+	// Update the item
 	fields := map[string]any{
 		"school_id": item.SchoolID,
 		"user_id":   item.UserID,
 
 		"uid": item.UID,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.Student{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.Student{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateStudentEnrollByID(id int64, item *model.StudentEnroll) (*model.StudentEnroll, error) {
-	result := &model.StudentEnroll{}
+func (repository *Repository) UpdateStudentEnrollByID(id int64, item *model.StudentEnroll) (result *model.StudentEnroll, err error) {
+	// Update the item
 	fields := map[string]any{
-		"school_id":  item.SchoolID,
-		"year_id":    item.YearID,
-		"student_id": item.StudentID,
+		"school_id":       item.SchoolID,
+		"year_id":         item.YearID,
+		"class_id":        nil,
+		"level_domain_id": nil,
+		"student_id":      item.StudentID,
 
 		"origin":          item.Origin,
 		"origin_feedback": item.OriginFeedback,
 	}
-	if item.ClassID > 0 {
-		fields["class_id"] = item.ClassID
-	} else if item.LevelDomainID > 0 {
+	if item.LevelDomainID > 0 {
 		fields["level_domain_id"] = item.LevelDomainID
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	if item.ClassID > 0 {
+		fields["class_id"] = item.ClassID
+	}
+	err = repository.Db.
 		Model(&model.StudentEnroll{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.StudentEnroll{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateStudentPreEnrollByID(id int64, item *model.StudentPreEnroll) (*model.StudentPreEnroll, error) {
-	result := &model.StudentPreEnroll{}
+func (repository *Repository) UpdateStudentPreEnrollByID(id int64, item *model.StudentPreEnroll) (result *model.StudentPreEnroll, err error) {
+	// Update the item
 	fields := map[string]any{
 		"school_id": item.SchoolID,
 		"year_id":   item.YearID,
@@ -96,35 +143,44 @@ func (repository *Repository) UpdateStudentPreEnrollByID(id int64, item *model.S
 		"document4":  item.Document4,
 		"document5":  item.Document5,
 	}
-	if item.ClassID > 0 {
-		fields["class_id"] = item.ClassID
-	} else if item.LevelDomainID > 0 {
-		fields["level_domain_id"] = item.LevelDomainID
-	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.StudentPreEnroll{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.StudentPreEnroll{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateStudentPreEnrollStatusByID(id int64, item *model.StudentPreEnroll) (*model.StudentPreEnroll, error) {
-	result := &model.StudentPreEnroll{}
+func (repository *Repository) UpdateStudentPreEnrollStatusByID(id int64, item *model.StudentPreEnroll) (result *model.StudentPreEnroll, err error) {
+	// Update the item
 	fields := map[string]any{
 		"status":          item.Status,
 		"status_feedback": item.StatusFeedback,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.StudentPreEnroll{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.StudentPreEnroll{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {

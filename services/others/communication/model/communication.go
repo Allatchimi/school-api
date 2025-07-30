@@ -21,7 +21,7 @@ type Communication struct {
 
 func (item *Communication) ToResponse() *data.CommunicationResponse {
 	if item == nil {
-		return nil
+		return &data.CommunicationResponse{}
 	}
 	resp := &data.CommunicationResponse{}
 	resp.ID = item.ID

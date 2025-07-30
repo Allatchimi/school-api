@@ -21,7 +21,7 @@ type CourseComment struct {
 
 func (item *CourseComment) ToResponse() *data.CourseCommentResponse {
 	if item == nil {
-		return nil
+		return &data.CourseCommentResponse{}
 	}
 	resp := &data.CourseCommentResponse{}
 	resp.Message = item.Message

@@ -18,7 +18,7 @@ type ReportConfig struct {
 
 func (item *ReportConfig) ToResponse() *data.ReportConfigResponse {
 	if item == nil {
-		return nil
+		return &data.ReportConfigResponse{}
 	}
 	resp := &data.ReportConfigResponse{}
 	resp.NotationAverage = item.NotationAverage

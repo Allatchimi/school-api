@@ -19,11 +19,21 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(item *model.Notification) (*model.Notification, error) {
-	result := *item
-	result.Seen = false
-	result.SeenAt = nil
-	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
+func (repository *Repository) Create(item *model.Notification) (result *model.Notification, err error) {
+	item.Seen = false
+	item.SeenAt = nil
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.Notification{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
 func (repository *Repository) UpdateSeenByIDUserID(id int64, userID int64, item *model.Notification) (*model.Notification, error) {

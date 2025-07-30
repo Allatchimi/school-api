@@ -46,7 +46,7 @@ type Request struct {
 
 func (item *Request) ToResponse() *data.RequestResponse {
 	if item == nil {
-		return nil
+		return &data.RequestResponse{}
 	}
 	resp := &data.RequestResponse{}
 	resp.Status = item.Status

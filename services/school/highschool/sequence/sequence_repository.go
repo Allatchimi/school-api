@@ -21,13 +21,23 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(item *model.HighschoolSequence) (*model.HighschoolSequence, error) {
-	result := *item
-	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
+func (repository *Repository) Create(item *model.HighschoolSequence) (result *model.HighschoolSequence, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.HighschoolSequence{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) UpdateByID(id int64, item *model.HighschoolSequence) (*model.HighschoolSequence, error) {
-	result := &model.HighschoolSequence{}
+func (repository *Repository) UpdateByID(id int64, item *model.HighschoolSequence) (result *model.HighschoolSequence, err error) {
+	// Update the item
 	fields := map[string]any{
 		"school_id":  item.SchoolID,
 		"quarter_id": item.QuarterID,
@@ -35,14 +45,21 @@ func (repository *Repository) UpdateByID(id int64, item *model.HighschoolSequenc
 		"name":        item.Name,
 		"description": item.Description,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.HighschoolSequence{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.HighschoolSequence{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {

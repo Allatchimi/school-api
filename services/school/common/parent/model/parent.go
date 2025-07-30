@@ -20,7 +20,7 @@ type Parent struct {
 
 func (item *Parent) ToResponse() *data.ParentResponse {
 	if item == nil {
-		return nil
+		return &data.ParentResponse{}
 	}
 	resp := &data.ParentResponse{
 		School: &dataSchool.SchoolPublicResponse{},
@@ -41,7 +41,7 @@ func (item *Parent) ToResponse() *data.ParentResponse {
 
 func (item *Parent) ToPublicResponse() *data.ParentPublicResponse {
 	if item == nil {
-		return nil
+		return &data.ParentPublicResponse{}
 	}
 	resp := &data.ParentPublicResponse{
 		School: &dataSchool.SchoolPublicResponse{},

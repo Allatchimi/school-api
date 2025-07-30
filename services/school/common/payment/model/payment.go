@@ -26,7 +26,7 @@ type Payment struct {
 
 func (item *Payment) ToResponse() *data.PaymentResponse {
 	if item == nil {
-		return nil
+		return &data.PaymentResponse{}
 	}
 	resp := &data.PaymentResponse{}
 	resp.Amount = item.Amount

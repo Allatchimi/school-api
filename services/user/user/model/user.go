@@ -49,7 +49,7 @@ func (item *User) BeforeUpdate(db *gorm.DB) (err error) {
 
 func (item *User) ToResponse() *data.UserResponse {
 	if item == nil {
-		return nil
+		return &data.UserResponse{}
 	}
 	resp := &data.UserResponse{}
 	resp.ID = item.ID
@@ -74,7 +74,7 @@ func (item *User) ToResponse() *data.UserResponse {
 
 func (item *User) ToPublicResponse() *data.UserPublicResponse {
 	if item == nil {
-		return nil
+		return &data.UserPublicResponse{}
 	}
 	resp := &data.UserPublicResponse{}
 	resp.ID = item.ID

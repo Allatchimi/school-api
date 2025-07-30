@@ -13,10 +13,10 @@ type QuizAnswer struct {
 	Student   *modelStudent.Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
 	QuizQuestionID int64         `gorm:"default:null"`
-	QuizQuestion   *QuizQuestion `gorm:"default:null;foreignKey:QuizQuestionID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	QuizQuestion   *QuizQuestion `gorm:"foreignKey:QuizQuestionID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	QuizQuestionOptionID int64               `gorm:"default:null"`
-	QuizQuestionOption   *QuizQuestionOption `gorm:"default:null;foreignKey:QuizQuestionOptionID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	QuizQuestionOption   *QuizQuestionOption `gorm:"foreignKey:QuizQuestionOptionID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 }
 type QuizAnswerWithoutFk struct {
 	types.BaseGormModel

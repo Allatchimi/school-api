@@ -18,7 +18,7 @@ type ExamType struct {
 
 func (item *ExamType) ToResponse() *data.ExamTypeResponse {
 	if item == nil {
-		return nil
+		return &data.ExamTypeResponse{}
 	}
 	resp := &data.ExamTypeResponse{}
 	resp.Name = item.Name

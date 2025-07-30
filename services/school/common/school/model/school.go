@@ -32,7 +32,7 @@ type School struct {
 
 func (item *School) ToResponse() *data.SchoolResponse {
 	if item == nil {
-		return nil
+		return &data.SchoolResponse{}
 	}
 	resp := &data.SchoolResponse{}
 	resp.ID = item.ID
@@ -59,7 +59,7 @@ func (item *School) ToResponse() *data.SchoolResponse {
 
 func (item *School) ToPublicResponse() *data.SchoolPublicResponse {
 	if item == nil {
-		return nil
+		return &data.SchoolPublicResponse{}
 	}
 	resp := &data.SchoolPublicResponse{}
 	resp.ID = item.ID

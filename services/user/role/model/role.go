@@ -14,7 +14,7 @@ type Role struct {
 
 func (item *Role) ToResponse() *data.RoleResponse {
 	if item == nil {
-		return nil
+		return &data.RoleResponse{}
 	}
 	resp := &data.RoleResponse{}
 	resp.ID = item.ID

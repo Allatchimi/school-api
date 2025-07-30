@@ -47,7 +47,7 @@ type StudentPreEnroll struct {
 
 func (item *StudentPreEnroll) ToResponse() *data.StudentPreEnrollResponse {
 	if item == nil {
-		return nil
+		return &data.StudentPreEnrollResponse{}
 	}
 	resp := &data.StudentPreEnrollResponse{}
 	resp.ID = item.ID

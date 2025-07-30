@@ -21,16 +21,28 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(item *model.Schedule) (*model.Schedule, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) Create(item *model.Schedule) (result *model.Schedule, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.Schedule{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) UpdateByID(id int64, item *model.Schedule) (*model.Schedule, error) {
-	result := &model.Schedule{}
+func (repository *Repository) UpdateByID(id int64, item *model.Schedule) (result *model.Schedule, err error) {
+	// Update the item
 	fields := map[string]any{
-		"school_id": item.SchoolID,
-		"year_id":   item.YearID,
+		"school_id":        item.SchoolID,
+		"year_id":          item.YearID,
+		"class_subject_id": nil,
+		"unit_id":          nil,
 
 		"is_common":       item.IsCommon,
 		"type":            item.Type,
@@ -45,17 +57,25 @@ func (repository *Repository) UpdateByID(id int64, item *model.Schedule) (*model
 	}
 	if item.ClassSubjectID > 0 {
 		fields["class_subject_id"] = item.ClassSubjectID
-	} else if item.UnitID > 0 {
+	}
+	if item.UnitID > 0 {
 		fields["unit_id"] = item.UnitID
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.Schedule{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.Schedule{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {

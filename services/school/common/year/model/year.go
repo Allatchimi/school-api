@@ -19,7 +19,7 @@ type Year struct {
 
 func (item *Year) ToResponse() *data.YearResponse {
 	if item == nil {
-		return nil
+		return &data.YearResponse{}
 	}
 	resp := &data.YearResponse{}
 	resp.ID = item.ID

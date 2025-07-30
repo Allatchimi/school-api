@@ -33,7 +33,7 @@ type StudentEnroll struct {
 
 func (item *StudentEnroll) ToResponse() *data.StudentEnrollResponse {
 	if item == nil {
-		return nil
+		return &data.StudentEnrollResponse{}
 	}
 	resp := &data.StudentEnrollResponse{}
 	resp.ID = item.ID

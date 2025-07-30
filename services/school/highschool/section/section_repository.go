@@ -21,27 +21,44 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(item *model.HighschoolSection) (*model.HighschoolSection, error) {
-	result := *item
-	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
+func (repository *Repository) Create(item *model.HighschoolSection) (result *model.HighschoolSection, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.HighschoolSection{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) UpdateByID(id int64, item *model.HighschoolSection) (*model.HighschoolSection, error) {
-	result := &model.HighschoolSection{}
+func (repository *Repository) UpdateByID(id int64, item *model.HighschoolSection) (result *model.HighschoolSection, err error) {
+	// Update the item
 	fields := map[string]any{
 		"school_id": item.SchoolID,
 
 		"name":        item.Name,
 		"description": item.Description,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.HighschoolSection{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.HighschoolSection{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {

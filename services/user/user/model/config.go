@@ -20,7 +20,7 @@ type UserConfig struct {
 
 func (item *UserConfig) ToResponse() *data.UserConfigResponse {
 	if item == nil {
-		return nil
+		return &data.UserConfigResponse{}
 	}
 	resp := &data.UserConfigResponse{}
 	resp.WhatsappPhoneNumber = item.WhatsappPhoneNumber

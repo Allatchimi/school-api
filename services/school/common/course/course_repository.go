@@ -21,31 +21,73 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(item *model.Course) (*model.Course, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) Create(item *model.Course) (result *model.Course, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.Course{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) CreateCourseDocument(item *model.CourseDocument) (*model.CourseDocument, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) CreateCourseDocument(item *model.CourseDocument) (result *model.CourseDocument, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.CourseDocument{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) CreateCourseVideo(item *model.CourseVideo) (*model.CourseVideo, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) CreateCourseVideo(item *model.CourseVideo) (result *model.CourseVideo, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.CourseVideo{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) CreateCourseComment(item *model.CourseComment) (*model.CourseComment, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) CreateCourseComment(item *model.CourseComment) (result *model.CourseComment, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.CourseComment{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) UpdateByID(id int64, item *model.Course) (*model.Course, error) {
-	result := &model.Course{}
+func (repository *Repository) UpdateByID(id int64, item *model.Course) (result *model.Course, err error) {
+	// Update the item
 	fields := map[string]any{
-		"school_id": item.SchoolID,
-		"year_id":   item.YearID,
+		"school_id":        item.SchoolID,
+		"year_id":          item.YearID,
+		"class_subject_id": nil,
+		"unit_id":          nil,
 
 		"title":       item.Title,
 		"description": item.Description,
@@ -53,34 +95,49 @@ func (repository *Repository) UpdateByID(id int64, item *model.Course) (*model.C
 	}
 	if item.ClassSubjectID > 0 {
 		fields["class_subject_id"] = item.ClassSubjectID
-	} else if item.UnitID > 0 {
+	}
+	if item.UnitID > 0 {
 		fields["unit_id"] = item.UnitID
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.Course{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.Course{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateCourseCommentByID(id int64, item *model.CourseComment) (*model.CourseComment, error) {
-	result := &model.CourseComment{}
+func (repository *Repository) UpdateCourseCommentByID(id int64, item *model.CourseComment) (result *model.CourseComment, err error) {
+	// Update the item
 	fields := map[string]any{
 		"message":    item.Message,
 		"rate":       item.Rate,
 		"is_deleted": item.IsDeleted,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.CourseComment{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.CourseComment{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {
@@ -96,14 +153,14 @@ func (repository *Repository) DeleteCourseCommentByID(id int64) (int64, error) {
 func (repository *Repository) DeleteCourseDocumentByCourseID(
 	id int64,
 ) (int64, error) {
-	result := repository.Db.Where("course_id = ?", id).Delete(&model.CourseComment{})
+	result := repository.Db.Where("course_id = ?", id).Delete(&model.CourseDocument{})
 	return result.RowsAffected, result.Error
 }
 
 func (repository *Repository) DeleteCourseVideoByCourseID(
 	id int64,
 ) (int64, error) {
-	result := repository.Db.Where("course_id = ?", id).Delete(&model.CourseComment{})
+	result := repository.Db.Where("course_id = ?", id).Delete(&model.CourseVideo{})
 	return result.RowsAffected, result.Error
 }
 

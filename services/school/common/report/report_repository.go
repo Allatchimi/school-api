@@ -21,32 +21,74 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) CreateReportEntry(item *model.ReportEntry) (*model.ReportEntry, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) CreateReportEntry(item *model.ReportEntry) (result *model.ReportEntry, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.ReportEntry{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) CreateReportGrade(item *model.ReportGrade) (*model.ReportGrade, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) CreateReportGrade(item *model.ReportGrade) (result *model.ReportGrade, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.ReportGrade{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) CreateReportConfig(item *model.ReportConfig) (*model.ReportConfig, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) CreateReportConfig(item *model.ReportConfig) (result *model.ReportConfig, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.ReportConfig{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) CreateReportTable(item *model.ReportTable) (*model.ReportTable, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) CreateReportTable(item *model.ReportTable) (result *model.ReportTable, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.ReportTable{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) UpdateReportEntryByID(id int64, item *model.ReportEntry) (*model.ReportEntry, error) {
-	result := &model.ReportEntry{}
+func (repository *Repository) UpdateReportEntryByID(id int64, item *model.ReportEntry) (result *model.ReportEntry, err error) {
+	// Update the item
 	fields := map[string]any{
-		"school_id":  item.SchoolID,
-		"year_id":    item.YearID,
-		"student_id": item.StudentID,
+		"school_id":        item.SchoolID,
+		"year_id":          item.YearID,
+		"class_subject_id": nil,
+		"sequence_id":      nil,
+		"unit_id":          nil,
 
 		"coefficient":   item.Coefficient,
 		"credit":        item.Credit,
@@ -61,21 +103,29 @@ func (repository *Repository) UpdateReportEntryByID(id int64, item *model.Report
 		if item.SequenceID > 0 {
 			fields["sequence_id"] = item.SequenceID
 		}
-	} else if item.UnitID > 0 {
+	}
+	if item.UnitID > 0 {
 		fields["unit_id"] = item.UnitID
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.ReportEntry{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.ReportEntry{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateReportGradeByID(id int64, item *model.ReportGrade) (*model.ReportGrade, error) {
-	result := &model.ReportGrade{}
+func (repository *Repository) UpdateReportGradeByID(id int64, item *model.ReportGrade) (result *model.ReportGrade, err error) {
+	// Update the item
 	fields := map[string]any{
 		"school_id": item.SchoolID,
 
@@ -87,18 +137,25 @@ func (repository *Repository) UpdateReportGradeByID(id int64, item *model.Report
 		"include_minimum": item.IncludeMinimum,
 		"include_maximum": item.IncludeMaximum,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.ReportGrade{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.ReportGrade{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateReportConfigByID(id int64, item *model.ReportConfig) (*model.ReportConfig, error) {
-	result := &model.ReportConfig{}
+func (repository *Repository) UpdateReportConfigByID(id int64, item *model.ReportConfig) (result *model.ReportConfig, err error) {
+	// Update the item
 	fields := map[string]any{
 		"school_id": item.SchoolID,
 
@@ -106,21 +163,30 @@ func (repository *Repository) UpdateReportConfigByID(id int64, item *model.Repor
 		"notation_report":                   item.NotationReport,
 		"minimum_required_value_to_promote": item.MinimumRequiredValueToPromote,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.ReportConfig{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.ReportConfig{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateReportTableByID(id int64, item *model.ReportTable) (*model.ReportTable, error) {
-	result := &model.ReportTable{}
+func (repository *Repository) UpdateReportTableByID(id int64, item *model.ReportTable) (result *model.ReportTable, err error) {
+	// Update the item
 	fields := map[string]any{
-		"school_id": item.SchoolID,
-		"year_id":   item.YearID,
+		"school_id":       item.SchoolID,
+		"year_id":         item.YearID,
+		"class_id":        nil,
+		"level_domain_id": nil,
 
 		"period_type":                       item.PeriodType,
 		"period_name":                       item.PeriodName,
@@ -132,17 +198,25 @@ func (repository *Repository) UpdateReportTableByID(id int64, item *model.Report
 	}
 	if item.ClassID > 0 {
 		fields["class_id"] = item.ClassID
-	} else if item.LevelDomainID > 0 {
+	}
+	if item.LevelDomainID > 0 {
 		fields["level_domain_id"] = item.LevelDomainID
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.ReportTable{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.ReportTable{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
 func (repository *Repository) DeleteReportEntryByID(id int64) (int64, error) {

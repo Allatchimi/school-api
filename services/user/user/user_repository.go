@@ -23,139 +23,218 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(item *model.User) (*model.User, error) {
-	result := *item
-	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
+func (repository *Repository) Create(item *model.User) (result *model.User, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.User{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) CreateUserInfo(item *model.UserInfo) (*model.UserInfo, error) {
-	result := *item
-	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
+func (repository *Repository) CreateUserInfo(item *model.UserInfo) (result *model.UserInfo, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.UserInfo{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) CreateUserConfig(item *model.UserConfig) (*model.UserConfig, error) {
-	result := *item
-	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
+func (repository *Repository) CreateUserConfig(item *model.UserConfig) (result *model.UserConfig, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.UserConfig{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) UpdateByID(id int64, item *model.User) (*model.User, error) {
-	result := &model.User{}
+func (repository *Repository) UpdateByID(id int64, item *model.User) (result *model.User, err error) {
+	// Update the item
 	fields := map[string]any{
+		"school_id": item.SchoolID,
+		"role_id":   item.RoleID,
+
 		"email":        item.Email,
 		"phone_number": item.PhoneNumber,
 		"status":       item.Status,
-		"school_id":    nil,
-		"role_id":      item.RoleID,
 		"is_activated": item.IsActivated,
+		"activated_at": item.ActivatedAt,
 	}
-	if item.SchoolID > 0 {
-		fields["school_id"] = item.SchoolID
-	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.User{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.User{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateEmailByID(id int64, email string) (*model.User, error) {
-	result := &model.User{}
+func (repository *Repository) UpdateEmailByID(id int64, email string) (result *model.User, err error) {
+	// Update the item
 	fields := map[string]any{
 		"email": email,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.User{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.User{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdatePhoneNumberByID(id int64, phoneNumber uint64) (*model.User, error) {
-	result := &model.User{}
+func (repository *Repository) UpdatePhoneNumberByID(id int64, phoneNumber uint64) (result *model.User, err error) {
+	// Update the item
 	fields := map[string]any{
 		"phone_number": phoneNumber,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.User{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.User{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdatePasswordByID(id int64, password string) (*model.User, error) {
-	result := &model.User{}
+func (repository *Repository) UpdatePasswordByID(id int64, password string) (result *model.User, err error) {
+	// Update the item
 	fields := map[string]any{
 		"password": password,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.User{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.User{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateActivationByID(id int64, item *model.User) (*model.User, error) {
-	result := &model.User{}
+func (repository *Repository) UpdateActivationByID(id int64, item *model.User) (result *model.User, err error) {
+	// Update the item
 	fields := map[string]any{
 		"is_activated": item.IsActivated,
 		"activated_at": item.ActivatedAt,
 		"info_id":      item.InfoID,
 		"config_id":    item.ConfigID,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.User{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.User{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateUserConfigAllowNotificationByID(id int64, enabled bool) (*model.UserConfig, error) {
-	result := &model.UserConfig{}
+func (repository *Repository) UpdateUserConfigAllowNotificationByID(id int64, enabled bool) (result *model.UserConfig, err error) {
+	// Update the item
 	fields := map[string]any{
 		"allow_notifications": enabled,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.UserConfig{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.UserConfig{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateUserConfigFieldByID(id int64, column string, value bool) (*model.UserConfig, error) {
-	result := &model.UserConfig{}
+func (repository *Repository) UpdateUserConfigFieldByID(id int64, column string, value bool) (result *model.UserConfig, err error) {
+	// Update the item
 	fields := map[string]any{}
 	if len(column) > 0 {
 		fields[column] = value
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.UserConfig{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.UserConfig{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
-func (repository *Repository) UpdateUserInfoByID(id int64, item *model.UserInfo) (*model.UserInfo, error) {
-	result := &model.UserInfo{}
+
+func (repository *Repository) UpdateUserInfoByID(id int64, item *model.UserInfo) (result *model.UserInfo, err error) {
+	// Update the item
 	fields := map[string]any{
 		"username":       item.Username,
 		"first_name":     item.FirstName,
@@ -167,46 +246,68 @@ func (repository *Repository) UpdateUserInfoByID(id int64, item *model.UserInfo)
 		"language":       item.Language,
 		"image":          item.Image,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.UserInfo{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.UserInfo{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
-func (repository *Repository) UpdateUserConfigByID(id int64, item *model.UserConfig) (*model.UserConfig, error) {
-	result := &model.UserConfig{}
+
+func (repository *Repository) UpdateUserConfigByID(id int64, item *model.UserConfig) (result *model.UserConfig, err error) {
+	// Update the item
 	fields := map[string]any{
 		"whatsapp_phone_number": item.WhatsappPhoneNumber,
 		"telegram_chat_id":      item.TelegramChatID,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.UserConfig{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.UserConfig{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateUserConfigWebPushSubscriptionByID(id int64, endpoint string, KeyP256dh string, keyAuth string) (*model.UserConfig, error) {
-	result := &model.UserConfig{}
+func (repository *Repository) UpdateUserConfigWebPushSubscriptionByID(id int64, endpoint string, KeyP256dh string, keyAuth string) (result *model.UserConfig, err error) {
+	// Update the item
 	fields := map[string]any{
 		"web_push_subscription_endpoint":   endpoint,
 		"web_push_subscription_key_p256dh": KeyP256dh,
 		"web_push_subscription_key_auth":   keyAuth,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.UserConfig{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.UserConfig{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {

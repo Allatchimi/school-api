@@ -24,8 +24,8 @@ type Course struct {
 	UnitID int64                     `gorm:"default:null"`
 	Unit   *modelUnit.UniversityUnit `gorm:"default:null;foreignKey:UnitID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Documents []CourseDocument `gorm:"default:null;foreignKey:CourseID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
-	Videos    []CourseVideo    `gorm:"default:null;foreignKey:CourseID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Documents []CourseDocument `gorm:"foreignKey:CourseID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
+	Videos    []CourseVideo    `gorm:"foreignKey:CourseID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	Title       string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
@@ -34,7 +34,7 @@ type Course struct {
 
 func (item *Course) ToResponse() *data.CourseResponse {
 	if item == nil {
-		return nil
+		return &data.CourseResponse{}
 	}
 	resp := &data.CourseResponse{}
 	resp.Title = item.Title

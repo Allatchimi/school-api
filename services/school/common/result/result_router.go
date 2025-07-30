@@ -37,9 +37,10 @@ func RegisterEndpoints(
 					constants.SecuritySchemeSchoolToken: {},
 					constants.SecuritySchemeSchoolID:    {},
 					constants.SecuritySchemeBearerToken: {
-						fmt.Sprintf("%s,%s",
+						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
+							constants.FeatureTeacher,
 						), // Feature
 						tableName,                  // Table name
 						constants.PermissionCreate, // Operation
@@ -64,6 +65,49 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Create result table
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "post-result-table",
+			Summary:     "Create result table",
+			Description: "Create new result table and return created object.",
+			Method:      http.MethodPost,
+			Path:        fmt.Sprintf("%s/tables", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionCreate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body data.ResultTableRequest
+			},
+		) (*struct{ Body data.ResultTableResponse }, error) {
+			result, errCode, err := controller.CreateTable(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.ResultTableResponse }{Body: *result.ToResponse()}, nil
+		},
+	)
+
 	// Update result with id
 	huma.Register(
 		*humaApi,
@@ -79,9 +123,10 @@ func RegisterEndpoints(
 					constants.SecuritySchemeSchoolToken: {},
 					constants.SecuritySchemeSchoolID:    {},
 					constants.SecuritySchemeBearerToken: {
-						fmt.Sprintf("%s,%s",
+						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
+							constants.FeatureTeacher,
 						), // Feature
 						tableName,                  // Table name
 						constants.PermissionUpdate, // Operation
@@ -107,6 +152,50 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Update result table with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "update-result-table",
+			Summary:     "Update result table",
+			Description: "Update existing result table with matching id and return the new result object.",
+			Method:      http.MethodPut,
+			Path:        fmt.Sprintf("%s/tables/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionUpdate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.ResultTableID
+				Body data.ResultTableRequest
+			},
+		) (*struct{ Body data.ResultTableResponse }, error) {
+			result, errCode, err := controller.UpdateTable(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.ResultTableResponse }{Body: *result.ToResponse()}, nil
+		},
+	)
+
 	// Delete result with id
 	huma.Register(
 		*humaApi,
@@ -122,9 +211,10 @@ func RegisterEndpoints(
 					constants.SecuritySchemeSchoolToken: {},
 					constants.SecuritySchemeSchoolID:    {},
 					constants.SecuritySchemeBearerToken: {
-						fmt.Sprintf("%s,%s",
+						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
+							constants.FeatureTeacher,
 						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
@@ -149,6 +239,49 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Delete result table with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "delete-result-table",
+			Summary:     "Delete result table",
+			Description: "Delete existing result table with matching id and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/tables/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.ResultTableID
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteTable(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
 	// Delete multiple result
 	huma.Register(
 		*humaApi,
@@ -164,9 +297,10 @@ func RegisterEndpoints(
 					constants.SecuritySchemeSchoolToken: {},
 					constants.SecuritySchemeSchoolID:    {},
 					constants.SecuritySchemeBearerToken: {
-						fmt.Sprintf("%s,%s",
+						fmt.Sprintf("%s,%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
+							constants.FeatureTeacher,
 						), // Feature
 						tableName,                  // Table name
 						constants.PermissionDelete, // Operation
@@ -184,6 +318,49 @@ func RegisterEndpoints(
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.DeleteMultiple(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
+	// Delete multiple result table
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "delete-result-table-multiple",
+			Summary:     "Delete multiple result table",
+			Description: "Delete multiple result table by providing a list of IDs and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/tables/multiple/delete", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body types.DeleteMultipleRequest
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteMultipleTable(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -236,6 +413,49 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Get result table by id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-result-table-id",
+			Summary:     "Get result table by id",
+			Description: "Return one result table with matching id",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/tables/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+						), // Feature
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.ResultTableID
+			},
+		) (*struct{ Body data.ResultTableResponse }, error) {
+			result, errCode, err := controller.GetTable(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body data.ResultTableResponse }{Body: *result.ToResponse()}, nil
+		},
+	)
+
 	// Get all result
 	huma.Register(
 		*humaApi,
@@ -284,6 +504,56 @@ func RegisterEndpoints(
 
 			return &struct {
 				Body data.ResultResponseList
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get all result table
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-result-table-list",
+			Summary:     "Get all result table",
+			Description: "Get all result table with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/tables", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+						), // Feature
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllResultTableRequest
+			},
+		) (*struct {
+			Body data.ResultTableResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllTable(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+
+			return &struct {
+				Body data.ResultTableResponseList
 			}{Body: *result}, nil
 		},
 	)

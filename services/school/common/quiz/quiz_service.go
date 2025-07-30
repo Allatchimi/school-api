@@ -34,7 +34,7 @@ func (service *Service) Create(
 	// Format item
 	item := &model.Quiz{
 		SchoolID:       newRequest.SchoolID,
-		YearID:         newRequest.SchoolID,
+		YearID:         newRequest.YearID,
 		ClassSubjectID: newRequest.ClassSubjectID,
 		UnitID:         newRequest.UnitID,
 
@@ -217,19 +217,7 @@ func (service *Service) Update(
 		return
 	}
 
-	// Delete quiz data in order
-	_, err = service.Repository.DeleteAllQuizQuestionOptionByQuizID(id)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		// err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	_, err = service.Repository.DeleteAllQuizAnswerByQuizID(id)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		// err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
+	// Delete quiz data
 	_, err = service.Repository.DeleteQuizQuestionByQuizID(id)
 	if err != nil {
 		errCode = http.StatusInternalServerError

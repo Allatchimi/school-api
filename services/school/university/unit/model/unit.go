@@ -31,7 +31,7 @@ type UniversityUnit struct {
 
 func (item *UniversityUnit) ToResponse() *data.UnitResponse {
 	if item == nil {
-		return nil
+		return &data.UnitResponse{}
 	}
 	resp := &data.UnitResponse{}
 	resp.ID = item.ID

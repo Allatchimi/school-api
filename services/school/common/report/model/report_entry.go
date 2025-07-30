@@ -44,7 +44,7 @@ type ReportEntry struct {
 
 func (item *ReportEntry) ToResponse() *data.ReportEntryResponse {
 	if item == nil {
-		return nil
+		return &data.ReportEntryResponse{}
 	}
 	resp := &data.ReportEntryResponse{}
 	resp.Coefficient = item.Coefficient

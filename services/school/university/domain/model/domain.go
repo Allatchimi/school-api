@@ -21,7 +21,7 @@ type UniversityDomain struct {
 
 func (item *UniversityDomain) ToResponse() *data.DomainResponse {
 	if item == nil {
-		return nil
+		return &data.DomainResponse{}
 	}
 	resp := &data.DomainResponse{}
 	resp.ID = item.ID

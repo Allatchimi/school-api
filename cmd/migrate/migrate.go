@@ -110,6 +110,7 @@ func Apply() error {
 		&quizModel.QuizAnswer{},
 		// Result
 		&resultModel.Result{},
+		&resultModel.ResultTable{},
 		// Report
 		&reportModel.ReportEntry{},
 		&reportModel.ReportGrade{},

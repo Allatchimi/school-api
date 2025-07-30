@@ -60,9 +60,11 @@ func (service *Service) Create(
 		for _, tempIterator := range newRequest.Documents {
 			tempItem, tempErr := service.Repository.CreateCourseDocument(
 				&model.CourseDocument{
+					CourseID: result.ID,
+
 					Title:       tempIterator.Title,
 					Description: tempIterator.Description,
-					CourseID:    result.ID,
+					Url:         tempIterator.Url,
 				},
 			)
 			if tempErr != nil || tempItem == nil || tempItem.ID <= 0 {
@@ -74,11 +76,13 @@ func (service *Service) Create(
 	}
 	if len(newRequest.Videos) > 0 {
 		for _, tempIterator := range newRequest.Videos {
-			tempItem, tempErr := service.Repository.CreateCourseDocument(
-				&model.CourseDocument{
+			tempItem, tempErr := service.Repository.CreateCourseVideo(
+				&model.CourseVideo{
+					CourseID: result.ID,
+
 					Title:       tempIterator.Title,
 					Description: tempIterator.Description,
-					CourseID:    result.ID,
+					Url:         tempIterator.Url,
 				},
 			)
 			if tempErr != nil || tempItem == nil || tempItem.ID <= 0 {
@@ -135,8 +139,9 @@ func (service *Service) CreateCourseComment(
 	item := &model.CourseComment{
 		CourseID: courseID,
 		UserID:   ctxData.Jwt.UserID,
-		Message:  newRequest.Message,
-		Rate:     newRequest.Rate,
+
+		Message: newRequest.Message,
+		Rate:    newRequest.Rate,
 	}
 
 	// Insert course
@@ -204,9 +209,11 @@ func (service *Service) Update(
 		for _, tempIterator := range newRequest.Documents {
 			tempItem, tempErr := service.Repository.CreateCourseDocument(
 				&model.CourseDocument{
+					CourseID: id,
+
 					Title:       tempIterator.Title,
 					Description: tempIterator.Description,
-					CourseID:    id,
+					Url:         tempIterator.Url,
 				},
 			)
 			if tempErr != nil || tempItem == nil || tempItem.ID <= 0 {
@@ -218,11 +225,13 @@ func (service *Service) Update(
 	}
 	if len(newRequest.Videos) > 0 {
 		for _, tempIterator := range newRequest.Videos {
-			tempItem, tempErr := service.Repository.CreateCourseDocument(
-				&model.CourseDocument{
+			tempItem, tempErr := service.Repository.CreateCourseVideo(
+				&model.CourseVideo{
+					CourseID: id,
+
 					Title:       tempIterator.Title,
 					Description: tempIterator.Description,
-					CourseID:    id,
+					Url:         tempIterator.Url,
 				},
 			)
 			if tempErr != nil || tempItem == nil || tempItem.ID <= 0 {

@@ -21,7 +21,7 @@ type ParentStudent struct {
 
 func (item *ParentStudent) ToParentStudentResponse() *data.ParentStudentResponse {
 	if item == nil {
-		return nil
+		return &data.ParentStudentResponse{}
 	}
 	resp := &data.ParentStudentResponse{}
 	resp.ID = item.ID

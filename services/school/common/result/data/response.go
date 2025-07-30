@@ -16,7 +16,20 @@ type ResultResponse struct {
 	Value float64 `json:"value" required:"false" doc:"Value"`
 }
 
+type ResultTableResponse struct {
+	types.BaseGormModelResponse
+	School *dataSchool.SchoolResponse `json:"school" required:"false" doc:"School"`
+	Exam   *examData.ExamResponse     `json:"exam" required:"true" doc:"Exam"`
+
+	Status string `json:"status" required:"false" doc:"Status"`
+}
+
 type ResultResponseList struct {
 	types.PaginatedResponse
 	Data []ResultResponse `json:"data" required:"false" doc:"List of result"`
+}
+
+type ResultTableResponseList struct {
+	types.PaginatedResponse
+	Data []ResultTableResponse `json:"data" required:"false" doc:"List of result table"`
 }

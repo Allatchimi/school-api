@@ -22,7 +22,7 @@ type ReportGrade struct {
 
 func (item *ReportGrade) ToResponse() *data.ReportGradeResponse {
 	if item == nil {
-		return nil
+		return &data.ReportGradeResponse{}
 	}
 	resp := &data.ReportGradeResponse{}
 	resp.Type = item.Type

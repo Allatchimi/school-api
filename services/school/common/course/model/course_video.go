@@ -12,17 +12,17 @@ type CourseVideo struct {
 
 	Title       string `gorm:"default:null"`
 	Description string `gorm:"default:null"`
-	URL         string `gorm:"default:null"`
+	Url         string `gorm:"default:null"`
 }
 
 func (item *CourseVideo) ToResponse() *data.CourseVideoResponse {
 	if item == nil {
-		return nil
+		return &data.CourseVideoResponse{}
 	}
 	resp := &data.CourseVideoResponse{}
 	resp.Title = item.Title
 	resp.Description = item.Description
-	resp.URL = item.URL
+	resp.Url = item.Url
 
 	resp.Course = item.Course.ToResponse()
 

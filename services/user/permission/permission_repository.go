@@ -21,35 +21,52 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(permission *model.Permission) (*model.Permission, error) {
-	result := *permission
-	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
+func (repository *Repository) Create(item *model.Permission) (result *model.Permission, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.Permission{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
 func (repository *Repository) UpdateByID(
 	roleID int64,
 	tableName string,
-	data *model.Permission,
+	item *model.Permission,
 ) (result *model.Permission, err error) {
-	result = &model.Permission{}
+	// Update the item
 	fields := map[string]any{
-		"role_id": data.RoleID,
+		"role_id": item.RoleID,
 
-		"table_name": data.TableName,
-		"create":     data.Create,
-		"read":       data.Read,
-		"update":     data.Update,
-		"delete":     data.Delete,
+		"table_name": item.TableName,
+		"create":     item.Create,
+		"read":       item.Read,
+		"update":     item.Update,
+		"delete":     item.Delete,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.Permission{}).
 		Where("role_id = ?", roleID).
 		Where("table_name = ?", tableName).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.Permission{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", roleID).
+		First(result).Error
+	return
 }
 
 func (repository *Repository) DeleteByID(id int64) (result int64, err error) {

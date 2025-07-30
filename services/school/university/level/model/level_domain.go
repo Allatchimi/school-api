@@ -28,7 +28,7 @@ type UniversityLevelDomain struct {
 
 func (item *UniversityLevelDomain) ToResponse() *data.LevelDomainResponse {
 	if item == nil {
-		return nil
+		return &data.LevelDomainResponse{}
 	}
 	resp := &data.LevelDomainResponse{}
 	resp.ID = item.ID

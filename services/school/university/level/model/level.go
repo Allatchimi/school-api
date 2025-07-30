@@ -17,7 +17,7 @@ type UniversityLevel struct {
 
 func (item *UniversityLevel) ToResponse() *data.LevelResponse {
 	if item == nil {
-		return nil
+		return &data.LevelResponse{}
 	}
 	resp := &data.LevelResponse{}
 	resp.ID = item.ID

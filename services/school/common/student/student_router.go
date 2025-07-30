@@ -593,12 +593,9 @@ func RegisterEndpoints(
 					constants.SecuritySchemeSchoolToken: {},
 					constants.SecuritySchemeSchoolID:    {},
 					constants.SecuritySchemeBearerToken: {
-						fmt.Sprintf("%s,%s,%s,%s,%s",
+						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-							constants.FeatureTeacher,
-							constants.FeatureStudent,
-							constants.FeatureParent,
 						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation
@@ -734,12 +731,9 @@ func RegisterEndpoints(
 					constants.SecuritySchemeSchoolToken: {},
 					constants.SecuritySchemeSchoolID:    {},
 					constants.SecuritySchemeBearerToken: {
-						fmt.Sprintf("%s,%s,%s,%s,%s",
+						fmt.Sprintf("%s,%s",
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
-							constants.FeatureTeacher,
-							constants.FeatureStudent,
-							constants.FeatureParent,
 						), // Feature
 						tableName,                // Table name
 						constants.PermissionRead, // Operation

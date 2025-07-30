@@ -24,7 +24,7 @@ type MeetingRoom struct {
 
 func (item *MeetingRoom) ToResponse() *data.MeetingRoomResponse {
 	if item == nil {
-		return nil
+		return &data.MeetingRoomResponse{}
 	}
 	resp := &data.MeetingRoomResponse{}
 	resp.ApiRoomID = item.ApiRoomID

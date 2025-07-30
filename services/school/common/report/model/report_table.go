@@ -34,7 +34,7 @@ type ReportTable struct {
 
 func (item *ReportTable) ToResponse() *data.ReportTableResponse {
 	if item == nil {
-		return nil
+		return &data.ReportTableResponse{}
 	}
 	resp := &data.ReportTableResponse{}
 	resp.PeriodType = item.PeriodType

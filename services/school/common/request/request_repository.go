@@ -21,17 +21,30 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(item *model.Request) (*model.Request, error) {
-	result := *item
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) Create(item *model.Request) (result *model.Request, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.Request{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
-func (repository *Repository) UpdateByID(id int64, item *model.Request) (*model.Request, error) {
-	result := &model.Request{}
+func (repository *Repository) UpdateByID(id int64, item *model.Request) (result *model.Request, err error) {
+	// Update the item
 	fields := map[string]any{
-		"school_id":  item.SchoolID,
-		"year_id":    item.YearID,
-		"student_id": item.StudentID,
+		"school_id":        item.SchoolID,
+		"year_id":          item.YearID,
+		"class_subject_id": nil,
+		"sequence_id":      nil,
+		"unit_id":          nil,
+		"student_id":       item.StudentID,
 
 		"audience":  item.Audience,
 		"title":     item.Title,
@@ -47,33 +60,51 @@ func (repository *Repository) UpdateByID(id int64, item *model.Request) (*model.
 		if item.SequenceID > 0 {
 			fields["sequence_id"] = item.SequenceID
 		}
-	} else if item.UnitID > 0 {
+	}
+	if item.UnitID > 0 {
 		fields["unit_id"] = item.UnitID
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.Request{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.Request{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
-func (repository *Repository) UpdateStatusByID(id int64, data *model.Request) (*model.Request, error) {
-	result := &model.Request{}
+func (repository *Repository) UpdateStatusByID(
+	id int64,
+	data *model.Request,
+) (result *model.Request, err error) {
+	// Update the item
 	fields := map[string]any{
 		"status":          data.Status,
 		"status_feedback": data.StatusFeedback,
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.Request{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.Request{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {

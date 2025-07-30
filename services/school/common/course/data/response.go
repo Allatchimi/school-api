@@ -30,7 +30,7 @@ type CourseDocumentResponse struct {
 
 	Title       string `json:"title" required:"false" doc:"Title"`
 	Description string `json:"description" required:"false" doc:"Description"`
-	URL         string `json:"url" required:"false" doc:"URL"`
+	Url         string `json:"url" required:"false" doc:"URL"`
 }
 
 type CourseVideoResponse struct {
@@ -39,7 +39,7 @@ type CourseVideoResponse struct {
 
 	Title       string `json:"title" required:"false" doc:"Title"`
 	Description string `json:"description" required:"false" doc:"Description"`
-	URL         string `json:"url" required:"false" doc:"URL"`
+	Url         string `json:"url" required:"false" doc:"URL"`
 }
 
 type CourseCommentResponse struct {

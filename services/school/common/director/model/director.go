@@ -20,7 +20,7 @@ type Director struct {
 
 func (item *Director) ToResponse() *data.DirectorResponse {
 	if item == nil {
-		return nil
+		return &data.DirectorResponse{}
 	}
 	resp := &data.DirectorResponse{}
 	resp.UID = item.UID
@@ -36,7 +36,7 @@ func (item *Director) ToResponse() *data.DirectorResponse {
 
 func (item *Director) ToDirectorPublicResponse() *data.DirectorpublicResponse {
 	if item == nil {
-		return nil
+		return &data.DirectorpublicResponse{}
 	}
 	resp := &data.DirectorpublicResponse{}
 

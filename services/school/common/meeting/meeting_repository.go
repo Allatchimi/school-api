@@ -25,9 +25,19 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(item *model.MeetingRoom) (*model.MeetingRoom, error) {
-	result := *item
-	return &result, repository.Db.Preload(clause.Associations).Create(&result).Error
+func (repository *Repository) Create(item *model.MeetingRoom) (result *model.MeetingRoom, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.MeetingRoom{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
 func (repository *Repository) CreateApiRoom() (*data.ApiCreateRoomResponse, error) {
@@ -118,26 +128,36 @@ func (repository *Repository) CreateApiRoom() (*data.ApiCreateRoomResponse, erro
 	return apiResp, err
 }
 
-func (repository *Repository) UpdateByID(id int64, item *model.MeetingRoom) (*model.MeetingRoom, error) {
-	result := &model.MeetingRoom{}
+func (repository *Repository) UpdateByID(id int64, item *model.MeetingRoom) (result *model.MeetingRoom, err error) {
+	// Update the item
 	fields := map[string]any{
-		"school_id": item.SchoolID,
+		"school_id":        item.SchoolID,
+		"class_subject_id": nil,
+		"unit_id":          nil,
 
 		"api_room_id": item.ApiRoomID,
 	}
 	if item.ClassSubjectID > 0 {
 		fields["class_subject_id"] = item.ClassSubjectID
-	} else if item.UnitID > 0 {
+	}
+	if item.UnitID > 0 {
 		fields["unit_id"] = item.UnitID
 	}
-	return result, repository.Db.
-		Preload(clause.Associations).
+	err = repository.Db.
 		Model(&model.MeetingRoom{}).
 		Where("id = ?", id).
-		Updates(
-			fields,
-		).
-		Find(result).Error
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.MeetingRoom{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
 }
 
 func (repository *Repository) DeleteByID(id int64) (int64, error) {

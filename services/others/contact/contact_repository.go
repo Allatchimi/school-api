@@ -21,9 +21,19 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{Db: db}
 }
 
-func (repository *Repository) Create(contact *model.Contact) (*model.Contact, error) {
-	result := *contact
-	return &result, repository.Db.Create(&result).Error
+func (repository *Repository) Create(item *model.Contact) (result *model.Contact, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.Contact{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
 }
 
 func (repository *Repository) Delete(id int64) (result int64, err error) {

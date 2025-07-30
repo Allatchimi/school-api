@@ -25,7 +25,7 @@ type SchoolConfig struct {
 
 func (item *SchoolConfig) ToResponse() *data.SchoolConfigResponse {
 	if item == nil {
-		return nil
+		return &data.SchoolConfigResponse{}
 	}
 	resp := &data.SchoolConfigResponse{}
 	resp.WebsiteDomainName = item.WebsiteDomainName
@@ -46,6 +46,9 @@ func (item *SchoolConfig) ToResponse() *data.SchoolConfigResponse {
 }
 
 func FromConfigRequest(item *data.SchoolConfigRequest) *SchoolConfig {
+	if item == nil {
+		return &SchoolConfig{}
+	}
 	resp := &SchoolConfig{
 		WebsiteDomainName:              item.WebsiteDomainName,
 		UserEmailDomainName:            item.UserEmailDomainName,

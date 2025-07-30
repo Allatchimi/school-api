@@ -38,7 +38,7 @@ type SchoolInfo struct {
 
 func (item *SchoolInfo) ToResponse() *data.SchoolInfoResponse {
 	if item == nil {
-		return nil
+		return &data.SchoolInfoResponse{}
 	}
 	resp := &data.SchoolInfoResponse{}
 	resp.FullName = item.FullName
@@ -71,7 +71,7 @@ func (item *SchoolInfo) ToResponse() *data.SchoolInfoResponse {
 
 func FromInfoRequest(item *data.SchoolInfoRequest) *SchoolInfo {
 	if item == nil {
-		return nil
+		return &SchoolInfo{}
 	}
 	resp := &SchoolInfo{}
 	resp.FullName = item.FullName
