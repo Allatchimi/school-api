@@ -44,6 +44,19 @@ func (controller *Controller) CreateGrade(
 	return
 }
 
+func (controller *Controller) CreateCorrespondence(
+	ctx *context.Context,
+	input *struct {
+		Body data.ReportCorrespondenceRequest
+	},
+) (result *model.ReportCorrespondence, errCode int, err error) {
+	result, errCode, err = controller.Service.CreateCorrespondence(
+		httpHelper.GetContextData(ctx),
+		&input.Body,
+	)
+	return
+}
+
 func (controller *Controller) CreateConfig(
 	ctx *context.Context,
 	input *struct {
@@ -65,6 +78,21 @@ func (controller *Controller) UpdateGrade(
 	},
 ) (result *model.ReportGrade, errCode int, err error) {
 	result, errCode, err = controller.Service.UpdateGrade(
+		httpHelper.GetContextData(ctx),
+		input.ID,
+		&input.Body,
+	)
+	return
+}
+
+func (controller *Controller) UpdateCorrespondence(
+	ctx *context.Context,
+	input *struct {
+		data.ReportCorrespondenceID
+		Body data.ReportCorrespondenceRequest
+	},
+) (result *model.ReportCorrespondence, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateCorrespondence(
 		httpHelper.GetContextData(ctx),
 		input.ID,
 		&input.Body,
@@ -115,6 +143,20 @@ func (controller *Controller) DeleteGrade(
 	return
 }
 
+func (controller *Controller) DeleteCorrespondence(
+	ctx *context.Context,
+	input *struct {
+		data.ReportCorrespondenceID
+	},
+) (result int64, errCode int, err error) {
+	affectedRows, errCode, err := controller.Service.DeleteCorrespondence(httpHelper.GetContextData(ctx), input.ID)
+	if err != nil {
+		return
+	}
+	result = affectedRows
+	return
+}
+
 func (controller *Controller) DeleteConfig(
 	ctx *context.Context,
 	input *struct {
@@ -157,6 +199,20 @@ func (controller *Controller) DeleteMultipleGrade(
 	return
 }
 
+func (controller *Controller) DeleteMultipleCorrespondence(
+	ctx *context.Context,
+	input *struct {
+		Body types.DeleteMultipleRequest
+	},
+) (result int64, errCode int, err error) {
+	affectedRows, errCode, err := controller.Service.DeleteMultipleCorrespondence(httpHelper.GetContextData(ctx), input.Body.List)
+	if err != nil {
+		return
+	}
+	result = affectedRows
+	return
+}
+
 func (controller *Controller) DeleteMultipleConfig(
 	ctx *context.Context,
 	input *struct {
@@ -188,6 +244,16 @@ func (controller *Controller) GetGrade(
 	},
 ) (result *model.ReportGrade, errCode int, err error) {
 	result, errCode, err = controller.Service.GetGrade(httpHelper.GetContextData(ctx), input.ID)
+	return
+}
+
+func (controller *Controller) GetCorrespondence(
+	ctx *context.Context,
+	input *struct {
+		data.ReportCorrespondenceID
+	},
+) (result *model.ReportCorrespondence, errCode int, err error) {
+	result, errCode, err = controller.Service.GetCorrespondence(httpHelper.GetContextData(ctx), input.ID)
 	return
 }
 
@@ -237,6 +303,27 @@ func (controller *Controller) GetAllGrade(
 	}
 	result = &data.ReportGradeResponseList{
 		Data: model.ToReportGradeResponseList(resultList),
+	}
+	result.Filter = newFilter
+	result.Pagination = newPagination
+	return
+}
+
+func (controller *Controller) GetAllCorrespondence(
+	ctx *context.Context,
+	input *struct {
+		types.Filter
+		types.PaginationRequest
+		data.GetAllReportCorrespondenceRequest
+	},
+) (result *data.ReportCorrespondenceResponseList, errCode int, err error) {
+	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
+	resultList, errCode, err := controller.Service.GetAllCorrespondence(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllReportCorrespondenceRequest)
+	if err != nil {
+		return
+	}
+	result = &data.ReportCorrespondenceResponseList{
+		Data: model.ToReportCorrespondenceResponseList(resultList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

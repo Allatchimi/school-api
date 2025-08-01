@@ -56,30 +56,26 @@ func (service *Service) Create(
 		},
 	}
 
-	// Check if user exists
-	var foundItem *model.User
+	// Check inputs
 	var isEmailValid = utils.IsEmailValid(item.Email)
-	var isPhoneNumberValid = utils.IsPhoneNumberValid(item.PhoneNumber)
-	if isEmailValid {
-		foundItem, err = service.Repository.GetByEmailSchoolID(item.Email, item.SchoolID)
-	} else if isPhoneNumberValid {
-		foundItem, err = service.Repository.GetByPhoneNumberSchoolID(item.PhoneNumber, item.SchoolID)
-	} else {
+	if !isEmailValid {
 		errCode = http.StatusBadRequest
 		err = constants.Http400BadRequestErrorMessage()
 		return
 	}
+
+	// Check existing item
+	var foundItemByEmail *model.User
+	foundItemByEmail, err = service.Repository.GetByEmailSchoolID(item.Email, item.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if foundItem != nil && foundItem.ID > 0 {
-		if (isEmailValid && foundItem.Email == item.Email) || (!isEmailValid && foundItem.PhoneNumber == item.PhoneNumber) {
-			errCode = http.StatusFound
-			err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			return
-		}
+	if foundItemByEmail != nil && foundItemByEmail.ID > 0 {
+		errCode = http.StatusFound
+		err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
 	}
 
 	// Create user info
@@ -167,7 +163,7 @@ func (service *Service) Update(
 	if ctxData.User.Feature != constants.FeatureAdmin {
 		foundItem, err = service.Repository.GetByIDSchoolID(id, newRequest.SchoolID)
 	} else {
-		foundItem, err = service.Repository.GetByID(id)
+		foundItem, err = service.Repository.GetByIDNoAdmin(id)
 	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -204,23 +200,22 @@ func (service *Service) Update(
 
 	// Check inputs
 	var isEmailValid = utils.IsEmailValid(item.Email)
-	var isPhoneNumberValid = utils.IsPhoneNumberValid(item.PhoneNumber)
-	if isEmailValid {
-		foundItem, err = service.Repository.GetByEmailSchoolID(item.Email, item.SchoolID)
-	} else if isPhoneNumberValid {
-		foundItem, err = service.Repository.GetByPhoneNumberSchoolID(item.PhoneNumber, item.SchoolID)
-	} else {
+	if !isEmailValid {
 		errCode = http.StatusBadRequest
 		err = constants.Http400BadRequestErrorMessage()
 		return
 	}
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundItem != nil && foundItem.ID > 0 {
-		if (isEmailValid && foundItem.Email == item.Email) || (!isEmailValid && foundItem.PhoneNumber == item.PhoneNumber) {
+
+	// Check existing item
+	if foundItem.Email != item.Email {
+		var foundItemByEmail *model.User
+		foundItemByEmail, err = service.Repository.GetByEmailSchoolID(item.Email, item.SchoolID)
+		if err != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
+		if foundItemByEmail != nil && foundItemByEmail.ID > 0 {
 			errCode = http.StatusFound
 			err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
@@ -267,7 +262,7 @@ func (service *Service) Delete(
 	if ctxData.User.Feature != constants.FeatureAdmin {
 		foundItem, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
 	} else {
-		foundItem, err = service.Repository.GetByID(id)
+		foundItem, err = service.Repository.GetByIDNoAdmin(id)
 	}
 	if err != nil {
 		errCode = http.StatusInternalServerError
@@ -320,7 +315,7 @@ func (service *Service) Get(
 	if ctxData.User.Feature != constants.FeatureAdmin {
 		result, err = service.Repository.GetByIDSchoolID(id, ctxData.Jwt.SchoolID)
 	} else {
-		result, err = service.Repository.GetByID(id)
+		result, err = service.Repository.GetByIDNoAdmin(id)
 	}
 	if err != nil {
 		errCode = http.StatusInternalServerError

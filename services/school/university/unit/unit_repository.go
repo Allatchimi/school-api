@@ -1,14 +1,11 @@
 package unit
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/common/utils"
 	"api/services/school/university/unit/data"
 	"api/services/school/university/unit/model"
 )
@@ -77,8 +74,7 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 	if len(list) < 1 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	var query *gorm.DB = repository.Db.Where(where)
+	query := repository.Db.Where("id IN ?", list)
 	if schoolID > 0 {
 		query = query.Where("school_id = ?", schoolID)
 	}
@@ -91,13 +87,21 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 
 func (repository *Repository) GetByID(id int64) (*model.UniversityUnit, error) {
 	result := &model.UniversityUnit{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("LevelDomain.Level").
+		Preload("LevelDomain.Domain.Department").
+		Preload("LevelDomain.Domain.Department.Faculty").
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.UniversityUnit, error) {
 	result := &model.UniversityUnit{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("LevelDomain.Level").
+		Preload("LevelDomain.Domain.Department").
+		Preload("LevelDomain.Domain.Department.Faculty").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
@@ -174,6 +178,7 @@ func (repository *Repository) GetAll(
 		Preload(clause.Associations).
 		Preload("LevelDomain.Level").
 		Preload("LevelDomain.Domain.Department").
+		Preload("LevelDomain.Domain.Department.Faculty").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,

@@ -33,7 +33,7 @@ type ReportEntry struct {
 
 	Coefficient      int     `gorm:"default:null"`
 	Credit           int     `gorm:"default:null"`
-	Value            float64 `gorm:"default:null"`
+	Score            float64 `gorm:"default:null"`
 	Notation         float64 `gorm:"default:null"`
 	Grade            string  `gorm:"default:null"`
 	GradeDescription string  `gorm:"default:null"`
@@ -49,7 +49,7 @@ func (item *ReportEntry) ToResponse() *data.ReportEntryResponse {
 	resp := &data.ReportEntryResponse{}
 	resp.Coefficient = item.Coefficient
 	resp.Credit = item.Credit
-	resp.Value = item.Value
+	resp.Score = item.Score
 	resp.Notation = item.Notation
 	resp.Grade = item.Grade
 	resp.GradeDescription = item.GradeDescription

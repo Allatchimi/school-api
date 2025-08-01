@@ -42,8 +42,14 @@ type ExamTypeRequest struct {
 
 type GetAllRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
-	SequenceID int64 `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
-	TypeID     int64 `json:"typeID" query:"typeID" required:"false" doc:"Type id"`
+	types.FilterTeacherStudentRequest
+	SequenceID    int64 `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
+	QuarterID     int64 `json:"quarterID" query:"quarterID" required:"false" doc:"Quarter id"`
+	SemesterID    int64 `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id"`
+	ClassID       int64 `json:"classID" query:"classID" required:"false" doc:"Class id"`
+	LevelDomainID int64 `json:"levelDomainID" query:"levelDomainID" required:"false" doc:"Level domain id"`
+	ExamID        int64 `json:"examID" query:"examID" required:"false" doc:"Exam id"`
+	ExamTypeID    int64 `json:"examTypeID" query:"examTypeID" required:"false" doc:"Exam type id"`
 }
 
 type GetAllExamTypeRequest struct {

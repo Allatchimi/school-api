@@ -1,14 +1,12 @@
 package role
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/common/utils"
+	"api/config"
 	"api/services/user/role/data"
 	"api/services/user/role/model"
 )
@@ -44,6 +42,7 @@ func (repository *Repository) UpdateByID(id int64, item *model.Role) (result *mo
 	}
 	err = repository.Db.
 		Model(&model.Role{}).
+		Where("name <> ?", config.Env.FixtureRoleAdmin).
 		Where("id = ?", id).
 		Updates(fields).Error
 	if err != nil {
@@ -54,13 +53,17 @@ func (repository *Repository) UpdateByID(id int64, item *model.Role) (result *mo
 	result = &model.Role{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Where("name <> ?", config.Env.FixtureRoleAdmin).
 		Where("id = ?", id).
 		First(result).Error
 	return
 }
 
 func (repository *Repository) DeleteByID(id int64) (result int64, err error) {
-	tmpResult := repository.Db.Where("id = ?", id).Delete(&model.Role{})
+	tmpResult := repository.Db.
+		Where("name <> ?", config.Env.FixtureRoleAdmin).
+		Where("id = ?", id).
+		Delete(&model.Role{})
 
 	result = tmpResult.RowsAffected
 	err = tmpResult.Error
@@ -71,8 +74,10 @@ func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, er
 	if len(list) < 1 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.Role{})
+	tmpResult := repository.Db.
+		Where("name <> ?", config.Env.FixtureRoleAdmin).
+		Where("id IN (?)", list).
+		Delete(&model.Role{})
 
 	result = tmpResult.RowsAffected
 	err = tmpResult.Error
@@ -81,7 +86,11 @@ func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, er
 
 func (repository *Repository) GetByID(id int64) (result *model.Role, err error) {
 	result = &model.Role{}
-	tmpErr := repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Where("name <> ?", config.Env.FixtureRoleAdmin).
+		Where("id = ?", id).
+		Limit(1).Find(result).Error
 
 	err = tmpErr
 	return
@@ -89,7 +98,10 @@ func (repository *Repository) GetByID(id int64) (result *model.Role, err error) 
 
 func (repository *Repository) GetByName(name string) (result *model.Role, err error) {
 	result = &model.Role{}
-	tmpErr := repository.Db.Preload(clause.Associations).Where("name = ?", name).Limit(1).Find(result).Error
+	tmpErr := repository.Db.
+		Preload(clause.Associations).
+		Where("name = ?", name).
+		Limit(1).Find(result).Error
 
 	err = tmpErr
 	return
@@ -110,7 +122,11 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "roles.feature = ?")
 			args = append(args, request.Feature)
 		}
+	} else {
+		request = &data.GetAllRequest{}
 	}
+	where = helpers.AppendWhereClause(where, "roles.name <> ?")
+	args = append(args, config.Env.FixtureRoleAdmin)
 
 	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {

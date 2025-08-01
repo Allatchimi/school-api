@@ -36,6 +36,15 @@ func (repository *Repository) CreateReportEntry(item *model.ReportEntry) (result
 	return
 }
 
+type aggregationKey struct {
+	StudentID      int64
+	SchoolID       int64
+	UnitID         int64 // universitaire
+	ClassSubjectID int64 // lycée
+	YearID         int64
+	SequenceID     int64
+}
+
 func (repository *Repository) CreateReportGrade(item *model.ReportGrade) (result *model.ReportGrade, err error) {
 	// Create the item
 	err = repository.Db.Create(item).Error
@@ -45,6 +54,21 @@ func (repository *Repository) CreateReportGrade(item *model.ReportGrade) (result
 
 	// Find the created item
 	result = &model.ReportGrade{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
+}
+
+func (repository *Repository) CreateReportCorrespondence(item *model.ReportCorrespondence) (result *model.ReportCorrespondence, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.ReportCorrespondence{}
 	err = repository.Db.
 		Preload(clause.Associations).
 		First(result, item.ID).Error
@@ -92,7 +116,7 @@ func (repository *Repository) UpdateReportEntryByID(id int64, item *model.Report
 
 		"coefficient":   item.Coefficient,
 		"credit":        item.Credit,
-		"value":         item.Value,
+		"score":         item.Score,
 		"notation":      item.Notation,
 		"is_retry":      item.IsRetry,
 		"retry_count":   item.RetryCount,
@@ -154,6 +178,34 @@ func (repository *Repository) UpdateReportGradeByID(id int64, item *model.Report
 	return
 }
 
+func (repository *Repository) UpdateReportCorrespondenceByID(id int64, item *model.ReportCorrespondence) (result *model.ReportCorrespondence, err error) {
+	// Update the item
+	fields := map[string]any{
+		"school_id": item.SchoolID,
+
+		"minimum":         item.Minimum,
+		"maximum":         item.Maximum,
+		"include_minimum": item.IncludeMinimum,
+		"include_maximum": item.IncludeMaximum,
+		"new_score":       item.NewScore,
+	}
+	err = repository.Db.
+		Model(&model.ReportCorrespondence{}).
+		Where("id = ?", id).
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.ReportCorrespondence{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
+}
+
 func (repository *Repository) UpdateReportConfigByID(id int64, item *model.ReportConfig) (result *model.ReportConfig, err error) {
 	// Update the item
 	fields := map[string]any{
@@ -161,7 +213,7 @@ func (repository *Repository) UpdateReportConfigByID(id int64, item *model.Repor
 
 		"notation_average":                  item.NotationAverage,
 		"notation_report":                   item.NotationReport,
-		"minimum_required_value_to_promote": item.MinimumRequiredValueToPromote,
+		"minimum_required_score_to_promote": item.MinimumRequiredScoreToPromote,
 	}
 	err = repository.Db.
 		Model(&model.ReportConfig{}).
@@ -192,7 +244,7 @@ func (repository *Repository) UpdateReportTableByID(id int64, item *model.Report
 		"period_name":                       item.PeriodName,
 		"status":                            item.Status,
 		"notation":                          item.Notation,
-		"minimum_required_value_to_promote": item.MinimumRequiredValueToPromote,
+		"minimum_required_score_to_promote": item.MinimumRequiredScoreToPromote,
 		"grade_name":                        item.GradeName,
 		"grade_description":                 item.GradeDescription,
 	}
@@ -226,6 +278,11 @@ func (repository *Repository) DeleteReportEntryByID(id int64) (int64, error) {
 
 func (repository *Repository) DeleteReportGradeByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.ReportGrade{})
+	return result.RowsAffected, result.Error
+}
+
+func (repository *Repository) DeleteReportCorrespondenceByID(id int64) (int64, error) {
+	result := repository.Db.Where("id = ?", id).Delete(&model.ReportCorrespondence{})
 	return result.RowsAffected, result.Error
 }
 
@@ -266,6 +323,22 @@ func (repository *Repository) DeleteMultipleReportGradeByID(list []int64, school
 	return
 }
 
+func (repository *Repository) DeleteMultipleReportCorrespondenceByID(list []int64, schoolID int64) (result int64, err error) {
+	if len(list) < 1 {
+		return
+	}
+	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
+	var query *gorm.DB = repository.Db.Where(where)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.ReportCorrespondence{})
+
+	result = query.RowsAffected
+	err = query.Error
+	return
+}
+
 func (repository *Repository) DeleteMultipleReportConfigByID(list []int64, schoolID int64) (result int64, err error) {
 	if len(list) < 1 {
 		return
@@ -294,6 +367,12 @@ func (repository *Repository) GetReportGradeByID(id int64) (*model.ReportGrade, 
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
+func (repository *Repository) GetReportCorrespondenceByID(id int64) (*model.ReportCorrespondence, error) {
+	result := &model.ReportCorrespondence{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
 func (repository *Repository) GetReportConfigByID(id int64) (*model.ReportConfig, error) {
 	result := &model.ReportConfig{}
 	return result, repository.Db.Preload(clause.Associations).
@@ -316,10 +395,25 @@ func (repository *Repository) GetReportGradeByIDSchoolID(id int64, schoolID int6
 		Limit(1).Find(result).Error
 }
 
+func (repository *Repository) GetReportCorrespondenceByIDSchoolID(id int64, schoolID int64) (*model.ReportCorrespondence, error) {
+	result := &model.ReportCorrespondence{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
+}
+
 func (repository *Repository) GetReportConfigByIDSchoolID(id int64, schoolID int64) (*model.ReportConfig, error) {
 	result := &model.ReportConfig{}
 	return result, repository.Db.Preload(clause.Associations).
 		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetReportConfigBySchoolID(schoolID int64) (*model.ReportConfig, error) {
+	result := &model.ReportConfig{}
+	return result, repository.Db.Preload(clause.Associations).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
 }
@@ -364,6 +458,26 @@ func (repository *Repository) AreSameUniqueObjectsReportGrade(item1 *model.Repor
 	if item1 != nil && item2 != nil &&
 		(item1.SchoolID == item2.SchoolID &&
 			item1.Type == item2.Type &&
+			item1.Name == item2.Name &&
+			item1.Minimum == item2.Minimum &&
+			item1.Maximum == item2.Maximum) {
+		return true
+	}
+	return false
+}
+
+func (repository *Repository) GetUniqueObjectReportCorrespondence(item *model.ReportCorrespondence) (*model.ReportCorrespondence, error) {
+	result := &model.ReportCorrespondence{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.ReportCorrespondence{
+		SchoolID: item.SchoolID,
+		Minimum:  item.Maximum,
+		Maximum:  item.Maximum,
+	}).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) AreSameUniqueObjectsReportCorrespondence(item1 *model.ReportCorrespondence, item2 *model.ReportCorrespondence) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID &&
 			item1.Minimum == item2.Minimum &&
 			item1.Maximum == item2.Maximum) {
 		return true
@@ -563,6 +677,57 @@ func (repository *Repository) GetAllReportGrade(
 				`SELECT report_grades.* 
 				FROM report_grades 
 				LEFT JOIN schools ON report_grades.school_id = schools.id`,
+				where,
+				pagination,
+				filter,
+				args...,
+			),
+		).Find(&result).Error
+
+	return
+}
+
+func (repository *Repository) GetAllReportCorrespondence(
+	filter *types.Filter, pagination *types.Pagination,
+	request *data.GetAllReportCorrespondenceRequest,
+) (result []model.ReportCorrespondence, err error) {
+	result = make([]model.ReportCorrespondence, 0)
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, "report_correspondences.school_id = ?")
+			args = append(args, request.SchoolID)
+		}
+	}
+
+	// Handle search filter securely
+	if filter != nil && len(filter.Search) > 0 {
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(report_correspondences.id AS TEXT) = ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like)
+	}
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
+		Preload(clause.Associations).
+		Scopes(
+			helpers.PaginationScopeV2(
+				repository.Db,
+				`SELECT report_correspondences.* 
+				FROM report_correspondences 
+				LEFT JOIN schools ON report_correspondences.school_id = schools.id`,
 				where,
 				pagination,
 				filter,

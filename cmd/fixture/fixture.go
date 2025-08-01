@@ -133,7 +133,7 @@ func Load() (err error) {
 		return
 	}
 	if foundPermission == nil || foundPermission.RoleID != roleAdmin.ID {
-		_, err = permissionRepo.Create(&permissionModel.Permission{
+		_, _ = permissionRepo.Create(&permissionModel.Permission{
 			RoleID:    roleAdmin.ID,
 			TableName: "*",
 			Create:    true,

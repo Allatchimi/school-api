@@ -9,6 +9,7 @@ import (
 	courseModel "api/services/school/common/course/model"
 	directorModel "api/services/school/common/director/model"
 	examModel "api/services/school/common/exam/model"
+	managerModel "api/services/school/common/manager/model"
 	meetingModel "api/services/school/common/meeting/model"
 	parentModel "api/services/school/common/parent/model"
 	paymentModel "api/services/school/common/payment/model"
@@ -80,6 +81,8 @@ func Apply() error {
 		&schoolModel.SchoolInfo{},
 		// Director
 		&directorModel.Director{},
+		// Manager
+		&managerModel.Manager{},
 		// Teacher
 		&teacherModel.Teacher{},
 		&teacherModel.TeacherClassSubjectUnit{},
@@ -112,9 +115,10 @@ func Apply() error {
 		&resultModel.Result{},
 		&resultModel.ResultTable{},
 		// Report
-		&reportModel.ReportEntry{},
-		&reportModel.ReportGrade{},
 		&reportModel.ReportConfig{},
+		&reportModel.ReportGrade{},
+		&reportModel.ReportCorrespondence{},
+		&reportModel.ReportEntry{},
 		&reportModel.ReportTable{},
 		// Schedule
 		&scheduleModel.Schedule{},

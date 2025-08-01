@@ -1,4 +1,4 @@
-package director
+package manager
 
 import (
 	"gorm.io/gorm"
@@ -6,8 +6,8 @@ import (
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/services/school/common/director/data"
-	"api/services/school/common/director/model"
+	"api/services/school/common/manager/data"
+	"api/services/school/common/manager/model"
 )
 
 type Repository struct {
@@ -19,8 +19,8 @@ func NewRepository(db *gorm.DB) *Repository {
 }
 
 func (repository *Repository) Create(
-	item *model.Director,
-) (result *model.Director, err error) {
+	item *model.Manager,
+) (result *model.Manager, err error) {
 	// Create the item
 	err = repository.Db.Create(item).Error
 	if err != nil {
@@ -28,7 +28,7 @@ func (repository *Repository) Create(
 	}
 
 	// Find the created item
-	result = &model.Director{}
+	result = &model.Manager{}
 	err = repository.Db.
 		Preload(clause.Associations).
 		First(result, item.ID).Error
@@ -37,15 +37,17 @@ func (repository *Repository) Create(
 
 func (repository *Repository) UpdateByID(
 	id int64,
-	item *model.Director,
-) (result *model.Director, err error) {
+	item *model.Manager,
+) (result *model.Manager, err error) {
 	// Update the item
 	fields := map[string]any{
 		"school_id": item.SchoolID,
 		"user_id":   item.UserID,
+
+		"uid": item.UID,
 	}
 	err = repository.Db.
-		Model(&model.Director{}).
+		Model(&model.Manager{}).
 		Where("id = ?", id).
 		Updates(fields).Error
 	if err != nil {
@@ -53,7 +55,7 @@ func (repository *Repository) UpdateByID(
 	}
 
 	// Find the updated item
-	result = &model.Director{}
+	result = &model.Manager{}
 	err = repository.Db.
 		Preload(clause.Associations).
 		Where("id = ?", id).
@@ -61,61 +63,59 @@ func (repository *Repository) UpdateByID(
 	return
 }
 
-func (repository *Repository) DeleteByID(
-	id int64,
-) (int64, error) {
-	foundItem, err := repository.GetByID(id)
-	if err != nil || foundItem == nil || foundItem.ID != id {
-		return -1, err
-	}
-	result := repository.Db.Where("id = ?", id).Delete(&model.Director{})
+func (repository *Repository) DeleteByID(id int64) (int64, error) {
+	result := repository.Db.Where("id = ?", id).Delete(&model.Manager{})
 	return result.RowsAffected, result.Error
 }
 
-func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
 	if len(list) < 1 {
 		return
 	}
-	tmpResult := repository.Db.Where("id IN ?", list).Delete(&model.Director{})
+	query := repository.Db.Where("id IN ?", list)
+	if schoolID > 0 {
+		query = query.Where("school_id = ?", schoolID)
+	}
+	query = query.Delete(&model.Manager{})
 
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
+	result = query.RowsAffected
+	err = query.Error
 	return
 }
 
-func (repository *Repository) GetByID(
-	id int64,
-) (*model.Director, error) {
-	result := &model.Director{}
-	return result, repository.Db.
-		Preload(clause.Associations).
-		Preload("User.Info").
+func (repository *Repository) GetByID(id int64) (*model.Manager, error) {
+	result := &model.Manager{}
+	return result, repository.Db.Preload(clause.Associations).
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
-func (repository *Repository) GetByUserID(
-	userID int64,
-) (*model.Director, error) {
-	result := &model.Director{}
-	return result, repository.Db.
-		Preload(clause.Associations).
-		Preload("User.Info").
+func (repository *Repository) GetByUserID(userID int64) (*model.Manager, error) {
+	result := &model.Manager{}
+	return result, repository.Db.Preload(clause.Associations).
 		Where("user_id = ?", userID).Limit(1).Find(result).Error
 }
 
+func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Manager, error) {
+	result := &model.Manager{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
+}
+
 func (repository *Repository) GetUniqueObjectByUserID(
-	item *model.Director,
-) (*model.Director, error) {
-	result := &model.Director{}
-	return result, repository.Db.Preload(clause.Associations).Where(&model.Director{
+	item *model.Manager,
+) (*model.Manager, error) {
+	result := &model.Manager{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.Manager{
 		SchoolID: item.SchoolID,
 		UserID:   item.UserID,
 	}).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) AreSameUniqueObjectsByUserID(
-	item1 *model.Director,
-	item2 *model.Director,
+	item1 *model.Manager,
+	item2 *model.Manager,
 ) bool {
 	if item1 != nil && item2 != nil &&
 		(item1.SchoolID == item2.SchoolID &&
@@ -126,18 +126,18 @@ func (repository *Repository) AreSameUniqueObjectsByUserID(
 }
 
 func (repository *Repository) GetUniqueObjectByUID(
-	item *model.Director,
-) (*model.Director, error) {
-	result := &model.Director{}
-	return result, repository.Db.Preload(clause.Associations).Where(&model.Director{
+	item *model.Manager,
+) (*model.Manager, error) {
+	result := &model.Manager{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.Manager{
 		SchoolID: item.SchoolID,
 		UID:      item.UID,
 	}).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) AreSameUniqueObjectsByUID(
-	item1 *model.Director,
-	item2 *model.Director,
+	item1 *model.Manager,
+	item2 *model.Manager,
 ) bool {
 	if item1 != nil && item2 != nil &&
 		(item1.SchoolID == item2.SchoolID &&
@@ -151,15 +151,15 @@ func (repository *Repository) GetAll(
 	filter *types.Filter,
 	pagination *types.Pagination,
 	request *data.GetAllRequest,
-) (result []model.Director, err error) {
-	result = make([]model.Director, 0)
+) (result []model.Manager, err error) {
+	result = make([]model.Manager, 0)
 
 	// Build secure WHERE conditions
 	where := ""
 	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, "directors.school_id = ?")
+			where = helpers.AppendWhereClause(where, "managers.school_id = ?")
 			args = append(args, request.SchoolID)
 		}
 	}
@@ -171,8 +171,8 @@ func (repository *Repository) GetAll(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(directors.id AS TEXT) = ? OR
-			directors.uid ILIKE ? OR
+			CAST(managers.id AS TEXT) = ? OR
+			managers.uid ILIKE ? OR
 			schools.name ILIKE ? OR
 			schools.type ILIKE ? OR
 			users.email ILIKE ? OR
@@ -191,10 +191,10 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT directors.*
-				FROM directors
-				LEFT JOIN schools ON directors.school_id = schools.id
-				LEFT JOIN users ON directors.user_id = users.id`,
+				`SELECT managers.*
+				FROM managers
+				LEFT JOIN schools ON managers.school_id = schools.id
+				LEFT JOIN users ON managers.user_id = users.id`,
 				where,
 				pagination,
 				filter,

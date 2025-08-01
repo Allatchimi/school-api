@@ -542,7 +542,7 @@ func (service *Service) ActivateAccount(
 	_, _ = config.DeleteRedisString(securityUtil.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
 
 	// Send welcome message
-	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+	if userFound.School == nil || userFound.School.Config == nil {
 		return
 	}
 	if utils.IsEmailValid(updatedUser.Email) {

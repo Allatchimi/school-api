@@ -1,14 +1,11 @@
 package school
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/common/utils"
 	"api/services/school/common/school/data"
 	"api/services/school/common/school/model"
 )
@@ -245,8 +242,7 @@ func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, er
 	if len(list) < 1 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.School{})
+	tmpResult := repository.Db.Where("id IN ?", list).Delete(&model.School{})
 
 	result = tmpResult.RowsAffected
 	err = tmpResult.Error

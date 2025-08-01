@@ -10,6 +10,10 @@ type ReportGradeID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Report grade id"`
 }
 
+type ReportCorrespondenceID struct {
+	ID int64 `json:"id" path:"id" required:"true" doc:"Report correspondence id"`
+}
+
 type ReportConfigID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Report config id"`
 }
@@ -34,8 +38,18 @@ type ReportGradeRequest struct {
 	Description    string  `json:"description" required:"false" doc:"Description"`
 	Minimum        float64 `json:"minimum" required:"true" doc:"Minimum"`
 	Maximum        float64 `json:"maximum" required:"true" doc:"Maximum"`
-	IncludeMinimum bool    `json:"includeMinimum" required:"true" doc:"Include minimum"`
-	IncludeMaximum bool    `json:"includeMaximum" required:"true" doc:"Include maximum"`
+	IncludeMinimum bool    `json:"includeMinimum" required:"false" doc:"Include minimum"`
+	IncludeMaximum bool    `json:"includeMaximum" required:"false" doc:"Include maximum"`
+}
+
+type ReportCorrespondenceRequest struct {
+	SchoolID int64 `json:"schoolID" required:"true" doc:"School id"`
+
+	Minimum        float64 `json:"minimum" required:"true" doc:"Minimum"`
+	Maximum        float64 `json:"maximum" required:"true" doc:"Maximum"`
+	IncludeMinimum bool    `json:"includeMinimum" required:"false" doc:"Include minimum"`
+	IncludeMaximum bool    `json:"includeMaximum" required:"false" doc:"Include maximum"`
+	NewScore       float64 `json:"newScore" required:"true" doc:"New score"`
 }
 
 type ReportConfigRequest struct {
@@ -43,7 +57,7 @@ type ReportConfigRequest struct {
 
 	NotationAverage               float64 `json:"notationAverage" required:"true" doc:"Notation average"`
 	NotationReport                float64 `json:"notationReport" required:"true" doc:"Notation report"`
-	MinimumRequiredValueToPromote float64 `json:"minimumRequiredValueToPromote" required:"true" doc:"Minimum required value to promote"`
+	MinimumRequiredScoreToPromote float64 `json:"minimumRequiredScoreToPromote" required:"true" doc:"Minimum required score to promote"`
 }
 
 type GetAllReportEntryRequest struct {
@@ -56,6 +70,10 @@ type GetAllReportEntryRequest struct {
 type GetAllReportGradeRequest struct {
 	SchoolID int64  `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
 	Type     string `json:"type" query:"type" required:"false" doc:"Type"`
+}
+
+type GetAllReportCorrespondenceRequest struct {
+	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
 }
 
 type GetAllReportConfigRequest struct {

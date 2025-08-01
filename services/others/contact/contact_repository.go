@@ -1,14 +1,11 @@
 package contact
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/common/utils"
 	"api/services/others/contact/data"
 	"api/services/others/contact/model"
 )
@@ -48,8 +45,9 @@ func (repository *Repository) DeleteMultiple(list []int64) (result int64, err er
 	if len(list) < 1 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.Contact{})
+	tmpResult := repository.Db.
+		Where("id IN (?)", list).
+		Delete(&model.Contact{})
 
 	result = tmpResult.RowsAffected
 	err = tmpResult.Error

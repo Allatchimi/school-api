@@ -1,14 +1,11 @@
 package class
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/common/utils"
 	"api/services/school/highschool/class/data"
 	"api/services/school/highschool/class/model"
 )
@@ -121,8 +118,7 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 	if len(list) < 1 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	var query *gorm.DB = repository.Db.Where(where)
+	query := repository.Db.Where("id IN ?", list)
 	if schoolID > 0 {
 		query = query.Where("school_id = ?", schoolID)
 	}
@@ -137,8 +133,7 @@ func (repository *Repository) DeleteMultipleClassSubjectByID(list []int64, schoo
 	if len(list) < 1 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	var query *gorm.DB = repository.Db.Where(where)
+	query := repository.Db.Where("id IN ?", list)
 	if schoolID > 0 {
 		query = query.Where("school_id = ?", schoolID)
 	}
@@ -151,19 +146,26 @@ func (repository *Repository) DeleteMultipleClassSubjectByID(list []int64, schoo
 
 func (repository *Repository) GetByID(id int64) (*model.HighschoolClass, error) {
 	result := &model.HighschoolClass{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("Specialty.Section").
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetClassSubjectByID(id int64) (*model.HighschoolClassSubject, error) {
 	result := &model.HighschoolClassSubject{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("Class.Specialty").
+		Preload("Class.Specialty.Section").
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.HighschoolClass, error) {
 	result := &model.HighschoolClass{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("Specialty.Section").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
@@ -171,7 +173,10 @@ func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.
 
 func (repository *Repository) GetClassSubjectByIDSchoolID(id int64, schoolID int64) (*model.HighschoolClassSubject, error) {
 	result := &model.HighschoolClassSubject{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("Class.Specialty").
+		Preload("Class.Specialty.Section").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
@@ -257,6 +262,7 @@ func (repository *Repository) GetAll(
 	// Perform query with preloads and custom pagination scope
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("Specialty.Section").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,

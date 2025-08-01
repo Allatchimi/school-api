@@ -4,12 +4,12 @@ import (
 	"api/common/constants"
 	"api/common/helpers"
 	"api/common/types"
-	"api/common/utils"
+	"api/config"
 	"api/services/user/user/data"
 	"api/services/user/user/model"
+	"fmt"
 
 	dataMonitoring "api/services/others/monitoring/data"
-	"fmt"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -69,6 +69,20 @@ func (repository *Repository) CreateUserConfig(item *model.UserConfig) (result *
 }
 
 func (repository *Repository) UpdateByID(id int64, item *model.User) (result *model.User, err error) {
+	// Check role
+	var foundItem *model.User = &model.User{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		Limit(1).Find(foundItem).Error
+	if err != nil {
+		return
+	}
+	if foundItem.Role.Name == config.Env.FixtureRoleAdmin {
+		err = fmt.Errorf("cannot update an admin user")
+		return
+	}
+
 	// Update the item
 	fields := map[string]any{
 		"school_id": item.SchoolID,
@@ -286,11 +300,11 @@ func (repository *Repository) UpdateUserConfigByID(id int64, item *model.UserCon
 	return
 }
 
-func (repository *Repository) UpdateUserConfigWebPushSubscriptionByID(id int64, endpoint string, KeyP256dh string, keyAuth string) (result *model.UserConfig, err error) {
+func (repository *Repository) UpdateUserConfigWebPushSubscriptionByID(id int64, endpoint string, keyP256dh string, keyAuth string) (result *model.UserConfig, err error) {
 	// Update the item
 	fields := map[string]any{
 		"web_push_subscription_endpoint":   endpoint,
-		"web_push_subscription_key_p256dh": KeyP256dh,
+		"web_push_subscription_key_p256dh": keyP256dh,
 		"web_push_subscription_key_auth":   keyAuth,
 	}
 	err = repository.Db.
@@ -310,54 +324,90 @@ func (repository *Repository) UpdateUserConfigWebPushSubscriptionByID(id int64, 
 	return
 }
 
-func (repository *Repository) DeleteByID(id int64) (int64, error) {
-	result := repository.Db.Where("id = ?", id).Delete(&model.User{})
-	return result.RowsAffected, result.Error
+func (repository *Repository) DeleteByID(id int64) (result int64, err error) {
+	// Subquery
+	subQuery := repository.Db.
+		Table("roles").
+		Select("id").
+		Where("name <> ?", config.Env.FixtureRoleAdmin)
+
+	// Delete
+	tmpResult := repository.Db.
+		Where("role_id IN (?)", subQuery).
+		Where("id = ?", id).
+		Delete(&model.User{})
+
+	result = tmpResult.RowsAffected
+	err = tmpResult.Error
+	return
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (result int64, err error) {
-	if len(list) < 1 {
+	if len(list) == 0 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	var query *gorm.DB = repository.Db.Where(where)
-	if schoolID > 0 {
-		query = query.Where("school_id = ?", schoolID)
-	}
-	query = query.Delete(&model.User{})
 
-	result = query.RowsAffected
-	err = query.Error
+	// Subquery to get non-admin role IDs
+	subQuery := repository.Db.
+		Table("roles").
+		Select("id").
+		Where("name <> ?", config.Env.FixtureRoleAdmin)
+
+	// Delete users matching conditions
+	tmpResult := repository.Db.
+		Where("role_id IN (?)", subQuery).
+		Where("id IN ?", list)
+	if schoolID > 0 {
+		tmpResult = tmpResult.Where("school_id = ?", schoolID)
+	}
+	tmpResult = tmpResult.Delete(&model.User{})
+
+	result = tmpResult.RowsAffected
+	err = tmpResult.Error
 	return
 }
 
 func (repository *Repository) GetByID(id int64) (*model.User, error) {
 	result := &model.User{}
-	return result, repository.Db.Preload(clause.Associations).
-		Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetByIDNoAdmin(id int64) (*model.User, error) {
+	result := &model.User{}
+	return result, repository.Db.
+		Joins("JOIN roles ON roles.id = users.role_id").
+		Preload(clause.Associations).
+		Where("roles.name <> ?", config.Env.FixtureRoleAdmin).
+		Where("users.id = ?", id).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.User, error) {
 	result := &model.User{}
-	return result, repository.Db.Preload(clause.Associations).
-		Where("id = ?", id).
-		Where("school_id = ?", schoolID).
+	return result, repository.Db.
+		Joins("JOIN roles ON roles.id = users.role_id").
+		Preload(clause.Associations).
+		Where("roles.name <> ?", config.Env.FixtureRoleAdmin).
+		Where("users.id = ?", id).
+		Where("users.school_id = ?", schoolID).
 		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByEmailSchoolID(email string, schoolID int64) (*model.User, error) {
 	result := &model.User{}
 	if schoolID < 1 {
-		return result, repository.Db.Preload(clause.Associations).
-			Where(
-				"login_method = ?", constants.AuthLoginMethodDefault,
-			).Where(
-			"email = ?", email,
-		).
-			Or("school_id < ?", 1).Or("school_id = ?", nil).
+		return result, repository.Db.
+			Preload(clause.Associations).
+			Where("login_method = ?", constants.AuthLoginMethodDefault).
+			Where("email = ?", email).
+			Where(repository.Db.Where("school_id < ?", 1).Or("school_id IS NULL")).
 			Limit(1).Find(result).Error
 	}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
 		Where(
 			"login_method = ?", constants.AuthLoginMethodDefault,
 		).Where(
@@ -370,28 +420,25 @@ func (repository *Repository) GetByEmailSchoolID(email string, schoolID int64) (
 func (repository *Repository) GetByPhoneNumberSchoolID(phoneNumber uint64, schoolID int64) (*model.User, error) {
 	result := &model.User{}
 	if schoolID < 1 {
-		return result, repository.Db.Preload(clause.Associations).
-			Where(
-				"login_method = ?", constants.AuthLoginMethodDefault,
-			).Where(
-			"phone_number = ?", phoneNumber,
-		).
-			Or("school_id < ?", 1).Or("school_id = ?", nil).
+		return result, repository.Db.
+			Preload(clause.Associations).
+			Where("login_method = ?", constants.AuthLoginMethodDefault).
+			Where("phone_number = ?", phoneNumber).
+			Where(repository.Db.Where("school_id < ?", 1).Or("school_id IS NULL")).
 			Limit(1).Find(result).Error
 	}
-	return result, repository.Db.Preload(clause.Associations).
-		Where(
-			"login_method = ?", constants.AuthLoginMethodDefault,
-		).Where(
-		"phone_number = ?", phoneNumber,
-	).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Where("login_method = ?", constants.AuthLoginMethodDefault).
+		Where("phone_number = ?", phoneNumber).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByProviderSchoolID(provider string, providerUserID string, schoolID int64) (*model.User, error) {
 	result := &model.User{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
 		Where(
 			"login_method = ?", constants.AuthLoginMethodProvider,
 		).Where(
@@ -426,7 +473,11 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "roles.name = ?")
 			args = append(args, request.RoleName)
 		}
+	} else {
+		request = &data.GetAllRequest{}
 	}
+	where = helpers.AppendWhereClause(where, "roles.name <> ?")
+	args = append(args, config.Env.FixtureRoleAdmin)
 
 	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {

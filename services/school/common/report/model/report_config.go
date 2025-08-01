@@ -13,7 +13,7 @@ type ReportConfig struct {
 
 	NotationAverage               float64 `gorm:"default:null"`
 	NotationReport                float64 `gorm:"default:null"`
-	MinimumRequiredValueToPromote float64 `gorm:"default:null"`
+	MinimumRequiredScoreToPromote float64 `gorm:"default:null"`
 }
 
 func (item *ReportConfig) ToResponse() *data.ReportConfigResponse {
@@ -23,7 +23,7 @@ func (item *ReportConfig) ToResponse() *data.ReportConfigResponse {
 	resp := &data.ReportConfigResponse{}
 	resp.NotationAverage = item.NotationAverage
 	resp.NotationReport = item.NotationReport
-	resp.MinimumRequiredValueToPromote = item.MinimumRequiredValueToPromote
+	resp.MinimumRequiredScoreToPromote = item.MinimumRequiredScoreToPromote
 
 	resp.School = item.School.ToPublicResponse()
 

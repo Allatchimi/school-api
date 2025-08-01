@@ -15,7 +15,7 @@ type ResultRequest struct {
 	ExamID    int64 `json:"examID" required:"true" doc:"Exam id"`
 	StudentID int64 `json:"studentID" required:"true" doc:"Student id"`
 
-	Value float64 `json:"value" required:"true" doc:"Value"`
+	Score float64 `json:"score" required:"true" doc:"Score"`
 }
 
 type ResultTableRequest struct {
@@ -28,10 +28,13 @@ type ResultTableRequest struct {
 type GetAllRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
 	types.FilterTeacherStudentRequest
-	SequenceID int64 `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
-	SemesterID int64 `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id"`
-	ExamID     int64 `json:"examID" query:"examID" required:"false" doc:"Exam id"`
-	ExamTypeID int64 `json:"examTypeID" query:"examTypeID" required:"false" doc:"Exam type id"`
+	SequenceID    int64 `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
+	QuarterID     int64 `json:"quarterID" query:"quarterID" required:"false" doc:"Quarter id"`
+	SemesterID    int64 `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id"`
+	ClassID       int64 `json:"classID" query:"classID" required:"false" doc:"Class id"`
+	LevelDomainID int64 `json:"levelDomainID" query:"levelDomainID" required:"false" doc:"Level domain id"`
+	ExamID        int64 `json:"examID" query:"examID" required:"false" doc:"Exam id"`
+	ExamTypeID    int64 `json:"examTypeID" query:"examTypeID" required:"false" doc:"Exam type id"`
 }
 
 type GetAllResultTableRequest struct {

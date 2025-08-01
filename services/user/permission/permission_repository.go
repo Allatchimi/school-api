@@ -8,7 +8,7 @@ import (
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/common/utils"
+	"api/config"
 	"api/services/user/permission/data"
 	"api/services/user/permission/model"
 )
@@ -41,10 +41,24 @@ func (repository *Repository) UpdateByID(
 	tableName string,
 	item *model.Permission,
 ) (result *model.Permission, err error) {
+	// Check role
+	var foundItem *model.Permission = &model.Permission{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("role_id = ?", roleID).
+		Where("table_name = ?", tableName).
+		Limit(1).Find(foundItem).Error
+	if err != nil {
+		return
+	}
+	if foundItem.Role.Name == config.Env.FixtureRoleAdmin {
+		err = fmt.Errorf("cannot update a permission of an admin user")
+		return
+	}
+
 	// Update the item
 	fields := map[string]any{
-		"role_id": item.RoleID,
-
+		"role_id":    item.RoleID,
 		"table_name": item.TableName,
 		"create":     item.Create,
 		"read":       item.Read,
@@ -57,20 +71,32 @@ func (repository *Repository) UpdateByID(
 		Where("table_name = ?", tableName).
 		Updates(fields).Error
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	// Find the updated item
+	// Refetch the updated item
 	result = &model.Permission{}
 	err = repository.Db.
 		Preload(clause.Associations).
-		Where("id = ?", roleID).
+		Where("role_id = ?", item.RoleID).
+		Where("table_name = ?", item.TableName).
 		First(result).Error
+
 	return
 }
 
 func (repository *Repository) DeleteByID(id int64) (result int64, err error) {
-	tmpResult := repository.Db.Where("id = ?", id).Delete(&model.Permission{})
+	// Subquery
+	subQuery := repository.Db.
+		Table("roles").
+		Select("id").
+		Where("name <> ?", config.Env.FixtureRoleAdmin)
+
+	// Delete
+	tmpResult := repository.Db.
+		Where("role_id IN (?)", subQuery).
+		Where("id = ?", id).
+		Delete(&model.Permission{})
 
 	result = tmpResult.RowsAffected
 	err = tmpResult.Error
@@ -78,11 +104,21 @@ func (repository *Repository) DeleteByID(id int64) (result int64, err error) {
 }
 
 func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
-	if len(list) < 1 {
+	if len(list) == 0 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.Permission{})
+
+	// Subquery
+	subQuery := repository.Db.
+		Table("roles").
+		Select("id").
+		Where("name <> ?", config.Env.FixtureRoleAdmin)
+
+	// Delete
+	tmpResult := repository.Db.
+		Where("role_id IN (?)", subQuery).
+		Where("id IN ?", list).
+		Delete(&model.Permission{})
 
 	result = tmpResult.RowsAffected
 	err = tmpResult.Error
@@ -94,7 +130,11 @@ func (repository *Repository) GetByRoleIDTableName(
 	tableName string,
 ) (*model.Permission, error) {
 	result := &model.Permission{}
-	return result, repository.Db.Preload(clause.Associations).Where("role_id = ?", roleID).Where("table_name = ?", tableName).Limit(1).Find(result).Error
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Where("role_id = ?", roleID).
+		Where("table_name = ?", tableName).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByRoleIDTableNameMultiple(
@@ -103,7 +143,11 @@ func (repository *Repository) GetByRoleIDTableNameMultiple(
 	tableName2 string,
 ) (*model.Permission, error) {
 	result := &model.Permission{}
-	return result, repository.Db.Preload(clause.Associations).Where("role_id = ?", roleID).Where("table_name = ? or table_name = ?", tableName1, tableName2).Limit(1).Find(result).Error
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Where("role_id = ?", roleID).
+		Where("table_name = ? or table_name = ?", tableName1, tableName2).
+		Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetAll(
@@ -125,7 +169,11 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "permissions.table_name = ?")
 			args = append(args, request.TableName)
 		}
+	} else {
+		request = &data.GetAllRequest{}
 	}
+	where = helpers.AppendWhereClause(where, "roles.name <> ?")
+	args = append(args, config.Env.FixtureRoleAdmin)
 
 	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {

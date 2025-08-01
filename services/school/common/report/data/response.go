@@ -22,7 +22,7 @@ type ReportEntryResponse struct {
 
 	Coefficient      int     `json:"coefficient" required:"false" doc:"Coefficient"`
 	Credit           int     `json:"credit" required:"false" doc:"Credit"`
-	Value            float64 `json:"value" required:"false" doc:"Value"`
+	Score            float64 `json:"score" required:"false" doc:"Score"`
 	Notation         float64 `json:"notation" required:"false" doc:"Notation"`
 	Grade            string  `json:"grade" required:"false" doc:"Grade"`
 	GradeDescription string  `json:"gradeDescription" required:"false" doc:"Grade description"`
@@ -44,13 +44,24 @@ type ReportGradeResponse struct {
 	IncludeMaximum bool    `json:"includeMaximum" required:"false" doc:"Include maximum"`
 }
 
+type ReportCorrespondenceResponse struct {
+	types.BaseGormModelResponse
+	School *dataSchool.SchoolResponse `json:"school" required:"false" doc:"School"`
+
+	Minimum        float64 `json:"minimum" required:"false" doc:"Minimum"`
+	Maximum        float64 `json:"maximum" required:"false" doc:"Maximum"`
+	IncludeMinimum bool    `json:"includeMinimum" required:"false" doc:"Include minimum"`
+	IncludeMaximum bool    `json:"includeMaximum" required:"false" doc:"Include maximum"`
+	NewScore       float64 `json:"newScore" required:"false" doc:"New score"`
+}
+
 type ReportConfigResponse struct {
 	types.BaseGormModelResponse
 	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
 
 	NotationAverage               float64 `json:"notationAverage" required:"false" doc:"Notation average"`
 	NotationReport                float64 `json:"notationReport" required:"false" doc:"Notation report"`
-	MinimumRequiredValueToPromote float64 `json:"minimumRequiredValueToPromote" required:"false" doc:"Minimum required value to promote"`
+	MinimumRequiredScoreToPromote float64 `json:"minimumRequiredScoreToPromote" required:"false" doc:"Minimum required score to promote"`
 }
 
 type ReportTableResponse struct {
@@ -64,7 +75,7 @@ type ReportTableResponse struct {
 	PeriodName                    string  `json:"periodName" required:"false" doc:"Period name"`
 	Status                        string  `json:"status" required:"false" doc:"Status"`
 	Notation                      float64 `json:"notation" required:"false" doc:"Notation"`
-	MinimumRequiredValueToPromote float64 `json:"minimumRequiredValueToPromote" required:"false" doc:"Minimum required value to promote"`
+	MinimumRequiredScoreToPromote float64 `json:"minimumRequiredScoreToPromote" required:"false" doc:"Minimum required score to promote"`
 	GradeName                     string  `json:"gradeName" required:"false" doc:"Grade name"`
 	GradeDescription              string  `json:"gradeDescription" required:"false" doc:"Grade description"`
 }
@@ -77,6 +88,11 @@ type ReportEntryResponseList struct {
 type ReportGradeResponseList struct {
 	types.PaginatedResponse
 	Data []ReportGradeResponse `json:"data" required:"false" doc:"List of report grade"`
+}
+
+type ReportCorrespondenceResponseList struct {
+	types.PaginatedResponse
+	Data []ReportCorrespondenceResponse `json:"data" required:"false" doc:"List of report correspondence"`
 }
 
 type ReportConfigResponseList struct {

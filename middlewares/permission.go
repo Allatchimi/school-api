@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"api/common/helpers"
 	httpHelper "api/common/helpers/http"
 	"api/services/school/common/director"
 	"api/services/school/common/parent"
@@ -13,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
+	"go.uber.org/zap"
 
 	"api/common/constants"
 )
@@ -58,6 +60,9 @@ func PermissionMiddleware(
 			return
 		}
 
+		helpers.Logger.Info("Checking permission...")
+		helpers.Logger.Info("Show data", zap.Any("UserID", ctxData.Jwt.UserID))
+
 		// Find user
 		foundUser, errFound := userRepo.GetByID(ctxData.Jwt.UserID)
 		if errFound != nil {
@@ -65,6 +70,7 @@ func PermissionMiddleware(
 			_ = huma.WriteErr(api, humaCtx, http.StatusInternalServerError, tempErr.Error(), tempErr)
 			return
 		}
+		helpers.Logger.Info("Show data", zap.Any("Found user", foundUser))
 		if foundUser == nil {
 			tempErr := constants.Http403InvalidPermissionErrorMessage()
 			_ = huma.WriteErr(api, humaCtx, http.StatusForbidden, tempErr.Error(), tempErr)

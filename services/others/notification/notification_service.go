@@ -159,7 +159,9 @@ func (service *Service) GetAll(
 	filter *types.Filter, pagination *types.Pagination,
 	request *data.GetAllRequest,
 ) (result []model.Notification, errCode int, err error) {
-	result, err = service.Repository.GetAllByUserID(filter, pagination, ctxData.Jwt.UserID)
+	newFilter := *filter
+	newFilter.OrderBy = "created_at"
+	result, err = service.Repository.GetAllByUserID(&newFilter, pagination, ctxData.Jwt.UserID)
 	fmt.Println(err)
 	if err != nil {
 		errCode = http.StatusInternalServerError

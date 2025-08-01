@@ -12,6 +12,7 @@ import (
 	"api/services/school/common/course"
 	"api/services/school/common/director"
 	"api/services/school/common/exam"
+	"api/services/school/common/manager"
 	"api/services/school/common/meeting"
 	"api/services/school/common/parent"
 	"api/services/school/common/payment"
@@ -60,6 +61,7 @@ type Controllers struct {
 	// School service
 	SchoolController     *school.Controller
 	DirectorController   *director.Controller
+	ManagerController    *manager.Controller
 	TeacherController    *teacher.Controller
 	StudentController    *student.Controller
 	ParentController     *parent.Controller
@@ -113,6 +115,7 @@ func registerEndpoints(humaApi *huma.API) {
 	// School service
 	school.RegisterEndpoints(humaApi, AllControllers.SchoolController)
 	director.RegisterEndpoints(humaApi, AllControllers.DirectorController)
+	manager.RegisterEndpoints(humaApi, AllControllers.ManagerController)
 	teacher.RegisterEndpoints(humaApi, AllControllers.TeacherController)
 	student.RegisterEndpoints(humaApi, AllControllers.StudentController)
 	parent.RegisterEndpoints(humaApi, AllControllers.ParentController)

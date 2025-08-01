@@ -1,14 +1,11 @@
 package level
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/common/utils"
 	"api/services/school/university/level/data"
 	"api/services/school/university/level/model"
 )
@@ -120,8 +117,7 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 	if len(list) < 1 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	var query *gorm.DB = repository.Db.Where(where)
+	query := repository.Db.Where("id IN ?", list)
 	if schoolID > 0 {
 		query = query.Where("school_id = ?", schoolID)
 	}
@@ -136,8 +132,7 @@ func (repository *Repository) DeleteMultipleLevelDomainByID(list []int64, school
 	if len(list) < 1 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	var query *gorm.DB = repository.Db.Where(where)
+	query := repository.Db.Where("id IN ?", list)
 	if schoolID > 0 {
 		query = query.Where("school_id = ?", schoolID)
 	}
@@ -156,7 +151,10 @@ func (repository *Repository) GetByID(id int64) (*model.UniversityLevel, error) 
 
 func (repository *Repository) GetLevelDomainByID(id int64) (*model.UniversityLevelDomain, error) {
 	result := &model.UniversityLevelDomain{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("Domain.Department").
+		Preload("Domain.Department.Faculty").
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
@@ -170,39 +168,13 @@ func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.
 
 func (repository *Repository) GetLevelDomainByIDSchoolID(id int64, schoolID int64) (*model.UniversityLevelDomain, error) {
 	result := &model.UniversityLevelDomain{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("Domain.Department").
+		Preload("Domain.Department.Faculty").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
-}
-
-func (repository *Repository) DeleteLevelDomain(id int64) (int64, error) {
-	result := repository.Db.Where("id = ?", id).Delete(&model.UniversityLevelDomain{})
-	return result.RowsAffected, result.Error
-}
-
-func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
-	if len(list) < 1 {
-		return
-	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.UniversityLevel{})
-
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
-	return
-}
-
-func (repository *Repository) DeleteMultipleLevelDomain(list []int64) (result int64, err error) {
-	if len(list) < 1 {
-		return
-	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.UniversityLevelDomain{})
-
-	result = tmpResult.RowsAffected
-	err = tmpResult.Error
-	return
 }
 
 func (repository *Repository) GetUniqueObject(item *model.UniversityLevel) (*model.UniversityLevel, error) {
@@ -343,10 +315,8 @@ func (repository *Repository) GetAllLevelDomain(
 	// Perform query with preloads and custom pagination scope
 	err = repository.Db.
 		Preload(clause.Associations).
-		Preload("Level.School").
 		Preload("Domain.Department").
 		Preload("Domain.Department.Faculty").
-		Preload("Domain.School").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,

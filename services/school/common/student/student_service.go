@@ -58,7 +58,12 @@ func (service *Service) Create(
 
 	// Get role
 	userRole, errRole := service.RoleService.Repository.GetByName(config.Env.FixtureRoleStudent)
-	if errRole != nil || userRole == nil || userRole.ID < 1 {
+	if errRole != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if userRole == nil || userRole.ID < 1 {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
@@ -368,7 +373,12 @@ func (service *Service) Update(
 
 	// Get the role
 	userRole, errRole := service.RoleService.Repository.GetByName(config.Env.FixtureRoleStudent)
-	if errRole != nil || userRole == nil || userRole.ID < 1 {
+	if errRole != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if userRole == nil || userRole.ID < 1 {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return

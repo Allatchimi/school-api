@@ -36,7 +36,7 @@ func (service *Service) Create(
 		StudentID: newRequest.StudentID,
 		ExamID:    newRequest.ExamID,
 
-		Value: newRequest.Value,
+		Score: newRequest.Score,
 	}
 
 	// Check unique
@@ -137,7 +137,7 @@ func (service *Service) Update(
 		StudentID: newRequest.StudentID,
 		ExamID:    newRequest.ExamID,
 
-		Value: newRequest.Value,
+		Score: newRequest.Score,
 	}
 
 	// Check unique

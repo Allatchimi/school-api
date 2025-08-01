@@ -27,7 +27,7 @@ type ReportTable struct {
 	PeriodName                    string  `gorm:"default:null"`
 	Status                        string  `gorm:"default:null"`
 	Notation                      float64 `gorm:"default:null"`
-	MinimumRequiredValueToPromote float64 `gorm:"default:null"`
+	MinimumRequiredScoreToPromote float64 `gorm:"default:null"`
 	GradeName                     string  `gorm:"default:null"`
 	GradeDescription              string  `gorm:"default:null"`
 }
@@ -41,7 +41,7 @@ func (item *ReportTable) ToResponse() *data.ReportTableResponse {
 	resp.PeriodName = item.PeriodName
 	resp.Status = item.Status
 	resp.Notation = item.Notation
-	resp.MinimumRequiredValueToPromote = item.MinimumRequiredValueToPromote
+	resp.MinimumRequiredScoreToPromote = item.MinimumRequiredScoreToPromote
 	resp.GradeName = item.GradeName
 	resp.GradeDescription = item.GradeDescription
 

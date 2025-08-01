@@ -1,14 +1,11 @@
 package exam
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/common/utils"
 	"api/services/school/common/exam/data"
 	"api/services/school/common/exam/model"
 )
@@ -139,8 +136,7 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 	if len(list) < 1 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	var query *gorm.DB = repository.Db.Where(where)
+	query := repository.Db.Where("id IN ?", list)
 	if schoolID > 0 {
 		query = query.Where("school_id = ?", schoolID)
 	}
@@ -155,8 +151,7 @@ func (repository *Repository) DeleteMultipleExamTypeByID(list []int64, schoolID 
 	if len(list) < 1 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	var query *gorm.DB = repository.Db.Where(where)
+	query := repository.Db.Where("id IN ?", list)
 	if schoolID > 0 {
 		query = query.Where("school_id = ?", schoolID)
 	}
@@ -326,9 +321,9 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "exams.unit_id = ?")
 			args = append(args, request.UnitID)
 		}
-		if request.TypeID > 0 {
+		if request.ExamTypeID > 0 {
 			where = helpers.AppendWhereClause(where, "exams.type_id = ?")
-			args = append(args, request.TypeID)
+			args = append(args, request.ExamTypeID)
 		}
 	}
 

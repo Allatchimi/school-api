@@ -1,14 +1,11 @@
 package communication
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/common/utils"
 	"api/services/others/communication/data"
 	"api/services/others/communication/model"
 )
@@ -44,12 +41,13 @@ func (repository *Repository) Delete(id int64) (result int64, err error) {
 	return
 }
 
-func (repository *Repository) DeleteMultiple(list []int64) (result int64, err error) {
+func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, err error) {
 	if len(list) < 1 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	tmpResult := repository.Db.Where(where).Delete(&model.Communication{})
+	tmpResult := repository.Db.
+		Where("id IN (?)", list).
+		Delete(&model.Communication{})
 
 	result = tmpResult.RowsAffected
 	err = tmpResult.Error

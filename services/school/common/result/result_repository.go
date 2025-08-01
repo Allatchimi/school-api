@@ -1,14 +1,11 @@
 package result
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/common/utils"
 	"api/services/school/common/result/data"
 	"api/services/school/common/result/model"
 )
@@ -58,7 +55,7 @@ func (repository *Repository) UpdateByID(id int64, item *model.Result) (result *
 		"student_id": item.StudentID,
 		"exam_id":    item.ExamID,
 
-		"value": item.Value,
+		"score": item.Score,
 	}
 	err = repository.Db.
 		Model(&model.Result{}).
@@ -116,8 +113,7 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 	if len(list) < 1 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	var query *gorm.DB = repository.Db.Where(where)
+	query := repository.Db.Where("id IN ?", list)
 	if schoolID > 0 {
 		query = query.Where("school_id = ?", schoolID)
 	}
@@ -132,8 +128,7 @@ func (repository *Repository) DeleteMultipleResultTableByID(list []int64, school
 	if len(list) < 1 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	var query *gorm.DB = repository.Db.Where(where)
+	query := repository.Db.Where("id IN ?", list)
 	if schoolID > 0 {
 		query = query.Where("school_id = ?", schoolID)
 	}
@@ -320,7 +315,7 @@ func (repository *Repository) GetAll(
 		// Securely append search conditions
 		searchClause := `(
 			CAST(results.id AS TEXT) = ? OR
-			CAST(results.value AS TEXT) = ? OR
+			CAST(results.score AS TEXT) = ? OR
 			exams.status ILIKE ? OR
 			exams.description ILIKE ? OR
 			exams.location_type ILIKE ? OR

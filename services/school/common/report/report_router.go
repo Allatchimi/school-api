@@ -106,6 +106,52 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Create report correspondence
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "post-report-correspondence",
+			Summary:     "Create report correspondence",
+			Description: "Create new report correspondence and return created object.",
+			Method:      http.MethodPost,
+			Path:        fmt.Sprintf("%s/correspondences", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionCreate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body data.ReportCorrespondenceRequest
+			},
+		) (*struct {
+			Body data.ReportCorrespondenceResponse
+		}, error) {
+			result, errCode, err := controller.CreateCorrespondence(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct {
+				Body data.ReportCorrespondenceResponse
+			}{Body: *result.ToResponse()}, nil
+		},
+	)
+
 	// Create report config
 	huma.Register(
 		*humaApi,
@@ -192,6 +238,53 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct{ Body data.ReportGradeResponse }{Body: *result.ToResponse()}, nil
+		},
+	)
+
+	// Update report correspondence with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "update-report-correspondence",
+			Summary:     "Update report correspondence",
+			Description: "Update existing report correspondence with matching id and return the new report grade object.",
+			Method:      http.MethodPut,
+			Path:        fmt.Sprintf("%s/correspondences/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionUpdate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.ReportCorrespondenceID
+				Body data.ReportCorrespondenceRequest
+			},
+		) (*struct {
+			Body data.ReportCorrespondenceResponse
+		}, error) {
+			result, errCode, err := controller.UpdateCorrespondence(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct {
+				Body data.ReportCorrespondenceResponse
+			}{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -326,6 +419,48 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Delete report correspondence with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "delete-report-correspondence",
+			Summary:     "Delete report correspondence",
+			Description: "Delete existing report correspondence with matching id and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/correspondences/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.ReportCorrespondenceID
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteCorrespondence(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
 	// Delete report config with id
 	huma.Register(
 		*humaApi,
@@ -445,6 +580,48 @@ func RegisterEndpoints(
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.DeleteMultipleGrade(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
+		},
+	)
+
+	// Delete multiple report correspondence
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "delete-report-grade-correspondence",
+			Summary:     "Delete multiple report correspondence",
+			Description: "Delete multiple report correspondence by providing a list of IDs and return affected rows in database.",
+			Method:      http.MethodDelete,
+			Path:        fmt.Sprintf("%s/correspondences/multiple/delete", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionDelete, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				Body types.DeleteMultipleRequest
+			},
+		) (*struct{ Body types.DeletedResponse }, error) {
+			result, errCode, err := controller.DeleteMultipleCorrespondence(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -581,6 +758,55 @@ func RegisterEndpoints(
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
 			return &struct{ Body data.ReportGradeResponse }{Body: *result.ToResponse()}, nil
+		},
+	)
+
+	// Get report correspondence by id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-report-correspondence-id",
+			Summary:     "Get report correspondence by id",
+			Description: "Return one report correspondence with matching id",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/correspondences/{id}", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Feature
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.ReportCorrespondenceID
+			},
+		) (*struct {
+			Body data.ReportCorrespondenceResponse
+		}, error) {
+			result, errCode, err := controller.GetCorrespondence(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct {
+				Body data.ReportCorrespondenceResponse
+			}{Body: *result.ToResponse()}, nil
 		},
 	)
 
@@ -733,6 +959,58 @@ func RegisterEndpoints(
 
 			return &struct {
 				Body data.ReportGradeResponseList
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get all report correspondence
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-report-correspondence-list",
+			Summary:     "Get all report correspondence",
+			Description: "Get all report correspondence with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/correspondences", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Feature
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllReportCorrespondenceRequest
+			},
+		) (*struct {
+			Body data.ReportCorrespondenceResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllCorrespondence(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+
+			return &struct {
+				Body data.ReportCorrespondenceResponseList
 			}{Body: *result}, nil
 		},
 	)
