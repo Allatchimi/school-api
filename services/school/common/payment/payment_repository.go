@@ -159,7 +159,7 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT payments.*
+				`SELECT DISTINCT payments.*
 				FROM payments
 				LEFT JOIN schools ON payments.school_id = schools.id
 				LEFT JOIN student_enrolls ON payments.student_enroll_id = student_enrolls.id

@@ -153,8 +153,8 @@ func (service *Service) CreateClassSubject(
 	// Create the meeting
 	go func() {
 		service.MeetingService.Create(ctxData, &dataMeeting.MeetingRoomRequest{
-			SchoolID: result.SchoolID,
-			UnitID:   result.ID,
+			SchoolID:       result.SchoolID,
+			ClassSubjectID: result.ID,
 		})
 	}()
 	return
@@ -322,8 +322,8 @@ func (service *Service) UpdateClassSubject(
 	// Create the meeting
 	go func() {
 		service.MeetingService.Create(ctxData, &dataMeeting.MeetingRoomRequest{
-			SchoolID: result.SchoolID,
-			UnitID:   result.ID,
+			SchoolID:       result.SchoolID,
+			ClassSubjectID: result.ID,
 		})
 	}()
 	return

@@ -198,7 +198,7 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT permissions.*
+				`SELECT DISTINCT permissions.*
 				FROM permissions
 				LEFT JOIN roles ON permissions.role_id = roles.id`,
 				where,

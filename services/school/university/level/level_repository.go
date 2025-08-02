@@ -254,7 +254,7 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT levels.*
+				`SELECT DISTINCT levels.*
 				FROM university_levels levels
 				LEFT JOIN schools ON levels.school_id = schools.id`,
 				where,
@@ -320,7 +320,7 @@ func (repository *Repository) GetAllLevelDomain(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT ld.*
+				`SELECT DISTINCT ld.*
 				FROM university_level_domains ld
 				LEFT JOIN university_levels ON ld.level_id = university_levels.id
 				LEFT JOIN university_domains ON ld.domain_id = university_domains.id

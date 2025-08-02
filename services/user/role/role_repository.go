@@ -151,7 +151,7 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT roles.*
+				`SELECT DISTINCT roles.*
 				FROM roles`,
 				where,
 				pagination,

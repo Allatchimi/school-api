@@ -202,6 +202,8 @@ func InjectDependencies() {
 	api.AllControllers.ResultController = result.NewController(
 		result.NewService(
 			resultRepo,
+			api.AllControllers.ExamController.Service,
+			api.AllControllers.StudentController.Service,
 		),
 	)
 	api.AllControllers.ScheduleController = schedule.NewController(

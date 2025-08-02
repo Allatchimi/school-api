@@ -105,7 +105,7 @@ func (repository *Repository) GetAll(filter *types.Filter, pagination *types.Pag
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT contacts.*
+				`SELECT DISTINCT contacts.*
 				FROM contacts
 				LEFT JOIN schools ON contacts.school_id = schools.id`,
 				where,

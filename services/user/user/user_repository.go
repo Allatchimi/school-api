@@ -507,7 +507,7 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT users.*
+				`SELECT DISTINCT users.*
 				FROM users
 				LEFT JOIN user_infos AS infos ON users.info_id = infos.id
 				LEFT JOIN roles ON users.role_id = roles.id

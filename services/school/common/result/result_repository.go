@@ -150,12 +150,17 @@ func (repository *Repository) GetByID(id int64) (*model.Result, error) {
 		Preload("Exam.Type").
 		Preload("Exam.ClassSubject").
 		Preload("Exam.ClassSubject.Class").
+		Preload("Exam.ClassSubject.Class.School").
+		Preload("Exam.ClassSubject.Class.Specialty").
+		Preload("Exam.ClassSubject.Class.Specialty.Section").
 		Preload("Exam.ClassSubject.Subject").
 		Preload("Exam.Sequence").
 		Preload("Exam.Unit").
 		Preload("Exam.Unit.LevelDomain").
 		Preload("Exam.Unit.LevelDomain.Level").
 		Preload("Exam.Unit.LevelDomain.Domain").
+		Preload("Exam.Unit.LevelDomain.Domain.Department").
+		Preload("Exam.Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Exam.Unit.Semester").
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
@@ -169,12 +174,17 @@ func (repository *Repository) GetResultTableByID(id int64) (*model.ResultTable, 
 		Preload("Exam.Type").
 		Preload("Exam.ClassSubject").
 		Preload("Exam.ClassSubject.Class").
+		Preload("Exam.ClassSubject.Class.School").
+		Preload("Exam.ClassSubject.Class.Specialty").
+		Preload("Exam.ClassSubject.Class.Specialty.Section").
 		Preload("Exam.ClassSubject.Subject").
 		Preload("Exam.Sequence").
 		Preload("Exam.Unit").
 		Preload("Exam.Unit.LevelDomain").
 		Preload("Exam.Unit.LevelDomain.Level").
 		Preload("Exam.Unit.LevelDomain.Domain").
+		Preload("Exam.Unit.LevelDomain.Domain.Department").
+		Preload("Exam.Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Exam.Unit.Semester").
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
@@ -190,12 +200,17 @@ func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.
 		Preload("Exam.Type").
 		Preload("Exam.ClassSubject").
 		Preload("Exam.ClassSubject.Class").
+		Preload("Exam.ClassSubject.Class.School").
+		Preload("Exam.ClassSubject.Class.Specialty").
+		Preload("Exam.ClassSubject.Class.Specialty.Section").
 		Preload("Exam.ClassSubject.Subject").
 		Preload("Exam.Sequence").
 		Preload("Exam.Unit").
 		Preload("Exam.Unit.LevelDomain").
 		Preload("Exam.Unit.LevelDomain.Level").
 		Preload("Exam.Unit.LevelDomain.Domain").
+		Preload("Exam.Unit.LevelDomain.Domain.Department").
+		Preload("Exam.Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Exam.Unit.Semester").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
@@ -211,12 +226,17 @@ func (repository *Repository) GetResultTableByIDSchoolID(id int64, schoolID int6
 		Preload("Exam.Type").
 		Preload("Exam.ClassSubject").
 		Preload("Exam.ClassSubject.Class").
+		Preload("Exam.ClassSubject.Class.School").
+		Preload("Exam.ClassSubject.Class.Specialty").
+		Preload("Exam.ClassSubject.Class.Specialty.Section").
 		Preload("Exam.ClassSubject.Subject").
 		Preload("Exam.Sequence").
 		Preload("Exam.Unit").
 		Preload("Exam.Unit.LevelDomain").
 		Preload("Exam.Unit.LevelDomain.Level").
 		Preload("Exam.Unit.LevelDomain.Domain").
+		Preload("Exam.Unit.LevelDomain.Domain.Department").
+		Preload("Exam.Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Exam.Unit.Semester").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
@@ -349,17 +369,22 @@ func (repository *Repository) GetAll(
 		Preload("Exam.Type").
 		Preload("Exam.ClassSubject").
 		Preload("Exam.ClassSubject.Class").
+		Preload("Exam.ClassSubject.Class.School").
+		Preload("Exam.ClassSubject.Class.Specialty").
+		Preload("Exam.ClassSubject.Class.Specialty.Section").
 		Preload("Exam.ClassSubject.Subject").
 		Preload("Exam.Sequence").
 		Preload("Exam.Unit").
 		Preload("Exam.Unit.LevelDomain").
 		Preload("Exam.Unit.LevelDomain.Level").
 		Preload("Exam.Unit.LevelDomain.Domain").
+		Preload("Exam.Unit.LevelDomain.Domain.Department").
+		Preload("Exam.Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Exam.Unit.Semester").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT results.*
+				`SELECT DISTINCT results.*
 				FROM results
 				LEFT JOIN schools ON results.school_id = schools.id
 				LEFT JOIN exams ON results.exam_id = exams.id
@@ -464,17 +489,22 @@ func (repository *Repository) GetAllResultTable(
 		Preload("Exam.Type").
 		Preload("Exam.ClassSubject").
 		Preload("Exam.ClassSubject.Class").
+		Preload("Exam.ClassSubject.Class.School").
+		Preload("Exam.ClassSubject.Class.Specialty").
+		Preload("Exam.ClassSubject.Class.Specialty.Section").
 		Preload("Exam.ClassSubject.Subject").
 		Preload("Exam.Sequence").
 		Preload("Exam.Unit").
 		Preload("Exam.Unit.LevelDomain").
 		Preload("Exam.Unit.LevelDomain.Level").
 		Preload("Exam.Unit.LevelDomain.Domain").
+		Preload("Exam.Unit.LevelDomain.Domain.Department").
+		Preload("Exam.Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Exam.Unit.Semester").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT result_tables.*
+				`SELECT DISTINCT result_tables.*
 				FROM result_tables
 				LEFT JOIN schools ON result_tables.school_id = schools.id
 				LEFT JOIN exams ON result_tables.exam_id = exams.id

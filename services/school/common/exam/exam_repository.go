@@ -164,7 +164,20 @@ func (repository *Repository) DeleteMultipleExamTypeByID(list []int64, schoolID 
 
 func (repository *Repository) GetByID(id int64) (*model.Exam, error) {
 	result := &model.Exam{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
+		Preload("Unit.Semester").
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
@@ -176,7 +189,20 @@ func (repository *Repository) GetExamTypeByID(id int64) (*model.ExamType, error)
 
 func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Exam, error) {
 	result := &model.Exam{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
+		Preload("Unit.Semester").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
@@ -277,7 +303,7 @@ func (repository *Repository) GetAllExamType(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT exam_types.*
+				`SELECT DISTINCT exam_types.*
 				FROM exam_types
 				LEFT JOIN schools ON exam_types.school_id = schools.id`,
 				where,
@@ -360,16 +386,21 @@ func (repository *Repository) GetAll(
 	err = repository.Db.
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
 		Preload("ClassSubject.Subject").
 		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
 		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.LevelDomain.Domain").
 		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Unit.Semester").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT exams.*
+				`SELECT DISTINCT exams.*
 				FROM exams
 				LEFT JOIN schools ON exams.school_id = schools.id
 				LEFT JOIN years ON exams.year_id = years.id
@@ -392,7 +423,7 @@ func (repository *Repository) GetAll(
 func (repository *Repository) CountAllUniqueIsNotRetry(item *model.Exam) (result int64, err error) {
 	var count int64
 	countQuery := `
-	SELECT COUNT(*) FROM exams
+	SELECT DISTINCT COUNT(*) FROM exams
 	WHERE exams.school_id = ?
 	AND exams.year_id = ?
 	AND exams.class_subject_id = ?

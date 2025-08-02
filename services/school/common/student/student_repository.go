@@ -299,8 +299,10 @@ func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.
 func (repository *Repository) GetStudentEnrollByIDSchoolID(id int64, schoolID int64) (*model.StudentEnroll, error) {
 	result := &model.StudentEnroll{}
 	return result, repository.Db.Preload(clause.Associations).
+		Preload("Class.School").
 		Preload("Class.Specialty").
 		Preload("Class.Specialty.Section").
+		Preload("LevelDomain.School").
 		Preload("LevelDomain.Level").
 		Preload("LevelDomain.Domain").
 		Preload("LevelDomain.Domain.Department").
@@ -312,12 +314,41 @@ func (repository *Repository) GetStudentEnrollByIDSchoolID(id int64, schoolID in
 		Limit(1).Find(result).Error
 }
 
+func (repository *Repository) GetStudentEnrollBySchoolIDYearIDClassIDLevelDomainIDStudentID(
+	schoolID int64,
+	yearID int64,
+	classID int64,
+	levelDomainID int64,
+	studentID int64,
+) (*model.StudentEnroll, error) {
+	result := &model.StudentEnroll{}
+	return result, repository.Db.Preload(clause.Associations).
+		Preload("Class.School").
+		Preload("Class.Specialty").
+		Preload("Class.Specialty.Section").
+		Preload("LevelDomain.School").
+		Preload("LevelDomain.Level").
+		Preload("LevelDomain.Domain").
+		Preload("LevelDomain.Domain.Department").
+		Preload("LevelDomain.Domain.Department.Faculty").
+		Preload("Student.User").
+		Preload("Student.User.Info").
+		Where("school_id = ?", schoolID).
+		Where("year_id = ?", yearID).
+		Where(repository.Db.Where("class_id = ?", classID).Or("class_id IS NULL")).
+		Where(repository.Db.Where("level_domain_id = ?", levelDomainID).Or("level_domain_id IS NULL")).
+		Where("student_id = ?", studentID).
+		Limit(1).Find(result).Error
+}
+
 func (repository *Repository) GetStudentPreEnrollByIDSchoolID(id int64, schoolID int64) (*model.StudentPreEnroll, error) {
 	result := &model.StudentPreEnroll{}
 	return result, repository.Db.Preload(clause.Associations).
 		Preload("School.Info").
+		Preload("Class.School").
 		Preload("Class.Specialty").
 		Preload("Class.Specialty.Section").
+		Preload("LevelDomain.School").
 		Preload("LevelDomain.Level").
 		Preload("LevelDomain.Domain").
 		Preload("LevelDomain.Domain.Department").
@@ -405,6 +436,11 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "students.school_id = ?")
 			args = append(args, request.SchoolID)
 		}
+		if request.ExamID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.id IS NOT NULL")
+			where = helpers.AppendWhereClause(where, "exams.id = ?")
+			args = append(args, request.ExamID)
+		}
 	}
 
 	// Handle search filter securely
@@ -434,10 +470,23 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT students.*
+				`SELECT DISTINCT students.*
 				FROM students
 				LEFT JOIN schools ON students.school_id = schools.id
-				LEFT JOIN users ON students.user_id = users.id`,
+				LEFT JOIN users ON students.user_id = users.id
+				LEFT JOIN student_enrolls ON students.id = student_enrolls.student_id
+				LEFT JOIN years ON student_enrolls.year_id = years.id
+				LEFT JOIN highschool_classes ON student_enrolls.class_id = highschool_classes.id
+				LEFT JOIN university_level_domains ON student_enrolls.level_domain_id = university_level_domains.id
+				LEFT JOIN highschool_class_subjects ON highschool_classes.id = highschool_class_subjects.class_id
+				LEFT JOIN university_units ON university_level_domains.id = university_units.level_domain_id
+				LEFT JOIN exams ON schools.id = exams.school_id
+				AND years.id = exams.year_id
+				AND (
+				(exams.class_subject_id IS NOT NULL AND exams.class_subject_id = highschool_class_subjects.id)
+				OR
+				(exams.unit_id IS NOT NULL AND exams.unit_id = university_units.id)
+				)`,
 				where,
 				pagination,
 				filter,
@@ -512,8 +561,10 @@ func (repository *Repository) GetAllStudentEnroll(
 	// Perform query with preloads and custom pagination scope
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("Class.School").
 		Preload("Class.Specialty").
 		Preload("Class.Specialty.Section").
+		Preload("LevelDomain.School").
 		Preload("LevelDomain.Level").
 		Preload("LevelDomain.Domain").
 		Preload("LevelDomain.Domain.Department").
@@ -523,7 +574,7 @@ func (repository *Repository) GetAllStudentEnroll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT enrolls.*
+				`SELECT DISTINCT enrolls.*
 				FROM student_enrolls enrolls
 				LEFT JOIN schools ON enrolls.school_id = schools.id
 				LEFT JOIN years ON enrolls.year_id = years.id
@@ -607,8 +658,10 @@ func (repository *Repository) GetAllStudentPreEnroll(
 	// Perform query with preloads and custom pagination scope
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("Class.School").
 		Preload("Class.Specialty").
 		Preload("Class.Specialty.Section").
+		Preload("LevelDomain.School").
 		Preload("LevelDomain.Level").
 		Preload("LevelDomain.Domain").
 		Preload("LevelDomain.Domain.Department").
@@ -618,7 +671,7 @@ func (repository *Repository) GetAllStudentPreEnroll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT pre_enrolls.*
+				`SELECT DISTINCT pre_enrolls.*
 				FROM student_pre_enrolls pre_enrolls
 				LEFT JOIN schools ON pre_enrolls.school_id = schools.id
 				LEFT JOIN years ON pre_enrolls.year_id = years.id

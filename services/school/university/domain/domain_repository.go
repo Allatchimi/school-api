@@ -1,14 +1,11 @@
 package domain
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
 	"api/common/helpers"
 	"api/common/types"
-	"api/common/utils"
 	"api/services/school/university/domain/data"
 	"api/services/school/university/domain/model"
 )
@@ -71,8 +68,7 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 	if len(list) < 1 {
 		return
 	}
-	where := fmt.Sprintf("id IN (%s)", utils.ListIntToString(list))
-	var query *gorm.DB = repository.Db.Where(where)
+	query := repository.Db.Where("id IN ?", list)
 	if schoolID > 0 {
 		query = query.Where("school_id = ?", schoolID)
 	}
@@ -161,7 +157,7 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT domains.*
+				`SELECT DISTINCT domains.*
 				FROM university_domains domains
 				LEFT JOIN schools ON domains.school_id = schools.id
 				LEFT JOIN university_departments ON domains.department_id = university_departments.id`,

@@ -5,16 +5,28 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
+	"api/services/school/common/exam"
 	"api/services/school/common/result/data"
 	"api/services/school/common/result/model"
+	"api/services/school/common/student"
 )
 
 type Service struct {
-	Repository *Repository
+	Repository     *Repository
+	ExamService    *exam.Service
+	StudentService *student.Service
 }
 
-func NewService(repository *Repository) *Service {
-	return &Service{Repository: repository}
+func NewService(
+	repository *Repository,
+	examService *exam.Service,
+	studentService *student.Service,
+) *Service {
+	return &Service{
+		Repository:     repository,
+		ExamService:    examService,
+		StudentService: studentService,
+	}
 }
 
 const MODEL_NAME = "result"
@@ -37,6 +49,48 @@ func (service *Service) Create(
 		ExamID:    newRequest.ExamID,
 
 		Score: newRequest.Score,
+	}
+
+	// Check exam
+	foundExam, err := service.ExamService.Repository.GetByID(item.ExamID)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundExam == nil || foundExam.ID < 1 {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessageV2("exam (not found)")
+		return
+
+	}
+
+	// Check if the student is enrolled
+	var tempClassID, tempLevelDomainID int64
+	if foundExam.ClassSubject != nil {
+		tempClassID = foundExam.ClassSubject.ClassID
+	}
+	if foundExam.Unit != nil {
+		tempLevelDomainID = foundExam.Unit.LevelDomainID
+	}
+	foundStudentEnroll, err := service.StudentService.
+		Repository.
+		GetStudentEnrollBySchoolIDYearIDClassIDLevelDomainIDStudentID(
+			item.SchoolID,
+			foundExam.YearID,
+			tempClassID,
+			tempLevelDomainID,
+			item.StudentID,
+		)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundStudentEnroll == nil || foundStudentEnroll.ID < 1 {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessageV2("student (not enrolled)")
+		return
 	}
 
 	// Check unique
@@ -131,6 +185,7 @@ func (service *Service) Update(
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
+
 	// Format request
 	item := &model.Result{
 		SchoolID:  newRequest.SchoolID,
@@ -138,6 +193,48 @@ func (service *Service) Update(
 		ExamID:    newRequest.ExamID,
 
 		Score: newRequest.Score,
+	}
+
+	// Check exam
+	foundExam, err := service.ExamService.Repository.GetByID(item.ExamID)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundExam == nil || foundExam.ID < 1 {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessageV2("exam (not found)")
+		return
+
+	}
+
+	// Check if the student is enrolled
+	var tempClassID, tempLevelDomainID int64
+	if foundExam.ClassSubject != nil {
+		tempClassID = foundExam.ClassSubject.ClassID
+	}
+	if foundExam.Unit != nil {
+		tempLevelDomainID = foundExam.Unit.LevelDomainID
+	}
+	foundStudentEnroll, err := service.StudentService.
+		Repository.
+		GetStudentEnrollBySchoolIDYearIDClassIDLevelDomainIDStudentID(
+			item.SchoolID,
+			foundExam.YearID,
+			tempClassID,
+			tempLevelDomainID,
+			item.StudentID,
+		)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundStudentEnroll == nil || foundStudentEnroll.ID < 1 {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessageV2("student (not enrolled)")
+		return
 	}
 
 	// Check unique

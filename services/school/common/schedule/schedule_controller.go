@@ -115,6 +115,7 @@ func (controller *Controller) GetAllWeeklyView(
 ) (result *data.ScheduleWeeklyViewResponseList, errCode int, err error) {
 	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
 	newPagination.Limit = 200
+	newFilter.OrderBy = "start_time"
 	scheduleList, errCode, err := controller.Service.GetAll(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllRequest)
 	if err != nil {
 		return

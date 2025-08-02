@@ -151,7 +151,7 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT specialties.*
+				`SELECT DISTINCT specialties.*
 				FROM highschool_specialties specialties
 				LEFT JOIN schools ON specialties.school_id = schools.id`,
 				where,

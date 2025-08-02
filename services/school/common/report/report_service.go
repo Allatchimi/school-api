@@ -222,6 +222,7 @@ func (service *Service) CreateGrade(
 		Minimum:        newRequest.Minimum,
 		Maximum:        newRequest.Maximum,
 		IncludeMinimum: newRequest.IncludeMinimum,
+		IncludeMaximum: newRequest.IncludeMaximum,
 	}
 
 	// Check unique
@@ -264,6 +265,7 @@ func (service *Service) CreateCorrespondence(
 		Minimum:        newRequest.Minimum,
 		Maximum:        newRequest.Maximum,
 		IncludeMinimum: newRequest.IncludeMinimum,
+		IncludeMaximum: newRequest.IncludeMaximum,
 		NewScore:       newRequest.NewScore,
 	}
 

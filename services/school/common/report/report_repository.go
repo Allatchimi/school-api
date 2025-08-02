@@ -357,7 +357,20 @@ func (repository *Repository) DeleteMultipleReportConfigByID(list []int64, schoo
 
 func (repository *Repository) GetReportEntryByID(id int64) (*model.ReportEntry, error) {
 	result := &model.ReportEntry{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
+		Preload("Unit.Semester").
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
@@ -381,7 +394,20 @@ func (repository *Repository) GetReportConfigByID(id int64) (*model.ReportConfig
 
 func (repository *Repository) GetReportEntryByIDSchoolID(id int64, schoolID int64) (*model.ReportEntry, error) {
 	result := &model.ReportEntry{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
+		Preload("Unit.Semester").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
@@ -597,18 +623,23 @@ func (repository *Repository) GetAllReportEntry(
 	err = repository.Db.
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
 		Preload("ClassSubject.Subject").
 		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
 		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.LevelDomain.Domain").
 		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Unit.Semester").
 		Preload("Student.User").
 		Preload("Student.User.Info").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT report_entries.* 
+				`SELECT DISTINCT report_entries.* 
 				FROM report_entries 
 				LEFT JOIN schools ON report_entries.school_id = schools.id
 				LEFT JOIN years ON report_entries.year_id = years.id
@@ -674,7 +705,7 @@ func (repository *Repository) GetAllReportGrade(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT report_grades.* 
+				`SELECT DISTINCT report_grades.* 
 				FROM report_grades 
 				LEFT JOIN schools ON report_grades.school_id = schools.id`,
 				where,
@@ -725,7 +756,7 @@ func (repository *Repository) GetAllReportCorrespondence(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT report_correspondences.* 
+				`SELECT DISTINCT report_correspondences.* 
 				FROM report_correspondences 
 				LEFT JOIN schools ON report_correspondences.school_id = schools.id`,
 				where,
@@ -776,7 +807,7 @@ func (repository *Repository) GetAllReportConfig(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT report_configs.* 
+				`SELECT DISTINCT report_configs.* 
 				FROM report_configs 
 				LEFT JOIN schools ON report_configs.school_id = schools.id`,
 				where,
@@ -854,10 +885,18 @@ func (repository *Repository) GetAllReportTable(
 	// Perform query with preloads and custom pagination scope
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("Class.School").
+		Preload("Class.Specialty").
+		Preload("Class.Specialty.Section").
+		Preload("LevelDomain.School").
+		Preload("LevelDomain.Level").
+		Preload("LevelDomain.Domain").
+		Preload("LevelDomain.Domain.Department").
+		Preload("LevelDomain.Domain.Department.Faculty").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT report_tables.* 
+				`SELECT DISTINCT report_tables.* 
 				FROM report_tables 
 				LEFT JOIN schools ON report_tables.school_id = schools.id
 				LEFT JOIN years ON report_tables.year_id = years.id
@@ -933,10 +972,18 @@ func (repository *Repository) GetAllReportTableHighschool(
 	// Perform query with preloads and custom pagination scope
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("Class.School").
+		Preload("Class.Specialty").
+		Preload("Class.Specialty.Section").
+		Preload("LevelDomain.School").
+		Preload("LevelDomain.Level").
+		Preload("LevelDomain.Domain").
+		Preload("LevelDomain.Domain.Department").
+		Preload("LevelDomain.Domain.Department.Faculty").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT report_tables.* 
+				`SELECT DISTINCT report_tables.* 
 				FROM report_tables 
 				LEFT JOIN schools ON report_tables.school_id = schools.id
 				LEFT JOIN years ON report_tables.year_id = years.id
@@ -1013,10 +1060,18 @@ func (repository *Repository) GetAllReportTableUniversity(
 	// Perform query with preloads and custom pagination scope
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("Class.School").
+		Preload("Class.Specialty").
+		Preload("Class.Specialty.Section").
+		Preload("LevelDomain.School").
+		Preload("LevelDomain.Level").
+		Preload("LevelDomain.Domain").
+		Preload("LevelDomain.Domain.Department").
+		Preload("LevelDomain.Domain.Department.Faculty").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT report_tables.* 
+				`SELECT DISTINCT report_tables.* 
 				FROM report_tables 
 				LEFT JOIN schools ON report_tables.school_id = schools.id
 				LEFT JOIN years ON report_tables.year_id = years.id

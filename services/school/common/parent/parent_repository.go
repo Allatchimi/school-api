@@ -386,7 +386,7 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT parents.*
+				`SELECT DISTINCT parents.*
 				FROM parents
 				LEFT JOIN schools ON parents.school_id = schools.id
 				LEFT JOIN users ON parents.user_id = users.id`,
@@ -452,7 +452,7 @@ func (repository *Repository) GetAllParentStudent(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT parent_students.*
+				`SELECT DISTINCT parent_students.*
 				FROM parent_students
 				LEFT JOIN schools ON parent_students.school_id = schools.id
 				LEFT JOIN parents ON parent_students.parent_id = parents.id
@@ -512,7 +512,7 @@ func (repository *Repository) GetAllParentAssign(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT parent_assigns.*
+				`SELECT DISTINCT parent_assigns.*
 				FROM parent_assigns
 				LEFT JOIN schools ON parent_assigns.school_id = schools.id
 				LEFT JOIN parents ON parent_assigns.parent_id = parents.id`,

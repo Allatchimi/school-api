@@ -325,7 +325,7 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT teachers.*
+				`SELECT DISTINCT teachers.*
 				FROM teachers
 				LEFT JOIN schools ON teachers.school_id = schools.id
 				LEFT JOIN users ON teachers.user_id = users.id`,
@@ -402,7 +402,7 @@ func (repository *Repository) GetAllTeacherClassSubjectUnit(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT tcsu.*
+				`SELECT DISTINCT tcsu.*
 				FROM teacher_class_subject_units AS tcsu
 				LEFT JOIN schools ON tcsu.school_id = schools.id
 				LEFT JOIN years ON tcsu.year_id = years.id

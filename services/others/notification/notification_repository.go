@@ -138,7 +138,7 @@ func (repository *Repository) GetAllByUserID(filter *types.Filter, pagination *t
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT notifications.*
+				`SELECT DISTINCT notifications.*
 				FROM notifications
 				LEFT JOIN users ON notifications.user_id = users.id`,
 				where,

@@ -157,7 +157,7 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT departments.*
+				`SELECT DISTINCT departments.*
 				FROM university_departments departments
 				LEFT JOIN schools ON departments.school_id = schools.id
 				LEFT JOIN university_faculties ON departments.faculty_id = university_faculties.id`,

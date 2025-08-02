@@ -31,6 +31,13 @@ func (service *Service) Create(
 		newRequest.SchoolID = ctxData.Jwt.SchoolID
 	}
 
+	// Check year
+	if newRequest.StartDate.Year() == newRequest.EndDate.Year() {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessageV2("start date and end date (must be different)")
+		return
+	}
+
 	// Format item
 	item := &model.Year{
 		SchoolID: newRequest.SchoolID,
@@ -72,6 +79,13 @@ func (service *Service) Update(
 	newRequest := *request
 	if ctxData.Jwt.SchoolID > 0 {
 		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Check year
+	if newRequest.StartDate.Year() == newRequest.EndDate.Year() {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessageV2("start date and end date (must be different)")
+		return
 	}
 
 	// Check if the item exists

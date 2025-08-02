@@ -182,7 +182,20 @@ func (repository *Repository) DeleteMultipleByID(list []int64, schoolID int64) (
 
 func (repository *Repository) GetByID(id int64) (*model.MeetingRoom, error) {
 	result := &model.MeetingRoom{}
-	return result, repository.Db.Preload(clause.Associations).
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
+		Preload("Unit.Semester").
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
@@ -191,11 +204,16 @@ func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.
 	return result, repository.Db.
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
 		Preload("ClassSubject.Subject").
-		Preload("Unit.LevelDomain.").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
 		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.LevelDomain.Domain").
 		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Unit.Semester").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
@@ -277,16 +295,21 @@ func (repository *Repository) GetAll(
 	err = repository.Db.
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
 		Preload("ClassSubject.Subject").
 		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
 		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.LevelDomain.Domain").
 		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Unit.Semester").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT meetings.*
+				`SELECT DISTINCT meetings.*
 				FROM meeting_rooms meetings
 				LEFT JOIN schools ON meetings.school_id = schools.id
 				LEFT JOIN highschool_class_subjects ON meetings.class_subject_id = highschool_class_subjects.id

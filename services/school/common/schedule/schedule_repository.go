@@ -206,16 +206,21 @@ func (repository *Repository) GetAll(
 	err = repository.Db.
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
 		Preload("ClassSubject.Subject").
 		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
 		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.LevelDomain.Domain").
 		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Unit.Semester").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT schedules.*
+				`SELECT DISTINCT schedules.*
 				FROM schedules
 				LEFT JOIN schools ON schedules.school_id = schools.id
 				LEFT JOIN years ON schedules.year_id = years.id

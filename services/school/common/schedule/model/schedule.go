@@ -7,6 +7,7 @@ import (
 	modelYear "api/services/school/common/year/model"
 	modelClass "api/services/school/highschool/class/model"
 	modelUnit "api/services/school/university/unit/model"
+	"sort"
 	"time"
 )
 
@@ -111,11 +112,19 @@ func ToScheduleWeeklyViewResponseList(itemList []Schedule) []data.ScheduleWeekly
 		}
 	}
 
-	// Conversion de map en slice
+	// Convert map to list
 	result := make([]data.ScheduleWeeklyViewResponse, 0, len(groupMap))
 	for _, v := range groupMap {
 		result = append(result, *v)
 	}
+
+	// Sort by start time first and then end time
+	sort.Slice(result, func(i, j int) bool {
+		if result[i].StartTime == result[j].StartTime {
+			return result[i].EndTime < result[j].EndTime
+		}
+		return result[i].StartTime < result[j].StartTime
+	})
 
 	return result
 }

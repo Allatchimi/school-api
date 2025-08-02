@@ -108,11 +108,16 @@ func (repository *Repository) UpdateByID(id int64, item *model.Quiz) (result *mo
 	err = repository.Db.
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
 		Preload("ClassSubject.Subject").
 		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
 		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.LevelDomain.Domain").
 		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Unit.Semester").
 		Preload("Questions.Options").
 		Preload("Questions.Solution").
@@ -180,11 +185,16 @@ func (repository *Repository) GetByID(id int64) (*model.Quiz, error) {
 	return result, repository.Db.
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
 		Preload("ClassSubject.Subject").
 		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
 		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.LevelDomain.Domain").
 		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Unit.Semester").
 		Preload("Questions.Options").
 		Preload("Questions.Solution").
@@ -196,11 +206,16 @@ func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.
 	return result, repository.Db.
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
 		Preload("ClassSubject.Subject").
 		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
 		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.LevelDomain.Domain").
 		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Unit.Semester").
 		Preload("Questions.Options").
 		Preload("Questions.Solution").
@@ -277,18 +292,23 @@ func (repository *Repository) GetAll(
 	err = repository.Db.
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
 		Preload("ClassSubject.Subject").
 		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
 		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.LevelDomain.Domain").
 		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Unit.Semester").
 		Preload("Questions.Options").
 		Preload("Questions.Solution").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT quizzes.*
+				`SELECT DISTINCT quizzes.*
 				FROM quizzes
 				LEFT JOIN schools ON quizzes.school_id = schools.id
 				LEFT JOIN years ON quizzes.year_id = years.id
@@ -354,7 +374,7 @@ func (repository *Repository) GetAllQuizAnswer(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT quiz_answers.*
+				`SELECT DISTINCT quiz_answers.*
 				FROM quiz_answers
 				LEFT JOIN quiz_questions ON quiz_answers.quiz_question_id = quiz_questions.id
 				LEFT JOIN students ON quiz_answers.student_id = students.id

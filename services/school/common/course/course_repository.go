@@ -181,11 +181,16 @@ func (repository *Repository) GetByID(id int64) (*model.Course, error) {
 	return result, repository.Db.
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
 		Preload("ClassSubject.Subject").
 		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
 		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.LevelDomain.Domain").
 		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Unit.Semester").
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
@@ -202,11 +207,16 @@ func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.
 	return result, repository.Db.
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
 		Preload("ClassSubject.Subject").
 		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
 		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.LevelDomain.Domain").
 		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Unit.Semester").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
@@ -279,16 +289,21 @@ func (repository *Repository) GetAll(
 	err = repository.Db.
 		Preload(clause.Associations).
 		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
 		Preload("ClassSubject.Subject").
 		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
 		Preload("Unit.LevelDomain.Level").
 		Preload("Unit.LevelDomain.Domain").
 		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Unit.Semester").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT courses.*
+				`SELECT DISTINCT courses.*
 				FROM courses
 				LEFT JOIN schools ON courses.school_id = schools.id
 				LEFT JOIN years ON courses.year_id = years.id
@@ -354,7 +369,7 @@ func (repository *Repository) GetAllCourseComment(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT comments.*
+				`SELECT DISTINCT comments.*
 				FROM course_comments comments
 				LEFT JOIN courses ON comments.course_id = courses.id
 				LEFT JOIN schools ON courses.school_id = schools.id

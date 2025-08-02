@@ -266,7 +266,7 @@ func (repository *Repository) GetAll(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT classes.*
+				`SELECT DISTINCT classes.*
 				FROM highschool_classes classes
 				LEFT JOIN schools ON classes.school_id = schools.id
 				LEFT JOIN highschool_specialties ON classes.specialty_id = highschool_specialties.id`,
@@ -333,7 +333,7 @@ func (repository *Repository) GetAllClassSubject(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT cs.*
+				`SELECT DISTINCT cs.*
 				FROM highschool_class_subjects AS cs
 				LEFT JOIN highschool_classes ON cs.class_id = highschool_classes.id
 				LEFT JOIN highschool_subjects ON cs.subject_id = highschool_subjects.id

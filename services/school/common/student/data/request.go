@@ -66,6 +66,7 @@ type StudentPreEnrollStatusRequest struct {
 
 type GetAllRequest struct {
 	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
+	ExamID   int64 `json:"examID" query:"examID" required:"false" doc:"Exam id"`
 }
 
 type GetAllStudentEnrollRequest struct {
