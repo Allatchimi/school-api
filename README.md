@@ -93,10 +93,3 @@ Go to this link: [GitHub Action Secrets](https://github.com/EMENEC-FINANCE/schoo
 
 - `docker-ghcr-pull`: Pulls a specific image from the GitHub Container Registry.
 
-# Additional Notes
-
-By following these steps and customizing the Makefile to fit your specific needs, you can effectively manage your project using Docker and Make.
-
-```
-
-```
