@@ -115,20 +115,6 @@ func (controller *Controller) UpdateConfig(
 	return
 }
 
-func (controller *Controller) DeleteEntry(
-	ctx *context.Context,
-	input *struct {
-		data.ReportEntryID
-	},
-) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteEntry(httpHelper.GetContextData(ctx), input.ID)
-	if err != nil {
-		return
-	}
-	result = affectedRows
-	return
-}
-
 func (controller *Controller) DeleteGrade(
 	ctx *context.Context,
 	input *struct {
@@ -164,20 +150,6 @@ func (controller *Controller) DeleteConfig(
 	},
 ) (result int64, errCode int, err error) {
 	affectedRows, errCode, err := controller.Service.DeleteConfig(httpHelper.GetContextData(ctx), input.ID)
-	if err != nil {
-		return
-	}
-	result = affectedRows
-	return
-}
-
-func (controller *Controller) DeleteMultipleEntry(
-	ctx *context.Context,
-	input *struct {
-		Body types.DeleteMultipleRequest
-	},
-) (result int64, errCode int, err error) {
-	affectedRows, errCode, err := controller.Service.DeleteMultipleEntry(httpHelper.GetContextData(ctx), input.Body.List)
 	if err != nil {
 		return
 	}
@@ -345,6 +317,27 @@ func (controller *Controller) GetAllConfig(
 	}
 	result = &data.ReportConfigResponseList{
 		Data: model.ToReportConfigResponseList(resultList),
+	}
+	result.Filter = newFilter
+	result.Pagination = newPagination
+	return
+}
+
+func (controller *Controller) GetAllAverage(
+	ctx *context.Context,
+	input *struct {
+		types.Filter
+		types.PaginationRequest
+		data.GetAllReportAverageRequest
+	},
+) (result *data.ReportAverageResponseList, errCode int, err error) {
+	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
+	resultList, errCode, err := controller.Service.GetAllAverage(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllReportAverageRequest)
+	if err != nil {
+		return
+	}
+	result = &data.ReportAverageResponseList{
+		Data: model.ToReportAverageResponseList(resultList),
 	}
 	result.Filter = newFilter
 	result.Pagination = newPagination

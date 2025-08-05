@@ -53,18 +53,20 @@ type ReportCorrespondenceRequest struct {
 }
 
 type ReportConfigRequest struct {
-	SchoolID int64 `json:"schoolID" required:"true" doc:"School id"`
+	SchoolID            int64 `json:"schoolID" required:"true" doc:"School id"`
+	ReportGradeToFailID int64 `json:"reportGradeToFailID" required:"false" doc:"Report grade to fail id"`
 
 	NotationAverage               float64 `json:"notationAverage" required:"true" doc:"Notation average"`
 	NotationReport                float64 `json:"notationReport" required:"true" doc:"Notation report"`
 	MinimumRequiredScoreToPromote float64 `json:"minimumRequiredScoreToPromote" required:"true" doc:"Minimum required score to promote"`
+	OnlyFailedExams               bool    `json:"onlyFailedExams" required:"false" doc:"Only failed exams"`
 }
 
 type GetAllReportEntryRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
+	types.FilterTeacherStudentRequest
 	SequenceID int64 `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
 	SemesterID int64 `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id"`
-	StudentID  int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id"`
 }
 
 type GetAllReportGradeRequest struct {
@@ -80,8 +82,16 @@ type GetAllReportConfigRequest struct {
 	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
 }
 
+type GetAllReportAverageRequest struct {
+	types.FilterSchoolYearClassLevelDomainRequest
+	types.FilterTeacherStudentRequest
+	PeriodType string `json:"periodType" query:"periodType" required:"false" doc:"Period type"`
+	PeriodName string `json:"periodName" query:"periodName" required:"false" doc:"Period name"`
+}
+
 type GetAllReportTableRequest struct {
 	types.FilterSchoolYearClassLevelDomainRequest
+	types.FilterTeacherStudentRequest
 	PeriodType string `json:"periodType" query:"periodType" required:"false" doc:"Period type"`
 	PeriodName string `json:"periodName" query:"periodName" required:"false" doc:"Period name"`
 }

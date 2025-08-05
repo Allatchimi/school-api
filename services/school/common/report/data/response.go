@@ -13,22 +13,21 @@ import (
 
 type ReportEntryResponse struct {
 	types.BaseGormModelResponse
-	School       *dataSchool.SchoolResponse      `json:"school" required:"false" doc:"School"`
-	Year         *dataYear.YearResponse          `json:"year" required:"false" doc:"Year"`
-	ClassSubject *dataClass.ClassSubjectResponse `json:"classSubject" required:"false" doc:"Subject for specific class"`
-	Sequence     *dataSequence.SequenceResponse  `json:"sequence" required:"false" doc:"Sequence"`
-	Unit         *dataUnit.UnitResponse          `json:"unit" required:"false" doc:"Unit"`
-	Student      *dataStudent.StudentResponse    `json:"student" required:"false" doc:"Student"`
+	School       *dataSchool.SchoolResponse         `json:"school" required:"false" doc:"School"`
+	Year         *dataYear.YearResponse             `json:"year" required:"false" doc:"Year"`
+	ClassSubject *dataClass.ClassSubjectResponse    `json:"classSubject" required:"false" doc:"Subject for specific class"`
+	Sequence     *dataSequence.SequenceResponse     `json:"sequence" required:"false" doc:"Sequence"`
+	Unit         *dataUnit.UnitResponse             `json:"unit" required:"false" doc:"Unit"`
+	Student      *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
 
-	Coefficient      int     `json:"coefficient" required:"false" doc:"Coefficient"`
-	Credit           int     `json:"credit" required:"false" doc:"Credit"`
-	Score            float64 `json:"score" required:"false" doc:"Score"`
-	Notation         float64 `json:"notation" required:"false" doc:"Notation"`
-	Grade            string  `json:"grade" required:"false" doc:"Grade"`
-	GradeDescription string  `json:"gradeDescription" required:"false" doc:"Grade description"`
-	IsRetry          bool    `json:"isRetry" required:"false" doc:"Is retry"`
-	RetryCount       int64   `json:"retryCount" required:"false" doc:"Retry count"`
-	RetryDetails     string  `json:"retryDetails" required:"false" doc:"Retry details"`
+	CoefficientCredit int     `json:"coefficientCredit" required:"false" doc:"Coefficient/credit"`
+	Score             float64 `json:"score" required:"false" doc:"Score"`
+	Notation          float64 `json:"notation" required:"false" doc:"Notation"`
+	GradeName         string  `json:"gradeName" required:"false" doc:"Grade name"`
+	GradeDescription  string  `json:"gradeDescription" required:"false" doc:"Grade description"`
+	IsRetry           bool    `json:"isRetry" required:"false" doc:"Is retry"`
+	RetryCount        int64   `json:"retryCount" required:"false" doc:"Retry count"`
+	RetryDetails      string  `json:"retryDetails" required:"false" doc:"Retry details"`
 }
 
 type ReportGradeResponse struct {
@@ -57,11 +56,33 @@ type ReportCorrespondenceResponse struct {
 
 type ReportConfigResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	School            *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	ReportGradeToFail *ReportGradeResponse             `json:"reportGradeToFail" required:"false" doc:"Report grade to fail"`
 
 	NotationAverage               float64 `json:"notationAverage" required:"false" doc:"Notation average"`
 	NotationReport                float64 `json:"notationReport" required:"false" doc:"Notation report"`
 	MinimumRequiredScoreToPromote float64 `json:"minimumRequiredScoreToPromote" required:"false" doc:"Minimum required score to promote"`
+	OnlyFailedExams               bool    `json:"onlyFailedExams" required:"false" doc:"Only failed exams"`
+}
+
+type ReportAverageResponse struct {
+	types.BaseGormModelResponse
+	School      *dataSchool.SchoolResponse         `json:"school" required:"false" doc:"School"`
+	Year        *dataYear.YearResponse             `json:"year" required:"false" doc:"Year"`
+	Class       *dataClass.ClassResponse           `json:"class" required:"false" doc:"Class"`
+	LevelDomain *dataLevel.LevelDomainResponse     `json:"levelDomain" required:"false" doc:"Level domain"`
+	Student     *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
+
+	PeriodType                 string  `json:"periodType" required:"false" doc:"Period type"`
+	PeriodName                 string  `json:"periodName" required:"false" doc:"Period name"`
+	Score                      float64 `json:"score" required:"false" doc:"Score"`
+	Notation                   float64 `json:"notation" required:"false" doc:"Notation"`
+	GradeName                  string  `json:"gradeName" required:"false" doc:"Grade name"`
+	GradeDescription           string  `json:"gradeDescription" required:"false" doc:"Grade description"`
+	Rank                       int64   `json:"rank" required:"false" doc:"Rank"`
+	IsSuccessful               bool    `json:"isSuccessful" required:"false" doc:"Is successful"`
+	TotalCreditCoefficient     int     `json:"totalCreditCoefficient" required:"false" doc:"Total credit coefficient"`
+	ValidatedCreditCoefficient int     `json:"validatedCreditCoefficient" required:"false" doc:"Validated credit coefficient"`
 }
 
 type ReportTableResponse struct {
@@ -71,13 +92,9 @@ type ReportTableResponse struct {
 	Class       *dataClass.ClassResponse       `json:"class" required:"false" doc:"Class"`
 	LevelDomain *dataLevel.LevelDomainResponse `json:"levelDomain" required:"false" doc:"Level domain"`
 
-	PeriodType                    string  `json:"periodType" required:"false" doc:"Period type"`
-	PeriodName                    string  `json:"periodName" required:"false" doc:"Period name"`
-	Status                        string  `json:"status" required:"false" doc:"Status"`
-	Notation                      float64 `json:"notation" required:"false" doc:"Notation"`
-	MinimumRequiredScoreToPromote float64 `json:"minimumRequiredScoreToPromote" required:"false" doc:"Minimum required score to promote"`
-	GradeName                     string  `json:"gradeName" required:"false" doc:"Grade name"`
-	GradeDescription              string  `json:"gradeDescription" required:"false" doc:"Grade description"`
+	PeriodType string `json:"periodType" required:"false" doc:"Period type"`
+	PeriodName string `json:"periodName" required:"false" doc:"Period name"`
+	Status     string `json:"status" required:"false" doc:"Status"`
 }
 
 type ReportEntryResponseList struct {
@@ -100,7 +117,12 @@ type ReportConfigResponseList struct {
 	Data []ReportConfigResponse `json:"data" required:"false" doc:"List of report config"`
 }
 
+type ReportAverageResponseList struct {
+	types.PaginatedResponse
+	Data []ReportAverageResponse `json:"data" required:"false" doc:"List of report average"`
+}
+
 type ReportTableResponseList struct {
 	types.PaginatedResponse
-	Data []ReportTableResponse `json:"data" required:"false" doc:"List of report board"`
+	Data []ReportTableResponse `json:"data" required:"false" doc:"List of report table"`
 }

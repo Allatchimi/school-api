@@ -93,7 +93,6 @@ func Apply() error {
 		// Parent
 		&parentModel.Parent{},
 		&parentModel.ParentStudent{},
-		&parentModel.ParentAssign{},
 		// Year
 		&yearModel.Year{},
 		// Course
@@ -119,6 +118,7 @@ func Apply() error {
 		&reportModel.ReportGrade{},
 		&reportModel.ReportCorrespondence{},
 		&reportModel.ReportEntry{},
+		&reportModel.ReportAverage{},
 		&reportModel.ReportTable{},
 		// Schedule
 		&scheduleModel.Schedule{},

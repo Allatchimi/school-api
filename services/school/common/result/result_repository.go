@@ -305,6 +305,14 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "exams.sequence_id = ?")
 			args = append(args, request.SequenceID)
 		}
+		if request.QuarterID > 0 {
+			where = helpers.AppendWhereClause(where, "highschool_sequences.quarter_id = ?")
+			args = append(args, request.QuarterID)
+		}
+		if request.ClassID > 0 {
+			where = helpers.AppendWhereClause(where, "highschool_class_subjects.class_id = ?")
+			args = append(args, request.ClassID)
+		}
 		if request.UnitID > 0 {
 			where = helpers.AppendWhereClause(where, "exams.unit_id = ?")
 			args = append(args, request.UnitID)
@@ -312,6 +320,10 @@ func (repository *Repository) GetAll(
 		if request.SemesterID > 0 {
 			where = helpers.AppendWhereClause(where, "university_units.semester_id = ?")
 			args = append(args, request.SemesterID)
+		}
+		if request.LevelDomainID > 0 {
+			where = helpers.AppendWhereClause(where, "university_units.level_domain_id = ?")
+			args = append(args, request.LevelDomainID)
 		}
 		if request.ExamID > 0 {
 			where = helpers.AppendWhereClause(where, "results.exam_id = ?")

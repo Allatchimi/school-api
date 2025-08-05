@@ -1,24 +1,39 @@
 package report
 
 import (
+	"fmt"
 	"net/http"
 
 	"api/common/constants"
 	"api/common/types"
+	"api/common/utils"
 	"api/services/school/common/exam"
-	dataExam "api/services/school/common/exam/data"
 	"api/services/school/common/report/data"
 	"api/services/school/common/report/model"
 	"api/services/school/common/result"
 	dataResult "api/services/school/common/result/data"
 	"api/services/school/common/school"
+	"api/services/school/highschool/class"
+	dataClass "api/services/school/highschool/class/data"
+	"api/services/school/highschool/quarter"
+	"api/services/school/highschool/sequence"
+	"api/services/school/university/semester"
+	"api/services/school/university/unit"
+	dataUnit "api/services/school/university/unit/data"
+
+	"go.uber.org/zap"
 )
 
 type Service struct {
-	Repository    *Repository
-	SchoolService *school.Service
-	ResultService *result.Service
-	ExamService   *exam.Service
+	Repository      *Repository
+	SchoolService   *school.Service
+	ResultService   *result.Service
+	ExamService     *exam.Service
+	ClassService    *class.Service
+	UnitService     *unit.Service
+	SequenceService *sequence.Service
+	QuarterService  *quarter.Service
+	SemesterService *semester.Service
 }
 
 func NewService(
@@ -26,12 +41,22 @@ func NewService(
 	schoolService *school.Service,
 	resultService *result.Service,
 	examService *exam.Service,
+	classService *class.Service,
+	unitService *unit.Service,
+	sequenceService *sequence.Service,
+	quarterService *quarter.Service,
+	semesterService *semester.Service,
 ) *Service {
 	return &Service{
-		Repository:    repository,
-		SchoolService: schoolService,
-		ResultService: resultService,
-		ExamService:   examService,
+		Repository:      repository,
+		SchoolService:   schoolService,
+		ResultService:   resultService,
+		ExamService:     examService,
+		ClassService:    classService,
+		UnitService:     unitService,
+		SequenceService: sequenceService,
+		QuarterService:  quarterService,
+		SemesterService: semesterService,
 	}
 }
 
@@ -66,55 +91,6 @@ func (service *Service) CreateEntry(
 		return
 	}
 
-	// Find all exams & results
-	resultRequest := &dataResult.GetAllRequest{}
-	examRequest := &dataExam.GetAllRequest{}
-	resultRequest.SchoolID = newRequest.SchoolID
-	resultRequest.YearID = newRequest.YearID
-	examRequest.SchoolID = newRequest.SchoolID
-	examRequest.YearID = newRequest.YearID
-	if foundSchool.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
-		resultRequest.ClassID = newRequest.ClassID
-		examRequest.ClassID = newRequest.ClassID
-		if newRequest.PeriodType == constants.REPORT_PERIOD_TYPE_SEQUENCE {
-			resultRequest.SequenceID = newRequest.SequenceID
-			examRequest.SequenceID = newRequest.SequenceID
-		}
-		if newRequest.PeriodType == constants.REPORT_PERIOD_TYPE_QUARTER {
-			resultRequest.QuarterID = newRequest.QuarterID
-			examRequest.QuarterID = newRequest.QuarterID
-		}
-	} else if foundSchool.Type == constants.SCHOOL_TYPE_UNIVERSITY {
-		resultRequest.LevelDomainID = newRequest.LevelDomainID
-		examRequest.LevelDomainID = newRequest.LevelDomainID
-		if newRequest.PeriodType == constants.REPORT_PERIOD_TYPE_SEMESTER {
-			resultRequest.SemesterID = newRequest.SemesterID
-			examRequest.SemesterID = newRequest.SemesterID
-		}
-	}
-	foundExams, err := service.ExamService.Repository.GetAll(nil, nil, examRequest)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundExams == nil || len(foundExams) < 1 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-	foundResults, err := service.ResultService.Repository.GetAll(nil, nil, resultRequest)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundResults == nil || len(foundResults) < 1 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-
 	// Find report configuration
 	foundReportConfig, err := service.Repository.GetReportConfigBySchoolID(newRequest.SchoolID)
 	if err != nil {
@@ -128,79 +104,316 @@ func (service *Service) CreateEntry(
 		return
 	}
 
-	// Find all report correspondences
-	reportCorrespondenceRequest := &data.GetAllReportCorrespondenceRequest{}
-	reportCorrespondenceRequest.SchoolID = newRequest.SchoolID
-	foundReportCorrespondences, err := service.Repository.GetAllReportCorrespondence(nil, nil, reportCorrespondenceRequest)
+	// Find all results
+	resultRequest := &dataResult.GetAllRequest{}
+	resultRequest.SchoolID = newRequest.SchoolID
+	resultRequest.YearID = newRequest.YearID
+	if foundSchool.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
+		resultRequest.ClassID = newRequest.ClassID
+		if newRequest.PeriodType == constants.REPORT_PERIOD_TYPE_SEQUENCE {
+			resultRequest.SequenceID = newRequest.SequenceID
+		}
+		if newRequest.PeriodType == constants.REPORT_PERIOD_TYPE_QUARTER {
+			resultRequest.QuarterID = newRequest.QuarterID
+		}
+	} else if foundSchool.Type == constants.SCHOOL_TYPE_UNIVERSITY {
+		resultRequest.LevelDomainID = newRequest.LevelDomainID
+		if newRequest.PeriodType == constants.REPORT_PERIOD_TYPE_SEMESTER {
+			resultRequest.SemesterID = newRequest.SemesterID
+		}
+	}
+	foundResults, err := service.ResultService.Repository.GetAll(nil, nil, resultRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+	if foundResults == nil || len(foundResults) < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
 
-	// Find all report grades
+	// Group results by student and sequence and calculate final grade
+	finalEntries := map[string]*model.ReportEntry{}
+	finalNotes := map[string]float64{}
+	for _, res := range foundResults {
+		if res.Exam == nil || res.Exam.Notation == 0 || res.Exam.Percentage == 0 {
+			continue // skip division by zero
+		}
+
+		// Set the map key
+		mapKey := fmt.Sprintf("%sseq%d", res.StudentID, res.Exam.SequenceID)
+
+		// Normalize score
+		normalized := (res.Score / res.Exam.Notation) * float64(res.Exam.Percentage)
+		finalNotes[mapKey] += normalized
+
+		// Create entry
+		foundEntry := finalEntries[mapKey]
+		if foundEntry == nil {
+			tempNewEntry := &model.ReportEntry{
+				StudentID:      res.StudentID,
+				SchoolID:       res.SchoolID,
+				YearID:         res.Exam.YearID,
+				ClassSubjectID: res.Exam.ClassSubjectID,
+				UnitID:         res.Exam.UnitID,
+				SequenceID:     res.Exam.SequenceID,
+
+				Notation: foundReportConfig.NotationReport,
+			}
+			if res.Exam.Unit != nil && res.Exam.Unit.Credit > 0 {
+				tempNewEntry.CoefficientCredit = res.Exam.Unit.Credit
+			} else if res.Exam.ClassSubject != nil && res.Exam.ClassSubject.Coefficient > 0 {
+				tempNewEntry.CoefficientCredit = res.Exam.ClassSubject.Coefficient
+			}
+			finalEntries[mapKey] = tempNewEntry
+		}
+
+		// Update entry
+		if !foundEntry.IsRetry {
+			foundEntry.IsRetry = res.Exam.IsRetry
+		}
+		foundEntry.RetryCount += res.Exam.RetryCount
+		if res.Exam.RetryCount > 0 && res.Exam.Type != nil {
+			if len(foundEntry.RetryDetails) > 0 {
+				foundEntry.RetryDetails = fmt.Sprintf("%s, %s(%d)", foundEntry.RetryDetails, res.Exam.Type.Name, res.Exam.RetryCount)
+			} else {
+				foundEntry.RetryDetails = fmt.Sprintf("%s(%d)", res.Exam.Type.Name, res.Exam.RetryCount)
+			}
+		}
+	}
+
+	// Normalize the report entry score with report config
+	if foundReportConfig.NotationReport > 0 {
+		for mapKey, score := range finalNotes {
+			tempFinalScore := (score / 100) * float64(foundReportConfig.NotationReport)
+			foundEntry := finalEntries[mapKey]
+			if foundEntry != nil && foundEntry.StudentID > 0 {
+				foundEntry.Score = tempFinalScore
+			}
+		}
+	}
+
+	// Update the entry grade
 	reportGradeRequest := &data.GetAllReportGradeRequest{}
 	reportGradeRequest.SchoolID = newRequest.SchoolID
+	reportGradeRequest.Type = constants.REPORT_GRADE_TYPE_REPORT
 	foundReportGrades, err := service.Repository.GetAllReportGrade(nil, nil, reportGradeRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+	if len(foundReportGrades) > 0 {
+		for _, entry := range finalEntries {
+			if entry == nil {
+				continue
+			}
 
-	// Group results by student and calculate final grade
-	finalNotes := map[int64]float64{} // studentID -> final grade
-	for _, res := range foundResults {
-		// Each `res` contains: res.StudentID, res.ExamID, res.Score
-		exam, errFoundExam := service.ExamService.Repository.GetByID(res.ExamID)
-		if errFoundExam != nil {
+			for _, grade := range foundReportGrades {
+				if grade.Minimum > grade.Maximum {
+					continue
+				}
+
+				minOK := (grade.IncludeMinimum && entry.Score >= grade.Minimum) || (!grade.IncludeMinimum && entry.Score > grade.Minimum)
+				maxOK := (grade.IncludeMaximum && entry.Score <= grade.Maximum) || (!grade.IncludeMaximum && entry.Score < grade.Maximum)
+
+				if minOK && maxOK {
+					entry.GradeName = grade.Name
+					entry.GradeDescription = grade.Description
+					break
+				}
+			}
+		}
+	}
+
+	// Get the total coefficient credit
+	finalTotalCoefficientCredit := 0
+	if foundSchool.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
+		classSubjectRequest := &dataClass.GetAllClassSubjectRequest{}
+		classSubjectRequest.SchoolID = newRequest.SchoolID
+		classSubjectRequest.ClassID = newRequest.ClassID
+		foundClassSubjects, errFound := service.ClassService.Repository.GetAllClassSubject(nil, nil, classSubjectRequest)
+		if errFound != nil {
 			errCode = http.StatusInternalServerError
 			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
 		}
-		if exam == nil || exam.ID < 1 {
+		for _, classSubject := range foundClassSubjects {
+			if classSubject.Coefficient > 0 && classSubject.IsValid {
+				finalTotalCoefficientCredit += classSubject.Coefficient
+			}
+		}
+	} else if foundSchool.Type == constants.SCHOOL_TYPE_UNIVERSITY {
+		unitRequest := &dataUnit.GetAllRequest{}
+		unitRequest.SchoolID = newRequest.SchoolID
+		unitRequest.LevelDomainID = newRequest.LevelDomainID
+		unitRequest.SemesterID = newRequest.SemesterID
+		foundUnits, errFound := service.UnitService.Repository.GetAll(nil, nil, unitRequest)
+		if errFound != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
 		}
-		if exam.Notation == 0 || exam.Percentage == 0 {
-			continue // skip division by zero
-		}
-
-		// Normalize score
-		normalized := (res.Score / exam.Notation) * float64(exam.Percentage)
-		finalNotes[res.StudentID] += normalized
-	}
-
-	// Normalize the report entry score with report config
-	if foundReportConfig.NotationReport > 0 {
-		for studentID, score := range finalNotes {
-			finalNotes[studentID] = (score / 100) * float64(foundReportConfig.NotationReport)
+		for _, unit := range foundUnits {
+			if unit.Credit > 0 && unit.IsValid {
+				finalTotalCoefficientCredit += unit.Credit
+			}
 		}
 	}
 
-	// 4. Create entries
-	entries := []*model.ReportEntry{}
-	for studentID, score := range finalNotes {
-		entry := &model.ReportEntry{
-			StudentID:      studentID,
-			SchoolID:       newRequest.SchoolID,
-			YearID:         newRequest.YearID,
-			UnitID:         newRequest.UnitID,
-			ClassSubjectID: newRequest.ClassSubjectID,
-			Score:          score,
-			// Ajoute d'autres champs si nécessaires
+	// Get the period name
+	periodName := ""
+	if foundSchool.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
+		resultRequest.ClassID = newRequest.ClassID
+		if newRequest.PeriodType == constants.REPORT_PERIOD_TYPE_SEQUENCE {
+			foundSequence, errFound := service.SequenceService.Repository.GetByIDSchoolID(newRequest.SequenceID, newRequest.SchoolID)
+			if errFound != nil {
+				errCode = http.StatusInternalServerError
+				err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+				return
+			}
+			if foundSequence != nil && foundSequence.ID > 0 {
+				periodName = foundSequence.Name
+			}
 		}
-		entries = append(entries, entry)
+		if newRequest.PeriodType == constants.REPORT_PERIOD_TYPE_QUARTER {
+			foundQuarter, errFound := service.QuarterService.Repository.GetByIDSchoolID(newRequest.QuarterID, newRequest.SchoolID)
+			if errFound != nil {
+				errCode = http.StatusInternalServerError
+				err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+				return
+			}
+			if foundQuarter != nil && foundQuarter.ID > 0 {
+				periodName = foundQuarter.Name
+			}
+		}
+	} else if foundSchool.Type == constants.SCHOOL_TYPE_UNIVERSITY {
+		if newRequest.PeriodType == constants.REPORT_PERIOD_TYPE_SEMESTER {
+			foundSemester, errFound := service.SemesterService.Repository.GetByIDSchoolID(newRequest.SemesterID, newRequest.SchoolID)
+			if errFound != nil {
+				errCode = http.StatusInternalServerError
+				err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+				return
+			}
+			if foundSemester != nil && foundSemester.ID > 0 {
+				periodName = foundSemester.Name
+			}
+		}
 	}
 
-	// 5. Enregistrer en base
-	err = service.Repository.CreateReportEntry(entries)
+	// Group average by student
+	finalAverages := map[string]*model.ReportAverage{}
+	finalAveragesScore := map[string]float64{}
+	for _, entry := range finalEntries {
+		if entry == nil {
+			continue
+		}
+
+		// Set the map key
+		mapKey := fmt.Sprintf("%s", entry.StudentID)
+
+		// Create new average
+		foundAvg := finalAverages[mapKey]
+		if foundAvg == nil {
+			foundAvg = &model.ReportAverage{
+				StudentID:     entry.StudentID,
+				SchoolID:      entry.SchoolID,
+				YearID:        entry.YearID,
+				ClassID:       newRequest.ClassID,
+				LevelDomainID: newRequest.LevelDomainID,
+
+				PeriodType:             newRequest.PeriodType,
+				PeriodName:             periodName,
+				Notation:               foundReportConfig.NotationAverage,
+				TotalCreditCoefficient: finalTotalCoefficientCredit,
+				IsSuccessful:           true,
+			}
+		}
+
+		// Update the total credit
+		foundAvg.TotalCreditCoefficient += entry.CoefficientCredit
+		if foundReportConfig.ReportGradeToFail != nil && entry.GradeName == foundReportConfig.ReportGradeToFail.Name {
+			foundAvg.IsSuccessful = false
+		}
+		// Update the score = sum of (entries/notation report) * coefficient credit)
+
+		// Calculate and normalize the score
+		var scoreWithCoefficientCredit float64 = (entry.Score / entry.Notation) * float64(entry.CoefficientCredit)
+	}
+
+	// Update and normalize the score
+	// Score                      float64 `gorm:"default:null"`
+	// IsSuccessful               bool    `gorm:"default:null"`
+	// ValidatedCreditCoefficient int     `gorm:"default:null"`
+
+	// Update the average grade
+	avarageRequest := &data.GetAllReportGradeRequest{}
+	avarageRequest.SchoolID = newRequest.SchoolID
+	avarageRequest.Type = constants.REPORT_GRADE_TYPE_AVERAGE
+	foundAverageGrades, err := service.Repository.GetAllReportGrade(nil, nil, avarageRequest)
 	if err != nil {
-		return nil, http.StatusInternalServerError, err
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if len(foundAverageGrades) > 0 {
+		for _, avg := range finalAverages {
+			if avg == nil {
+				continue
+			}
+
+			for _, grade := range foundAverageGrades {
+				if grade.Minimum > grade.Maximum {
+					continue
+				}
+
+				minOK := (grade.IncludeMinimum && avg.Score >= grade.Minimum) || (!grade.IncludeMinimum && avg.Score > grade.Minimum)
+				maxOK := (grade.IncludeMaximum && avg.Score <= grade.Maximum) || (!grade.IncludeMaximum && avg.Score < grade.Maximum)
+
+				if minOK && maxOK {
+					avg.GradeName = grade.Name
+					avg.GradeDescription = grade.Description
+					break
+				}
+			}
+		}
 	}
 
-	// 6. Retourner une réponse (peut-être le premier pour tester)
-	return entries[0], http.StatusOK, nil
+	// Create entries
+	for studentID, score := range finalNotes {
+		entries = append(entries, entry)
+		_, _ = service.Repository.CreateReportEntry(entry)
+		if err != nil {
+			utils.Logger.Info("Error creating report entry", zap.Error(err))
+		}
+	}
+	// Create averages
+	for studentID, score := range finalNotes {
+		entries = append(entries, entry)
+		_, _ = service.Repository.CreateReportEntry(entry)
+		if err != nil {
+			utils.Logger.Info("Error creating report entry", zap.Error(err))
+		}
+	}
+	// Create table
+	finalTable := &model.ReportTable{
+		SchoolID:      newRequest.SchoolID,
+		YearID:        newRequest.YearID,
+		ClassID:       newRequest.ClassID,
+		LevelDomainID: newRequest.LevelDomainID,
 
+		PeriodType: newRequest.PeriodType,
+		PeriodName: periodName,
+		Status:     constants.REPORT_TABLE_STATUS_GENERATED,
+	}
+	_, err = service.Repository.CreateReportTable(finalTable)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
 	return
 }
 
@@ -224,6 +437,7 @@ func (service *Service) CreateGrade(
 		Minimum:        newRequest.Minimum,
 		Maximum:        newRequest.Maximum,
 		IncludeMinimum: newRequest.IncludeMinimum,
+		IncludeMaximum: newRequest.IncludeMaximum,
 	}
 
 	// Check unique
@@ -266,6 +480,7 @@ func (service *Service) CreateCorrespondence(
 		Minimum:        newRequest.Minimum,
 		Maximum:        newRequest.Maximum,
 		IncludeMinimum: newRequest.IncludeMinimum,
+		IncludeMaximum: newRequest.IncludeMaximum,
 		NewScore:       newRequest.NewScore,
 	}
 
@@ -304,11 +519,13 @@ func (service *Service) CreateConfig(
 
 	// Format
 	item := &model.ReportConfig{
-		SchoolID: newRequest.SchoolID,
+		SchoolID:            newRequest.SchoolID,
+		ReportGradeToFailID: newRequest.ReportGradeToFailID,
 
 		NotationAverage:               newRequest.NotationAverage,
 		NotationReport:                newRequest.NotationReport,
 		MinimumRequiredScoreToPromote: newRequest.MinimumRequiredScoreToPromote,
+		OnlyFailedExams:               newRequest.OnlyFailedExams,
 	}
 
 	// Check unique
@@ -495,11 +712,13 @@ func (service *Service) UpdateConfig(
 
 	// Format request
 	item := &model.ReportConfig{
-		SchoolID: newRequest.SchoolID,
+		SchoolID:            newRequest.SchoolID,
+		ReportGradeToFailID: newRequest.ReportGradeToFailID,
 
 		NotationAverage:               newRequest.NotationAverage,
 		NotationReport:                newRequest.NotationReport,
 		MinimumRequiredScoreToPromote: newRequest.MinimumRequiredScoreToPromote,
+		OnlyFailedExams:               newRequest.OnlyFailedExams,
 	}
 
 	// Check unique
@@ -521,43 +740,6 @@ func (service *Service) UpdateConfig(
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	return
-}
-
-func (service *Service) DeleteEntry(
-	ctxData *types.ContextData,
-	id int64,
-) (affectedRows int64, errCode int, err error) {
-	// Check if the item exists
-	var foundItem *model.ReportEntry
-	if ctxData.User.Feature != constants.FeatureAdmin {
-		foundItem, err = service.Repository.GetReportEntryByIDSchoolID(id, ctxData.Jwt.SchoolID)
-	} else {
-		foundItem, err = service.Repository.GetReportEntryByID(id)
-	}
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundItem == nil || foundItem.ID < 1 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-
-	// Delete
-	affectedRows, err = service.Repository.DeleteReportEntryByID(id)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if affectedRows <= 0 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 	return
@@ -661,24 +843,6 @@ func (service *Service) DeleteConfig(
 
 	// Delete
 	affectedRows, err = service.Repository.DeleteReportConfigByID(id)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if affectedRows <= 0 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-	return
-}
-
-func (service *Service) DeleteMultipleEntry(
-	ctxData *types.ContextData,
-	list []int64,
-) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteMultipleReportEntryByID(list, ctxData.Jwt.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -911,6 +1075,27 @@ func (service *Service) GetAllConfig(
 
 	// Get
 	result, err = service.Repository.GetAllReportConfig(filter, pagination, &newRequest)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+	}
+	return
+}
+
+func (service *Service) GetAllAverage(
+	ctxData *types.ContextData,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllReportAverageRequest,
+) (result []model.ReportAverage, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Get
+	result, err = service.Repository.GetAllReportAverage(filter, pagination, &newRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

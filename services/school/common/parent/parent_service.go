@@ -192,60 +192,6 @@ func (service *Service) CreateParentStudent(
 	return
 }
 
-func (service *Service) CreateParentAssign(
-	ctxData *types.ContextData,
-	request *data.ParentAssignRequest,
-) (result *model.ParentAssign, errCode int, err error) {
-	// Check school
-	newRequest := *request
-	if ctxData.Jwt.SchoolID > 0 {
-		newRequest.SchoolID = ctxData.Jwt.SchoolID
-	}
-
-	// Format request
-	item := &model.ParentAssign{
-		SchoolID: newRequest.SchoolID,
-		UserID:   ctxData.Jwt.UserID,
-
-		StudentListID:  newRequest.StudentListID,
-		Status:         newRequest.StudentListID,
-		StatusFeedback: newRequest.StudentListID,
-		Message:        newRequest.Message,
-		Gender:         newRequest.Gender,
-		FirstName:      newRequest.FirstName,
-		LastName:       newRequest.LastName,
-		Birthday:       newRequest.Birthday,
-		BirthLocation:  newRequest.BirthLocation,
-		Document1:      newRequest.Document1,
-		Document2:      newRequest.Document2,
-		Document3:      newRequest.Document3,
-		Document4:      newRequest.Document4,
-		Document5:      newRequest.Document5,
-	}
-
-	// Check unique
-	foundUnique, err := service.Repository.GetParentAssignUniqueObjectByUserID(item)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if service.Repository.AreParentAssignSameUniqueObjectsByUserID(foundUnique, item) {
-		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-
-	// Create
-	result, err = service.Repository.CreateParentAssign(item)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	return
-}
-
 func (service *Service) Update(
 	ctxData *types.ContextData,
 	id int64,
@@ -373,6 +319,7 @@ func (service *Service) UpdateParentStudent(
 
 	// Format request
 	item := &model.ParentStudent{
+		SchoolID:  newRequest.SchoolID,
 		ParentID:  newRequest.ParentID,
 		StudentID: newRequest.StudentID,
 	}
@@ -393,125 +340,6 @@ func (service *Service) UpdateParentStudent(
 
 	// Update
 	result, err = service.Repository.UpdateParentStudentByID(id, item)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	return
-}
-
-func (service *Service) UpdateParentAssign(
-	ctxData *types.ContextData,
-	id int64,
-	request *data.ParentAssignRequest,
-) (result *model.ParentAssign, errCode int, err error) {
-	// Check school
-	newRequest := *request
-	if ctxData.Jwt.SchoolID > 0 {
-		newRequest.SchoolID = ctxData.Jwt.SchoolID
-	}
-
-	// Check if the item exists
-	var foundItem *model.ParentAssign
-	if ctxData.User.Feature != constants.FeatureAdmin {
-		foundItem, err = service.Repository.GetParentAssignByIDSchoolID(id, newRequest.SchoolID)
-	} else {
-		foundItem, err = service.Repository.GetParentAssignByID(id)
-	}
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundItem == nil || foundItem.ID < 1 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-
-	// Format request
-	item := &model.ParentAssign{
-		SchoolID: newRequest.SchoolID,
-		UserID:   foundItem.UserID,
-
-		StudentListID:  newRequest.StudentListID,
-		Status:         newRequest.StudentListID,
-		StatusFeedback: newRequest.StudentListID,
-		Message:        newRequest.Message,
-		Gender:         newRequest.Gender,
-		FirstName:      newRequest.FirstName,
-		LastName:       newRequest.LastName,
-		Birthday:       newRequest.Birthday,
-		BirthLocation:  newRequest.BirthLocation,
-		Document1:      newRequest.Document1,
-		Document2:      newRequest.Document2,
-		Document3:      newRequest.Document3,
-		Document4:      newRequest.Document4,
-		Document5:      newRequest.Document5,
-	}
-
-	// Check unique
-	foundUnique, err := service.Repository.GetParentAssignUniqueObjectByUserID(item)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if service.Repository.AreParentAssignSameUniqueObjectsByUserID(foundUnique, item) &&
-		!service.Repository.AreParentAssignSameUniqueObjectsByUserID(foundUnique, foundItem) {
-		errCode = http.StatusFound
-		err = constants.Http302ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-
-	// Update
-	result, err = service.Repository.UpdateParentAssignByID(id, item)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	return
-}
-func (service *Service) UpdateParentAssignStatus(
-	ctxData *types.ContextData,
-	id int64,
-	request *data.ParentAssignStatusRequest,
-) (result *model.ParentAssign, errCode int, err error) {
-	// Check school
-	newRequest := *request
-	var newSchoolID int64
-	if ctxData.Jwt.SchoolID > 0 {
-		newSchoolID = ctxData.Jwt.SchoolID
-	}
-
-	// Check if the item exists
-	var foundItem *model.ParentAssign
-	if ctxData.User.Feature != constants.FeatureAdmin {
-		foundItem, err = service.Repository.GetParentAssignByIDSchoolID(id, newSchoolID)
-	} else {
-		foundItem, err = service.Repository.GetParentAssignByID(id)
-	}
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundItem == nil || foundItem.ID < 1 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-
-	// Format request
-	item := &model.ParentAssign{
-		Status:         newRequest.Status,
-		StatusFeedback: newRequest.StatusFeedback,
-	}
-
-	// Update
-	result, err = service.Repository.UpdateParentAssignStatusByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -594,43 +422,6 @@ func (service *Service) DeleteParentStudent(
 	return
 }
 
-func (service *Service) DeleteParentAssign(
-	ctxData *types.ContextData,
-	id int64,
-) (affectedRows int64, errCode int, err error) {
-	// Check if the item exists
-	var foundItem *model.ParentAssign
-	if ctxData.User.Feature != constants.FeatureAdmin {
-		foundItem, err = service.Repository.GetParentAssignByIDSchoolID(id, ctxData.Jwt.SchoolID)
-	} else {
-		foundItem, err = service.Repository.GetParentAssignByID(id)
-	}
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundItem == nil || foundItem.ID < 1 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-
-	// Delete
-	affectedRows, err = service.Repository.DeleteParentAssignByID(id)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if affectedRows <= 0 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-	return
-}
-
 func (service *Service) DeleteMultiple(
 	ctxData *types.ContextData,
 	list []int64,
@@ -654,24 +445,6 @@ func (service *Service) DeleteMultipleParentStudent(
 	list []int64,
 ) (affectedRows int64, errCode int, err error) {
 	affectedRows, err = service.Repository.DeleteMultipleParentStudentByID(list, ctxData.Jwt.SchoolID)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if affectedRows <= 0 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-	return
-}
-
-func (service *Service) DeleteMultipleParentAssign(
-	ctxData *types.ContextData,
-	list []int64,
-) (affectedRows int64, errCode int, err error) {
-	affectedRows, err = service.Repository.DeleteMultipleParentAssignByID(list, ctxData.Jwt.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
@@ -729,28 +502,6 @@ func (service *Service) GetParentStudent(
 	return
 }
 
-func (service *Service) GetParentAssign(
-	ctxData *types.ContextData,
-	id int64,
-) (result *model.ParentAssign, errCode int, err error) {
-	if ctxData.User.Feature != constants.FeatureAdmin {
-		result, err = service.Repository.GetParentAssignByIDSchoolID(id, ctxData.Jwt.SchoolID)
-	} else {
-		result, err = service.Repository.GetParentAssignByID(id)
-	}
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if result == nil {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-	return
-}
-
 func (service *Service) GetAll(
 	ctxData *types.ContextData,
 	filter *types.Filter,
@@ -786,27 +537,6 @@ func (service *Service) GetAllParentStudent(
 
 	// Get
 	result, err = service.Repository.GetAllParentStudent(filter, pagination, &newRequest)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-	}
-	return
-}
-
-func (service *Service) GetAllParentAssign(
-	ctxData *types.ContextData,
-	filter *types.Filter,
-	pagination *types.Pagination,
-	request *data.GetAllParentAssignRequest,
-) (result []model.ParentAssign, errCode int, err error) {
-	// Check school
-	newRequest := *request
-	if ctxData.Jwt.SchoolID > 0 {
-		newRequest.SchoolID = ctxData.Jwt.SchoolID
-	}
-
-	// Get
-	result, err = service.Repository.GetAllParentAssign(filter, pagination, &newRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

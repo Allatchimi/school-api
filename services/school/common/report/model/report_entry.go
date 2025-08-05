@@ -31,15 +31,14 @@ type ReportEntry struct {
 	StudentID int64                 `gorm:"default:null"`
 	Student   *modelStudent.Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
 
-	Coefficient      int     `gorm:"default:null"`
-	Credit           int     `gorm:"default:null"`
-	Score            float64 `gorm:"default:null"`
-	Notation         float64 `gorm:"default:null"`
-	Grade            string  `gorm:"default:null"`
-	GradeDescription string  `gorm:"default:null"`
-	IsRetry          bool    `gorm:"default:null"`
-	RetryCount       int64   `gorm:"default:null"`
-	RetryDetails     string  `gorm:"default:null"`
+	CoefficientCredit int     `gorm:"default:null"`
+	Score             float64 `gorm:"default:null"`
+	Notation          float64 `gorm:"default:null"`
+	GradeName         string  `gorm:"default:null"`
+	GradeDescription  string  `gorm:"default:null"`
+	IsRetry           bool    `gorm:"default:null"`
+	RetryCount        int64   `gorm:"default:null"`
+	RetryDetails      string  `gorm:"default:null"`
 }
 
 func (item *ReportEntry) ToResponse() *data.ReportEntryResponse {
@@ -47,20 +46,21 @@ func (item *ReportEntry) ToResponse() *data.ReportEntryResponse {
 		return &data.ReportEntryResponse{}
 	}
 	resp := &data.ReportEntryResponse{}
-	resp.Coefficient = item.Coefficient
-	resp.Credit = item.Credit
+	resp.CoefficientCredit = item.CoefficientCredit
 	resp.Score = item.Score
 	resp.Notation = item.Notation
-	resp.Grade = item.Grade
+	resp.GradeName = item.GradeName
 	resp.GradeDescription = item.GradeDescription
 	resp.IsRetry = item.IsRetry
 	resp.RetryCount = item.RetryCount
 	resp.RetryDetails = item.RetryDetails
 
-	resp.Student = item.Student.ToResponse()
+	resp.School = item.School.ToResponse()
+	resp.Year = item.Year.ToResponse()
 	resp.ClassSubject = item.ClassSubject.ToResponse()
 	resp.Sequence = item.Sequence.ToResponse()
 	resp.Unit = item.Unit.ToResponse()
+	resp.Student = item.Student.ToPublicResponse()
 
 	resp.ID = item.ID
 	resp.CreatedAt = item.CreatedAt

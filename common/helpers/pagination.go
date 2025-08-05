@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// PaginationScope Returns *gorm.DB pointer with applied search, filter and pagination
+// PaginationScopeV2 Returns *gorm.DB pointer with applied search, filter and pagination
 //
 // - Search performs a full-text search on a specific rows of the table.
 // searchColumns is the specific rows.
@@ -22,40 +22,6 @@ import (
 // sorting the results in ascending or descending based on the Sort parameter.
 //
 // - Pagination applies an offset and limit to the results, determining which subset of data to display.
-func PaginationScope(db *gorm.DB, selection string, where string, pagination *types.Pagination, filter *types.Filter) func(*gorm.DB) *gorm.DB {
-	if pagination != nil {
-		var count int64
-		db.Raw(fmt.Sprintf("SELECT COUNT(*) FROM (%s %s) AS subquery;", selection, where)).Count(&count)
-		pagination.UpdateFields(count)
-	}
-
-	var paginationFilter = ""
-	if pagination != nil && filter != nil {
-		paginationFilter = fmt.Sprintf(
-			"ORDER BY %s %s LIMIT %d OFFSET %d",
-			filter.OrderBy,
-			filter.Sort,
-			pagination.Limit,
-			pagination.Offset,
-		)
-	} else if pagination == nil && filter != nil {
-		if pagination != nil && filter != nil {
-			paginationFilter = fmt.Sprintf(
-				"ORDER BY %s %s",
-				filter.OrderBy,
-				filter.Sort,
-			)
-		}
-	}
-
-	return func(db *gorm.DB) *gorm.DB {
-		return db.Raw(fmt.Sprintf("%s %s %s;",
-			selection,
-			where,
-			paginationFilter,
-		))
-	}
-}
 func PaginationScopeV2(
 	db *gorm.DB,
 	selection string,
@@ -82,14 +48,20 @@ func PaginationScopeV2(
 			pagination.Limit,
 			pagination.Offset,
 		)
-	} else if pagination == nil && filter != nil {
-		if pagination != nil && filter != nil {
-			paginationFilter = fmt.Sprintf(
-				"ORDER BY %s %s",
-				filter.OrderBy,
-				filter.Sort,
-			)
-		}
+	} else if filter != nil {
+		paginationFilter = fmt.Sprintf(
+			"ORDER BY %s %s",
+			filter.OrderBy,
+			filter.Sort,
+		)
+	} else if pagination != nil {
+		paginationFilter = fmt.Sprintf(
+			"ORDER BY %s %s LIMIT %d OFFSET %d",
+			"updated_at",
+			"desc",
+			pagination.Limit,
+			pagination.Offset,
+		)
 	}
 
 	// Return scoped function to apply raw SQL with parameters
@@ -100,24 +72,34 @@ func PaginationScopeV2(
 }
 
 // GetPaginationFiltersFromQuery Checks the entries and return the corrected ones.
-func GetPaginationFiltersFromQuery(filter *types.Filter, pagination *types.PaginationRequest) (*types.Pagination, *types.Filter) {
-	page := pagination.Page
-	limit := pagination.Limit
-
-	if page <= 0 {
-		page = 1
+func GetPaginationFiltersFromQuery(filter *types.Filter, pagination *types.PaginationRequest) (pageResult *types.Pagination, filterResult *types.Filter) {
+	if filter == nil && pagination == nil {
+		return
 	}
-	if limit <= 0 {
-		limit = constants.PaginationLimitDefault
-	}
-	if len(strings.TrimSpace(filter.OrderBy)) <= 0 {
-		filter.OrderBy = constants.FilterOrderByDefault
-	}
-	if filter.Sort != "asc" {
-		filter.Sort = constants.FilterSortDefault
+	if filter != nil {
+		if len(strings.TrimSpace(filter.OrderBy)) <= 0 {
+			filter.OrderBy = constants.FilterOrderByDefault
+		}
+		if filter.Sort != "asc" {
+			filter.Sort = constants.FilterSortDefault
+		}
+		filterResult = filter
 	}
 
-	return NewPaginationData(page, limit), filter
+	if pagination != nil {
+		page := pagination.Page
+		limit := pagination.Limit
+
+		if page <= 0 {
+			page = 1
+		}
+		if limit <= 0 {
+			limit = constants.PaginationLimitDefault
+		}
+		pageResult = NewPaginationData(page, limit)
+	}
+
+	return
 }
 
 // NewPaginationData The user passes a pagination request, specifying the desired page and limit.

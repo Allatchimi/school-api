@@ -335,48 +335,6 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete report entry with id
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "delete-report-entry",
-			Summary:     "Delete report entry",
-			Description: "Delete existing report entry with matching id and return affected rows in database.",
-			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/entries/{id}", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecuritySchemeSchoolToken: {},
-					constants.SecuritySchemeSchoolID:    {},
-					constants.SecuritySchemeBearerToken: {
-						fmt.Sprintf("%s,%s",
-							constants.FeatureAdmin,
-							constants.FeatureDirector,
-						), // Feature
-						tableName,                  // Table name
-						constants.PermissionDelete, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				data.ReportEntryID
-			},
-		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteEntry(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
-		},
-	)
-
 	// Delete report grade with id
 	huma.Register(
 		*humaApi,
@@ -496,48 +454,6 @@ func RegisterEndpoints(
 			},
 		) (*struct{ Body types.DeletedResponse }, error) {
 			result, errCode, err := controller.DeleteConfig(&ctx, input)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			return &struct{ Body types.DeletedResponse }{Body: types.DeletedResponse{AffectedRows: result}}, nil
-		},
-	)
-
-	// Delete multiple report entry
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "delete-report-entry-multiple",
-			Summary:     "Delete multiple report entry",
-			Description: "Delete multiple report entry by providing a list of IDs and return affected rows in database.",
-			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/entries/multiple/delete", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecuritySchemeSchoolToken: {},
-					constants.SecuritySchemeSchoolID:    {},
-					constants.SecuritySchemeBearerToken: {
-						fmt.Sprintf("%s,%s",
-							constants.FeatureAdmin,
-							constants.FeatureDirector,
-						), // Feature
-						tableName,                  // Table name
-						constants.PermissionDelete, // Operation
-					},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct {
-				Body types.DeleteMultipleRequest
-			},
-		) (*struct{ Body types.DeletedResponse }, error) {
-			result, errCode, err := controller.DeleteMultipleEntry(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}
@@ -1063,6 +979,58 @@ func RegisterEndpoints(
 
 			return &struct {
 				Body data.ReportConfigResponseList
+			}{Body: *result}, nil
+		},
+	)
+
+	// Get all report average
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-report-average-list",
+			Summary:     "Get all report average",
+			Description: "Get all report average with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/averages", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s,%s,%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+							constants.FeatureTeacher,
+							constants.FeatureStudent,
+							constants.FeatureParent,
+						), // Feature
+						tableName,                // Table name
+						constants.PermissionRead, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllReportAverageRequest
+			},
+		) (*struct {
+			Body data.ReportAverageResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllAverage(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+
+			return &struct {
+				Body data.ReportAverageResponseList
 			}{Body: *result}, nil
 		},
 	)

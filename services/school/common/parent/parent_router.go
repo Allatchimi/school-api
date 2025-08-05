@@ -64,15 +64,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Create parent level domain class
+	// Create parent student
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "post-parent-level-domain-class",
-			Summary:     "Create parent level domain class",
-			Description: "Create new parent level domain class and return created object.",
+			OperationID: "post-parent-student",
+			Summary:     "Create parent student",
+			Description: "Create new parent student and return created object.",
 			Method:      http.MethodPost,
-			Path:        fmt.Sprintf("%s/leveldomainclasses", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/students", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -153,15 +153,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Update parent level domain class with id
+	// Update parent student with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "update-parent-level-domain-class",
-			Summary:     "Update parent level domain class",
-			Description: "Update existing parent level domain class with matching id and return the new object.",
+			OperationID: "update-parent-student",
+			Summary:     "Update parent student",
+			Description: "Update existing parent student with matching id and return the new object.",
 			Method:      http.MethodPut,
-			Path:        fmt.Sprintf("%s/leveldomainclasses/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/students/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{
@@ -242,15 +242,15 @@ func RegisterEndpoints(
 		},
 	)
 
-	// Delete parent level domain class with id
+	// Delete parent student with id
 	huma.Register(
 		*humaApi,
 		huma.Operation{
-			OperationID: "delete-parent-level-domain-class",
-			Summary:     "Delete parent level domain class",
-			Description: "Delete existing parent level domain class with matching id and return affected rows in database.",
+			OperationID: "delete-parent-student",
+			Summary:     "Delete parent student",
+			Description: "Delete existing parent student with matching id and return affected rows in database.",
 			Method:      http.MethodDelete,
-			Path:        fmt.Sprintf("%s/leveldomainclasses/{id}", endpointConfig.Group),
+			Path:        fmt.Sprintf("%s/students/{id}", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
 				{

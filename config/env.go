@@ -67,7 +67,7 @@ type Environment struct {
 
 	// SMS
 	SmsAfrikaTalkingApiKey   string `mapstructure:"SMS_AFRIKA_TALKING_API_KEY"`
-	SmsAfrikaTalkingUserName string `mapstructure:"SMS_AFRIKA_TALKING_USER_NAME"`
+	SmsAfrikaTalkingUsername string `mapstructure:"SMS_AFRIKA_TALKING_USERNAME"`
 	SmsAfrikaTalkingSenderId string `mapstructure:"SMS_AFRIKA_TALKING_SENDER_ID"`
 
 	// Login with Google

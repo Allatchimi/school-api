@@ -222,6 +222,11 @@ func InjectDependencies() {
 			api.AllControllers.SchoolController.Service,
 			api.AllControllers.ResultController.Service,
 			api.AllControllers.ExamController.Service,
+			api.AllControllers.ClassController.Service,
+			api.AllControllers.UnitController.Service,
+			api.AllControllers.SequenceController.Service,
+			api.AllControllers.QuarterController.Service,
+			api.AllControllers.SemesterController.Service,
 		),
 	)
 	api.AllControllers.MonitoringController = monitoring.NewController(

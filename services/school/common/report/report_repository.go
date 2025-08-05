@@ -90,6 +90,21 @@ func (repository *Repository) CreateReportConfig(item *model.ReportConfig) (resu
 	return
 }
 
+func (repository *Repository) CreateReportAverage(item *model.ReportAverage) (result *model.ReportAverage, err error) {
+	// Create the item
+	err = repository.Db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the created item
+	result = &model.ReportAverage{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		First(result, item.ID).Error
+	return
+}
+
 func (repository *Repository) CreateReportTable(item *model.ReportTable) (result *model.ReportTable, err error) {
 	// Create the item
 	err = repository.Db.Create(item).Error
@@ -102,49 +117,6 @@ func (repository *Repository) CreateReportTable(item *model.ReportTable) (result
 	err = repository.Db.
 		Preload(clause.Associations).
 		First(result, item.ID).Error
-	return
-}
-
-func (repository *Repository) UpdateReportEntryByID(id int64, item *model.ReportEntry) (result *model.ReportEntry, err error) {
-	// Update the item
-	fields := map[string]any{
-		"school_id":        item.SchoolID,
-		"year_id":          item.YearID,
-		"class_subject_id": nil,
-		"sequence_id":      nil,
-		"unit_id":          nil,
-
-		"coefficient":   item.Coefficient,
-		"credit":        item.Credit,
-		"score":         item.Score,
-		"notation":      item.Notation,
-		"is_retry":      item.IsRetry,
-		"retry_count":   item.RetryCount,
-		"retry_details": item.RetryDetails,
-	}
-	if item.ClassSubjectID > 0 {
-		fields["class_subject_id"] = item.ClassSubjectID
-		if item.SequenceID > 0 {
-			fields["sequence_id"] = item.SequenceID
-		}
-	}
-	if item.UnitID > 0 {
-		fields["unit_id"] = item.UnitID
-	}
-	err = repository.Db.
-		Model(&model.ReportEntry{}).
-		Where("id = ?", id).
-		Updates(fields).Error
-	if err != nil {
-		return
-	}
-
-	// Find the updated item
-	result = &model.ReportEntry{}
-	err = repository.Db.
-		Preload(clause.Associations).
-		Where("id = ?", id).
-		First(result).Error
 	return
 }
 
@@ -209,11 +181,13 @@ func (repository *Repository) UpdateReportCorrespondenceByID(id int64, item *mod
 func (repository *Repository) UpdateReportConfigByID(id int64, item *model.ReportConfig) (result *model.ReportConfig, err error) {
 	// Update the item
 	fields := map[string]any{
-		"school_id": item.SchoolID,
+		"school_id":               item.SchoolID,
+		"report_grade_to_fail_id": item.ReportGradeToFailID,
 
 		"notation_average":                  item.NotationAverage,
 		"notation_report":                   item.NotationReport,
 		"minimum_required_score_to_promote": item.MinimumRequiredScoreToPromote,
+		"only_failed_exams":                 item.OnlyFailedExams,
 	}
 	err = repository.Db.
 		Model(&model.ReportConfig{}).
@@ -240,13 +214,9 @@ func (repository *Repository) UpdateReportTableByID(id int64, item *model.Report
 		"class_id":        nil,
 		"level_domain_id": nil,
 
-		"period_type":                       item.PeriodType,
-		"period_name":                       item.PeriodName,
-		"status":                            item.Status,
-		"notation":                          item.Notation,
-		"minimum_required_score_to_promote": item.MinimumRequiredScoreToPromote,
-		"grade_name":                        item.GradeName,
-		"grade_description":                 item.GradeDescription,
+		"period_type": item.PeriodType,
+		"period_name": item.PeriodName,
+		"status":      item.Status,
 	}
 	if item.ClassID > 0 {
 		fields["class_id"] = item.ClassID
@@ -521,6 +491,31 @@ func (repository *Repository) GetUniqueObjectReportConfig(item *model.ReportConf
 func (repository *Repository) AreSameUniqueObjectsReportConfig(item1 *model.ReportConfig, item2 *model.ReportConfig) bool {
 	if item1 != nil && item2 != nil &&
 		(item1.SchoolID == item2.SchoolID) {
+		return true
+	}
+	return false
+}
+
+func (repository *Repository) GetUniqueObjectReportAverage(item *model.ReportAverage) (*model.ReportAverage, error) {
+	result := &model.ReportAverage{}
+	return result, repository.Db.Preload(clause.Associations).Where(&model.ReportAverage{
+		SchoolID:      item.SchoolID,
+		YearID:        item.YearID,
+		ClassID:       item.ClassID,
+		LevelDomainID: item.LevelDomainID,
+		PeriodType:    item.PeriodType,
+		PeriodName:    item.PeriodName,
+	}).Limit(1).Find(result).Error
+}
+
+func (repository *Repository) AreSameUniqueObjectsReportAverage(item1 *model.ReportAverage, item2 *model.ReportAverage) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID &&
+			item1.YearID == item2.YearID &&
+			item1.ClassID == item2.ClassID &&
+			item1.LevelDomainID == item2.LevelDomainID &&
+			item1.PeriodType == item2.PeriodType &&
+			item1.PeriodName == item2.PeriodName) {
 		return true
 	}
 	return false
@@ -810,6 +805,100 @@ func (repository *Repository) GetAllReportConfig(
 				`SELECT DISTINCT report_configs.* 
 				FROM report_configs 
 				LEFT JOIN schools ON report_configs.school_id = schools.id`,
+				where,
+				pagination,
+				filter,
+				args...,
+			),
+		).Find(&result).Error
+
+	return
+}
+
+func (repository *Repository) GetAllReportAverage(
+	filter *types.Filter, pagination *types.Pagination,
+	request *data.GetAllReportAverageRequest,
+) (result []model.ReportAverage, err error) {
+	result = make([]model.ReportAverage, 0)
+
+	// Build secure WHERE conditions
+	where := ""
+	args := []any{}
+	if request != nil {
+		if request.SchoolID > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.school_id = ?")
+			args = append(args, request.SchoolID)
+		}
+		if request.YearID > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.year_id = ?")
+			args = append(args, request.YearID)
+		}
+		if request.ClassID > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.class_id = ?")
+			args = append(args, request.ClassID)
+		}
+		if request.LevelDomainID > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.level_domain = ?")
+			args = append(args, request.LevelDomainID)
+		}
+		if len(request.PeriodType) > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.period_type = ?")
+			args = append(args, request.PeriodType)
+		}
+		if len(request.PeriodName) > 0 {
+			where = helpers.AppendWhereClause(where, "report_tables.period_name = ?")
+			args = append(args, request.PeriodName)
+		}
+	}
+
+	// Handle search filter securely
+	if filter != nil && len(filter.Search) > 0 {
+		search := filter.Search
+		like := "%" + search + "%"
+
+		// Securely append search conditions
+		searchClause := `(
+			CAST(report_tables.id AS TEXT) = ? OR
+			report_tables.period_type ILIKE ? OR
+			report_tables.period_name ILIKE ? OR
+			report_tables.status ILIKE ? OR
+			schools.name ILIKE ? OR
+			schools.type ILIKE ? OR
+			years.name ILIKE ? OR
+			highschool_classes.name ILIKE ? OR
+			highschool_classes.description ILIKE ? OR
+			university_levels.name ILIKE ? OR
+			university_levels.description ILIKE ? OR
+			university_domains.name ILIKE ? OR
+			university_domains.description ILIKE ?
+		)`
+
+		where = helpers.AppendWhereClause(where, searchClause)
+		args = append(args, search, like, like, like, like, like, like, like, like, like, like, like, like, like)
+	}
+
+	// Perform query with preloads and custom pagination scope
+	err = repository.Db.
+		Preload(clause.Associations).
+		Preload("Class.School").
+		Preload("Class.Specialty").
+		Preload("Class.Specialty.Section").
+		Preload("LevelDomain.School").
+		Preload("LevelDomain.Level").
+		Preload("LevelDomain.Domain").
+		Preload("LevelDomain.Domain.Department").
+		Preload("LevelDomain.Domain.Department.Faculty").
+		Scopes(
+			helpers.PaginationScopeV2(
+				repository.Db,
+				`SELECT DISTINCT report_tables.* 
+				FROM report_tables 
+				LEFT JOIN schools ON report_tables.school_id = schools.id
+				LEFT JOIN years ON report_tables.year_id = years.id
+				LEFT JOIN highschool_classes ON report_tables.class_id = highschool_classes.id
+				LEFT JOIN university_level_domains ON report_tables.level_domain_id = university_level_domains.id
+				LEFT JOIN university_levels ON university_level_domains.level_id = university_levels.id
+				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id`,
 				where,
 				pagination,
 				filter,

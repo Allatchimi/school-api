@@ -56,6 +56,7 @@ func DeploySchool(school *model.School) (err error) {
 		err = fmt.Errorf("%s", errMsg)
 		return
 	}
+	helpers.Logger.Info("API key generated successfully.", zap.String("API Key", apiKey))
 	// Generate app environment variables
 	envData := AppEnvData{
 		Name:           school.Config.WebsiteTitle,
