@@ -117,7 +117,6 @@ func InjectDependencies() {
 	var meetingRepo = meeting.NewRepository(config.DB)
 	var quizRepo = quiz.NewRepository(config.DB)
 	var resultRepo = result.NewRepository(config.DB)
-	var reportRepo = report.NewRepository(config.DB)
 	var scheduleRepo = schedule.NewRepository(config.DB)
 	var requestRepo = request.NewRepository(config.DB)
 	var paymentRepo = payment.NewRepository(config.DB)
@@ -216,30 +215,6 @@ func InjectDependencies() {
 			paymentRepo,
 		),
 	)
-	api.AllControllers.ReportController = report.NewController(
-		report.NewService(
-			reportRepo,
-			api.AllControllers.SchoolController.Service,
-			api.AllControllers.ResultController.Service,
-			api.AllControllers.ExamController.Service,
-			api.AllControllers.ClassController.Service,
-			api.AllControllers.UnitController.Service,
-			api.AllControllers.SequenceController.Service,
-			api.AllControllers.QuarterController.Service,
-			api.AllControllers.SemesterController.Service,
-		),
-	)
-	api.AllControllers.MonitoringController = monitoring.NewController(
-		monitoring.NewService(
-			api.AllControllers.UserController.Service,
-			api.AllControllers.SchoolController.Service,
-			api.AllControllers.DirectorController.Service,
-			api.AllControllers.TeacherController.Service,
-			api.AllControllers.StudentController.Service,
-			api.AllControllers.ParentController.Service,
-			api.AllControllers.ReportController.Service,
-		),
-	)
 
 	// Highschool
 	var sequenceRepo = sequence.NewRepository(config.DB)
@@ -328,6 +303,35 @@ func InjectDependencies() {
 			unitRepo,
 			api.AllControllers.SchoolController.Service,
 			api.AllControllers.MeetingController.Service,
+		),
+	)
+
+	// Report
+	var reportRepo = report.NewRepository(config.DB)
+	api.AllControllers.ReportController = report.NewController(
+		report.NewService(
+			reportRepo,
+			api.AllControllers.SchoolController.Service,
+			api.AllControllers.ResultController.Service,
+			api.AllControllers.ExamController.Service,
+			api.AllControllers.ClassController.Service,
+			api.AllControllers.UnitController.Service,
+			api.AllControllers.SequenceController.Service,
+			api.AllControllers.QuarterController.Service,
+			api.AllControllers.SemesterController.Service,
+		),
+	)
+
+	// Statistics
+	api.AllControllers.MonitoringController = monitoring.NewController(
+		monitoring.NewService(
+			api.AllControllers.UserController.Service,
+			api.AllControllers.SchoolController.Service,
+			api.AllControllers.DirectorController.Service,
+			api.AllControllers.TeacherController.Service,
+			api.AllControllers.StudentController.Service,
+			api.AllControllers.ParentController.Service,
+			api.AllControllers.ReportController.Service,
 		),
 	)
 
