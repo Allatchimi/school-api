@@ -42,7 +42,7 @@ type ExamTypeRequest struct {
 
 type GetAllRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
-	types.FilterTeacherStudentRequest
+	types.FilterTeacherStudentParentRequest
 	SequenceID    int64 `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
 	QuarterID     int64 `json:"quarterID" query:"quarterID" required:"false" doc:"Quarter id"`
 	SemesterID    int64 `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id"`

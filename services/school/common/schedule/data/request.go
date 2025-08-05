@@ -29,6 +29,8 @@ type ScheduleRequest struct {
 
 type GetAllRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
-	types.FilterTeacherStudentRequest
-	Type string `json:"type" query:"type" required:"false" doc:"Type"`
+	types.FilterTeacherStudentParentRequest
+	ClassID       int64  `json:"classID" query:"classID" required:"false" doc:"Class id"`
+	LevelDomainID int64  `json:"levelDomainID" query:"levelDomainID" required:"false" doc:"Level domain id"`
+	Type          string `json:"type" query:"type" required:"false" doc:"Type"`
 }

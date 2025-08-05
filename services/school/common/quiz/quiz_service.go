@@ -3,6 +3,7 @@ package quiz
 import (
 	"api/common/constants"
 	"api/common/types"
+	serviceHelperFeature "api/services/helper/feature"
 	"api/services/school/common/quiz/data"
 	"api/services/school/common/quiz/model"
 	"net/http"
@@ -400,6 +401,25 @@ func (service *Service) GetAll(
 	newRequest := *request
 	if ctxData.Jwt.SchoolID > 0 {
 		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Check feature
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		var okCheck bool
+		var errCheck error
+		newRequest.TeacherID,
+			newRequest.StudentID,
+			newRequest.ParentID,
+			okCheck,
+			errCheck = serviceHelperFeature.GetUserDataByFeatureName(ctxData)
+		if errCheck != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
+		if !okCheck {
+			return
+		}
 	}
 
 	// Get

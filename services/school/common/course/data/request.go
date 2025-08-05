@@ -44,6 +44,9 @@ type CourseCommentRequest struct {
 
 type GetAllRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
+	types.FilterTeacherStudentParentRequest
+	ClassID       int64 `json:"classID" query:"classID" required:"false" doc:"Class id"`
+	LevelDomainID int64 `json:"levelDomainID" query:"levelDomainID" required:"false" doc:"Level domain id"`
 }
 
 type GetAllCourseCommentRequest struct {

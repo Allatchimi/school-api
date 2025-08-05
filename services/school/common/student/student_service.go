@@ -11,7 +11,7 @@ import (
 	"api/common/types"
 	"api/common/utils"
 	"api/config"
-	serviceHelper "api/services/helper"
+	serviceHelperMessage "api/services/helper/message"
 	"api/services/school/common/school"
 	"api/services/school/common/student/data"
 	"api/services/school/common/student/model"
@@ -708,8 +708,8 @@ func (service *Service) UpdateStudentPreEnrollStatus(
 		msgTitle = fmt.Sprintf("Enrollment rejected for %s!", msgClassLevelDomain)
 		msgBody = fmt.Sprintf("Enrollment rejected for %s!", msgClassLevelDomain)
 	}
-	serviceHelper.SendMessage(
-		&serviceHelper.MessageRequest{
+	serviceHelperMessage.SendMessage(
+		&serviceHelperMessage.MessageRequest{
 			PusNotification: true,
 			Mail:            true,
 		},

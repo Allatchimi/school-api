@@ -260,6 +260,26 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "courses.unit_id = ?")
 			args = append(args, request.UnitID)
 		}
+		if request.ClassID > 0 {
+			where = helpers.AppendWhereClause(where, "highschool_class_subjects.class_id = ?")
+			args = append(args, request.ClassID)
+		}
+		if request.LevelDomainID > 0 {
+			where = helpers.AppendWhereClause(where, "university_units.level_domain_id = ?")
+			args = append(args, request.LevelDomainID)
+		}
+		if request.TeacherID > 0 {
+			where = helpers.AppendWhereClause(where, "teacher_class_subject_units.teacher_id = ?")
+			args = append(args, request.TeacherID)
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.student_id = ?")
+			args = append(args, request.StudentID)
+		}
+		if request.ParentID > 0 {
+			where = helpers.AppendWhereClause(where, "parent_students.parent_id = ?")
+			args = append(args, request.ParentID)
+		}
 	}
 
 	// Handle search filter securely
@@ -309,7 +329,21 @@ func (repository *Repository) GetAll(
 				LEFT JOIN years ON courses.year_id = years.id
 				LEFT JOIN highschool_class_subjects ON courses.class_subject_id = highschool_class_subjects.id
 				LEFT JOIN university_units ON courses.unit_id = university_units.id
-				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id`,
+				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id
+
+				LEFT JOIN teacher_class_subject_units ON courses.school_id = teacher_class_subject_units.school_id
+				AND (
+				(teacher_class_subject_units.class_subject_id IS NOT NULL AND courses.class_subject_id = teacher_class_subject_units.class_subject_id)
+				OR
+				(teacher_class_subject_units.unit_id IS NOT NULL AND courses.unit_id = teacher_class_subject_units.unit_id)
+				)
+				LEFT JOIN student_enrolls ON courses.school_id = student_enrolls.school_id
+				AND (
+				(student_enrolls.class_id IS NOT NULL AND highschool_class_subjects.class_id = student_enrolls.class_id)
+				OR
+				(student_enrolls.level_domain_id IS NOT NULL AND university_units.level_domain_id = student_enrolls.level_domain_id)
+				)
+				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,
 				filter,
@@ -349,16 +383,11 @@ func (repository *Repository) GetAllCourseComment(
 		// Securely append search conditions
 		searchClause := `(
 			CAST(comments.id AS TEXT) = ? OR
-			schools.name ILIKE ? OR
-			schools.type ILIKE ? OR
-			university_units.name ILIKE ? OR
-			university_units.description ILIKE ? OR
-			highschool_subjects.name ILIKE ? OR
-			highschool_subjects.description ILIKE ?
+			comments.comment ILIKE ?
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
-		args = append(args, search, like, like, like, like, like, like)
+		args = append(args, search, like)
 	}
 
 	// Perform query with preloads and custom pagination scope
@@ -371,12 +400,7 @@ func (repository *Repository) GetAllCourseComment(
 				repository.Db,
 				`SELECT DISTINCT comments.*
 				FROM course_comments comments
-				LEFT JOIN courses ON comments.course_id = courses.id
-				LEFT JOIN schools ON courses.school_id = schools.id
-				LEFT JOIN years ON courses.year_id = years.id
-				LEFT JOIN highschool_class_subjects ON courses.class_subject_id = highschool_class_subjects.id
-				LEFT JOIN university_units ON courses.unit_id = university_units.id
-				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id`,
+				LEFT JOIN courses ON comments.course_id = courses.id`,
 				where,
 				pagination,
 				filter,

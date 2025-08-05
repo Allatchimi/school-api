@@ -5,6 +5,7 @@ import (
 
 	"api/common/constants"
 	"api/common/types"
+	serviceHelperFeature "api/services/helper/feature"
 	"api/services/school/common/course/data"
 	"api/services/school/common/course/model"
 )
@@ -444,6 +445,25 @@ func (service *Service) GetAll(
 		newRequest.SchoolID = ctxData.Jwt.SchoolID
 	}
 
+	// Check feature
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		var okCheck bool
+		var errCheck error
+		newRequest.TeacherID,
+			newRequest.StudentID,
+			newRequest.ParentID,
+			okCheck,
+			errCheck = serviceHelperFeature.GetUserDataByFeatureName(ctxData)
+		if errCheck != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
+		if !okCheck {
+			return
+		}
+	}
+
 	// Get
 	result, err = service.Repository.GetAll(filter, pagination, &newRequest)
 	if err != nil {
@@ -468,7 +488,7 @@ func (service *Service) GetAllCourseComment(
 	newRequest.CourseID = courseID
 
 	// Get
-	result, err = service.Repository.GetAllCourseComment(filter, pagination, request)
+	result, err = service.Repository.GetAllCourseComment(filter, pagination, &newRequest)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

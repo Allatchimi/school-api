@@ -6,7 +6,7 @@ import (
 	"api/common/constants"
 	"api/common/types"
 	"api/common/utils"
-	serviceHelper "api/services/helper"
+	serviceHelperMessage "api/services/helper/message"
 	"api/services/others/communication/data"
 	"api/services/others/communication/model"
 	dataUser "api/services/user/user/data"
@@ -69,7 +69,7 @@ func (service *Service) Create(
 		if result == nil {
 			continue
 		}
-		users, _ := serviceHelper.UserService.Repository.GetAll(
+		users, _ := serviceHelperMessage.UserService.Repository.GetAll(
 			nil,
 			nil,
 			&dataUser.GetAllRequest{
@@ -79,8 +79,8 @@ func (service *Service) Create(
 		)
 
 		// Send message
-		serviceHelper.SendMessage(
-			&serviceHelper.MessageRequest{
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
 				PusNotification: true,
 				Telegram:        true,
 				Whatsapp:        true,

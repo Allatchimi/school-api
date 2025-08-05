@@ -30,8 +30,9 @@ type RequestStatusRequest struct {
 
 type GetAllRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
-	types.FilterTeacherStudentRequest
-	SequenceID int64  `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
-	StudentID  int64  `json:"studentID" query:"studentID" required:"false" doc:"Student id"`
-	Audience   string `json:"audience" query:"audience" required:"false" doc:"Audience"`
+	types.FilterTeacherStudentParentRequest
+	SequenceID    int64  `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
+	ClassID       int64  `json:"classID" query:"classID" required:"false" doc:"Class id"`
+	LevelDomainID int64  `json:"levelDomainID" query:"levelDomainID" required:"false" doc:"Level domain id"`
+	Audience      string `json:"audience" query:"audience" required:"false" doc:"Audience"`
 }

@@ -582,7 +582,23 @@ func (repository *Repository) GetAllStudentEnroll(
 				LEFT JOIN university_level_domains ON enrolls.level_domain_id = university_level_domains.id
 				LEFT JOIN students ON enrolls.student_id = students.id
 				LEFT JOIN university_levels ON university_level_domains.level_id = university_levels.id
-				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id`,
+				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id
+				LEFT JOIN highschool_class_subjects ON enrolls.class_id = highschool_class_subjects.class_id
+				LEFT JOIN university_units ON enrolls.level_domain_id = university_units.level_domain_id
+				
+				LEFT JOIN teacher_class_subject_units ON enrolls.school_id = teacher_class_subject_units.school_id
+				AND (
+				(teacher_class_subject_units.class_subject_id IS NOT NULL AND highschool_class_subjects.id = teacher_class_subject_units.class_subject_id)
+				OR
+				(teacher_class_subject_units.unit_id IS NOT NULL AND university_units.id = teacher_class_subject_units.unit_id)
+				)
+				LEFT JOIN student_enrolls ON enrolls.school_id = student_enrolls.school_id
+				AND (
+				(student_enrolls.class_id IS NOT NULL AND enrolls.class_id = student_enrolls.class_id)
+				OR
+				(student_enrolls.level_domain_id IS NOT NULL AND enrolls.level_domain_id = student_enrolls.level_domain_id)
+				)
+				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,
 				filter,

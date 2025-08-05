@@ -644,7 +644,11 @@ func (repository *Repository) GetAllReportEntry(
 				LEFT JOIN students ON report_entries.student_id = students.id
 				LEFT JOIN highschool_classes ON highschool_class_subjects.class_id = highschool_classes.id
 				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id
-				LEFT JOIN university_semesters ON university_units.semester_id = university_semesters.id`,
+				LEFT JOIN university_semesters ON university_units.semester_id = university_semesters.id
+				
+				LEFT JOIN teacher_class_subject_units ON courses.class_subject_id = teacher_class_subject_units.class_subject_id AND courses.unit_id = teacher_class_subject_units.unit_id
+				LEFT JOIN student_enrolls ON highschool_class_subjects.class_id = student_enrolls.class_id AND university_units.level_domain_id = student_enrolls.level_domain_id
+				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,
 				filter,
@@ -826,28 +830,40 @@ func (repository *Repository) GetAllReportAverage(
 	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, "report_tables.school_id = ?")
+			where = helpers.AppendWhereClause(where, "report_averages.school_id = ?")
 			args = append(args, request.SchoolID)
 		}
 		if request.YearID > 0 {
-			where = helpers.AppendWhereClause(where, "report_tables.year_id = ?")
+			where = helpers.AppendWhereClause(where, "report_averages.year_id = ?")
 			args = append(args, request.YearID)
 		}
 		if request.ClassID > 0 {
-			where = helpers.AppendWhereClause(where, "report_tables.class_id = ?")
+			where = helpers.AppendWhereClause(where, "report_averages.class_id = ?")
 			args = append(args, request.ClassID)
 		}
 		if request.LevelDomainID > 0 {
-			where = helpers.AppendWhereClause(where, "report_tables.level_domain = ?")
+			where = helpers.AppendWhereClause(where, "report_averages.level_domain = ?")
 			args = append(args, request.LevelDomainID)
 		}
 		if len(request.PeriodType) > 0 {
-			where = helpers.AppendWhereClause(where, "report_tables.period_type = ?")
+			where = helpers.AppendWhereClause(where, "report_averages.period_type = ?")
 			args = append(args, request.PeriodType)
 		}
 		if len(request.PeriodName) > 0 {
-			where = helpers.AppendWhereClause(where, "report_tables.period_name = ?")
+			where = helpers.AppendWhereClause(where, "report_averages.period_name = ?")
 			args = append(args, request.PeriodName)
+		}
+		if request.TeacherID > 0 {
+			where = helpers.AppendWhereClause(where, "teacher_class_subject_units.teacher_id = ?")
+			args = append(args, request.TeacherID)
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.student_id = ?")
+			args = append(args, request.StudentID)
+		}
+		if request.ParentID > 0 {
+			where = helpers.AppendWhereClause(where, "parent_students.parent_id = ?")
+			args = append(args, request.ParentID)
 		}
 	}
 
@@ -858,10 +874,10 @@ func (repository *Repository) GetAllReportAverage(
 
 		// Securely append search conditions
 		searchClause := `(
-			CAST(report_tables.id AS TEXT) = ? OR
-			report_tables.period_type ILIKE ? OR
-			report_tables.period_name ILIKE ? OR
-			report_tables.status ILIKE ? OR
+			CAST(report_averages.id AS TEXT) = ? OR
+			report_averages.period_type ILIKE ? OR
+			report_averages.period_name ILIKE ? OR
+			report_averages.status ILIKE ? OR
 			schools.name ILIKE ? OR
 			schools.type ILIKE ? OR
 			years.name ILIKE ? OR
@@ -891,14 +907,30 @@ func (repository *Repository) GetAllReportAverage(
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,
-				`SELECT DISTINCT report_tables.* 
-				FROM report_tables 
-				LEFT JOIN schools ON report_tables.school_id = schools.id
-				LEFT JOIN years ON report_tables.year_id = years.id
-				LEFT JOIN highschool_classes ON report_tables.class_id = highschool_classes.id
-				LEFT JOIN university_level_domains ON report_tables.level_domain_id = university_level_domains.id
+				`SELECT DISTINCT report_averages.* 
+				FROM report_averages 
+				LEFT JOIN schools ON report_averages.school_id = schools.id
+				LEFT JOIN years ON report_averages.year_id = years.id
+				LEFT JOIN highschool_classes ON report_averages.class_id = highschool_classes.id
+				LEFT JOIN university_level_domains ON report_averages.level_domain_id = university_level_domains.id
 				LEFT JOIN university_levels ON university_level_domains.level_id = university_levels.id
-				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id`,
+				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id
+				LEFT JOIN highschool_class_subjects ON report_averages.class_id = highschool_class_subjects.class_id
+				LEFT JOIN university_units ON report_averages.level_domain_id = university_units.level_domain_id
+				
+				LEFT JOIN teacher_class_subject_units ON report_averages.school_id = teacher_class_subject_units.school_id
+				AND (
+				(teacher_class_subject_units.class_subject_id IS NOT NULL AND highschool_class_subjects.id = teacher_class_subject_units.class_subject_id)
+				OR
+				(teacher_class_subject_units.unit_id IS NOT NULL AND university_units.id = teacher_class_subject_units.unit_id)
+				)
+				LEFT JOIN student_enrolls ON report_averages.school_id = student_enrolls.school_id
+				AND (
+				(student_enrolls.class_id IS NOT NULL AND report_averages.class_id = student_enrolls.class_id)
+				OR
+				(student_enrolls.level_domain_id IS NOT NULL AND report_averages.level_domain_id = student_enrolls.level_domain_id)
+				)
+				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,
 				filter,
@@ -943,6 +975,18 @@ func (repository *Repository) GetAllReportTable(
 			where = helpers.AppendWhereClause(where, "report_tables.period_name = ?")
 			args = append(args, request.PeriodName)
 		}
+		if request.TeacherID > 0 {
+			where = helpers.AppendWhereClause(where, "teacher_class_subject_units.teacher_id = ?")
+			args = append(args, request.TeacherID)
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.student_id = ?")
+			args = append(args, request.StudentID)
+		}
+		if request.ParentID > 0 {
+			where = helpers.AppendWhereClause(where, "parent_students.parent_id = ?")
+			args = append(args, request.ParentID)
+		}
 	}
 
 	// Handle search filter securely
@@ -992,7 +1036,24 @@ func (repository *Repository) GetAllReportTable(
 				LEFT JOIN highschool_classes ON report_tables.class_id = highschool_classes.id
 				LEFT JOIN university_level_domains ON report_tables.level_domain_id = university_level_domains.id
 				LEFT JOIN university_levels ON university_level_domains.level_id = university_levels.id
-				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id`,
+				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id
+				LEFT JOIN highschool_class_subjects ON report_tables.class_id = highschool_class_subjects.class_id
+				LEFT JOIN university_units ON report_tables.level_domain_id = university_units.level_domain_id
+				
+				
+				LEFT JOIN teacher_class_subject_units ON report_tables.school_id = teacher_class_subject_units.school_id
+				AND (
+				(teacher_class_subject_units.class_subject_id IS NOT NULL AND highschool_class_subjects.id = teacher_class_subject_units.class_subject_id)
+				OR
+				(teacher_class_subject_units.unit_id IS NOT NULL AND university_units.id = teacher_class_subject_units.unit_id)
+				)
+				LEFT JOIN student_enrolls ON report_tables.school_id = student_enrolls.school_id
+				AND (
+				(student_enrolls.class_id IS NOT NULL AND report_tables.class_id = student_enrolls.class_id)
+				OR
+				(student_enrolls.level_domain_id IS NOT NULL AND report_tables.level_domain_id = student_enrolls.level_domain_id)
+				)
+				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,
 				filter,
@@ -1032,6 +1093,18 @@ func (repository *Repository) GetAllReportTableHighschool(
 		if len(request.PeriodName) > 0 {
 			where = helpers.AppendWhereClause(where, "report_tables.period_name = ?")
 			args = append(args, request.PeriodName)
+		}
+		if request.TeacherID > 0 {
+			where = helpers.AppendWhereClause(where, "teacher_class_subject_units.teacher_id = ?")
+			args = append(args, request.TeacherID)
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.student_id = ?")
+			args = append(args, request.StudentID)
+		}
+		if request.ParentID > 0 {
+			where = helpers.AppendWhereClause(where, "parent_students.parent_id = ?")
+			args = append(args, request.ParentID)
 		}
 	}
 
@@ -1077,8 +1150,18 @@ func (repository *Repository) GetAllReportTableHighschool(
 				LEFT JOIN schools ON report_tables.school_id = schools.id
 				LEFT JOIN years ON report_tables.year_id = years.id
 				LEFT JOIN highschool_classes ON report_tables.class_id = highschool_classes.id
-				LEFT JOIN student_enrolls ON highschool_classes.id = student_enrolls.class_id
-				LEFT JOIN students ON student_enrolls.student_id = students.id`,
+				LEFT JOIN highschool_class_subjects ON report_tables.class_id = highschool_class_subjects.class_id
+				
+				
+				LEFT JOIN teacher_class_subject_units ON report_tables.school_id = teacher_class_subject_units.school_id
+				AND (
+				teacher_class_subject_units.class_subject_id IS NOT NULL AND highschool_class_subjects.id = teacher_class_subject_units.class_subject_id
+				)
+				LEFT JOIN student_enrolls ON report_tables.school_id = student_enrolls.school_id
+				AND (
+				student_enrolls.class_id IS NOT NULL AND report_tables.class_id = student_enrolls.class_id
+				)
+				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,
 				filter,
@@ -1118,6 +1201,18 @@ func (repository *Repository) GetAllReportTableUniversity(
 		if len(request.PeriodName) > 0 {
 			where = helpers.AppendWhereClause(where, "report_tables.period_name = ?")
 			args = append(args, request.PeriodName)
+		}
+		if request.TeacherID > 0 {
+			where = helpers.AppendWhereClause(where, "teacher_class_subject_units.teacher_id = ?")
+			args = append(args, request.TeacherID)
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.student_id = ?")
+			args = append(args, request.StudentID)
+		}
+		if request.ParentID > 0 {
+			where = helpers.AppendWhereClause(where, "parent_students.parent_id = ?")
+			args = append(args, request.ParentID)
 		}
 	}
 
@@ -1167,8 +1262,18 @@ func (repository *Repository) GetAllReportTableUniversity(
 				LEFT JOIN university_level_domains ON report_tables.level_domain_id = university_level_domains.id
 				LEFT JOIN university_levels ON university_level_domains.level_id = university_levels.id
 				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id
-				LEFT JOIN student_enrolls ON university_level_domains.id = student_enrolls.level_domain_id
-				LEFT JOIN students ON student_enrolls.student_id = students.id`,
+				LEFT JOIN university_units ON report_tables.level_domain_id = university_units.level_domain_id
+				
+				
+				LEFT JOIN teacher_class_subject_units ON report_tables.school_id = teacher_class_subject_units.school_id
+				AND (
+				teacher_class_subject_units.unit_id IS NOT NULL AND university_units.id = teacher_class_subject_units.unit_id
+				)
+				LEFT JOIN student_enrolls ON report_tables.school_id = student_enrolls.school_id
+				AND (
+				student_enrolls.level_domain_id IS NOT NULL AND report_tables.level_domain_id = student_enrolls.level_domain_id
+				)
+				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,
 				filter,

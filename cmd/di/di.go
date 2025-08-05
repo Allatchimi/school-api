@@ -3,7 +3,8 @@ package di
 import (
 	"api/cmd/api"
 	"api/config"
-	serviceHelper "api/services/helper"
+	serviceHelperFeature "api/services/helper/feature"
+	serviceHelperMessage "api/services/helper/message"
 	"api/services/others/communication"
 	"api/services/others/contact"
 	"api/services/others/health"
@@ -342,9 +343,14 @@ func InjectDependencies() {
 		),
 	)
 
-	// Permissions checker
-	serviceHelper.InjectServices(
+	// Service helpers
+	serviceHelperMessage.InjectServices(
 		api.AllControllers.UserController.Service,
 		api.AllControllers.NotificationController.Service,
+	)
+	serviceHelperFeature.InjectServices(
+		api.AllControllers.TeacherController.Service,
+		api.AllControllers.StudentController.Service,
+		api.AllControllers.ParentController.Service,
 	)
 }

@@ -92,4 +92,3 @@ Go to this link: [GitHub Action Secrets](https://github.com/EMENEC-FINANCE/schoo
 - `docker-ghcr-push`: Builds the Docker image and pushes it to the GitHub Container Registry.
 
 - `docker-ghcr-pull`: Pulls a specific image from the GitHub Container Registry.
-

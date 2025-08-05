@@ -1,4 +1,4 @@
-package serviceHelper
+package serviceHelperMessage
 
 import (
 	"api/common/helpers"

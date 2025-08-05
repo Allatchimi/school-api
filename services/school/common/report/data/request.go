@@ -64,7 +64,7 @@ type ReportConfigRequest struct {
 
 type GetAllReportEntryRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
-	types.FilterTeacherStudentRequest
+	types.FilterTeacherStudentParentRequest
 	SequenceID int64 `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
 	SemesterID int64 `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id"`
 }
@@ -84,14 +84,14 @@ type GetAllReportConfigRequest struct {
 
 type GetAllReportAverageRequest struct {
 	types.FilterSchoolYearClassLevelDomainRequest
-	types.FilterTeacherStudentRequest
+	types.FilterTeacherStudentParentRequest
 	PeriodType string `json:"periodType" query:"periodType" required:"false" doc:"Period type"`
 	PeriodName string `json:"periodName" query:"periodName" required:"false" doc:"Period name"`
 }
 
 type GetAllReportTableRequest struct {
 	types.FilterSchoolYearClassLevelDomainRequest
-	types.FilterTeacherStudentRequest
+	types.FilterTeacherStudentParentRequest
 	PeriodType string `json:"periodType" query:"periodType" required:"false" doc:"Period type"`
 	PeriodName string `json:"periodName" query:"periodName" required:"false" doc:"Period name"`
 }

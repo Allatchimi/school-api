@@ -116,6 +116,26 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "payments.student_enroll_id = ?")
 			args = append(args, request.StudentEnrollID)
 		}
+		if request.ClassID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.class_id = ?")
+			args = append(args, request.ClassID)
+		}
+		if request.LevelDomainID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.level_domain_id = ?")
+			args = append(args, request.LevelDomainID)
+		}
+		if request.TeacherID > 0 {
+			where = helpers.AppendWhereClause(where, "teacher_class_subject_units.teacher_id = ?")
+			args = append(args, request.TeacherID)
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.student_id = ?")
+			args = append(args, request.StudentID)
+		}
+		if request.ParentID > 0 {
+			where = helpers.AppendWhereClause(where, "parent_students.parent_id = ?")
+			args = append(args, request.ParentID)
+		}
 	}
 
 	// Handle search filter securely
@@ -167,7 +187,17 @@ func (repository *Repository) GetAll(
 				LEFT JOIN highschool_classes ON student_enrolls.class_id = highschool_classes.id
 				LEFT JOIN university_level_domains ON student_enrolls.level_domain_id = university_level_domains.id
 				LEFT JOIN university_levels ON university_level_domains.level_id = university_levels.id
-				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id`,
+				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id
+				LEFT JOIN highschool_class_subjects ON highschool_classes.id = highschool_class_subjects.class_id
+				LEFT JOIN university_units ON university_level_domains.id = university_units.level_domain_id
+				
+				LEFT JOIN teacher_class_subject_units ON payments.school_id = teacher_class_subject_units.school_id
+				AND (
+				(teacher_class_subject_units.class_subject_id IS NOT NULL AND highschool_class_subjects.id = teacher_class_subject_units.class_subject_id)
+				OR
+				(teacher_class_subject_units.unit_id IS NOT NULL AND university_units.id = teacher_class_subject_units.unit_id)
+				)
+				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,
 				filter,

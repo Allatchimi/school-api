@@ -1,6 +1,9 @@
 package data
 
-import "time"
+import (
+	"api/common/types"
+	"time"
+)
 
 type PaymentID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Academic payment id"`
@@ -19,7 +22,7 @@ type PaymentRequest struct {
 }
 
 type GetAllRequest struct {
-	SchoolID        int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
+	types.FilterSchoolYearClassLevelDomainRequest
+	types.FilterTeacherStudentParentRequest
 	StudentEnrollID int64 `json:"studentEnrollID" query:"studentEnrollID" required:"false" doc:"Student enroll id"`
-	StudentID       int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id"`
 }

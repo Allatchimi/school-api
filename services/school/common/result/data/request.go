@@ -27,7 +27,7 @@ type ResultTableRequest struct {
 
 type GetAllRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
-	types.FilterTeacherStudentRequest
+	types.FilterTeacherStudentParentRequest
 	SequenceID    int64 `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
 	QuarterID     int64 `json:"quarterID" query:"quarterID" required:"false" doc:"Quarter id"`
 	SemesterID    int64 `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id"`
@@ -39,6 +39,7 @@ type GetAllRequest struct {
 
 type GetAllResultTableRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
+	types.FilterTeacherStudentParentRequest
 	SequenceID int64 `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
 	SemesterID int64 `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id"`
 	ExamID     int64 `json:"examID" query:"examID" required:"false" doc:"Exam id"`

@@ -71,8 +71,7 @@ type GetAllRequest struct {
 
 type GetAllStudentEnrollRequest struct {
 	types.FilterSchoolYearClassLevelDomainRequest
-	StudentID int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id"`
-	TeacherID int64 `json:"teacherID" query:"teacherID" required:"false" doc:"Teacher id"`
+	types.FilterTeacherStudentParentRequest
 }
 
 type GetAllStudentPreEnrollRequest struct {

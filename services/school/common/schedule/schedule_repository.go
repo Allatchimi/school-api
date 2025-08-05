@@ -167,6 +167,26 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "schedules.unit_id = ?")
 			args = append(args, request.UnitID)
 		}
+		if request.ClassID > 0 {
+			where = helpers.AppendWhereClause(where, "highschool_class_subjects.class_id = ?")
+			args = append(args, request.ClassID)
+		}
+		if request.LevelDomainID > 0 {
+			where = helpers.AppendWhereClause(where, "university_units.level_domain_id = ?")
+			args = append(args, request.LevelDomainID)
+		}
+		if request.TeacherID > 0 {
+			where = helpers.AppendWhereClause(where, "teacher_class_subject_units.teacher_id = ?")
+			args = append(args, request.TeacherID)
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.student_id = ?")
+			args = append(args, request.StudentID)
+		}
+		if request.ParentID > 0 {
+			where = helpers.AppendWhereClause(where, "parent_students.parent_id = ?")
+			args = append(args, request.ParentID)
+		}
 		if len(request.Type) > 0 {
 			where = helpers.AppendWhereClause(where, "schedules.type = ?")
 			args = append(args, request.Type)
@@ -227,7 +247,21 @@ func (repository *Repository) GetAll(
 				LEFT JOIN highschool_class_subjects ON schedules.class_subject_id = highschool_class_subjects.id
 				LEFT JOIN university_units ON schedules.unit_id = university_units.id
 				LEFT JOIN highschool_classes ON highschool_class_subjects.class_id = highschool_classes.id
-				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id `,
+				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id
+				
+				LEFT JOIN teacher_class_subject_units ON schedules.school_id = teacher_class_subject_units.school_id
+				AND (
+				(teacher_class_subject_units.class_subject_id IS NOT NULL AND schedules.class_subject_id = teacher_class_subject_units.class_subject_id)
+				OR
+				(teacher_class_subject_units.unit_id IS NOT NULL AND schedules.unit_id = teacher_class_subject_units.unit_id)
+				)
+				LEFT JOIN student_enrolls ON schedules.school_id = student_enrolls.school_id
+				AND (
+				(student_enrolls.class_id IS NOT NULL AND highschool_class_subjects.class_id = student_enrolls.class_id)
+				OR
+				(student_enrolls.level_domain_id IS NOT NULL AND university_units.level_domain_id = student_enrolls.level_domain_id)
+				)
+				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,
 				filter,

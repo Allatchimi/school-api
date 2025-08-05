@@ -35,6 +35,5 @@ type GetAllRequest struct {
 
 type GetAllParentStudentRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
-	ParentID  int64 `json:"parentID" query:"parentID" required:"false" doc:"Parent id"`
-	StudentID int64 `json:"studentID" query:"studentID" required:"false" doc:"Student id"`
+	types.FilterTeacherStudentParentRequest
 }

@@ -262,6 +262,18 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "university_units.level_domain_id = ?")
 			args = append(args, request.LevelDomainID)
 		}
+		if request.TeacherID > 0 {
+			where = helpers.AppendWhereClause(where, "teacher_class_subject_units.teacher_id = ?")
+			args = append(args, request.TeacherID)
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.student_id = ?")
+			args = append(args, request.StudentID)
+		}
+		if request.ParentID > 0 {
+			where = helpers.AppendWhereClause(where, "parent_students.parent_id = ?")
+			args = append(args, request.ParentID)
+		}
 	}
 
 	// Handle search filter securely
@@ -318,7 +330,21 @@ func (repository *Repository) GetAll(
 				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id
 				LEFT JOIN university_level_domains ON university_units.level_domain_id = university_level_domains.id
 				LEFT JOIN university_levels ON university_level_domains.level_id = university_levels.id
-				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id `,
+				LEFT JOIN university_domains ON university_level_domains.domain_id = university_domains.id
+				
+				LEFT JOIN teacher_class_subject_units ON meetings.school_id = teacher_class_subject_units.school_id
+				AND (
+				(teacher_class_subject_units.class_subject_id IS NOT NULL AND meetings.class_subject_id = teacher_class_subject_units.class_subject_id)
+				OR
+				(teacher_class_subject_units.unit_id IS NOT NULL AND meetings.unit_id = teacher_class_subject_units.unit_id)
+				)
+				LEFT JOIN student_enrolls ON meetings.school_id = student_enrolls.school_id
+				AND (
+				(student_enrolls.class_id IS NOT NULL AND highschool_class_subjects.class_id = student_enrolls.class_id)
+				OR
+				(student_enrolls.level_domain_id IS NOT NULL AND university_units.level_domain_id = student_enrolls.level_domain_id)
+				)
+				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,
 				filter,
