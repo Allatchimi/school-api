@@ -18,6 +18,10 @@ type ReportConfigID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Report config id"`
 }
 
+type ReportTableID struct {
+	ID int64 `json:"id" path:"id" required:"true" doc:"Report table id"`
+}
+
 type ReportEntryRequest struct {
 	SchoolID      int64 `json:"schoolID" required:"true" doc:"School id"`
 	YearID        int64 `json:"yearID" required:"true" doc:"Year id"`
@@ -62,6 +66,10 @@ type ReportConfigRequest struct {
 	OnlyFailedExams               bool    `json:"onlyFailedExams" required:"false" doc:"Only failed exams"`
 }
 
+type ReportTableStatusRequest struct {
+	Status string `json:"status" required:"true" doc:"Status"`
+}
+
 type GetAllReportEntryRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
 	types.FilterTeacherStudentParentRequest
@@ -85,8 +93,9 @@ type GetAllReportConfigRequest struct {
 type GetAllReportAverageRequest struct {
 	types.FilterSchoolYearClassLevelDomainRequest
 	types.FilterTeacherStudentParentRequest
-	PeriodType string `json:"periodType" query:"periodType" required:"false" doc:"Period type"`
-	PeriodName string `json:"periodName" query:"periodName" required:"false" doc:"Period name"`
+	PeriodType  string `json:"periodType" query:"periodType" required:"false" doc:"Period type"`
+	PeriodName  string `json:"periodName" query:"periodName" required:"false" doc:"Period name"`
+	TableStatus string `json:"tableStatus" query:"tableStatus" required:"false" doc:"Table status"`
 }
 
 type GetAllReportTableRequest struct {
@@ -94,4 +103,5 @@ type GetAllReportTableRequest struct {
 	types.FilterTeacherStudentParentRequest
 	PeriodType string `json:"periodType" query:"periodType" required:"false" doc:"Period type"`
 	PeriodName string `json:"periodName" query:"periodName" required:"false" doc:"Period name"`
+	Status     string `json:"status" query:"status" required:"false" doc:"Status"`
 }

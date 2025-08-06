@@ -18,7 +18,7 @@ func SendMessage(botToken string, message string, users []model.User) (err error
 	go safeStartWorker(config.RedisClient, botToken)
 
 	for _, user := range users {
-		if user.Config.TelegramChatID < 1 {
+		if user.Config == nil || user.Config.TelegramChatID < 1 {
 			continue
 		}
 

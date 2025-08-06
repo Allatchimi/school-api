@@ -39,6 +39,7 @@ func SendMessage(
 	messageTitle string,
 	messageBody string,
 	school *modelSchool.School,
+	urlPath string,
 	users []modelUser.User,
 ) {
 	if request == nil || len(users) < 1 {
@@ -58,7 +59,7 @@ func SendMessage(
 					Title:     messageTitle,
 					Body:      messageBody,
 					Icon:      school.LogoUrl(),
-					Url:       school.WebsiteUrl(),
+					Url:       school.WebsiteUrl() + urlPath,
 					CreatedAt: createdAt,
 				},
 				nil,

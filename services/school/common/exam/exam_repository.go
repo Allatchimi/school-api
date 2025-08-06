@@ -1,6 +1,9 @@
 package exam
 
 import (
+	"fmt"
+	"strings"
+
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -370,6 +373,14 @@ func (repository *Repository) GetAll(
 		if request.ParentID > 0 {
 			where = helpers.AppendWhereClause(where, "parent_students.parent_id = ?")
 			args = append(args, request.ParentID)
+		}
+		if len(request.StatusList) > 0 {
+			placeholders := make([]string, len(request.StatusList))
+			for i := range request.StatusList {
+				placeholders[i] = "?"
+				args = append(args, request.StatusList[i])
+			}
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("exams.status IN (%s)", strings.Join(placeholders, ",")))
 		}
 	}
 

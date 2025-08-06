@@ -351,8 +351,28 @@ func (repository *Repository) GetAllTeacherClassSubjectUnit(
 	args := []any{}
 	if request != nil {
 		if request.SchoolID > 0 {
-			where = helpers.AppendWhereClause(where, "teachers.school_id = ?")
+			where = helpers.AppendWhereClause(where, "tcsu.school_id = ?")
 			args = append(args, request.SchoolID)
+		}
+		if request.YearID > 0 {
+			where = helpers.AppendWhereClause(where, "tcsu.year_id = ?")
+			args = append(args, request.YearID)
+		}
+		if request.ClassSubjectID > 0 {
+			where = helpers.AppendWhereClause(where, "tcsu.class_subject_id = ?")
+			args = append(args, request.ClassSubjectID)
+		}
+		if request.UnitID > 0 {
+			where = helpers.AppendWhereClause(where, "tcsu.unit_id = ?")
+			args = append(args, request.UnitID)
+		}
+		if request.ClassID > 0 {
+			where = helpers.AppendWhereClause(where, "highschool_class_subjects.class_id = ?")
+			args = append(args, request.ClassID)
+		}
+		if request.LevelDomainID > 0 {
+			where = helpers.AppendWhereClause(where, "university_units.level_domain_id = ?")
+			args = append(args, request.LevelDomainID)
 		}
 		if request.TeacherID > 0 {
 			where = helpers.AppendWhereClause(where, "tcsu.teacher_id = ?")

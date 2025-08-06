@@ -1,21 +1,29 @@
 package course
 
 import (
+	"fmt"
 	"net/http"
 
 	"api/common/constants"
 	"api/common/types"
 	serviceHelperFeature "api/services/helper/feature"
+	serviceHelperMessage "api/services/helper/message"
+	serviceHelperUser "api/services/helper/user"
 	"api/services/school/common/course/data"
 	"api/services/school/common/course/model"
+	dataStudent "api/services/school/common/student/data"
 )
 
 type Service struct {
 	Repository *Repository
 }
 
-func NewService(repository *Repository) *Service {
-	return &Service{Repository: repository}
+func NewService(
+	repository *Repository,
+) *Service {
+	return &Service{
+		Repository: repository,
+	}
 }
 
 const MODEL_NAME = "course"
@@ -107,6 +115,48 @@ func (service *Service) Create(
 		return
 	}
 	result = foundItem
+
+	// Send message
+	go func() {
+		stdEnrollReq := &dataStudent.GetAllStudentEnrollRequest{}
+		stdEnrollReq.SchoolID = result.SchoolID
+		stdEnrollReq.YearID = result.YearID
+		stdEnrollReq.ClassSubjectID = result.ClassSubjectID
+		stdEnrollReq.UnitID = result.UnitID
+		users, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(stdEnrollReq)
+		if errUsers != nil || len(users) < 1 {
+			return
+		}
+		var title, message string
+		title = "New published course"
+		switch result.School.Type {
+		case constants.SCHOOL_TYPE_HIGHSCHOOL:
+			if result.ClassSubject != nil && result.ClassSubject.Subject != nil {
+				message = fmt.Sprintf("%s %s: %s", result.ClassSubject.Subject.Name, result.ClassSubject.Class.Name, result.Title)
+			} else {
+				message = result.Title
+			}
+		case constants.SCHOOL_TYPE_UNIVERSITY:
+			if result.Unit != nil {
+				message = fmt.Sprintf("%s: %s", result.Unit.Name, result.Title)
+			} else {
+				message = result.Title
+			}
+		}
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				PusNotification: true,
+				Telegram:        true,
+				Whatsapp:        true,
+				Mail:            true,
+			},
+			title,
+			message,
+			result.School,
+			fmt.Sprintf("/dashboard/common/courses/%d", result.ID),
+			users,
+		)
+	}()
 	return
 }
 

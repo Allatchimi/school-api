@@ -24,7 +24,7 @@ type RequestRequest struct {
 }
 
 type RequestStatusRequest struct {
-	Status         string `json:"status" required:"true" doc:"Status"`
+	Status         string `json:"status" required:"true" enum:"initiated,pending,completed,rejected" doc:"Status"`
 	StatusFeedback string `json:"statusFeedback" required:"true" doc:"Status feedback"`
 }
 

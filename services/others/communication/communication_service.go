@@ -89,6 +89,7 @@ func (service *Service) Create(
 			request.Subject,
 			request.Message,
 			result.School,
+			"",
 			users,
 		)
 	}

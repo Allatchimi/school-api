@@ -18,7 +18,7 @@ func SendMessage(accessToken, phoneID string, message string, users []model.User
 	go safeStartWorker(config.RedisClient, accessToken, phoneID)
 
 	for _, user := range users {
-		if user.Config.WhatsappPhoneNumber < 1 {
+		if user.Config == nil || user.Config.WhatsappPhoneNumber < 1 {
 			continue
 		}
 

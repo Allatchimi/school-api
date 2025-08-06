@@ -28,20 +28,22 @@ type ResultTableRequest struct {
 type GetAllRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
 	types.FilterTeacherStudentParentRequest
-	SequenceID    int64 `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
-	QuarterID     int64 `json:"quarterID" query:"quarterID" required:"false" doc:"Quarter id"`
-	SemesterID    int64 `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id"`
-	ClassID       int64 `json:"classID" query:"classID" required:"false" doc:"Class id"`
-	LevelDomainID int64 `json:"levelDomainID" query:"levelDomainID" required:"false" doc:"Level domain id"`
-	ExamID        int64 `json:"examID" query:"examID" required:"false" doc:"Exam id"`
-	ExamTypeID    int64 `json:"examTypeID" query:"examTypeID" required:"false" doc:"Exam type id"`
+	SequenceID      int64    `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
+	QuarterID       int64    `json:"quarterID" query:"quarterID" required:"false" doc:"Quarter id"`
+	SemesterID      int64    `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id"`
+	ClassID         int64    `json:"classID" query:"classID" required:"false" doc:"Class id"`
+	LevelDomainID   int64    `json:"levelDomainID" query:"levelDomainID" required:"false" doc:"Level domain id"`
+	ExamID          int64    `json:"examID" query:"examID" required:"false" doc:"Exam id"`
+	ExamTypeID      int64    `json:"examTypeID" query:"examTypeID" required:"false" doc:"Exam type id"`
+	TableStatusList []string `json:"tableStatusList" query:"tableStatusList" required:"false" doc:"Table status list"`
 }
 
 type GetAllResultTableRequest struct {
 	types.FilterSchoolYearClassSubjectUnitRequest
 	types.FilterTeacherStudentParentRequest
-	SequenceID int64 `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
-	SemesterID int64 `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id"`
-	ExamID     int64 `json:"examID" query:"examID" required:"false" doc:"Exam id"`
-	ExamTypeID int64 `json:"examTypeID" query:"examTypeID" required:"false" doc:"Exam type id"`
+	SequenceID     int64    `json:"sequenceID" query:"sequenceID" required:"false" doc:"Sequence id"`
+	SemesterID     int64    `json:"semesterID" query:"semesterID" required:"false" doc:"Semester id"`
+	ExamID         int64    `json:"examID" query:"examID" required:"false" doc:"Exam id"`
+	ExamTypeID     int64    `json:"examTypeID" query:"examTypeID" required:"false" doc:"Exam type id"`
+	ExamStatusList []string `json:"examStatusList" query:"examStatusList" required:"false" doc:"Exam status list"`
 }

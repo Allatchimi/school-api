@@ -241,6 +241,28 @@ func (repository *Repository) UpdateReportTableByID(id int64, item *model.Report
 	return
 }
 
+func (repository *Repository) UpdateReportTableStatusByID(id int64, status string) (result *model.ReportTable, err error) {
+	// Update the item
+	fields := map[string]any{
+		"status": status,
+	}
+	err = repository.Db.
+		Model(&model.ReportTable{}).
+		Where("id = ?", id).
+		Updates(fields).Error
+	if err != nil {
+		return
+	}
+
+	// Find the updated item
+	result = &model.ReportTable{}
+	err = repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).
+		First(result).Error
+	return
+}
+
 func (repository *Repository) DeleteReportEntryByID(id int64) (int64, error) {
 	result := repository.Db.Where("id = ?", id).Delete(&model.ReportEntry{})
 	return result.RowsAffected, result.Error
@@ -362,6 +384,12 @@ func (repository *Repository) GetReportConfigByID(id int64) (*model.ReportConfig
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
+func (repository *Repository) GetReportTableByID(id int64) (*model.ReportTable, error) {
+	result := &model.ReportTable{}
+	return result, repository.Db.Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
+}
+
 func (repository *Repository) GetReportEntryByIDSchoolID(id int64, schoolID int64) (*model.ReportEntry, error) {
 	result := &model.ReportEntry{}
 	return result, repository.Db.
@@ -378,6 +406,24 @@ func (repository *Repository) GetReportEntryByIDSchoolID(id int64, schoolID int6
 		Preload("Unit.LevelDomain.Domain.Department").
 		Preload("Unit.LevelDomain.Domain.Department.Faculty").
 		Preload("Unit.Semester").
+		Where("id = ?", id).
+		Where("school_id = ?", schoolID).
+		Limit(1).Find(result).Error
+}
+
+func (repository *Repository) GetReportTableByIDSchoolID(id int64, schoolID int64) (*model.ReportTable, error) {
+	result := &model.ReportTable{}
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Preload("ClassSubject.Class").
+		Preload("Class.School").
+		Preload("Class.Specialty").
+		Preload("Class.Specialty.Section").
+		Preload("LevelDomain.School").
+		Preload("LevelDomain.Level").
+		Preload("LevelDomain.Domain").
+		Preload("LevelDomain.Domain.Department").
+		Preload("LevelDomain.Domain.Department.Faculty").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
@@ -646,7 +692,7 @@ func (repository *Repository) GetAllReportEntry(
 				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id
 				LEFT JOIN university_semesters ON university_units.semester_id = university_semesters.id
 				
-				LEFT JOIN teacher_class_subject_units ON courses.class_subject_id = teacher_class_subject_units.class_subject_id AND courses.unit_id = teacher_class_subject_units.unit_id
+				LEFT JOIN teacher_class_subject_units ON report_entries.class_subject_id = teacher_class_subject_units.class_subject_id AND report_entries.unit_id = teacher_class_subject_units.unit_id
 				LEFT JOIN student_enrolls ON highschool_class_subjects.class_id = student_enrolls.class_id AND university_units.level_domain_id = student_enrolls.level_domain_id
 				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,

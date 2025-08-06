@@ -1,21 +1,28 @@
 package report
 
 import (
+	"fmt"
 	"net/http"
 
 	"api/common/constants"
+	"api/common/helpers"
 	"api/common/types"
 	serviceHelperFeature "api/services/helper/feature"
+	serviceHelperMessage "api/services/helper/message"
+	serviceHelperUser "api/services/helper/user"
 	"api/services/school/common/exam"
 	"api/services/school/common/report/data"
 	"api/services/school/common/report/model"
 	"api/services/school/common/result"
 	"api/services/school/common/school"
+	dataStudent "api/services/school/common/student/data"
 	"api/services/school/highschool/class"
 	"api/services/school/highschool/quarter"
 	"api/services/school/highschool/sequence"
 	"api/services/school/university/semester"
 	"api/services/school/university/unit"
+
+	"go.uber.org/zap"
 )
 
 type Service struct {
@@ -389,6 +396,97 @@ func (service *Service) UpdateConfig(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+	return
+}
+
+func (service *Service) UpdateTableStatus(
+	ctxData *types.ContextData,
+	id int64,
+	request *data.ReportTableStatusRequest,
+) (result *model.ReportTable, errCode int, err error) {
+	// Check school
+	newRequest := *request
+
+	// Check if the item exists
+	var foundItem *model.ReportTable
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		foundItem, err = service.Repository.GetReportTableByIDSchoolID(id, ctxData.Jwt.SchoolID)
+	} else {
+		foundItem, err = service.Repository.GetReportTableByID(id)
+	}
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundItem == nil || foundItem.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Update
+	result, err = service.Repository.UpdateReportTableStatusByID(id, newRequest.Status)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+
+	// Send message to student
+	go func() {
+		if result == nil || result.Status == foundItem.Status {
+			return
+		}
+		if !(result.Status != constants.REPORT_TABLE_STATUS_PUBLISHED) {
+			return
+		}
+		// Students
+		studentEnrollReq := &dataStudent.GetAllStudentEnrollRequest{}
+		studentEnrollReq.SchoolID = result.SchoolID
+		studentEnrollReq.YearID = result.YearID
+		studentEnrollReq.ClassID = result.ClassID
+		studentEnrollReq.LevelDomainID = result.LevelDomainID
+		userStudents, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
+		if errUsers != nil {
+			helpers.Logger.Error("Error getting users for student enroll", zap.Error(errUsers))
+			return
+		}
+		var title, message string
+		switch result.Status {
+		case constants.REPORT_TABLE_STATUS_PUBLISHED:
+			title = "Report Published"
+		}
+		var periodFullName string
+		if result.PeriodType == constants.REPORT_PERIOD_TYPE_FINAL {
+			periodFullName = result.PeriodType
+		} else {
+			periodFullName = result.PeriodName
+		}
+		switch result.School.Type {
+		case constants.SCHOOL_TYPE_HIGHSCHOOL:
+			if result.Class != nil && result.Year != nil {
+				message = fmt.Sprintf("The report for class %s: %s %s has been %s", result.Class.Name, periodFullName, result.Year.Name, result.Status)
+			}
+		case constants.SCHOOL_TYPE_UNIVERSITY:
+			if result.LevelDomain != nil && result.LevelDomain.Level != nil && result.LevelDomain.Domain != nil && result.Year != nil {
+				message = fmt.Sprintf("The report for level domain %s %s: %s %s has been %s", result.LevelDomain.Level.Name, result.LevelDomain.Domain.Name, periodFullName, result.Year.Name, result.Status)
+			}
+		}
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				PusNotification: true,
+				Telegram:        true,
+				Whatsapp:        true,
+				Mail:            true,
+			},
+			title,
+			message,
+			result.School,
+			"",
+			userStudents,
+		)
+	}()
 	return
 }
 
@@ -777,6 +875,9 @@ func (service *Service) GetAllAverage(
 		if !okCheck {
 			return
 		}
+		if ctxData.User.Feature != constants.FeatureAdmin && ctxData.User.Feature != constants.FeatureDirector {
+			newRequest.TableStatus = constants.REPORT_TABLE_STATUS_PUBLISHED
+		}
 	}
 
 	// Get
@@ -798,6 +899,28 @@ func (service *Service) GetAllTable(
 	newRequest := *request
 	if ctxData.Jwt.SchoolID > 0 {
 		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Check feature
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		var okCheck bool
+		var errCheck error
+		newRequest.TeacherID,
+			newRequest.StudentID,
+			newRequest.ParentID,
+			okCheck,
+			errCheck = serviceHelperFeature.GetUserDataByFeatureName(ctxData)
+		if errCheck != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
+		if !okCheck {
+			return
+		}
+		if ctxData.User.Feature != constants.FeatureAdmin && ctxData.User.Feature != constants.FeatureDirector {
+			newRequest.Status = constants.REPORT_TABLE_STATUS_PUBLISHED
+		}
 	}
 
 	// Get school

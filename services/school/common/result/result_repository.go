@@ -1,6 +1,9 @@
 package result
 
 import (
+	"fmt"
+	"strings"
+
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -345,6 +348,14 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "parent_students.parent_id = ?")
 			args = append(args, request.ParentID)
 		}
+		if len(request.TableStatusList) > 0 {
+			placeholders := make([]string, len(request.TableStatusList))
+			for i := range request.TableStatusList {
+				placeholders[i] = "?"
+				args = append(args, request.TableStatusList[i])
+			}
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("result_tables.status IN (%s)", strings.Join(placeholders, ",")))
+		}
 	}
 
 	// Handle search filter securely
@@ -416,6 +427,7 @@ func (repository *Repository) GetAll(
 				LEFT JOIN exam_types ON exams.type_id = exam_types.id
 				LEFT JOIN highschool_classes ON highschool_class_subjects.class_id = highschool_classes.id
 				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id
+				LEFT JOIN result_tables ON results.school_id = result_tables.school_id AND exams.id = result_tables.exam_id 
 				
 				LEFT JOIN teacher_class_subject_units ON results.school_id = teacher_class_subject_units.school_id
 				AND (
@@ -481,6 +493,14 @@ func (repository *Repository) GetAllResultTable(
 		if request.ExamTypeID > 0 {
 			where = helpers.AppendWhereClause(where, "exams.type_id = ?")
 			args = append(args, request.ExamTypeID)
+		}
+		if len(request.ExamStatusList) > 0 {
+			placeholders := make([]string, len(request.ExamStatusList))
+			for i := range request.ExamStatusList {
+				placeholders[i] = "?"
+				args = append(args, request.ExamStatusList[i])
+			}
+			where = helpers.AppendWhereClause(where, fmt.Sprintf("result_tables.status IN (%s)", strings.Join(placeholders, ",")))
 		}
 	}
 

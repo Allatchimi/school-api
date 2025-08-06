@@ -115,6 +115,21 @@ func (controller *Controller) UpdateConfig(
 	return
 }
 
+func (controller *Controller) UpdateTableStatus(
+	ctx *context.Context,
+	input *struct {
+		data.ReportTableID
+		Body data.ReportTableStatusRequest
+	},
+) (result *model.ReportTable, errCode int, err error) {
+	result, errCode, err = controller.Service.UpdateTableStatus(
+		httpHelper.GetContextData(ctx),
+		input.ID,
+		&input.Body,
+	)
+	return
+}
+
 func (controller *Controller) DeleteGrade(
 	ctx *context.Context,
 	input *struct {

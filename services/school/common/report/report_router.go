@@ -335,6 +335,53 @@ func RegisterEndpoints(
 		},
 	)
 
+	// Update report table status with id
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "update-report-table-status",
+			Summary:     "Update report table status",
+			Description: "Update existing report table status with matching id and return the new report config object.",
+			Method:      http.MethodPut,
+			Path:        fmt.Sprintf("%s/tables/{id}/status", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {
+						fmt.Sprintf("%s,%s",
+							constants.FeatureAdmin,
+							constants.FeatureDirector,
+						), // Feature
+						tableName,                  // Table name
+						constants.PermissionUpdate, // Operation
+					},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				data.ReportTableID
+				Body data.ReportTableStatusRequest
+			},
+		) (*struct {
+			Body data.ReportTableResponse
+		}, error) {
+			result, errCode, err := controller.UpdateTableStatus(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+			return &struct {
+				Body data.ReportTableResponse
+			}{Body: *result.ToResponse()}, nil
+		},
+	)
+
 	// Delete report grade with id
 	huma.Register(
 		*humaApi,

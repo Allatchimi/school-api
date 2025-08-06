@@ -716,6 +716,7 @@ func (service *Service) UpdateStudentPreEnrollStatus(
 		msgTitle,
 		msgBody,
 		foundItem.School,
+		"",
 		[]modelUser.User{*foundItem.User},
 	)
 

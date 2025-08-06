@@ -1,15 +1,23 @@
 package result
 
 import (
+	"fmt"
 	"net/http"
 
 	"api/common/constants"
+	"api/common/helpers"
 	"api/common/types"
 	serviceHelperFeature "api/services/helper/feature"
+	serviceHelperMessage "api/services/helper/message"
+	serviceHelperUser "api/services/helper/user"
 	"api/services/school/common/exam"
+	dataParent "api/services/school/common/parent/data"
 	"api/services/school/common/result/data"
 	"api/services/school/common/result/model"
 	"api/services/school/common/student"
+	dataStudent "api/services/school/common/student/data"
+
+	"go.uber.org/zap"
 )
 
 type Service struct {
@@ -155,6 +163,64 @@ func (service *Service) CreateTable(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+
+	// Send message to students and parents
+	go func() {
+		if result.Exam == nil || result.Exam.ID < 1 || result.Status != constants.RESULT_STATUS_PUBLISHED {
+			return
+		}
+		// Students
+		studentEnrollReq := &dataStudent.GetAllStudentEnrollRequest{}
+		studentEnrollReq.SchoolID = result.SchoolID
+		studentEnrollReq.YearID = result.Exam.YearID
+		studentEnrollReq.ClassSubjectID = result.Exam.ClassSubjectID
+		studentEnrollReq.UnitID = result.Exam.UnitID
+		userStudents, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
+		if errUsers != nil {
+			helpers.Logger.Error("Error getting users for student enroll", zap.Error(errUsers))
+			return
+		}
+		// Parents
+		parentEnrollReq := &dataParent.GetAllParentStudentRequest{}
+		parentEnrollReq.SchoolID = result.SchoolID
+		parentEnrollReq.YearID = result.Exam.YearID
+		parentEnrollReq.ClassSubjectID = result.Exam.ClassSubjectID
+		parentEnrollReq.UnitID = result.Exam.UnitID
+		userParents, errUsers := serviceHelperUser.GetAllUserForParentStudent(parentEnrollReq)
+		if errUsers != nil {
+			helpers.Logger.Error("Error getting users for parent student", zap.Error(errUsers))
+			return
+		}
+		var title, message string
+		switch result.Status {
+		case constants.RESULT_STATUS_PUBLISHED:
+			title = "Available results for exam"
+		}
+		switch result.School.Type {
+		case constants.SCHOOL_TYPE_HIGHSCHOOL:
+			if result.Exam.ClassSubject != nil && result.Exam.ClassSubject.Subject != nil && result.Exam.ClassSubject.Class != nil && result.Exam.Type != nil && result.Exam.Sequence != nil && result.Exam.Year != nil {
+				message = fmt.Sprintf("Results exam for subject %s %s: %s %s %s", result.Exam.ClassSubject.Subject.Name, result.Exam.ClassSubject.Class.Name, result.Exam.Type.Name, result.Exam.Sequence.Name, result.Exam.Year.Name)
+			}
+		case constants.SCHOOL_TYPE_UNIVERSITY:
+			if result.Exam.Unit != nil && result.Exam.Type != nil && result.Exam.Unit.Semester != nil && result.Exam.Year != nil {
+				message = fmt.Sprintf("Results exam for unit %s: %s %s %s", result.Exam.Unit.Name, result.Exam.Type.Name, result.Exam.Unit.Semester.Name, result.Exam.Year.Name)
+			}
+		}
+		allUsers := append(userStudents, userParents...)
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				PusNotification: true,
+				Telegram:        true,
+				Whatsapp:        true,
+				Mail:            true,
+			},
+			title,
+			message,
+			result.School,
+			"",
+			allUsers,
+		)
+	}()
 	return
 }
 
@@ -317,6 +383,64 @@ func (service *Service) UpdateTable(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+
+	// Send message to students and parents
+	go func() {
+		if result.Exam == nil || result.Exam.ID < 1 || result.Status != constants.RESULT_STATUS_PUBLISHED || result.Status == foundItem.Status {
+			return
+		}
+		// Students
+		studentEnrollReq := &dataStudent.GetAllStudentEnrollRequest{}
+		studentEnrollReq.SchoolID = result.SchoolID
+		studentEnrollReq.YearID = result.Exam.YearID
+		studentEnrollReq.ClassSubjectID = result.Exam.ClassSubjectID
+		studentEnrollReq.UnitID = result.Exam.UnitID
+		userStudents, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
+		if errUsers != nil {
+			helpers.Logger.Error("Error getting users for student enroll", zap.Error(errUsers))
+			return
+		}
+		// Parents
+		parentEnrollReq := &dataParent.GetAllParentStudentRequest{}
+		parentEnrollReq.SchoolID = result.SchoolID
+		parentEnrollReq.YearID = result.Exam.YearID
+		parentEnrollReq.ClassSubjectID = result.Exam.ClassSubjectID
+		parentEnrollReq.UnitID = result.Exam.UnitID
+		userParents, errUsers := serviceHelperUser.GetAllUserForParentStudent(parentEnrollReq)
+		if errUsers != nil {
+			helpers.Logger.Error("Error getting users for parent student", zap.Error(errUsers))
+			return
+		}
+		var title, message string
+		switch result.Status {
+		case constants.RESULT_STATUS_PUBLISHED:
+			title = "Available results for exam"
+		}
+		switch result.School.Type {
+		case constants.SCHOOL_TYPE_HIGHSCHOOL:
+			if result.Exam.ClassSubject != nil && result.Exam.ClassSubject.Subject != nil && result.Exam.ClassSubject.Class != nil && result.Exam.Type != nil && result.Exam.Sequence != nil && result.Exam.Year != nil {
+				message = fmt.Sprintf("Results exam for subject %s %s: %s %s %s", result.Exam.ClassSubject.Subject.Name, result.Exam.ClassSubject.Class.Name, result.Exam.Type.Name, result.Exam.Sequence.Name, result.Exam.Year.Name)
+			}
+		case constants.SCHOOL_TYPE_UNIVERSITY:
+			if result.Exam.Unit != nil && result.Exam.Type != nil && result.Exam.Unit.Semester != nil && result.Exam.Year != nil {
+				message = fmt.Sprintf("Results exam for unit %s: %s %s %s", result.Exam.Unit.Name, result.Exam.Type.Name, result.Exam.Unit.Semester.Name, result.Exam.Year.Name)
+			}
+		}
+		allUsers := append(userStudents, userParents...)
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				PusNotification: true,
+				Telegram:        true,
+				Whatsapp:        true,
+				Mail:            true,
+			},
+			title,
+			message,
+			result.School,
+			"",
+			allUsers,
+		)
+	}()
 	return
 }
 
@@ -502,6 +626,9 @@ func (service *Service) GetAll(
 		if !okCheck {
 			return
 		}
+		if ctxData.User.Feature != constants.FeatureAdmin && ctxData.User.Feature != constants.FeatureDirector && ctxData.User.Feature != constants.FeatureTeacher {
+			newRequest.TableStatusList = []string{constants.EXAM_STATUS_ONLINE, constants.EXAM_STATUS_RESULTS}
+		}
 	}
 
 	// Get
@@ -541,6 +668,9 @@ func (service *Service) GetAllTable(
 		}
 		if !okCheck {
 			return
+		}
+		if ctxData.User.Feature != constants.FeatureAdmin && ctxData.User.Feature != constants.FeatureDirector && ctxData.User.Feature != constants.FeatureTeacher {
+			newRequest.ExamStatusList = []string{constants.EXAM_STATUS_ONLINE, constants.EXAM_STATUS_RESULTS}
 		}
 	}
 

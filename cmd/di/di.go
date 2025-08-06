@@ -5,6 +5,7 @@ import (
 	"api/config"
 	serviceHelperFeature "api/services/helper/feature"
 	serviceHelperMessage "api/services/helper/message"
+	serviceHelperUser "api/services/helper/user"
 	"api/services/others/communication"
 	"api/services/others/contact"
 	"api/services/others/health"
@@ -344,11 +345,17 @@ func InjectDependencies() {
 	)
 
 	// Service helpers
+	serviceHelperFeature.InjectServices(
+		api.AllControllers.TeacherController.Service,
+		api.AllControllers.StudentController.Service,
+		api.AllControllers.ParentController.Service,
+	)
 	serviceHelperMessage.InjectServices(
 		api.AllControllers.UserController.Service,
 		api.AllControllers.NotificationController.Service,
 	)
-	serviceHelperFeature.InjectServices(
+	serviceHelperUser.InjectServices(
+		api.AllControllers.UserController.Service,
 		api.AllControllers.TeacherController.Service,
 		api.AllControllers.StudentController.Service,
 		api.AllControllers.ParentController.Service,
