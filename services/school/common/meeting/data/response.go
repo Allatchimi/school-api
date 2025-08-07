@@ -9,9 +9,9 @@ import (
 
 type MeetingRoomResponse struct {
 	types.BaseGormModelResponse
-	School       *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	ClassSubject *dataClass.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Subject for specific class"`
-	Unit         *dataUnit.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
+	School       *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	ClassSubject *dataClass.ClassSubjectResponse  `json:"classSubject,omitempty" required:"false" doc:"Subject for specific class"`
+	Unit         *dataUnit.UnitResponse           `json:"unit,omitempty" required:"false" doc:"Unit"`
 
 	ApiRoomID string `json:"apiRoomID" required:"false" doc:"Room id for the API"`
 	IsRunning bool   `json:"isRunning" required:"false" doc:"Is running"`

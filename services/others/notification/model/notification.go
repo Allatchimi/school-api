@@ -11,7 +11,7 @@ type Notification struct {
 	types.BaseGormModel
 
 	UserID int64           `gorm:"default:null"`
-	User   *modelUser.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	User   *modelUser.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	Title   string     `gorm:"default:null"`
 	Message string     `gorm:"default:null"`

@@ -11,10 +11,10 @@ import (
 
 type CourseResponse struct {
 	types.BaseGormModelResponse
-	School       *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Year         *dataYear.YearResponse           `json:"year" required:"false" doc:"Year"`
-	ClassSubject *dataClass.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Subject for specific class"`
-	Unit         *dataUnit.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
+	School       *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	Year         *dataYear.YearResponse           `json:"year,omitempty" required:"false" doc:"Year"`
+	ClassSubject *dataClass.ClassSubjectResponse  `json:"classSubject,omitempty" required:"false" doc:"Subject for specific class"`
+	Unit         *dataUnit.UnitResponse           `json:"unit,omitempty" required:"false" doc:"Unit"`
 
 	Title       string `json:"title" required:"false" doc:"Title"`
 	Description string `json:"description" required:"false" doc:"Description"`
@@ -26,7 +26,7 @@ type CourseResponse struct {
 
 type CourseDocumentResponse struct {
 	types.BaseGormModelResponse
-	Course *CourseResponse `json:"course" required:"false" doc:"Course"`
+	Course *CourseResponse `json:"course,omitempty" required:"false" doc:"Course"`
 
 	Title       string `json:"title" required:"false" doc:"Title"`
 	Description string `json:"description" required:"false" doc:"Description"`
@@ -35,7 +35,7 @@ type CourseDocumentResponse struct {
 
 type CourseVideoResponse struct {
 	types.BaseGormModelResponse
-	Course *CourseResponse `json:"course" required:"false" doc:"Course"`
+	Course *CourseResponse `json:"course,omitempty" required:"false" doc:"Course"`
 
 	Title       string `json:"title" required:"false" doc:"Title"`
 	Description string `json:"description" required:"false" doc:"Description"`
@@ -44,8 +44,8 @@ type CourseVideoResponse struct {
 
 type CourseCommentResponse struct {
 	types.BaseGormModelResponse
-	Course *CourseResponse          `json:"course" required:"false" doc:"Course"`
-	User   *data.UserPublicResponse `json:"user" required:"false" doc:"User"`
+	Course *CourseResponse          `json:"course,omitempty" required:"false" doc:"Course"`
+	User   *data.UserPublicResponse `json:"user,omitempty" required:"false" doc:"User"`
 
 	Message   string `json:"message" required:"false" doc:"Message"`
 	Rate      int    `json:"rate" required:"false" doc:"Rate"`

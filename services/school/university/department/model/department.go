@@ -10,10 +10,10 @@ import (
 type UniversityDepartment struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
-	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	FacultyID int64                           `gorm:"default:null"`
-	Faculty   *modelFaculty.UniversityFaculty `gorm:"default:null;foreignKey:FacultyID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Faculty   *modelFaculty.UniversityFaculty `gorm:"default:null;foreignKey:FacultyID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	Name        string `gorm:"default:null"`
 	Description string `gorm:"default:null"`

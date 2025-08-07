@@ -11,13 +11,13 @@ import (
 type HighschoolClassSubject struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
-	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	ClassID int64            `gorm:"default:null"`
-	Class   *HighschoolClass `gorm:"default:null;foreignKey:ClassID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Class   *HighschoolClass `gorm:"default:null;foreignKey:ClassID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	SubjectID int64                           `gorm:"default:null"`
-	Subject   *modelSubject.HighschoolSubject `gorm:"default:null;foreignKey:SubjectID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Subject   *modelSubject.HighschoolSubject `gorm:"default:null;foreignKey:SubjectID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	Coefficient  int        `gorm:"default:1"`
 	Program      string     `gorm:"default null"`
@@ -36,8 +36,8 @@ func (item *HighschoolClassSubject) ToResponse() *data.ClassSubjectResponse {
 	resp.UpdatedAt = item.UpdatedAt
 
 	resp.School = item.School.ToPublicResponse()
-	resp.Subject = item.Subject.ToResponse()
 	resp.Class = item.Class.ToResponse()
+	resp.Subject = item.Subject.ToResponse()
 
 	resp.Coefficient = item.Coefficient
 	resp.Program = item.Program

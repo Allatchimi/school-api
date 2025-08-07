@@ -8,7 +8,7 @@ import (
 type CourseVideo struct {
 	types.BaseGormModel
 	CourseID int64   `gorm:"default:null"`
-	Course   *Course `gorm:"default:null;foreignKey:CourseID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Course   *Course `gorm:"default:null;foreignKey:CourseID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	Title       string `gorm:"default:null"`
 	Description string `gorm:"default:null"`

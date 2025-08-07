@@ -692,6 +692,9 @@ func (service *Service) GetAll(
 		if !okCheck {
 			return
 		}
+		if ctxData.User.Feature == constants.FeatureParent && newRequest.StudentID < 1 {
+			return
+		}
 		if ctxData.User.Feature != constants.FeatureAdmin && ctxData.User.Feature != constants.FeatureDirector && ctxData.User.Feature != constants.FeatureTeacher {
 			newRequest.StatusList = []string{constants.EXAM_STATUS_ONLINE, constants.EXAM_STATUS_RESULTS}
 		}

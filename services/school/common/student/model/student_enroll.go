@@ -13,19 +13,19 @@ type StudentEnroll struct {
 	types.BaseGormModel
 
 	SchoolID int64               `gorm:"default:null"`
-	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	YearID int64           `gorm:"default:null"`
-	Year   *modelYear.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Year   *modelYear.Year `gorm:"default:null;foreignKey:YearID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	ClassID int64                       `gorm:"default:null"`
-	Class   *modelClass.HighschoolClass `gorm:"default:null;foreignKey:ClassID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Class   *modelClass.HighschoolClass `gorm:"default:null;foreignKey:ClassID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	LevelDomainID int64                             `gorm:"default:null"`
-	LevelDomain   *modelLevel.UniversityLevelDomain `gorm:"default:null;foreignKey:LevelDomainID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	LevelDomain   *modelLevel.UniversityLevelDomain `gorm:"default:null;foreignKey:LevelDomainID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	StudentID int64    `gorm:"default:null"`
-	Student   *Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Student   *Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	Origin         string `gorm:"default:null"`
 	OriginFeedback string `gorm:"default:null;type:text"`

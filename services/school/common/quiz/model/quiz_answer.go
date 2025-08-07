@@ -10,7 +10,7 @@ import (
 type QuizAnswer struct {
 	types.BaseGormModel
 	StudentID int64                 `gorm:"default:null"`
-	Student   *modelStudent.Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Student   *modelStudent.Student `gorm:"default:null;foreignKey:StudentID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	QuizQuestionID int64         `gorm:"default:null"`
 	QuizQuestion   *QuizQuestion `gorm:"foreignKey:QuizQuestionID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`

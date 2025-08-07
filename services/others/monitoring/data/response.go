@@ -7,7 +7,6 @@ import (
 
 type MonitoringResponse struct {
 	Count                 *CountResponse                  `json:"count,omitempty" required:"false" doc:"Count of schools, directors, teachers, students, and parents"`
-	UsersByFeature        []UsersByFeatureResponse        `json:"usersByFeature,omitempty" required:"false" doc:"Users by feature"`
 	UsersByGender         []UsersByGenderResponse         `json:"usersByGender,omitempty" required:"false" doc:"Users by gender"`
 	UsersByMonth          []UsersByMonthResponse          `json:"usersByMonth,omitempty" required:"false" doc:"Users by month"`
 	UsersByYear           []UsersByYearResponse           `json:"usersByYear,omitempty" required:"false" doc:"Users by year"`
@@ -44,16 +43,16 @@ type UsersByYearResponse struct {
 
 type SuccessBySchoolResponse struct {
 	School  *dataSchool.SchoolResponse `json:"school,omitempty" required:"false" doc:"School"`
-	Success int64                      `json:"success,omitempty" required:"false" doc:"Success"`
+	Success int64                      `json:"success" required:"false" doc:"Success"`
 }
 
 type SuccessBySchoolGenderResponse struct {
 	School *dataSchool.SchoolResponse `json:"school,omitempty" required:"false" doc:"School"`
-	Boys   int64                      `json:"boys,omitempty" required:"false" doc:"Boys"`
-	Girls  int64                      `json:"girls,omitempty" required:"false" doc:"Girls"`
+	Boys   int64                      `json:"boys" required:"false" doc:"Boys"`
+	Girls  int64                      `json:"girls" required:"false" doc:"Girls"`
 }
 
 type MonitoringResponseList struct {
 	types.PaginatedResponse
-	Data *MonitoringResponse `json:"data" required:"false" doc:"Statistics"`
+	Data *MonitoringResponse `json:"data,omitempty" required:"false" doc:"Statistics"`
 }

@@ -10,10 +10,10 @@ import (
 type ResultTable struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
-	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	ExamID int64           `gorm:"default:null"`
-	Exam   *modelExam.Exam `gorm:"default:null;foreignKey:ExamID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Exam   *modelExam.Exam `gorm:"default:null;foreignKey:ExamID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	Status string `gorm:"default:null"`
 }

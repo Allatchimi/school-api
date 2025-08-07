@@ -22,12 +22,18 @@ func ConnectDatabase() error {
 		Env.PostgresSslMode,
 		Env.PostgresTimeZone,
 	)
+
 	var err error
 	DB, err = gorm.Open(
 		postgres.New(postgres.Config{
 			DSN:                  dsn,
 			PreferSimpleProtocol: true, // disables implicit prepared statement usage
 		}),
+		&gorm.Config{
+			NowFunc: func() time.Time {
+				return time.Now().UTC()
+			},
+		},
 	)
 	if err != nil {
 		return err

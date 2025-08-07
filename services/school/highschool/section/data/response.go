@@ -7,7 +7,7 @@ import (
 
 type SectionResponse struct {
 	types.BaseGormModelResponse
-	School *data.SchoolResponse `json:"school" doc:"School"`
+	School *data.SchoolResponse `json:"school,omitempty" doc:"School"`
 
 	Name        string `json:"name" required:"false" doc:"Section name"`
 	Description string `json:"description" required:"false" doc:"Section description"`

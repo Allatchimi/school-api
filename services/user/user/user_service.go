@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -113,6 +114,10 @@ func (service *Service) Create(
 	} else {
 		randomPassword = *password
 	}
+	fmt.Println()
+	fmt.Print("Generated password: ")
+	fmt.Print(randomPassword)
+	fmt.Println()
 	var activatedAt *time.Time = nil
 	if item.IsActivated {
 		tmpTime := time.Now()

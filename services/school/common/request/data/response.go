@@ -12,12 +12,12 @@ import (
 
 type RequestResponse struct {
 	types.BaseGormModelResponse
-	School       *schoolData.SchoolPublicResponse   `json:"school" required:"false" doc:"School"`
-	Year         *yearData.YearResponse             `json:"year" required:"false" doc:"Year"`
-	ClassSubject *classData.ClassSubjectResponse    `json:"classSubject" required:"false" doc:"Class subject"`
-	Sequence     *sequenceData.SequenceResponse     `json:"sequence" required:"false" doc:"Sequence"`
-	Unit         *unitData.UnitResponse             `json:"unit" required:"false" doc:"Unit"`
-	Student      *studentData.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
+	School       *schoolData.SchoolPublicResponse   `json:"school,omitempty" required:"false" doc:"School"`
+	Year         *yearData.YearResponse             `json:"year,omitempty" required:"false" doc:"Year"`
+	ClassSubject *classData.ClassSubjectResponse    `json:"classSubject,omitempty" required:"false" doc:"Class subject"`
+	Sequence     *sequenceData.SequenceResponse     `json:"sequence,omitempty" required:"false" doc:"Sequence"`
+	Unit         *unitData.UnitResponse             `json:"unit,omitempty" required:"false" doc:"Unit"`
+	Student      *studentData.StudentPublicResponse `json:"student,omitempty" required:"false" doc:"Student"`
 
 	Status         string `json:"status" required:"false" doc:"Status"`
 	StatusFeedback string `json:"statusFeedback" required:"false" doc:"Status feedback"`

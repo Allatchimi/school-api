@@ -10,10 +10,10 @@ import (
 
 type UserResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Role   *dataRole.RoleResponse           `json:"role" required:"false" doc:"Role" `
-	Info   *UserInfoResponse                `json:"info" required:"false" doc:"Additional user info(e.g. address, first name, last name, ...)" `
-	Config *UserConfigResponse              `json:"config" required:"false" doc:"Multiple factor authenticator enabled by the user"`
+	School *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	Role   *dataRole.RoleResponse           `json:"role,omitempty" required:"false" doc:"Role" `
+	Info   *UserInfoResponse                `json:"info,omitempty" required:"false" doc:"Additional user info(e.g. address, first name, last name, ...)" `
+	Config *UserConfigResponse              `json:"config,omitempty" required:"false" doc:"Multiple factor authenticator enabled by the user"`
 
 	Email          string     `json:"email" required:"false" doc:"Email"`
 	PhoneNumber    uint64     `json:"phoneNumber" required:"false" doc:"Phone number"`
@@ -27,9 +27,9 @@ type UserResponse struct {
 
 type UserPublicResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Role   *dataRole.RoleResponse           `json:"role" required:"false" doc:"Role"`
-	Info   *UserInfoPublicResponse          `json:"info" required:"false" doc:"Additional user info(e.g. address, first name, last name, ...)" `
+	School *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	Role   *dataRole.RoleResponse           `json:"role,omitempty" required:"false" doc:"Role"`
+	Info   *UserInfoPublicResponse          `json:"info,omitempty" required:"false" doc:"Additional user info(e.g. address, first name, last name, ...)" `
 
 	Email  string `json:"email" required:"false" doc:"Email"`
 	Status string `json:"status" required:"false" doc:"Status"`

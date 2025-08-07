@@ -12,11 +12,11 @@ import (
 
 type ScheduleResponse struct {
 	types.BaseGormModelResponse
-	School       *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Year         *dataYear.YearResponse           `json:"year" required:"false" doc:"Year"`
-	ClassSubject *dataClass.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Class subject"`
-	Sequence     *dataSequence.SequenceResponse   `json:"semester" required:"false" doc:"Sequence"`
-	Unit         *unitData.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
+	School       *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	Year         *dataYear.YearResponse           `json:"year,omitempty" required:"false" doc:"Year"`
+	ClassSubject *dataClass.ClassSubjectResponse  `json:"classSubject,omitempty" required:"false" doc:"Class subject"`
+	Sequence     *dataSequence.SequenceResponse   `json:"semester,omitempty" required:"false" doc:"Sequence"`
+	Unit         *unitData.UnitResponse           `json:"unit,omitempty" required:"false" doc:"Unit"`
 
 	IsCommon       bool       `json:"isCommon" required:"false" doc:"Is common"`
 	Type           string     `json:"type" required:"false" doc:"Type"`
@@ -32,9 +32,8 @@ type ScheduleResponse struct {
 }
 
 type ScheduleWeeklyViewResponse struct {
-	StartTime string `json:"startTime" required:"false" doc:"Start time"`
-	EndTime   string `json:"endTime" required:"false" doc:"End time"`
-
+	StartTime string             `json:"startTime" required:"false" doc:"Start time"`
+	EndTime   string             `json:"endTime" required:"false" doc:"End time"`
 	Monday    []ScheduleResponse `json:"monday" required:"false" doc:"Monday"`
 	Tuesday   []ScheduleResponse `json:"tuesday" required:"false" doc:"Tuesday"`
 	Wednesday []ScheduleResponse `json:"wednesday" required:"false" doc:"Wednesday"`

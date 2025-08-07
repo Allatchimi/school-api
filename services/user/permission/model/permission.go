@@ -9,7 +9,7 @@ import (
 type Permission struct {
 	types.BaseGormModel
 	RoleID int64           `gorm:"default:null"`
-	Role   *modelRole.Role `gorm:"default:null;foreignKey:RoleID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Role   *modelRole.Role `gorm:"default:null;foreignKey:RoleID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	TableName string `gorm:"default:null"`
 	Create    bool   `gorm:"default:null"`

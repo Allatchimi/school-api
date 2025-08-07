@@ -12,12 +12,12 @@ import (
 
 type ExamResponse struct {
 	types.BaseGormModelResponse
-	School       *schoolData.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Year         *yearData.YearResponse           `json:"year" required:"false" doc:"Year"`
-	ClassSubject *classData.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Class subject"`
-	Sequence     *sequenceData.SequenceResponse   `json:"sequence" required:"false" doc:"Sequence"`
-	Unit         *unitData.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
-	Type         *ExamTypeResponse                `json:"type" required:"false" doc:"Type"`
+	School       *schoolData.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	Year         *yearData.YearResponse           `json:"year,omitempty" required:"false" doc:"Year"`
+	ClassSubject *classData.ClassSubjectResponse  `json:"classSubject,omitempty" required:"false" doc:"Class subject"`
+	Sequence     *sequenceData.SequenceResponse   `json:"sequence,omitempty" required:"false" doc:"Sequence"`
+	Unit         *unitData.UnitResponse           `json:"unit,omitempty" required:"false" doc:"Unit"`
+	Type         *ExamTypeResponse                `json:"type,omitempty" required:"false" doc:"Type"`
 
 	Status          string     `json:"status" required:"false" doc:"Status"`
 	Notation        float64    `json:"notation" required:"false" doc:"Notation"`
@@ -35,7 +35,7 @@ type ExamResponse struct {
 
 type ExamTypeResponse struct {
 	types.BaseGormModelResponse
-	School *schoolData.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	School *schoolData.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
 
 	Name        string `json:"name" required:"false" doc:"Name"`
 	Description string `json:"description" required:"false" doc:"Description"`

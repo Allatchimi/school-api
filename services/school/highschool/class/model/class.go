@@ -11,10 +11,10 @@ import (
 type HighschoolClass struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
-	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	SpecialtyID int64                               `gorm:"default:null"`
-	Specialty   *modelSpecialty.HighschoolSpecialty `gorm:"default:null;foreignKey:SpecialtyID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Specialty   *modelSpecialty.HighschoolSpecialty `gorm:"default:null;foreignKey:SpecialtyID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	Name        string `gorm:"default:null"`
 	Description string `gorm:"default:null"`

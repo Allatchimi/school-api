@@ -251,7 +251,9 @@ func (repository *Repository) DeleteMultipleByID(list []int64) (result int64, er
 
 func (repository *Repository) GetByID(id int64) (*model.School, error) {
 	result := &model.School{}
-	return result, repository.Db.Preload(clause.Associations).Where("id = ?", id).Limit(1).Find(result).Error
+	return result, repository.Db.
+		Preload(clause.Associations).
+		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetUniqueObject(item *model.School) (*model.School, error) {

@@ -9,7 +9,7 @@ import (
 type HighschoolQuarter struct {
 	types.BaseGormModel
 	SchoolID int64         `gorm:"default:null"`
-	School   *model.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *model.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	Name        string `gorm:"default:null"`
 	Description string `gorm:"default:null"`

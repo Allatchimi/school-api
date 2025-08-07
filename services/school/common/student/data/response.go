@@ -12,27 +12,27 @@ import (
 
 type StudentResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	User   *dataUser.UserResponse           `json:"user" required:"false" doc:"User"`
+	School *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	User   *dataUser.UserResponse           `json:"user,omitempty" required:"false" doc:"User"`
 
 	UID string `json:"uid" required:"false" doc:"Student UID"`
 }
 
 type StudentPublicResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
+	School *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	User   *dataUser.UserPublicResponse     `json:"user,omitempty" required:"false" doc:"User"`
 
 	UID string `json:"uid" required:"false" doc:"Student UID"`
 }
 
 type StudentEnrollResponse struct {
 	types.BaseGormModelResponse
-	School      *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Year        *dataYear.YearResponse           `json:"year" required:"false" doc:"Year"`
-	Class       *dataClass.ClassResponse         `json:"class" required:"false" doc:"Class"`
-	LevelDomain *dataLevel.LevelDomainResponse   `json:"levelDomain" required:"false" doc:"Level for domain"`
-	Student     *StudentPublicResponse           `json:"student" required:"false" doc:"Student"`
+	School      *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	Year        *dataYear.YearResponse           `json:"year,omitempty" required:"false" doc:"Year"`
+	Class       *dataClass.ClassResponse         `json:"class,omitempty" required:"false" doc:"Class"`
+	LevelDomain *dataLevel.LevelDomainResponse   `json:"levelDomain,omitempty" required:"false" doc:"Level for domain"`
+	Student     *StudentPublicResponse           `json:"student,omitempty" required:"false" doc:"Student"`
 
 	Origin         string `json:"origin" required:"false" doc:"Origin"`
 	OriginFeedback string `json:"originFeedback" required:"false" doc:"Origin feedback"`
@@ -40,11 +40,11 @@ type StudentEnrollResponse struct {
 
 type StudentPreEnrollResponse struct {
 	types.BaseGormModelResponse
-	School      *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Year        *dataYear.YearResponse           `json:"year" required:"false" doc:"Year"`
-	Class       *dataClass.ClassResponse         `json:"class" required:"false" doc:"Class"`
-	LevelDomain *dataLevel.LevelDomainResponse   `json:"levelDomain" required:"false" doc:"Level for domain"`
-	User        *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
+	School      *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	Year        *dataYear.YearResponse           `json:"year,omitempty" required:"false" doc:"Year"`
+	Class       *dataClass.ClassResponse         `json:"class,omitempty" required:"false" doc:"Class"`
+	LevelDomain *dataLevel.LevelDomainResponse   `json:"levelDomain,omitempty" required:"false" doc:"Level for domain"`
+	User        *dataUser.UserPublicResponse     `json:"user,omitempty" required:"false" doc:"User"`
 
 	Birthday       *time.Time `json:"birthday" required:"false" doc:"Birthday date time"`
 	BirthLocation  string     `json:"birthLocation" required:"false" doc:"Birth location"`

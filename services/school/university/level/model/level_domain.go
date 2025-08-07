@@ -11,13 +11,13 @@ import (
 type UniversityLevelDomain struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
-	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	LevelID int64            `gorm:"default:null"`
-	Level   *UniversityLevel `gorm:"default:null;foreignKey:LevelID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Level   *UniversityLevel `gorm:"default:null;foreignKey:LevelID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	DomainID int64                         `gorm:"default:null"`
-	Domain   *modelDomain.UniversityDomain `gorm:"default:null;foreignKey:DomainID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Domain   *modelDomain.UniversityDomain `gorm:"default:null;foreignKey:DomainID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	Fees         float64    `gorm:"default null"`
 	Program      string     `gorm:"default null"`

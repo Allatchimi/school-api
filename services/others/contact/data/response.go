@@ -7,7 +7,7 @@ import (
 
 type ContactResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	School *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
 
 	Subject string `json:"subject" required:"true" doc:"Subject"`
 	Email   string `json:"email" required:"true" doc:"Email"`

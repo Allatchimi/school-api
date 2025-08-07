@@ -78,8 +78,8 @@ func (repository *Repository) UpdateClassSubjectByID(id int64, item *model.Highs
 	// Update the item
 	fields := map[string]any{
 		"school_id":  item.SchoolID,
-		"subject_id": item.SubjectID,
 		"class_id":   item.ClassID,
+		"subject_id": item.SubjectID,
 
 		"coefficient":  item.Coefficient,
 		"program":      item.Program,

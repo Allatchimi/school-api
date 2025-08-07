@@ -12,10 +12,10 @@ import (
 type Parent struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
-	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	UserID int64           `gorm:"default:null"`
-	User   *modelUser.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	User   *modelUser.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 }
 
 func (item *Parent) ToResponse() *data.ParentResponse {

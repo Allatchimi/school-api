@@ -8,7 +8,7 @@ import (
 
 type YearResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
+	School *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
 
 	Name      string     `json:"name" required:"false" doc:"Name"`
 	StartDate *time.Time `json:"startDate" required:"false" doc:"Academic year start date"`

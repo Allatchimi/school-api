@@ -113,8 +113,8 @@ func (service *Service) CreateClassSubject(
 	// Format request
 	item := &model.HighschoolClassSubject{
 		SchoolID:  newRequest.SchoolID,
-		SubjectID: newRequest.SubjectID,
 		ClassID:   newRequest.ClassID,
+		SubjectID: newRequest.SubjectID,
 
 		Coefficient:  newRequest.Coefficient,
 		Program:      newRequest.Program,
@@ -273,8 +273,8 @@ func (service *Service) UpdateClassSubject(
 	// Format request
 	item := &model.HighschoolClassSubject{
 		SchoolID:  newRequest.SchoolID,
-		SubjectID: newRequest.SubjectID,
 		ClassID:   newRequest.ClassID,
+		SubjectID: newRequest.SubjectID,
 
 		Coefficient:  newRequest.Coefficient,
 		Program:      newRequest.Program,

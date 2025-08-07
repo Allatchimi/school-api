@@ -8,6 +8,7 @@ import (
 	"api/services/user/user/data"
 	"api/services/user/user/model"
 	"fmt"
+	"time"
 
 	dataMonitoring "api/services/others/monitoring/data"
 
@@ -570,9 +571,15 @@ func (repository *Repository) CountAllGroupByGender(schoolID int64, result *[]da
 func (repository *Repository) CountAllGroupByMonth(schoolID int64, result *[]dataMonitoring.UsersByMonthResponse) (err error) {
 	query := repository.Db.Model(&model.User{})
 
+	currentYear := time.Now().Year()
+
 	if schoolID > 0 {
 		query = query.Where("users.school_id = ?", schoolID)
 	}
+
+	// Filtre sur l'année en cours
+	query = query.Where("EXTRACT(YEAR FROM created_at) = ?", currentYear)
+
 	err = query.
 		Select("EXTRACT(MONTH FROM created_at) AS month, COUNT(*) AS count").
 		Group("month").

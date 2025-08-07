@@ -8,8 +8,8 @@ import (
 
 type SpecialtyResponse struct {
 	types.BaseGormModelResponse
-	School  *dataSchool.SchoolPublicResponse `json:"school" doc:"School"`
-	Section *dataSection.SectionResponse     `json:"section" doc:"Section"`
+	School  *dataSchool.SchoolPublicResponse `json:"school,omitempty" doc:"School"`
+	Section *dataSection.SectionResponse     `json:"section,omitempty" doc:"Section"`
 
 	Name        string `json:"name" required:"false" doc:"Specialty name"`
 	Description string `json:"description" required:"false" doc:"Specialty description"`

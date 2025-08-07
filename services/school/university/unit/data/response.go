@@ -3,7 +3,6 @@ package data
 import (
 	"api/common/types"
 	dataSchool "api/services/school/common/school/data"
-	dataDomain "api/services/school/university/domain/data"
 	dataLevel "api/services/school/university/level/data"
 	dataSemester "api/services/school/university/semester/data"
 	"time"
@@ -11,10 +10,9 @@ import (
 
 type UnitResponse struct {
 	types.BaseGormModelResponse
-	School      *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Domain      *dataDomain.DomainResponse       `json:"domain" required:"false" doc:"Domain"`
-	LevelDomain *dataLevel.LevelDomainResponse   `json:"levelDomain" required:"false" doc:"Level domain"`
-	Semester    *dataSemester.SemesterResponse   `json:"semester" required:"false" doc:"Semester"`
+	School      *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	LevelDomain *dataLevel.LevelDomainResponse   `json:"levelDomain,omitempty" required:"false" doc:"Level domain"`
+	Semester    *dataSemester.SemesterResponse   `json:"semester,omitempty" required:"false" doc:"Semester"`
 
 	Name         string     `json:"name" required:"false" doc:"Name"`
 	Description  string     `json:"description" required:"false" doc:"Description"`

@@ -9,7 +9,7 @@ import (
 type ReportConfig struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
-	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	ReportGradeToFailID int64        `gorm:"default:null"`
 	ReportGradeToFail   *ReportGrade `gorm:"default:null;foreignKey:ReportGradeToFailID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`

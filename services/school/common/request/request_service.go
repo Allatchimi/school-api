@@ -393,6 +393,9 @@ func (service *Service) GetAll(
 		if !okCheck {
 			return
 		}
+		if ctxData.User.Feature == constants.FeatureTeacher {
+			newRequest.Audience = constants.REQUEST_AUDIENCE_TEACHER
+		}
 	}
 
 	// Get

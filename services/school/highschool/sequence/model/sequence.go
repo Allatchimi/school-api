@@ -10,10 +10,10 @@ import (
 type HighschoolSequence struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
-	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	QuarterID int64                           `gorm:"default:null"`
-	Quarter   *modelQuarter.HighschoolQuarter `gorm:"default:null;foreignKey:QuarterID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Quarter   *modelQuarter.HighschoolQuarter `gorm:"default:null;foreignKey:QuarterID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	Name        string `gorm:"default:null"`
 	Description string `gorm:"default:null"`

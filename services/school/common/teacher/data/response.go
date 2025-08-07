@@ -11,27 +11,27 @@ import (
 
 type TeacherResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	User   *dataUser.UserResponse           `json:"user" required:"false" doc:"User"`
+	School *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	User   *dataUser.UserResponse           `json:"user,omitempty" required:"false" doc:"User"`
 
 	UID string `json:"uid" required:"false" doc:"Teacher UID"`
 }
 
 type TeacherPublicResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
+	School *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	User   *dataUser.UserPublicResponse     `json:"user,omitempty" required:"false" doc:"User"`
 
 	UID string `json:"uid" required:"false" doc:"Teacher UID"`
 }
 
 type TeacherClassSubjectUnitResponse struct {
 	types.BaseGormModelResponse
-	School       *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Year         *dataYear.YearResponse           `json:"year" required:"false" doc:"Year"`
-	ClassSubject *dataClass.ClassSubjectResponse  `json:"classSubject" required:"false" doc:"Subject for specific class"`
-	Unit         *dataUnit.UnitResponse           `json:"unit" required:"false" doc:"Unit"`
-	Teacher      *TeacherPublicResponse           `json:"teacher" required:"false" doc:"Teacher"`
+	School       *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	Year         *dataYear.YearResponse           `json:"year,omitempty" required:"false" doc:"Year"`
+	ClassSubject *dataClass.ClassSubjectResponse  `json:"classSubject,omitempty" required:"false" doc:"Subject for specific class"`
+	Unit         *dataUnit.UnitResponse           `json:"unit,omitempty" required:"false" doc:"Unit"`
+	Teacher      *TeacherPublicResponse           `json:"teacher,omitempty" required:"false" doc:"Teacher"`
 }
 
 type TeacherResponseList struct {

@@ -2,33 +2,33 @@ package data
 
 // Login
 type LoginDevice struct {
-	Platform   string `json:"platform" required:"true" minLength:"2" maxLength:"30" doc:"Platform name"`
-	DeviceName string `json:"deviceName" required:"true" minLength:"2" maxLength:"50" doc:"Device name"`
-	App        string `json:"app" required:"true" minLength:"2" maxLength:"50" doc:"Application used to login"`
+	Platform   string `json:"platform" required:"true" doc:"Platform name"`
+	DeviceName string `json:"deviceName" required:"true" doc:"Device name"`
+	App        string `json:"app" required:"true" doc:"Application used to login"`
 }
 type LoginWithEmailRequest struct {
 	Email         string `json:"email" required:"true" format:"email" doc:"Email"`
-	Password      string `json:"password" required:"true" minLength:"8" maxLength:"30" doc:"Base64 encoded password"`
+	Password      string `json:"password" required:"true" doc:"Base64 encoded password"`
 	StayConnected bool   `json:"stayConnected" required:"false" doc:"Stay connected"`
 }
 type LoginWithProviderRequest struct {
-	Provider string `json:"provider" required:"true" doc:"Provider" minLength:"2" maxLength:"30"`
+	Provider string `json:"provider" required:"true" doc:"Provider"`
 	Token    string `json:"token" required:"true" doc:"Token" minLength:"3"`
 }
 type LoginRequest struct {
 	Email         string `json:"email" required:"true" format:"email" doc:"Email"`
-	Password      string `json:"password" required:"true" minLength:"8" maxLength:"30" doc:"Base64 encoded password"`
+	Password      string `json:"password" required:"true" doc:"Base64 encoded password"`
 	StayConnected bool   `json:"stayConnected" required:"false" doc:"Stay connected"`
 }
 
 // Register
 type RegisterWithEmailRequest struct {
 	Email    string `json:"email" required:"true" format:"email" doc:"Email"`
-	Password string `json:"password" required:"true" minLength:"8" maxLength:"30" doc:"Base64 encoded password"`
+	Password string `json:"password" required:"true" doc:"Base64 encoded password"`
 }
 type RegisterRequest struct {
 	Email    string `json:"email" required:"true" format:"email" doc:"Email"`
-	Password string `json:"password" required:"true" minLength:"8" maxLength:"30" doc:"Base64 encoded password"`
+	Password string `json:"password" required:"true" doc:"Base64 encoded password"`
 }
 
 // Activate account
@@ -50,5 +50,5 @@ type ForgotPasswordCodeRequest struct {
 }
 type ForgotPasswordNewPasswordRequest struct {
 	Token       string `json:"token" required:"true" minLength:"3" doc:"Received token on previous step"`
-	NewPassword string `json:"password" required:"true" minLength:"8" maxLength:"30" doc:"Base64 encoded password"`
+	NewPassword string `json:"password" required:"true" doc:"Base64 encoded password"`
 }

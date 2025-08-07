@@ -8,16 +8,16 @@ import (
 
 type ManagerResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	User   *dataUser.UserResponse           `json:"user" required:"false" doc:"User"`
+	School *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	User   *dataUser.UserResponse           `json:"user,omitempty" required:"false" doc:"User"`
 
 	UID string `json:"uid" required:"false" doc:"Manager UID"`
 }
 
 type ManagerPublicResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
+	School *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	User   *dataUser.UserPublicResponse     `json:"user,omitempty" required:"false" doc:"User"`
 
 	UID string `json:"uid" required:"false" doc:"Manager UID"`
 }

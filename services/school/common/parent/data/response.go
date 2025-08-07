@@ -9,21 +9,21 @@ import (
 
 type ParentResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	User   *dataUser.UserResponse           `json:"user" required:"false" doc:"User"`
+	School *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	User   *dataUser.UserResponse           `json:"user,omitempty" required:"false" doc:"User"`
 }
 
 type ParentPublicResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	User   *dataUser.UserPublicResponse     `json:"user" required:"false" doc:"User"`
+	School *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	User   *dataUser.UserPublicResponse     `json:"user,omitempty" required:"false" doc:"User"`
 }
 
 type ParentStudentResponse struct {
 	types.BaseGormModelResponse
-	School  *dataSchool.SchoolPublicResponse   `json:"school" required:"false" doc:"School"`
-	Parent  *ParentPublicResponse              `json:"parent" required:"false" doc:"Parent"`
-	Student *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
+	School  *dataSchool.SchoolPublicResponse   `json:"school,omitempty" required:"false" doc:"School"`
+	Parent  *ParentPublicResponse              `json:"parent,omitempty" required:"false" doc:"Parent"`
+	Student *dataStudent.StudentPublicResponse `json:"student,omitempty" required:"false" doc:"Student"`
 }
 
 type ParentResponseList struct {

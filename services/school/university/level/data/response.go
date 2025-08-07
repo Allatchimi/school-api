@@ -9,8 +9,8 @@ import (
 
 type LevelResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Domain *dataDomain.DomainResponse       `json:"domain" required:"false" doc:"Domain"`
+	School *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	Domain *dataDomain.DomainResponse       `json:"domain,omitempty" required:"false" doc:"Domain"`
 
 	Name        string `json:"name" required:"false" doc:"Level name"`
 	Description string `json:"description" required:"false" doc:"Level description"`
@@ -18,9 +18,9 @@ type LevelResponse struct {
 
 type LevelDomainResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Level  *LevelResponse                   `json:"level" required:"false" doc:"Level"`
-	Domain *dataDomain.DomainResponse       `json:"domain" required:"false" doc:"Domain"`
+	School *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	Level  *LevelResponse                   `json:"level,omitempty" required:"false" doc:"Level"`
+	Domain *dataDomain.DomainResponse       `json:"domain,omitempty" required:"false" doc:"Domain"`
 
 	Fees         float64    `json:"fees" required:"false" doc:"Level domain fees"`
 	Program      string     `json:"program" required:"false" doc:"Program"`

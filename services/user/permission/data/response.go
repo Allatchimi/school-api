@@ -7,7 +7,7 @@ import (
 
 type PermissionResponse struct {
 	types.BaseGormModelResponse
-	Role *data.RoleResponse `json:"role" required:"false" doc:"Role" `
+	Role *data.RoleResponse `json:"role,omitempty" required:"false" doc:"Role" `
 
 	TableName string `json:"tableName" required:"false" doc:"Table name"`
 	Create    bool   `json:"create" required:"false" doc:"Create permission"`

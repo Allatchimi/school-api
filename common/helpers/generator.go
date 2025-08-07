@@ -45,6 +45,10 @@ func GeneratePasswordFromUser(firstName string, lastName string, birthday *time.
 	}
 	var password string = ""
 	if len(firstName) > 0 && len(lastName) > 0 && formattedBirthday > 0 {
+		// Lowercase
+		firstName = strings.ToLower(firstName)
+		lastName = strings.ToLower(lastName)
+		// Format
 		password = fmt.Sprintf("%s%s%d", firstName, lastName, formattedBirthday)
 	}
 	return password

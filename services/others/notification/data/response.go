@@ -8,7 +8,7 @@ import (
 
 type NotificationResponse struct {
 	types.BaseGormModelResponse
-	User *dataUser.UserPublicResponse `json:"user" required:"false" doc:"User"`
+	User *dataUser.UserPublicResponse `json:"user,omitempty" required:"false" doc:"User"`
 
 	Title   string     `json:"title" required:"false" doc:"Title"`
 	Message string     `json:"message" required:"false" doc:"Message"`

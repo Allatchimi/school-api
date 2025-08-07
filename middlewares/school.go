@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/danielgtaylor/huma/v2"
 
@@ -11,14 +12,16 @@ import (
 )
 
 // ExtractSchoolTokenHeader Retrieves the school token from the current request context.
-func ExtractSchoolTokenHeaders(humaCtx *huma.Context) (string, string) {
-	return (*humaCtx).Header("X-School-Api-Key"), (*humaCtx).Header("X-School-Id")
+func ExtractSchoolTokenHeaders(humaCtx *huma.Context) (apiKey string, schoolID string) {
+	apiKey = (*humaCtx).Header("X-School-Api-Key")
+	schoolID = (*humaCtx).Header("X-School-Id")
+	return
 }
 
 // SetAuthContext Adds information such as JWT token and bearer token to context in order
 // to pass information to middleware, operation and handler func
-func SetSchoolContext(humaCtx *huma.Context, schoolIDStr string) *huma.Context {
-	ctxSchoolID := huma.WithValue(*humaCtx, constants.SchoolIDKey, schoolIDStr)
+func SetSchoolContext(humaCtx *huma.Context, schoolID int64) *huma.Context {
+	ctxSchoolID := huma.WithValue(*humaCtx, constants.SchoolIDKey, schoolID)
 	return &ctxSchoolID
 }
 
@@ -38,11 +41,11 @@ func SchoolMiddleware(api huma.API) func(huma.Context, func(huma.Context)) {
 			return
 		}
 
-		schoolToken, schoolIDStr := ExtractSchoolTokenHeaders(&humaCtx)
-		if len(schoolToken) > 0 && len(schoolIDStr) > 0 {
+		schoolApiKey, schoolIDStr := ExtractSchoolTokenHeaders(&humaCtx)
+		if len(schoolApiKey) > 0 && len(schoolIDStr) > 0 {
 			ok, errSecretProof := securityUtil.VerifyHMAC_SHA256_Base64URL(
 				schoolIDStr,
-				schoolToken,
+				schoolApiKey,
 				config.Env.SchoolApiSecret,
 			)
 			if errSecretProof != nil {
@@ -67,7 +70,18 @@ func SchoolMiddleware(api huma.API) func(huma.Context, func(huma.Context)) {
 
 			}
 
-			next(*SetSchoolContext(&humaCtx, schoolIDStr))
+			schoolID, err := strconv.ParseInt(schoolIDStr, 10, 64)
+			if err != nil {
+				_ = huma.WriteErr(
+					api,
+					humaCtx,
+					http.StatusInternalServerError,
+					constants.Http500ErrorMessage("").Error(),
+					constants.Http500ErrorMessage(""),
+				)
+				return
+			}
+			next(*SetSchoolContext(&humaCtx, schoolID))
 			return
 		}
 

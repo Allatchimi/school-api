@@ -9,17 +9,17 @@ import (
 
 type ResultResponse struct {
 	types.BaseGormModelResponse
-	School  *dataSchool.SchoolPublicResponse   `json:"school" required:"false" doc:"School"`
-	Exam    *examData.ExamResponse             `json:"exam" required:"true" doc:"Exam"`
-	Student *studentData.StudentPublicResponse `json:"student" required:"true" doc:"Student"`
+	School  *dataSchool.SchoolPublicResponse   `json:"school,omitempty" required:"false" doc:"School"`
+	Exam    *examData.ExamResponse             `json:"exam,omitempty" required:"true" doc:"Exam"`
+	Student *studentData.StudentPublicResponse `json:"student,omitempty" required:"true" doc:"Student"`
 
 	Score float64 `json:"score" required:"false" doc:"Score"`
 }
 
 type ResultTableResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolResponse `json:"school" required:"false" doc:"School"`
-	Exam   *examData.ExamResponse     `json:"exam" required:"true" doc:"Exam"`
+	School *dataSchool.SchoolResponse `json:"school,omitempty" required:"false" doc:"School"`
+	Exam   *examData.ExamResponse     `json:"exam,omitempty" required:"true" doc:"Exam"`
 
 	Status string `json:"status" required:"false" doc:"Status"`
 }

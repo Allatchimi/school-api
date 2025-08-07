@@ -10,8 +10,8 @@ import (
 
 type ClassResponse struct {
 	types.BaseGormModelResponse
-	School    *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Specialty *dataSpecialty.SpecialtyResponse `json:"specialty" required:"false" doc:"Specialty"`
+	School    *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	Specialty *dataSpecialty.SpecialtyResponse `json:"specialty,omitempty" required:"false" doc:"Specialty"`
 
 	Name         string     `json:"name" required:"false" doc:"Class name"`
 	Description  string     `json:"description" required:"false" doc:"Class description"`
@@ -24,9 +24,9 @@ type ClassResponse struct {
 
 type ClassSubjectResponse struct {
 	types.BaseGormModelResponse
-	School  *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Subject *dataSubject.SubjectResponse     `json:"subject" required:"false" doc:"Subject"`
-	Class   *ClassResponse                   `json:"class" required:"false" doc:"Class"`
+	School  *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	Class   *ClassResponse                   `json:"class,omitempty" required:"false" doc:"Class"`
+	Subject *dataSubject.SubjectResponse     `json:"subject,omitempty" required:"false" doc:"Subject"`
 
 	Coefficient  int        `json:"coefficient" required:"false" doc:"Coefficient"`
 	Program      string     `json:"program" required:"false" doc:"Program"`

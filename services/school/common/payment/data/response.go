@@ -9,8 +9,8 @@ import (
 
 type PaymentResponse struct {
 	types.BaseGormModelResponse
-	School        *dataSchool.SchoolPublicResponse   `json:"school" required:"false" doc:"School"`
-	StudentEnroll *dataStudent.StudentEnrollResponse `json:"studentEnroll" required:"false" doc:"Student Enroll"`
+	School        *dataSchool.SchoolPublicResponse   `json:"school,omitempty" required:"false" doc:"School"`
+	StudentEnroll *dataStudent.StudentEnrollResponse `json:"studentEnroll,omitempty" required:"false" doc:"Student Enroll"`
 
 	Amount   float64    `json:"amount" required:"false" doc:"Amount"`
 	Currency string     `json:"currency" required:"false" doc:"Currency"`

@@ -9,7 +9,7 @@ import (
 type CourseComment struct {
 	types.BaseGormModel
 	CourseID int64   `gorm:"default:null"`
-	Course   *Course `gorm:"default:null;foreignKey:CourseID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	Course   *Course `gorm:"default:null;foreignKey:CourseID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	UserID int64       `gorm:"default:null"`
 	User   *model.User `gorm:"default:null;foreignKey:UserID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`

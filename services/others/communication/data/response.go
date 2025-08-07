@@ -8,8 +8,8 @@ import (
 
 type CommunicationResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	Role   *dataRole.RoleResponse           `json:"role" required:"false" doc:"Role"`
+	School *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	Role   *dataRole.RoleResponse           `json:"role,omitempty" required:"false" doc:"Role"`
 
 	Subject  string `json:"subject" required:"true" doc:"Subject"`
 	Message  string `json:"message" required:"true" doc:"Message"`

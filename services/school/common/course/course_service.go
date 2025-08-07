@@ -512,6 +512,9 @@ func (service *Service) GetAll(
 		if !okCheck {
 			return
 		}
+		if ctxData.User.Feature == constants.FeatureParent && newRequest.StudentID < 1 {
+			return
+		}
 	}
 
 	// Get

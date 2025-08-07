@@ -7,7 +7,7 @@ import (
 
 type SchoolResponse struct {
 	SchoolPublicResponse
-	Config *SchoolConfigResponse `json:"config" required:"false" doc:"Configuration"`
+	Config *SchoolConfigResponse `json:"config,omitempty" required:"false" doc:"Configuration"`
 
 	DeploymentRequest  string `json:"deploymentRequest" required:"false" doc:"Deployment request"`
 	DeploymentStatus   string `json:"deploymentStatus" required:"false" doc:"Deployment status"`
@@ -17,7 +17,7 @@ type SchoolResponse struct {
 
 type SchoolPublicResponse struct {
 	types.BaseGormModelResponse
-	Info *SchoolInfoResponse `json:"info" required:"false" doc:"Information"`
+	Info *SchoolInfoResponse `json:"info,omitempty" required:"false" doc:"Information"`
 
 	Name         string `json:"name" required:"false" doc:"School name"`
 	Type         string `json:"type" required:"false" doc:"Type"`

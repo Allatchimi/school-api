@@ -15,7 +15,7 @@ import (
 type User struct {
 	types.BaseGormModel
 	SchoolID int64               `gorm:"default:null"`
-	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
+	School   *modelSchool.School `gorm:"default:null;foreignKey:SchoolID;references:ID;constraint:onDelete:CASCADE,onUpdate:CASCADE;"`
 
 	RoleID int64           `gorm:"default:null"`
 	Role   *modelRole.Role `gorm:"default:null;foreignKey:RoleID;references:ID;constraint:onDelete:SET NULL,onUpdate:CASCADE;"`
@@ -45,6 +45,19 @@ func (item *User) BeforeCreate(db *gorm.DB) (err error) {
 func (item *User) BeforeUpdate(db *gorm.DB) (err error) {
 	item.Password, err = securityUtil.EncodeArgon2id(item.Password)
 	return
+}
+
+func (u *User) BeforeDelete(db *gorm.DB) (err error) {
+	if u == nil {
+		return
+	}
+	if u.InfoID > 0 {
+		db.Unscoped().Delete(&UserInfo{}, u.InfoID)
+	}
+	if u.ConfigID > 0 {
+		db.Unscoped().Delete(&UserConfig{}, u.ConfigID)
+	}
+	return nil
 }
 
 func (item *User) ToResponse() *data.UserResponse {

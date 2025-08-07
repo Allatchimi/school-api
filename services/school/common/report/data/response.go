@@ -13,12 +13,12 @@ import (
 
 type ReportEntryResponse struct {
 	types.BaseGormModelResponse
-	School       *dataSchool.SchoolResponse         `json:"school" required:"false" doc:"School"`
-	Year         *dataYear.YearResponse             `json:"year" required:"false" doc:"Year"`
-	ClassSubject *dataClass.ClassSubjectResponse    `json:"classSubject" required:"false" doc:"Subject for specific class"`
-	Sequence     *dataSequence.SequenceResponse     `json:"sequence" required:"false" doc:"Sequence"`
-	Unit         *dataUnit.UnitResponse             `json:"unit" required:"false" doc:"Unit"`
-	Student      *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
+	School       *dataSchool.SchoolResponse         `json:"school,omitempty" required:"false" doc:"School"`
+	Year         *dataYear.YearResponse             `json:"year,omitempty" required:"false" doc:"Year"`
+	ClassSubject *dataClass.ClassSubjectResponse    `json:"classSubject,omitempty" required:"false" doc:"Subject for specific class"`
+	Sequence     *dataSequence.SequenceResponse     `json:"sequence,omitempty" required:"false" doc:"Sequence"`
+	Unit         *dataUnit.UnitResponse             `json:"unit,omitempty" required:"false" doc:"Unit"`
+	Student      *dataStudent.StudentPublicResponse `json:"student,omitempty" required:"false" doc:"Student"`
 
 	CoefficientCredit int     `json:"coefficientCredit" required:"false" doc:"Coefficient/credit"`
 	Score             float64 `json:"score" required:"false" doc:"Score"`
@@ -32,7 +32,7 @@ type ReportEntryResponse struct {
 
 type ReportGradeResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolResponse `json:"school" required:"false" doc:"School"`
+	School *dataSchool.SchoolResponse `json:"school,omitempty" required:"false" doc:"School"`
 
 	Type           string  `json:"type" required:"false" doc:"Type"`
 	Name           string  `json:"name" required:"true" doc:"Name"`
@@ -45,7 +45,7 @@ type ReportGradeResponse struct {
 
 type ReportCorrespondenceResponse struct {
 	types.BaseGormModelResponse
-	School *dataSchool.SchoolResponse `json:"school" required:"false" doc:"School"`
+	School *dataSchool.SchoolResponse `json:"school,omitempty" required:"false" doc:"School"`
 
 	Minimum        float64 `json:"minimum" required:"false" doc:"Minimum"`
 	Maximum        float64 `json:"maximum" required:"false" doc:"Maximum"`
@@ -56,8 +56,8 @@ type ReportCorrespondenceResponse struct {
 
 type ReportConfigResponse struct {
 	types.BaseGormModelResponse
-	School            *dataSchool.SchoolPublicResponse `json:"school" required:"false" doc:"School"`
-	ReportGradeToFail *ReportGradeResponse             `json:"reportGradeToFail" required:"false" doc:"Report grade to fail"`
+	School            *dataSchool.SchoolPublicResponse `json:"school,omitempty" required:"false" doc:"School"`
+	ReportGradeToFail *ReportGradeResponse             `json:"reportGradeToFail,omitempty" required:"false" doc:"Report grade to fail"`
 
 	NotationAverage               float64 `json:"notationAverage" required:"false" doc:"Notation average"`
 	NotationReport                float64 `json:"notationReport" required:"false" doc:"Notation report"`
@@ -67,11 +67,11 @@ type ReportConfigResponse struct {
 
 type ReportAverageResponse struct {
 	types.BaseGormModelResponse
-	School      *dataSchool.SchoolResponse         `json:"school" required:"false" doc:"School"`
-	Year        *dataYear.YearResponse             `json:"year" required:"false" doc:"Year"`
-	Class       *dataClass.ClassResponse           `json:"class" required:"false" doc:"Class"`
-	LevelDomain *dataLevel.LevelDomainResponse     `json:"levelDomain" required:"false" doc:"Level domain"`
-	Student     *dataStudent.StudentPublicResponse `json:"student" required:"false" doc:"Student"`
+	School      *dataSchool.SchoolResponse         `json:"school,omitempty" required:"false" doc:"School"`
+	Year        *dataYear.YearResponse             `json:"year,omitempty" required:"false" doc:"Year"`
+	Class       *dataClass.ClassResponse           `json:"class,omitempty" required:"false" doc:"Class"`
+	LevelDomain *dataLevel.LevelDomainResponse     `json:"levelDomain,omitempty" required:"false" doc:"Level domain"`
+	Student     *dataStudent.StudentPublicResponse `json:"student,omitempty" required:"false" doc:"Student"`
 
 	PeriodType                 string  `json:"periodType" required:"false" doc:"Period type"`
 	PeriodName                 string  `json:"periodName" required:"false" doc:"Period name"`
@@ -87,10 +87,10 @@ type ReportAverageResponse struct {
 
 type ReportTableResponse struct {
 	types.BaseGormModelResponse
-	School      *dataSchool.SchoolResponse     `json:"school" required:"false" doc:"School"`
-	Year        *dataYear.YearResponse         `json:"year" required:"false" doc:"Year"`
-	Class       *dataClass.ClassResponse       `json:"class" required:"false" doc:"Class"`
-	LevelDomain *dataLevel.LevelDomainResponse `json:"levelDomain" required:"false" doc:"Level domain"`
+	School      *dataSchool.SchoolResponse     `json:"school,omitempty" required:"false" doc:"School"`
+	Year        *dataYear.YearResponse         `json:"year,omitempty" required:"false" doc:"Year"`
+	Class       *dataClass.ClassResponse       `json:"class,omitempty" required:"false" doc:"Class"`
+	LevelDomain *dataLevel.LevelDomainResponse `json:"levelDomain,omitempty" required:"false" doc:"Level domain"`
 
 	PeriodType string `json:"periodType" required:"false" doc:"Period type"`
 	PeriodName string `json:"periodName" required:"false" doc:"Period name"`

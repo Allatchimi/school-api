@@ -279,6 +279,57 @@ func (service *Service) GetAll(
 		if !okCheck {
 			return
 		}
+		if ctxData.User.Feature == constants.FeatureParent && newRequest.StudentID < 1 {
+			return
+		}
+	}
+
+	// Get
+	result, err = service.Repository.GetAll(filter, pagination, &newRequest)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+	}
+	return
+}
+
+func (service *Service) GetAllWeeklyView(
+	ctxData *types.ContextData,
+	filter *types.Filter,
+	pagination *types.Pagination,
+	request *data.GetAllRequest,
+) (result []model.Schedule, errCode int, err error) {
+	// Check school
+	newRequest := *request
+	if ctxData.Jwt.SchoolID > 0 {
+		newRequest.SchoolID = ctxData.Jwt.SchoolID
+	}
+
+	// Check feature
+	if ctxData.User.Feature != constants.FeatureAdmin {
+		var okCheck bool
+		var errCheck error
+		newRequest.TeacherID,
+			newRequest.StudentID,
+			newRequest.ParentID,
+			okCheck,
+			errCheck = serviceHelperFeature.GetUserDataByFeatureName(ctxData)
+		if errCheck != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
+		if !okCheck {
+			return
+		}
+		if ctxData.User.Feature == constants.FeatureParent && newRequest.StudentID < 1 {
+			return
+		}
+	}
+	if ctxData.User.Feature == constants.FeatureAdmin || ctxData.User.Feature == constants.FeatureDirector {
+		if newRequest.ClassID < 1 && newRequest.LevelDomainID < 1 {
+			return
+		}
 	}
 
 	// Get
