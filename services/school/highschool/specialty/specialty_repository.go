@@ -96,14 +96,16 @@ func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.
 func (repository *Repository) GetUniqueObject(item *model.HighschoolSpecialty) (*model.HighschoolSpecialty, error) {
 	result := &model.HighschoolSpecialty{}
 	return result, repository.Db.Preload(clause.Associations).Where(&model.HighschoolSpecialty{
-		SchoolID: item.SchoolID,
-		Name:     item.Name,
+		SchoolID:  item.SchoolID,
+		SectionID: item.SectionID,
+		Name:      item.Name,
 	}).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) AreSameUniqueObjects(item1 *model.HighschoolSpecialty, item2 *model.HighschoolSpecialty) bool {
 	if item1 != nil && item2 != nil &&
 		(item1.SchoolID == item2.SchoolID &&
+			item1.SectionID == item2.SectionID &&
 			item1.Name == item2.Name) {
 		return true
 	}

@@ -54,8 +54,13 @@ func (repository *Repository) UpdateByID(id int64, item *model.HighschoolClass) 
 		"school_id":    item.SchoolID,
 		"specialty_id": item.SpecialtyID,
 
-		"name":        item.Name,
-		"description": item.Description,
+		"name":         item.Name,
+		"description":  item.Description,
+		"fees":         item.Fees,
+		"program":      item.Program,
+		"requirements": item.Requirements,
+		"is_valid":     item.IsValid,
+		"invalid_date": item.InvalidDate,
 	}
 	err = repository.Db.
 		Model(&model.HighschoolClass{}).
