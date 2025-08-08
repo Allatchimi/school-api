@@ -526,7 +526,7 @@ func RegisterEndpoints(
 		) (*struct {
 			Body data.ClassResponseList
 		}, error) {
-			result, errCode, err := controller.GetAll(&ctx, input)
+			result, errCode, err := controller.GetAllPublic(&ctx, input)
 			if err != nil {
 				return nil, huma.NewError(errCode, err.Error(), err)
 			}

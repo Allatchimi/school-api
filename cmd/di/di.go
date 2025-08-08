@@ -9,6 +9,7 @@ import (
 	"api/services/others/communication"
 	"api/services/others/contact"
 	"api/services/others/health"
+	"api/services/others/initialize"
 	"api/services/others/monitoring"
 	"api/services/others/notification"
 	"api/services/others/telegram"
@@ -341,6 +342,14 @@ func InjectDependencies() {
 	api.AllControllers.TelegramController = telegram.NewController(
 		telegram.NewService(
 			api.AllControllers.SchoolController.Service,
+		),
+	)
+
+	// Init
+	api.AllControllers.InitController = initialize.NewController(
+		initialize.NewService(
+			api.AllControllers.SchoolController.Service,
+			api.AllControllers.YearController.Service,
 		),
 	)
 

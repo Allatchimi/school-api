@@ -199,3 +199,24 @@ func (controller *Controller) GetAllLevelDomain(
 	result.Pagination = newPagination
 	return
 }
+
+func (controller *Controller) GetAllLevelDomainPublic(
+	ctx *context.Context,
+	input *struct {
+		types.Filter
+		types.PaginationRequest
+		data.GetAllLevelDomainRequest
+	},
+) (result *data.LevelDomainResponseList, errCode int, err error) {
+	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
+	levelList, errCode, err := controller.Service.GetAllLevelDomainPublic(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllLevelDomainRequest)
+	if err != nil {
+		return
+	}
+	result = &data.LevelDomainResponseList{
+		Data: model.ToLevelDomainResponseList(levelList),
+	}
+	result.Filter = newFilter
+	result.Pagination = newPagination
+	return
+}

@@ -103,17 +103,6 @@ func (controller *Controller) Get(
 	return
 }
 
-func (controller *Controller) GetPublic(
-	ctx *context.Context,
-) (result *model.School, errCode int, err error) {
-	school, errCode, err := controller.Service.GetPublic(httpHelper.GetContextData(ctx))
-	if err != nil {
-		return
-	}
-	result = school
-	return
-}
-
 func (controller *Controller) GetAll(
 	ctx *context.Context,
 	input *struct {

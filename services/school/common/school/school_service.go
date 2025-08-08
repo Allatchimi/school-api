@@ -436,23 +436,6 @@ func (service *Service) Get(
 	return
 }
 
-func (service *Service) GetPublic(
-	ctxData *types.ContextData,
-) (result *model.School, errCode int, err error) {
-	result, err = service.Repository.GetByID(ctxData.Jwt.SchoolID)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if result == nil || result.ID < 1 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(MODEL_NAME)
-		return
-	}
-	return
-}
-
 func (service *Service) GetAll(
 	ctxData *types.ContextData,
 	filter *types.Filter,

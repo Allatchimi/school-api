@@ -1,5 +1,7 @@
 package data
 
+import "api/common/types"
+
 type ClassID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Class id"`
 }
@@ -30,12 +32,16 @@ type ClassSubjectRequest struct {
 	IsValid      bool   `json:"isValid" required:"false" doc:"Is valid"`
 }
 type GetAllRequest struct {
+	types.FilterTeacherStudentParentRequest
 	SchoolID    int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
 	SpecialtyID int64 `json:"specialtyID" query:"specialtyID" required:"false" doc:"Specialty id"`
+	OnlyValid   bool  `json:"onlyValid" query:"onlyValid" required:"false" doc:"Only valid"`
 }
 
 type GetAllClassSubjectRequest struct {
+	types.FilterTeacherStudentParentRequest
 	SchoolID  int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
 	ClassID   int64 `json:"classID" query:"classID" required:"false" doc:"Class id"`
 	SubjectID int64 `json:"subjectID" query:"subjectID" required:"false" doc:"Subject id"`
+	OnlyValid bool  `json:"onlyValid" query:"onlyValid" required:"false" doc:"Only valid"`
 }

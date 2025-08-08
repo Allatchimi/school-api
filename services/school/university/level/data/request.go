@@ -1,5 +1,7 @@
 package data
 
+import "api/common/types"
+
 type LevelID struct {
 	ID int64 `json:"id" path:"id" required:"true" doc:"Level id"`
 }
@@ -31,7 +33,9 @@ type GetAllRequest struct {
 }
 
 type GetAllLevelDomainRequest struct {
-	SchoolID int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
-	LevelID  int64 `json:"levelID" query:"levelID" required:"false" doc:"Level id"`
-	DomainID int64 `json:"domainID" query:"domainID" required:"false" doc:"Domain id"`
+	types.FilterTeacherStudentParentRequest
+	SchoolID  int64 `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
+	LevelID   int64 `json:"levelID" query:"levelID" required:"false" doc:"Level id"`
+	DomainID  int64 `json:"domainID" query:"domainID" required:"false" doc:"Domain id"`
+	OnlyValid bool  `json:"onlyValid" query:"onlyValid" required:"false" doc:"Only valid"`
 }

@@ -237,6 +237,22 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "classes.specialty_id = ?")
 			args = append(args, request.SpecialtyID)
 		}
+		if request.OnlyValid {
+			where = helpers.AppendWhereClause(where, "classes.is_valid = ?")
+			args = append(args, true)
+		}
+		if request.TeacherID > 0 {
+			where = helpers.AppendWhereClause(where, "teacher_class_subject_units.teacher_id = ?")
+			args = append(args, request.TeacherID)
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.student_id = ?")
+			args = append(args, request.StudentID)
+		}
+		if request.ParentID > 0 {
+			where = helpers.AppendWhereClause(where, "parent_students.parent_id = ?")
+			args = append(args, request.ParentID)
+		}
 	}
 
 	// Handle search filter securely
@@ -269,7 +285,18 @@ func (repository *Repository) GetAll(
 				`SELECT DISTINCT classes.*
 				FROM highschool_classes classes
 				LEFT JOIN schools ON classes.school_id = schools.id
-				LEFT JOIN highschool_specialties ON classes.specialty_id = highschool_specialties.id`,
+				LEFT JOIN highschool_specialties ON classes.specialty_id = highschool_specialties.id
+				LEFT JOIN highschool_class_subjects ON classes.id = highschool_class_subjects.class_id
+
+				LEFT JOIN teacher_class_subject_units ON classes.school_id = teacher_class_subject_units.school_id
+				AND (
+				teacher_class_subject_units.class_subject_id IS NOT NULL AND highschool_class_subjects.id = teacher_class_subject_units.class_subject_id
+				)
+				LEFT JOIN student_enrolls ON classes.school_id = student_enrolls.school_id
+				AND (
+				student_enrolls.class_id IS NOT NULL AND classes.id = student_enrolls.class_id
+				)
+				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,
 				filter,
@@ -303,6 +330,22 @@ func (repository *Repository) GetAllClassSubject(
 			where = helpers.AppendWhereClause(where, "cs.subkect_id = ?")
 			args = append(args, request.SubjectID)
 		}
+		if request.OnlyValid {
+			where = helpers.AppendWhereClause(where, "cs.is_valid = ?")
+			args = append(args, true)
+		}
+		if request.TeacherID > 0 {
+			where = helpers.AppendWhereClause(where, "teacher_class_subject_units.teacher_id = ?")
+			args = append(args, request.TeacherID)
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.student_id = ?")
+			args = append(args, request.StudentID)
+		}
+		if request.ParentID > 0 {
+			where = helpers.AppendWhereClause(where, "parent_students.parent_id = ?")
+			args = append(args, request.ParentID)
+		}
 	}
 
 	// Handle search filter securely
@@ -335,9 +378,19 @@ func (repository *Repository) GetAllClassSubject(
 				repository.Db,
 				`SELECT DISTINCT cs.*
 				FROM highschool_class_subjects AS cs
+				LEFT JOIN schools ON cs.school_id = schools.id
 				LEFT JOIN highschool_classes ON cs.class_id = highschool_classes.id
 				LEFT JOIN highschool_subjects ON cs.subject_id = highschool_subjects.id
-				LEFT JOIN schools ON cs.school_id = schools.id`,
+
+				LEFT JOIN teacher_class_subject_units ON cs.school_id = teacher_class_subject_units.school_id
+				AND (
+				teacher_class_subject_units.class_subject_id IS NOT NULL AND cs.id = teacher_class_subject_units.class_subject_id
+				)
+				LEFT JOIN student_enrolls ON cs.school_id = student_enrolls.school_id
+				AND (
+				student_enrolls.class_id IS NOT NULL AND cs.class_id = student_enrolls.class_id
+				)
+				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,
 				filter,

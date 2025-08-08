@@ -179,6 +179,27 @@ func (controller *Controller) GetAll(
 	return
 }
 
+func (controller *Controller) GetAllPublic(
+	ctx *context.Context,
+	input *struct {
+		types.Filter
+		types.PaginationRequest
+		data.GetAllRequest
+	},
+) (result *data.ClassResponseList, errCode int, err error) {
+	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
+	classList, errCode, err := controller.Service.GetAllPublic(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllRequest)
+	if err != nil {
+		return
+	}
+	result = &data.ClassResponseList{
+		Data: model.ToResponseList(classList),
+	}
+	result.Filter = newFilter
+	result.Pagination = newPagination
+	return
+}
+
 func (controller *Controller) GetAllClassSubject(
 	ctx *context.Context,
 	input *struct {

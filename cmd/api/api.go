@@ -6,6 +6,7 @@ import (
 	"api/services/others/communication"
 	"api/services/others/contact"
 	"api/services/others/health"
+	"api/services/others/initialize"
 	"api/services/others/monitoring"
 	"api/services/others/notification"
 	"api/services/others/telegram"
@@ -93,6 +94,9 @@ type Controllers struct {
 
 	// Telegram
 	TelegramController *telegram.Controller
+
+	// Init
+	InitController *initialize.Controller
 }
 
 var AllControllers = &Controllers{}
@@ -147,4 +151,7 @@ func registerEndpoints(humaApi *huma.API) {
 
 	// Telegram
 	telegram.RegisterEndpoints(humaApi, AllControllers.TelegramController)
+
+	// Init
+	initialize.RegisterEndpoints(humaApi, AllControllers.InitController)
 }

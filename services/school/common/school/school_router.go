@@ -262,39 +262,6 @@ func RegisterEndpoints(
 			return &struct{ Body data.SchoolResponse }{Body: *result.ToResponse()}, nil
 		},
 	)
-	// Get school by id public
-	huma.Register(
-		*humaApi,
-		huma.Operation{
-			OperationID: "get-school-id-public",
-			Summary:     "Get school by id public",
-			Description: "Return one school with matching id public",
-			Method:      http.MethodGet,
-			Path:        fmt.Sprintf("%s/public", endpointConfig.Group),
-			Tags:        endpointConfig.Tag,
-			Security: []map[string][]string{
-				{
-					constants.SecuritySchemeSchoolToken: {},
-					constants.SecuritySchemeSchoolID:    {},
-				},
-			},
-			MaxBodyBytes:  constants.DefaultBodySize,
-			DefaultStatus: http.StatusOK,
-			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound},
-		},
-		func(
-			ctx context.Context,
-			input *struct{},
-		) (*struct{ Body data.SchoolResponse }, error) {
-			result, errCode, err := controller.GetPublic(&ctx)
-			if err != nil {
-				return nil, huma.NewError(errCode, err.Error(), err)
-			}
-			newResult := result
-			newResult.Config = nil
-			return &struct{ Body data.SchoolResponse }{Body: *newResult.ToResponse()}, nil
-		},
-	)
 
 	// Get all school
 	huma.Register(

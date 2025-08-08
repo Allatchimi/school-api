@@ -290,6 +290,22 @@ func (repository *Repository) GetAllLevelDomain(
 			where = helpers.AppendWhereClause(where, "ld.domain_id = ?")
 			args = append(args, request.DomainID)
 		}
+		if request.OnlyValid {
+			where = helpers.AppendWhereClause(where, "ld.is_valid = ?")
+			args = append(args, true)
+		}
+		if request.TeacherID > 0 {
+			where = helpers.AppendWhereClause(where, "teacher_class_subject_units.teacher_id = ?")
+			args = append(args, request.TeacherID)
+		}
+		if request.StudentID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.student_id = ?")
+			args = append(args, request.StudentID)
+		}
+		if request.ParentID > 0 {
+			where = helpers.AppendWhereClause(where, "parent_students.parent_id = ?")
+			args = append(args, request.ParentID)
+		}
 	}
 
 	// Handle search filter securely
@@ -322,9 +338,20 @@ func (repository *Repository) GetAllLevelDomain(
 				repository.Db,
 				`SELECT DISTINCT ld.*
 				FROM university_level_domains ld
+				LEFT JOIN schools ON ld.school_id = schools.id
 				LEFT JOIN university_levels ON ld.level_id = university_levels.id
 				LEFT JOIN university_domains ON ld.domain_id = university_domains.id
-				LEFT JOIN schools ON ld.school_id = schools.id`,
+				LEFT JOIN university_units ON ld.id = university_units.level_domain_id
+
+				LEFT JOIN teacher_class_subject_units ON ld.school_id = teacher_class_subject_units.school_id
+				AND (
+				teacher_class_subject_units.unit_id IS NOT NULL AND university_units.id = teacher_class_subject_units.unit_id
+				)
+				LEFT JOIN student_enrolls ON ld.school_id = student_enrolls.school_id
+				AND (
+				student_enrolls.level_domain_id IS NOT NULL AND ld.id = student_enrolls.level_domain_id
+				)
+				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,
 				filter,
