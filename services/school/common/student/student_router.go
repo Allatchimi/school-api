@@ -120,11 +120,7 @@ func RegisterEndpoints(
 				{
 					constants.SecuritySchemeSchoolToken: {},
 					constants.SecuritySchemeSchoolID:    {},
-					constants.SecuritySchemeBearerToken: {
-						fmt.Sprintf("%s",
-							constants.FeatureDefault,
-						), // Feature
-					},
+					constants.SecuritySchemeBearerToken: {},
 				},
 			},
 			MaxBodyBytes:  constants.DefaultBodySize,

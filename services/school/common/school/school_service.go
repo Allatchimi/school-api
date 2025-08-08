@@ -8,6 +8,7 @@ import (
 	deploymentHelper "api/common/helpers/deployment"
 	"api/common/types"
 	"api/common/utils"
+	serviceHelperMessage "api/services/helper/message"
 	"api/services/school/common/school/data"
 	"api/services/school/common/school/model"
 )
@@ -291,12 +292,49 @@ func (service *Service) UpdateDeploymentStatus(
 	}
 
 	// Update status
-	_, err = service.Repository.UpdateDeploymentStatusByID(id, request)
+	updatedItem, err := service.Repository.UpdateDeploymentStatusByID(id, request)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+
+	// Send message
+	go func() {
+		users, errUsers := serviceHelperUser.GetAllUserByFeature(constants.FeatureAdmin)
+		if errUsers != nil || len(users) < 1 {
+			return
+		}
+		var title, message string
+		title = "New published course"
+		switch updatedItem.Status {
+		case constants.DEPLOYMENT_STATUS_FAILED:
+			if result.ClassSubject != nil && result.ClassSubject.Subject != nil {
+				message = fmt.Sprintf("%s %s: %s", result.ClassSubject.Subject.Name, result.ClassSubject.Class.Name, result.Title)
+			} else {
+				message = result.Title
+			}
+		case constants.DEPLOYMENT_STATUS_SUCCESSFUL:
+			if result.Unit != nil {
+				message = fmt.Sprintf("%s: %s", result.Unit.Name, result.Title)
+			} else {
+				message = result.Title
+			}
+		}
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				PusNotification: true,
+				Telegram:        true,
+				Whatsapp:        true,
+				Mail:            true,
+			},
+			title,
+			message,
+			result.School,
+			fmt.Sprintf("/dashboard/common/courses/%d", result.ID),
+			users,
+		)
+	}()
 	return
 }
 

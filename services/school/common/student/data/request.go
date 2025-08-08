@@ -52,7 +52,7 @@ type StudentPreEnrollRequest struct {
 	LastName      string     `json:"lastName" required:"true" max:"30" doc:"Last name"`
 	Birthday      *time.Time `json:"birthday" required:"true" doc:"Birthday"`
 	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
-	Document1     string     `json:"document1" required:"true" doc:"Document1"`
+	Document1     string     `json:"document1" required:"false" doc:"Document1"`
 	Document2     string     `json:"document2" required:"false" doc:"Document2"`
 	Document3     string     `json:"document3" required:"false" doc:"Document3"`
 	Document4     string     `json:"document4" required:"false" doc:"Document4"`

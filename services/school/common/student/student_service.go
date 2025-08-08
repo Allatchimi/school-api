@@ -286,6 +286,48 @@ func (service *Service) CreateStudentPreEnroll(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+	if result == nil || result.ID < 1 {
+		return
+	}
+
+	// get pre enroll
+	foundItem, err := service.Repository.GetStudentPreEnrollByID(result.ID)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundItem == nil || foundItem.ID < 1 {
+		return
+	}
+
+	// Send message
+	var msgTitle, msgBody, msgClassLevelDomain string
+	if foundItem.School.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
+		msgClassLevelDomain = fmt.Sprintf("class %s", foundItem.Class.Name)
+	} else {
+		msgClassLevelDomain = fmt.Sprintf("level domain %s %s", foundItem.LevelDomain.Level.Name, foundItem.LevelDomain.Domain.Name)
+	}
+	switch foundItem.Status {
+	case constants.STUDENT_PRE_ENROLL_STATUS_INITIATED:
+		msgTitle = fmt.Sprintf("Your enrollment for %s!", msgClassLevelDomain)
+		msgBody = fmt.Sprintf(`
+		Hi %s %s and welcome to %s! 
+		We have received your enrollment request for %s. 
+		We will review your request and get back to you as soon as possible.
+		Thank you!`, foundItem.FirstName, foundItem.LastName, foundItem.School.Info.FullName, msgClassLevelDomain)
+	}
+	serviceHelperMessage.SendMessage(
+		&serviceHelperMessage.MessageRequest{
+			PusNotification: true,
+			Mail:            true,
+		},
+		msgTitle,
+		msgBody,
+		foundItem.School,
+		"",
+		[]modelUser.User{*foundItem.User},
+	)
 	return
 }
 
@@ -699,14 +741,14 @@ func (service *Service) UpdateStudentPreEnrollStatus(
 	case constants.STUDENT_PRE_ENROLL_STATUS_ENROLLED:
 		msgTitle = fmt.Sprintf("Enrollment accepted for %s!", msgClassLevelDomain)
 		msgBody = fmt.Sprintf(`
-		Webcome %s to %s! 
+		Hi %s and welcome to %s! 
 		Please go to our website and login with your credentials! 
-		Your new email is %s, and your password default password is a concat of your first first name, first last name, birth year. 
-		E.g: For user with first name "Jhon Durand", last name "Carmack Benie and birthday "2010/06/13", the default password is JhonCarmack2010. 
+		Your new email is %s, and your password default password is a concat of your first first name, first last name, birth year/enrolled year. 
+		E.g: For user with first name "Jhon Durand", last name "Carmack Benie" and birthday "2010/06/13", the default password is JhonCarmack2010 
 		If it doesn't work please contact the support team from the website. Thanks.`, foundItem.FirstName, foundItem.School.Info.FullName, createdStudent.User.Email)
 	case constants.STUDENT_PRE_ENROLL_STATUS_REJECTED:
 		msgTitle = fmt.Sprintf("Enrollment rejected for %s!", msgClassLevelDomain)
-		msgBody = fmt.Sprintf("Enrollment rejected for %s!", msgClassLevelDomain)
+		msgBody = fmt.Sprintf("Enrollment rejected for %s! Please check your account dashboard for more details.", msgClassLevelDomain)
 	}
 	serviceHelperMessage.SendMessage(
 		&serviceHelperMessage.MessageRequest{
@@ -719,7 +761,6 @@ func (service *Service) UpdateStudentPreEnrollStatus(
 		"",
 		[]modelUser.User{*foundItem.User},
 	)
-
 	return
 }
 
