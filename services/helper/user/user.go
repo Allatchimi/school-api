@@ -8,6 +8,7 @@ import (
 	"api/services/school/common/teacher"
 	dataTeacher "api/services/school/common/teacher/data"
 	"api/services/user/user"
+	dataUser "api/services/user/user/data"
 	"api/services/user/user/model"
 )
 
@@ -76,5 +77,10 @@ func GetAllUserForParentStudent(request *dataParent.GetAllParentStudentRequest) 
 			users = append(users, *item.Parent.User)
 		}
 	}
+	return
+}
+
+func GetAllUserByFeature(feature string) (users []model.User, err error) {
+	users, err = UserService.Repository.GetAll(nil, nil, &dataUser.GetAllRequest{Feature: feature})
 	return
 }

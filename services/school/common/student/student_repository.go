@@ -29,6 +29,10 @@ func (repository *Repository) Create(item *model.Student) (result *model.Student
 	result = &model.Student{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
+		Preload("User.Info").
+		Preload("User.Config").
 		First(result, item.ID).Error
 	return
 }

@@ -310,12 +310,16 @@ func (service *Service) CreateStudentPreEnroll(
 	}
 	switch foundItem.Status {
 	case constants.STUDENT_PRE_ENROLL_STATUS_INITIATED:
-		msgTitle = fmt.Sprintf("Your enrollment for %s!", msgClassLevelDomain)
-		msgBody = fmt.Sprintf(`
-		Hi %s %s and welcome to %s! 
-		We have received your enrollment request for %s. 
-		We will review your request and get back to you as soon as possible.
-		Thank you!`, foundItem.FirstName, foundItem.LastName, foundItem.School.Info.FullName, msgClassLevelDomain)
+		msgTitle = fmt.Sprintf("Enrollment request received for %s", msgClassLevelDomain)
+		msgBody = fmt.Sprintf(`Dear %s %s,
+		Thank you for your enrollment request to %s for %s.
+		We have successfully received your application and our admissions team is currently reviewing it. 
+		You will receive a notification with our decision as soon as the review process is complete.
+		If you have any questions in the meantime, please don't hesitate to contact our support team.
+		Best regards,
+		The Admissions Team`,
+			foundItem.FirstName, foundItem.LastName, foundItem.School.Info.FullName, msgClassLevelDomain)
+
 	}
 	serviceHelperMessage.SendMessage(
 		&serviceHelperMessage.MessageRequest{
@@ -740,16 +744,16 @@ func (service *Service) UpdateStudentPreEnrollStatus(
 	switch result.Status {
 	case constants.STUDENT_PRE_ENROLL_STATUS_ENROLLED:
 		msgTitle = fmt.Sprintf("Enrollment accepted for %s!", msgClassLevelDomain)
-		msgBody = fmt.Sprintf(`
-		Hi %s and welcome to %s! 
-		Please go to our website and login with your credentials! 
-		Your new email is %s, and your password default password is a concat of your first first name, first last name, birth year/enrolled year. 
-		E.g: For user with first name "Jhon Durand", last name "Carmack Benie" and birthday "2010/06/13", the default password is JhonCarmack2010 
-		If it doesn't work please contact the support team from the website. Thanks.`, foundItem.FirstName, foundItem.School.Info.FullName, createdStudent.User.Email)
+		msgBody = fmt.Sprintf(`Hi %s, welcome to %s! 
+		Please visit our website and log in with your credentials. 
+		Your new email is %s, and your default password is a combination of your first name, first last name, and birth year/enrolled year. 
+		For example: For a user with first name "John Durand", last name "Carmack Benie" and birthday "2010/06/13", the default password would be JohnCarmack2010. 
+		If this doesn't work, please contact our support team through the website. Thank you.`, foundItem.FirstName, foundItem.School.Info.FullName, createdStudent.User.Email)
 	case constants.STUDENT_PRE_ENROLL_STATUS_REJECTED:
 		msgTitle = fmt.Sprintf("Enrollment rejected for %s!", msgClassLevelDomain)
-		msgBody = fmt.Sprintf("Enrollment rejected for %s! Please check your account dashboard for more details.", msgClassLevelDomain)
+		msgBody = fmt.Sprintf("Your enrollment for %s has been rejected. Please check your account dashboard for more details.", msgClassLevelDomain)
 	}
+
 	serviceHelperMessage.SendMessage(
 		&serviceHelperMessage.MessageRequest{
 			PusNotification: true,

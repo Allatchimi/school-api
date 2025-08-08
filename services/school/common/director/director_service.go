@@ -10,12 +10,14 @@ import (
 	"api/common/types"
 	"api/common/utils"
 	"api/config"
+	serviceHelperMessage "api/services/helper/message"
 	"api/services/school/common/director/data"
 	"api/services/school/common/director/model"
 	"api/services/school/common/school"
 	"api/services/user/role"
 	"api/services/user/user"
 	dataUser "api/services/user/user/data"
+	modelUser "api/services/user/user/model"
 )
 
 type Service struct {
@@ -175,6 +177,49 @@ func (service *Service) Create(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+	if result == nil || result.ID < 1 {
+		return
+	}
+
+	// Send message
+	var msgTitle, msgBody string
+	msgTitle = fmt.Sprintf("Welcome to %s - Director Assignment", result.School.Name)
+	msgBody = fmt.Sprintf(`Dear %s %s,
+	<br><br>
+	Congratulations on your appointment as Director of %s!
+	We are delighted to welcome you to our educational community. 
+	Your leadership and expertise will be invaluable as we continue to provide excellent education to our students.
+
+	<br><br>
+	Your account has been set up with the following credentials:
+	<br>
+	• Email: %s
+	<br>
+	• Temporary Password: %s
+
+	<br><br>
+	For security reasons, please log in to the administrative portal at your earliest convenience and update your password. 
+	You will have full administrative access to manage school operations, staff, students, and resources.
+	If you need any assistance getting started or have questions about the platform, please don't hesitate to contact our support team.
+
+	<br><br>
+	We look forward to working with you and wish you great success in your new role.
+	
+	<br><br>
+	Best regards,
+	The Administration Team`,
+		result.User.Info.FirstName, result.User.Info.LastName, result.School.Name, result.User.Email, password)
+
+	serviceHelperMessage.SendMessage(
+		&serviceHelperMessage.MessageRequest{
+			Mail: true,
+		},
+		msgTitle,
+		msgBody,
+		result.School,
+		"",
+		[]modelUser.User{*result.User},
+	)
 	return
 }
 

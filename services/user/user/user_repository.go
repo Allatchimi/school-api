@@ -474,6 +474,10 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "roles.name = ?")
 			args = append(args, request.RoleName)
 		}
+		if len(request.Feature) > 0 {
+			where = helpers.AppendWhereClause(where, "roles.feature = ?")
+			args = append(args, request.Feature)
+		}
 	} else {
 		request = &data.GetAllRequest{}
 	}

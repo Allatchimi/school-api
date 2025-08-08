@@ -183,6 +183,38 @@ func (service *Service) Create(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+
+	// Send message
+	// var msgTitle, msgBody, msgClassLevelDomain string
+	// if foundItem.School.Type == constants.SCHOOL_TYPE_HIGHSCHOOL {
+	// 	msgClassLevelDomain = fmt.Sprintf("class %s", foundItem.Class.Name)
+	// } else {
+	// 	msgClassLevelDomain = fmt.Sprintf("level domain %s %s", foundItem.LevelDomain.Level.Name, foundItem.LevelDomain.Domain.Name)
+	// }
+	// switch result.Status {
+	// case constants.STUDENT_PRE_ENROLL_STATUS_ENROLLED:
+	// 	msgTitle = fmt.Sprintf("Enrollment accepted for %s!", msgClassLevelDomain)
+	// 	msgBody = fmt.Sprintf(`
+	// 	Hi %s and welcome to %s!
+	// 	Please go to our website and login with your credentials!
+	// 	Your new email is %s, and your password default password is a concat of your first first name, first last name, birth year/enrolled year.
+	// 	E.g: For user with first name "Jhon Durand", last name "Carmack Benie" and birthday "2010/06/13", the default password is JhonCarmack2010
+	// 	If it doesn't work please contact the support team from the website. Thanks.`, foundItem.FirstName, foundItem.School.Info.FullName, createdStudent.User.Email)
+	// case constants.STUDENT_PRE_ENROLL_STATUS_REJECTED:
+	// 	msgTitle = fmt.Sprintf("Enrollment rejected for %s!", msgClassLevelDomain)
+	// 	msgBody = fmt.Sprintf("Enrollment rejected for %s! Please check your account dashboard for more details.", msgClassLevelDomain)
+	// }
+	// serviceHelperMessage.SendMessage(
+	// 	&serviceHelperMessage.MessageRequest{
+	// 		PusNotification: true,
+	// 		Mail:            true,
+	// 	},
+	// 	msgTitle,
+	// 	msgBody,
+	// 	foundItem.School,
+	// 	"",
+	// 	[]modelUser.User{*foundItem.User},
+	// )
 	return
 }
 

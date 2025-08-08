@@ -31,6 +31,10 @@ func (repository *Repository) Create(
 	result = &model.Director{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
+		Preload("User.Info").
+		Preload("User.Config").
 		First(result, item.ID).Error
 	return
 }

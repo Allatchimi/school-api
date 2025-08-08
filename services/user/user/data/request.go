@@ -33,4 +33,5 @@ type GetAllRequest struct {
 	SchoolID int64  `json:"schoolID" query:"schoolID" required:"false" doc:"School id"`
 	RoleName string `json:"roleName" query:"roleName" required:"false" doc:"Role name"`
 	RoleID   int64  `json:"roleID" query:"roleID" required:"false" doc:"Role id"`
+	Feature  string `json:"feature" query:"feature" required:"false" doc:"Feature name"`
 }

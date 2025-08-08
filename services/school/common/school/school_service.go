@@ -9,6 +9,7 @@ import (
 	"api/common/types"
 	"api/common/utils"
 	serviceHelperMessage "api/services/helper/message"
+	serviceHelperSchool "api/services/helper/school"
 	"api/services/school/common/school/data"
 	"api/services/school/common/school/model"
 )
@@ -298,40 +299,43 @@ func (service *Service) UpdateDeploymentStatus(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+	if updatedItem == nil || updatedItem.ID < 1 {
+		return
+	}
 
 	// Send message
 	go func() {
-		users, errUsers := serviceHelperUser.GetAllUserByFeature(constants.FeatureAdmin)
+		users, errUsers := serviceHelperSchool.GetAllUserByFeature(constants.FeatureAdmin)
 		if errUsers != nil || len(users) < 1 {
 			return
 		}
 		var title, message string
-		title = "New published course"
+		websiteUrl := ""
+		if updatedItem.Config != nil && len(updatedItem.Config.WebsiteDomainName) > 0 {
+			websiteUrl = fmt.Sprintf("https://%s", updatedItem.Config.WebsiteDomainName)
+		}
 		switch updatedItem.Status {
-		case constants.DEPLOYMENT_STATUS_FAILED:
-			if result.ClassSubject != nil && result.ClassSubject.Subject != nil {
-				message = fmt.Sprintf("%s %s: %s", result.ClassSubject.Subject.Name, result.ClassSubject.Class.Name, result.Title)
-			} else {
-				message = result.Title
-			}
-		case constants.DEPLOYMENT_STATUS_SUCCESSFUL:
-			if result.Unit != nil {
-				message = fmt.Sprintf("%s: %s", result.Unit.Name, result.Title)
-			} else {
-				message = result.Title
-			}
+		case constants.SCHOOL_DEPLOYMENT_STATUS_FAILED:
+			title = "Successfully deployed school " + updatedItem.Name
+			message = fmt.Sprintf(`
+			The school %s has been successfully deployed and is now ready for use. You can access it at %s.
+			`, updatedItem.Name, websiteUrl)
+		case constants.SCHOOL_DEPLOYMENT_STATUS_DONE, constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES:
+			title = "Failed to deploy school " + updatedItem.Name
+			message = fmt.Sprintf(`
+			The deployment of school '%s' has failed due to technical issues. 
+			Please check the system logs and try again, or contact support for assistance
+			`, updatedItem.Name)
 		}
 		serviceHelperMessage.SendMessage(
 			&serviceHelperMessage.MessageRequest{
 				PusNotification: true,
-				Telegram:        true,
-				Whatsapp:        true,
 				Mail:            true,
 			},
 			title,
 			message,
-			result.School,
-			fmt.Sprintf("/dashboard/common/courses/%d", result.ID),
+			nil,
+			"",
 			users,
 		)
 	}()
