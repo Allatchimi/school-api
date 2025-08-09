@@ -19,9 +19,6 @@ jobs:
         uses: actions/checkout@v4.1.7
         with:
           ref: ${{ github.head_ref }} # Branch name
-      
+
       - name: Build Docker image
         run: docker build ./ --file ./docker/api/Dockerfile --tag ${{ env.CONTAINER_PROVIDER}}/${{ env.CONTAINER_ORG }}/${{ env.CONTAINER_REPO }}/${{ env.CONTAINER_IMAGE }}:${{ env.CONTAINER_IMAGE_TAG }}
-      
-      - name: Cleanup ENV
-        run: unset CONTAINER_PROVIDER && unset CONTAINER_ORG && unset CONTAINER_REPO && unset CONTAINER_IMAGE && unset CONTAINER_IMAGE_TAG
