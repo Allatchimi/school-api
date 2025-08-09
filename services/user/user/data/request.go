@@ -18,14 +18,14 @@ type UserRequest struct {
 }
 
 type UserInfoRequest struct {
-	Username      string     `json:"username" required:"false" maxLength:"150" doc:"User name"`
-	FirstName     string     `json:"firstName" required:"true" maxLength:"150" doc:"First name"`
-	LastName      string     `json:"lastName" required:"true" maxLength:"150" doc:"Last name"`
+	Username      string     `json:"username" required:"false" doc:"User name"`
+	FirstName     string     `json:"firstName" required:"true" doc:"First name"`
+	LastName      string     `json:"lastName" required:"true" doc:"Last name"`
 	Gender        string     `json:"Gender" required:"true" enum:"male,female" doc:"Gender"`
 	Birthday      *time.Time `json:"birthday" required:"false" doc:"Birthday"`
 	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
-	Address       string     `json:"address" required:"false" maxLength:"150" doc:"Address"`
-	Language      string     `json:"language" required:"false" min:"2" maxLength:"2" doc:"Language code with 2 letter"`
+	Address       string     `json:"address" required:"false" doc:"Address"`
+	Language      string     `json:"language" required:"false" doc:"Language code with 2 letter"`
 	Image         string     `json:"image" required:"false" doc:"Thumbnail"`
 }
 

@@ -6,7 +6,7 @@ type RoleID struct {
 
 type RoleRequest struct {
 	Feature     string `json:"feature" required:"true" enum:"dashboard-admin,dashboard-director,dashboard-teacher,dashboard-student,dashboard-parent,dashboard-default" doc:"Feature name"`
-	Name        string `json:"name" required:"true" minLength:"2" maxLength:"30" doc:"Role name"`
+	Name        string `json:"name" required:"true" doc:"Role name"`
 	Description string `json:"description" required:"false" doc:"Role description"`
 }
 

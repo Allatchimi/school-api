@@ -9,14 +9,14 @@ type SchoolID struct {
 }
 
 type SchoolRequest struct {
-	Name         string               `json:"name" required:"true" minLength:"2" maxLength:"50" doc:"School name"`
+	Name         string               `json:"name" required:"true" maxLength:"150" doc:"School name"`
 	Type         string               `json:"type" required:"true" enum:"highschool,university" doc:"School type"`
 	Status       string               `json:"status" required:"true" enum:"enabled,disabled" doc:"School status"`
 	Favicon      string               `json:"favicon" required:"false" doc:"School favicon"`
 	Logo         string               `json:"logo" required:"false" doc:"School logo"`
 	LogoWhite    string               `json:"logoWhite" required:"false" doc:"School logo white"`
-	Currency     string               `json:"currency" required:"true" minLength:"2" maxLength:"20" doc:"Currency"`
-	PaymentCount int64                `json:"paymentCount" required:"true" min:"1" max:"10" doc:"Payment count"`
+	Currency     string               `json:"currency" required:"true"  doc:"Currency"`
+	PaymentCount int64                `json:"paymentCount" required:"true" min:"1" doc:"Payment count"`
 	Info         *SchoolInfoRequest   `json:"info" required:"true" doc:"Information"`
 	Config       *SchoolConfigRequest `json:"config" required:"true" doc:"Configuration"`
 }

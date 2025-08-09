@@ -23,7 +23,7 @@ type ExamRequest struct {
 
 	Status          string     `json:"status" required:"true" enum:"draft,online,results" doc:"Status"`
 	Notation        float64    `json:"notation" required:"true" minimum:"1" doc:"Notation"`
-	Percentage      int        `json:"percentage" required:"true" minimum:"1" maximum:"100" doc:"Percentage"`
+	Percentage      int        `json:"percentage" required:"true" minimum:"1" doc:"Percentage"`
 	Description     string     `json:"description" required:"false" doc:"Description"`
 	LocationType    string     `json:"locationType" required:"true" enum:"online,onsite" doc:"Location type"`
 	LocationDetails string     `json:"locationDetails" required:"false" doc:"Location details"`

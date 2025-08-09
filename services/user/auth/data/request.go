@@ -13,7 +13,7 @@ type LoginWithEmailRequest struct {
 }
 type LoginWithProviderRequest struct {
 	Provider string `json:"provider" required:"true" doc:"Provider"`
-	Token    string `json:"token" required:"true" doc:"Token" minLength:"3"`
+	Token    string `json:"token" required:"true" doc:"Token"`
 }
 type LoginRequest struct {
 	Email         string `json:"email" required:"true" format:"email" doc:"Email"`
@@ -33,7 +33,7 @@ type RegisterRequest struct {
 
 // Activate account
 type ActivateAccountRequest struct {
-	Token string `json:"token" required:"true" minLength:"3" doc:"Received token"`
+	Token string `json:"token" required:"true" doc:"Received token"`
 	Code  int    `json:"code" required:"true" doc:"Received Code by email"`
 }
 
@@ -45,10 +45,10 @@ type ForgotPasswordInitRequest struct {
 	Email string `json:"email" required:"true" format:"email" doc:"Email"`
 }
 type ForgotPasswordCodeRequest struct {
-	Token string `json:"token" required:"true" minLength:"3" doc:"Received token on previous step"`
+	Token string `json:"token" required:"true" doc:"Received token on previous step"`
 	Code  int    `json:"code" required:"true" doc:"Received Code by email"`
 }
 type ForgotPasswordNewPasswordRequest struct {
-	Token       string `json:"token" required:"true" minLength:"3" doc:"Received token on previous step"`
+	Token       string `json:"token" required:"true" doc:"Received token on previous step"`
 	NewPassword string `json:"password" required:"true" doc:"Base64 encoded password"`
 }

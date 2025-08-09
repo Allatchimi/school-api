@@ -48,8 +48,8 @@ type StudentPreEnrollRequest struct {
 
 	Message       string     `json:"message" required:"false" doc:"Message"`
 	Gender        string     `json:"gender" required:"true" enum:"male,female" doc:"Gender"`
-	FirstName     string     `json:"firstName" required:"true" max:"30" doc:"First name"`
-	LastName      string     `json:"lastName" required:"true" max:"30" doc:"Last name"`
+	FirstName     string     `json:"firstName" required:"true" doc:"First name"`
+	LastName      string     `json:"lastName" required:"true" doc:"Last name"`
 	Birthday      *time.Time `json:"birthday" required:"true" doc:"Birthday"`
 	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
 	Document1     string     `json:"document1" required:"false" doc:"Document1"`

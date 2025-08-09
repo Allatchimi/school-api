@@ -6,34 +6,34 @@ import "time"
 type UpdateProfileInfoRequest struct {
 	Username      string     `json:"username" required:"false" minLength:"2" maxLength:"30" doc:"User name"`
 	FirstName     string     `json:"firstName" required:"true" minLength:"2" maxLength:"30" doc:"First name"`
-	LastName      string     `json:"lastName" required:"true" minLength:"2" maxLength:"30" doc:"Last name"`
+	LastName      string     `json:"lastName" required:"true" doc:"Last name"`
 	Gender        string     `json:"Gender" required:"true" enum:"male,female" doc:"Gender"`
 	Birthday      *time.Time `json:"birthday" required:"false" doc:"Birthday date time"`
 	BirthLocation string     `json:"birthLocation" required:"false" doc:"Birth location"`
-	Address       string     `json:"address" required:"false" minLength:"2" maxLength:"30" doc:"Address"`
-	Language      string     `json:"language" required:"false" minLength:"2" maxLength:"2" doc:"Language code with 2 letter"`
+	Address       string     `json:"address" required:"false" doc:"Address"`
+	Language      string     `json:"language" required:"false" doc:"Language code with 2 letter"`
 	Image         string     `json:"image" required:"false" doc:"Thumbnail"`
 }
 
 // Update password
 type UpdateProfilePasswordCheckCodeRequest struct {
-	Token string `json:"token" required:"true" minLength:"3" doc:"Received token on previous step"`
+	Token string `json:"token" required:"true" doc:"Received token on previous step"`
 	Code  int    `json:"code" required:"true" doc:"Received Code by email"`
 }
 type UpdateProfilePasswordNewPasswordRequest struct {
-	Token           string `json:"token" required:"true" minLength:"3" doc:"Received token on previous step"`
+	Token           string `json:"token" required:"true" doc:"Received token on previous step"`
 	CurrentPassword string `json:"currentPassword" required:"true" minLength:"8" maxLength:"30" doc:"Base64 encoded password"`
 	NewPassword     string `json:"password" required:"true" minLength:"8" maxLength:"30" doc:"Base64 encoded password"`
 }
 
 // Update phone number
 type UpdateProfilePhoneNumberCheckCodeRequest struct {
-	Token string `json:"token" required:"true" minLength:"3" doc:"Received token on previous step"`
+	Token string `json:"token" required:"true" doc:"Received token on previous step"`
 	Code  int    `json:"code" required:"true" doc:"Received Code by email"`
 }
 type UpdateProfilePhoneNumberNewPhoneNumberRequest struct {
-	Token       string `json:"token" required:"true" minLength:"3" doc:"Received token on previous step"`
-	PhoneNumber uint64 `json:"phoneNumber" required:"true" minimum:"10000000" doc:"Phone number"`
+	Token       string `json:"token" required:"true" doc:"Received token on previous step"`
+	PhoneNumber uint64 `json:"phoneNumber" required:"true" doc:"Phone number"`
 }
 
 // Update message
@@ -44,7 +44,7 @@ type UpdateProfileMessageRequest struct {
 
 // Update MFA for email
 type UpdateProfileMfaEmailCheckCodeRequest struct {
-	Token string `json:"token" required:"true" minLength:"3" doc:"Received token on previous step"`
+	Token string `json:"token" required:"true" doc:"Received token on previous step"`
 	Code  int    `json:"code" required:"true" doc:"Received Code by email"`
 }
 

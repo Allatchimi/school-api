@@ -9,7 +9,7 @@ type PermissionRoleID struct {
 }
 
 type UpdatePermissionRequest struct {
-	TableName string `json:"tableName" required:"true" minLength:"1" doc:"Table name"`
+	TableName string `json:"tableName" required:"true" doc:"Table name"`
 	Create    bool   `json:"create" required:"true" doc:"Create permission"`
 	Read      bool   `json:"read" required:"true" doc:"Read permission"`
 	Update    bool   `json:"update" required:"true" doc:"Update permission"`
