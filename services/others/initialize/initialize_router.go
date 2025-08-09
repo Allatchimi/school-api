@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -16,10 +17,10 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/initialize",
+		Group: fmt.Sprintf("/%s", constants.RESOURCE_TABLE_INITIALIZE),
 		Tag:   []string{"Initialize"},
 	}
-	const tableName = "initialize"
+	const tableName = constants.RESOURCE_TABLE_INITIALIZE
 
 	// Get initial school by id
 	huma.Register(

@@ -36,7 +36,27 @@ func (repository *Repository) Create(item *model.Permission) (result *model.Perm
 	return
 }
 
-func (repository *Repository) UpdateByID(
+func (repository *Repository) CreateMultiple(tablesName []string, item *model.Permission) (result int64) {
+	result = 0
+	for _, table := range tablesName {
+		// Create the item
+		newItem := &model.Permission{
+			RoleID:    item.RoleID,
+			TableName: table,
+			Create:    item.Create,
+			Read:      item.Read,
+			Update:    item.Update,
+			Delete:    item.Delete,
+		}
+		err := repository.Db.Create(newItem).Error
+		if err == nil {
+			result++
+		}
+	}
+	return
+}
+
+func (repository *Repository) UpdateByRoleIDTableName(
 	roleID int64,
 	tableName string,
 	item *model.Permission,
@@ -82,6 +102,24 @@ func (repository *Repository) UpdateByID(
 		Where("table_name = ?", item.TableName).
 		First(result).Error
 
+	return
+}
+
+func (repository *Repository) DeleteByRoleID(id int64) (result int64, err error) {
+	// Subquery
+	subQuery := repository.Db.
+		Table("roles").
+		Select("id").
+		Where("name <> ?", config.Env.FixtureRoleAdmin)
+
+	// Delete
+	tmpResult := repository.Db.
+		Where("role_id IN (?)", subQuery).
+		Where("role_id = ?", id).
+		Delete(&model.Permission{})
+
+	result = tmpResult.RowsAffected
+	err = tmpResult.Error
 	return
 }
 

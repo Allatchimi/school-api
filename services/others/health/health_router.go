@@ -17,7 +17,7 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/healthz",
+		Group: fmt.Sprintf("/%s", constants.RESOURCE_TABLE_HEALTHZ),
 		Tag:   []string{"Healthz"},
 	}
 

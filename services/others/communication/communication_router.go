@@ -17,10 +17,10 @@ func RegisterEndpoints(
 	controller *Controller,
 ) {
 	var endpointConfig = types.ApiEndpointConfig{
-		Group: "/communications",
+		Group: fmt.Sprintf("/%s", constants.RESOURCE_TABLE_COMMUNICATION),
 		Tag:   []string{"Communications"},
 	}
-	const tableName = "communications"
+	const tableName = constants.RESOURCE_TABLE_COMMUNICATION
 
 	// Create communication
 	huma.Register(

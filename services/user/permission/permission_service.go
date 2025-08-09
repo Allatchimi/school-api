@@ -2,6 +2,7 @@ package permission
 
 import (
 	"net/http"
+	"slices"
 
 	"api/common/constants"
 	"api/common/types"
@@ -26,6 +27,14 @@ func (service *Service) Update(
 	roleID int64,
 	request *data.UpdatePermissionRequest,
 ) (result *model.Permission, errCode int, err error) {
+	// Check table name
+	if request.TableName != constants.RESOURCE_TABLE_ALL &&
+		!slices.Contains(constants.RESOURCE_TABLE_LIST, request.TableName) {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessageV2("table name")
+		return
+	}
+
 	// Format item
 	item := &model.Permission{
 		RoleID:    roleID,
@@ -36,15 +45,17 @@ func (service *Service) Update(
 		Delete:    request.Delete,
 	}
 
-	// Check unique
-	foundPermission, err := service.Repository.GetByRoleIDTableName(item.RoleID, item.TableName)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundPermission == nil || foundPermission.RoleID != item.RoleID {
-		// Create new ones
+	// Update all
+	if item.TableName == constants.RESOURCE_TABLE_ALL {
+		// Delete all by roleID
+		_, errDelete := service.Repository.DeleteByRoleID(item.RoleID)
+		if errDelete != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
+
+		// Create
 		result, err = service.Repository.Create(item)
 		if err != nil {
 			pgState, errPgState := utils.ExtractSQLState(err.Error())
@@ -61,10 +72,74 @@ func (service *Service) Update(
 		return
 	}
 
-	// Update now
-	result, err = service.Repository.UpdateByID(
-		item.RoleID, item.TableName, item,
-	)
+	// Check unique
+	foundPermission, err := service.Repository.GetByRoleIDTableName(item.RoleID, item.TableName)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+
+	// Check if there is one permission on all tables
+	foundPermissionAll, errFound := service.Repository.GetByRoleIDTableName(item.RoleID, constants.RESOURCE_TABLE_ALL)
+	if errFound != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if foundPermissionAll != nil && foundPermissionAll.ID > 0 {
+		// Delete all by roleID
+		_, errDelete := service.Repository.DeleteByRoleID(item.RoleID)
+		if errDelete != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
+
+		// Create all
+		service.Repository.CreateMultiple(constants.RESOURCE_TABLE_LIST, foundPermissionAll)
+
+		// Update specific
+		result, err = service.Repository.UpdateByRoleIDTableName(
+			item.RoleID, item.TableName, item,
+		)
+		if err != nil {
+			pgState, errPgState := utils.ExtractSQLState(err.Error())
+			if errPgState == nil {
+				if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+					errCode = http.StatusConflict
+					err = constants.Http409ConflictErrorMessage()
+					return
+				}
+			}
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		}
+		return
+	}
+
+	if foundPermission != nil && foundPermission.ID > 0 {
+		// Update
+		result, err = service.Repository.UpdateByRoleIDTableName(
+			item.RoleID, item.TableName, item,
+		)
+		if err != nil {
+			pgState, errPgState := utils.ExtractSQLState(err.Error())
+			if errPgState == nil {
+				if pgState == constants.PG_ERROR_CONSTRAINT_COLUMN {
+					errCode = http.StatusConflict
+					err = constants.Http409ConflictErrorMessage()
+					return
+				}
+			}
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		}
+		return
+	}
+
+	// Create
+	result, err = service.Repository.Create(item)
 	if err != nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
 		if errPgState == nil {
