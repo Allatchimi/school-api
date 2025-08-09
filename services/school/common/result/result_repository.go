@@ -47,6 +47,8 @@ func (repository *Repository) CreateResultTable(item *model.ResultTable) (result
 	result = &model.ResultTable{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		First(result, item.ID).Error
 	return
 }
@@ -97,6 +99,8 @@ func (repository *Repository) UpdateResultTableByID(id int64, item *model.Result
 	result = &model.ResultTable{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where("id = ?", id).
 		First(result).Error
 	return

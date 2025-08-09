@@ -65,6 +65,7 @@ func (item *StudentPreEnroll) ToResponse() *data.StudentPreEnrollResponse {
 	resp.Message = item.Message
 	resp.Gender = item.Gender
 	resp.FirstName = item.FirstName
+	resp.LastName = item.LastName
 	resp.Birthday = item.Birthday
 	resp.BirthLocation = item.BirthLocation
 	resp.Document1 = item.Document1

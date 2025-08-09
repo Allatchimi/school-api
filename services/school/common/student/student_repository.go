@@ -48,6 +48,15 @@ func (repository *Repository) CreateStudentPreEnroll(item *model.StudentPreEnrol
 	result = &model.StudentPreEnroll{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
+		Preload("Class.Specialty").
+		Preload("Class.Specialty.Section").
+		Preload("LevelDomain.Level").
+		Preload("LevelDomain.Domain").
+		Preload("LevelDomain.Domain.Department").
+		Preload("LevelDomain.Domain.Department.Faculty").
+		Preload("User.Info").
 		First(result, item.ID).Error
 	return
 }
@@ -179,6 +188,8 @@ func (repository *Repository) UpdateStudentPreEnrollStatusByID(id int64, item *m
 	result = &model.StudentPreEnroll{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where("id = ?", id).
 		First(result).Error
 	return

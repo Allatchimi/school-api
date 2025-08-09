@@ -29,6 +29,8 @@ func (repository *Repository) Create(item *model.Communication) (result *model.C
 	result = &model.Communication{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		First(result, item.ID).Error
 	return
 }

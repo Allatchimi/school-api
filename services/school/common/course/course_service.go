@@ -102,20 +102,6 @@ func (service *Service) Create(
 		}
 	}
 
-	// Refetch the course
-	foundItem, err := service.Repository.GetByID(result.ID)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	if foundItem == nil || foundItem.ID < 0 {
-		errCode = http.StatusNotFound
-		err = constants.Http404ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
-	result = foundItem
-
 	// Send message
 	go func() {
 		stdEnrollReq := &dataStudent.GetAllStudentEnrollRequest{}

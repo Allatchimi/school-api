@@ -99,6 +99,8 @@ func (repository *Repository) UpdateStatusByID(
 	result = &model.Request{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where("id = ?", id).
 		First(result).Error
 	return

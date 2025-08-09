@@ -258,6 +258,8 @@ func (repository *Repository) UpdateReportTableStatusByID(id int64, status strin
 	result = &model.ReportTable{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where("id = ?", id).
 		First(result).Error
 	return

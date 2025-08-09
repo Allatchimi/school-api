@@ -88,7 +88,7 @@ func ToSchoolResponseList(itemList []School) []data.SchoolResponse {
 }
 
 func (item *School) WebsiteUrl() (url string) {
-	if item == nil {
+	if item == nil || item.Config == nil {
 		url = config.Env.WebsiteBaseURL
 		return
 	}

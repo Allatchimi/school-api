@@ -32,6 +32,8 @@ func (repository *Repository) Create(item *model.Exam) (result *model.Exam, err 
 	result = &model.Exam{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		First(result, item.ID).Error
 	return
 }
@@ -95,6 +97,8 @@ func (repository *Repository) UpdateByID(id int64, item *model.Exam) (result *mo
 	result = &model.Exam{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where("id = ?", id).
 		First(result).Error
 	return

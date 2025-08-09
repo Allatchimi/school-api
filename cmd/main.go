@@ -5,6 +5,7 @@ import (
 	"api/cmd/di"
 	"api/cmd/fixture"
 	"api/cmd/migrate"
+	"api/cmd/test"
 	"api/common/helpers"
 	securityUtil "api/common/utils/security"
 	"api/config"
@@ -19,6 +20,8 @@ func main() {
 	// Enable logger
 	helpers.EnableLogger()
 	defer helpers.Logger.Sync()
+
+	test.TestSpecific()
 
 	// Check if there are any errors when initializing the app
 	if errInit != nil {
