@@ -59,17 +59,17 @@ func DeploySchool(school *model.School) (err error) {
 	helpers.Logger.Info("API key generated successfully.", zap.String("API Key", apiKey))
 	// Generate app environment variables
 	envData := AppEnvData{
-		Name:           school.Config.WebsiteTitle,
-		Description:    school.Config.WebsiteDescription,
-		WebsiteURL:     websiteURL,
-		ApiBaseUrl:     config.Env.SchoolApiBaseURL,
-		CdnUrl:         config.Env.SchoolCdnUrl,
-		CdnKey:         config.Env.SchoolCdnKey,
-		NextAuthUrl:    websiteURL,
-		NextAuthSecret: securityUtil.GenerateRandomBase64(32),
-		SchoolID:       school.ID,
-		SchoolType:     school.Type,
-		SchoolApiKey:   apiKey,
+		WebsiteTitle:       school.Config.WebsiteTitle,
+		WebsiteDescription: school.Config.WebsiteDescription,
+		WebsiteURL:         websiteURL,
+		ApiBaseUrl:         config.Env.SchoolApiBaseURL,
+		CdnUrl:             config.Env.SchoolCdnUrl,
+		CdnKey:             config.Env.SchoolCdnKey,
+		NextAuthUrl:        websiteURL,
+		NextAuthSecret:     securityUtil.GenerateRandomBase64(32),
+		SchoolID:           school.ID,
+		SchoolType:         school.Type,
+		SchoolApiKey:       apiKey,
 	}
 	// Generate app color data
 	colorData := AppColorData{

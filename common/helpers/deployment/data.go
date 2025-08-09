@@ -3,8 +3,9 @@ package deploymentHelper
 const (
 	// App env templates
 	envTemplateContent = `
-NEXT_PUBLIC_APP_NAME="{{ .Name }}"
-NEXT_PUBLIC_APP_DESCRIPTION="{{ .Description }}"
+NEXT_PUBLIC_APP_NAME="{{ .AppName }}"
+NEXT_PUBLIC_WEBSITE_TITLE="{{ .WebsiteTitle }}"
+NEXT_PUBLIC_WEBSITE_DESCRIPTION="{{ .WebsiteDescription }}"
 NEXT_PUBLIC_WEBSITE_URL="{{ .WebsiteURL }}"
 
 API_BASE_URL="{{ .ApiBaseUrl }}"
@@ -49,9 +50,10 @@ export const COLOR_SCHEMES = [
 )
 
 type AppEnvData struct {
-	Name        string
-	Description string
-	WebsiteURL  string
+	AppName            string
+	WebsiteTitle       string
+	WebsiteDescription string
+	WebsiteURL         string
 
 	ApiBaseUrl string
 	CdnUrl     string
