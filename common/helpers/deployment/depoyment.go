@@ -78,6 +78,10 @@ func DeploySchool(school *model.School) (err error) {
 		PrimaryBg:      school.Config.ColorPrimaryBg,
 		PrimaryBgHover: school.Config.ColorPrimaryBgHover,
 	}
+	// Generate deployment status data
+	deploymentStatusData := DeploymentStatusData{
+		SchoolApiKey: apiKey,
+	}
 	// Generate deployment data
 	kubernetesDeploymentData := KubernetesWebsiteDomainNameData{
 		WebsiteDomainName: school.Config.WebsiteDomainName,
@@ -119,6 +123,12 @@ func DeploySchool(school *model.School) (err error) {
 	if err = htmlHelper.RenderTemplate(filepath.Join(colorDir, "color.ts"), colorTemplateContent, colorData); err != nil {
 		errMsg := "Failed to render template!"
 		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(colorDir, "color.ts"), colorTemplateContent, err)
+		return
+	}
+	// Generate deployment status files
+	if err = htmlHelper.RenderTemplate(filepath.Join(deploymentDir, "status.txt"), deploymentStatusTemplateContent, deploymentStatusData); err != nil {
+		errMsg := "Failed to render template!"
+		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentDir, "status.txt"), deploymentStatusTemplateContent, err)
 		return
 	}
 	// Generate kubernetes deployment files
