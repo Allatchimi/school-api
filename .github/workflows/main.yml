@@ -25,7 +25,7 @@ jobs:
           --tag ${{ env.CONTAINER_PROVIDER}}/${{ env.CONTAINER_ORG }}/${{ env.CONTAINER_REPO }}/${{ env.CONTAINER_IMAGE }}:${{ env.CONTAINER_IMAGE_TAG }} \
           --tag ${{ env.CONTAINER_PROVIDER}}/${{ env.CONTAINER_ORG }}/${{ env.CONTAINER_REPO }}/${{ env.CONTAINER_IMAGE }}:latest
 
-      - name: Run Trivy vulnerability scanner
+      - name: Run Trivy vulnerability
         uses: aquasecurity/trivy-action@master
         continue-on-error: true
         with:
