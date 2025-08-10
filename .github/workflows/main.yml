@@ -20,7 +20,10 @@ jobs:
           ref: "main" # Branch name
 
       - name: Build Docker image
-        run: docker build ./ --file ./docker/api/Dockerfile --tag ${{ env.CONTAINER_PROVIDER}}/${{ env.CONTAINER_ORG }}/${{ env.CONTAINER_REPO }}/${{ env.CONTAINER_IMAGE }}:${{ env.CONTAINER_IMAGE_TAG }}
+        run: |
+          docker build ./ --file ./docker/api/Dockerfile \
+          --tag ${{ env.CONTAINER_PROVIDER}}/${{ env.CONTAINER_ORG }}/${{ env.CONTAINER_REPO }}/${{ env.CONTAINER_IMAGE }}:${{ env.CONTAINER_IMAGE_TAG }} \
+          --tag ${{ env.CONTAINER_PROVIDER}}/${{ env.CONTAINER_ORG }}/${{ env.CONTAINER_REPO }}/${{ env.CONTAINER_IMAGE }}:latest
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
