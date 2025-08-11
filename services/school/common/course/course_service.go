@@ -129,7 +129,7 @@ func (service *Service) Create(
 				message = result.Title
 			}
 		}
-		serviceHelperMessage.SendMessage(
+		go serviceHelperMessage.SendMessage(
 			&serviceHelperMessage.MessageRequest{
 				PusNotification: true,
 				Telegram:        true,

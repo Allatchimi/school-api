@@ -210,7 +210,7 @@ func (service *Service) Create(
 	The Administration Team`,
 		result.User.Info.FirstName, result.User.Info.LastName, result.School.Name, result.User.Email, password)
 
-	serviceHelperMessage.SendMessage(
+	go serviceHelperMessage.SendMessage(
 		&serviceHelperMessage.MessageRequest{
 			Mail: true,
 		},

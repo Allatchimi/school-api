@@ -251,54 +251,52 @@ func (service *Service) UpdateStatus(
 	}
 
 	// Send message to student
-	go func() {
-		if result == nil || result.Student == nil || result.StudentID < 1 || result.Status == foundItem.Status {
-			return
+	if result == nil || result.Student == nil || result.StudentID < 1 || result.Status == foundItem.Status {
+		return
+	}
+	if !(result.Status == constants.REQUEST_STATUS_COMPLETED || result.Status == constants.REQUEST_STATUS_REJECTED) {
+		return
+	}
+	// Students
+	studentEnrollReq := &dataStudent.GetAllStudentEnrollRequest{}
+	studentEnrollReq.SchoolID = result.SchoolID
+	studentEnrollReq.YearID = result.YearID
+	studentEnrollReq.ClassSubjectID = result.ClassSubjectID
+	studentEnrollReq.UnitID = result.UnitID
+	userStudents, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
+	if errUsers != nil {
+		return
+	}
+	var title, message string
+	switch result.Status {
+	case constants.REQUEST_STATUS_COMPLETED:
+		title = "Request Completed"
+	case constants.REQUEST_STATUS_REJECTED:
+		title = "Request Rejected"
+	}
+	switch result.School.Type {
+	case constants.SCHOOL_TYPE_HIGHSCHOOL:
+		if result.ClassSubject != nil && result.ClassSubject.Subject != nil && result.ClassSubject.Class != nil && result.Sequence != nil && result.Year != nil {
+			message = fmt.Sprintf("The request for subject %s %s: %s %s has been %s", result.ClassSubject.Subject.Name, result.ClassSubject.Class.Name, result.Sequence.Name, result.Year.Name, result.Status)
 		}
-		if !(result.Status == constants.REQUEST_STATUS_COMPLETED || result.Status == constants.REQUEST_STATUS_REJECTED) {
-			return
+	case constants.SCHOOL_TYPE_UNIVERSITY:
+		if result.Unit != nil && result.Unit.Semester != nil && result.Year != nil {
+			message = fmt.Sprintf("The request for unit %s: %s %s has been %s", result.Unit.Name, result.Unit.Semester.Name, result.Year.Name, result.Year.Name)
 		}
-		// Students
-		studentEnrollReq := &dataStudent.GetAllStudentEnrollRequest{}
-		studentEnrollReq.SchoolID = result.SchoolID
-		studentEnrollReq.YearID = result.YearID
-		studentEnrollReq.ClassSubjectID = result.ClassSubjectID
-		studentEnrollReq.UnitID = result.UnitID
-		userStudents, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
-		if errUsers != nil {
-			return
-		}
-		var title, message string
-		switch result.Status {
-		case constants.REQUEST_STATUS_COMPLETED:
-			title = "Request Completed"
-		case constants.REQUEST_STATUS_REJECTED:
-			title = "Request Rejected"
-		}
-		switch result.School.Type {
-		case constants.SCHOOL_TYPE_HIGHSCHOOL:
-			if result.ClassSubject != nil && result.ClassSubject.Subject != nil && result.ClassSubject.Class != nil && result.Sequence != nil && result.Year != nil {
-				message = fmt.Sprintf("The request for subject %s %s: %s %s has been %s", result.ClassSubject.Subject.Name, result.ClassSubject.Class.Name, result.Sequence.Name, result.Year.Name, result.Status)
-			}
-		case constants.SCHOOL_TYPE_UNIVERSITY:
-			if result.Unit != nil && result.Unit.Semester != nil && result.Year != nil {
-				message = fmt.Sprintf("The request for unit %s: %s %s has been %s", result.Unit.Name, result.Unit.Semester.Name, result.Year.Name, result.Year.Name)
-			}
-		}
-		serviceHelperMessage.SendMessage(
-			&serviceHelperMessage.MessageRequest{
-				PusNotification: true,
-				Telegram:        true,
-				Whatsapp:        true,
-				Mail:            true,
-			},
-			title,
-			message,
-			result.School,
-			"",
-			userStudents,
-		)
-	}()
+	}
+	go serviceHelperMessage.SendMessage(
+		&serviceHelperMessage.MessageRequest{
+			PusNotification: true,
+			Telegram:        true,
+			Whatsapp:        true,
+			Mail:            true,
+		},
+		title,
+		message,
+		result.School,
+		"",
+		userStudents,
+	)
 	return
 }
 

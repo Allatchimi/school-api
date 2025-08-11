@@ -315,7 +315,7 @@ func (service *Service) CreateStudentPreEnroll(
 			result.FirstName, result.LastName, result.School.Info.FullName, msgClassLevelDomain)
 
 	}
-	serviceHelperMessage.SendMessage(
+	go serviceHelperMessage.SendMessage(
 		&serviceHelperMessage.MessageRequest{
 			PusNotification: true,
 			Mail:            true,
@@ -756,7 +756,7 @@ func (service *Service) UpdateStudentPreEnrollStatus(
 		msgBody = fmt.Sprintf("Your enrollment for %s has been rejected. Please check your account dashboard for more details.", msgClassLevelDomain)
 	}
 
-	serviceHelperMessage.SendMessage(
+	go serviceHelperMessage.SendMessage(
 		&serviceHelperMessage.MessageRequest{
 			PusNotification: true,
 			Mail:            true,

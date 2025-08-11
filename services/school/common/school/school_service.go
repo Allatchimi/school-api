@@ -330,7 +330,7 @@ func (service *Service) UpdateDeploymentStatus(
 			Please check the system logs and try again, or contact support for assistance
 			`, updatedItem.Name)
 	}
-	serviceHelperMessage.SendMessage(
+	go serviceHelperMessage.SendMessage(
 		&serviceHelperMessage.MessageRequest{
 			Audience:        constants.NOTIFICATION_AUDIENCE_SCHOOL,
 			PusNotification: true,

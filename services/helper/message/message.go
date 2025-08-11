@@ -44,20 +44,17 @@ func SendMessage(
 	users []modelUser.User,
 ) {
 	if request == nil || len(users) < 1 {
+		helpers.Logger.Info("No users to send message! Skipped!")
 		return
 	}
 
 	helpers.Logger.Info("Preparing to send message to users: ", zap.Int("count", len(users)))
 
 	// Send push notification
-	go func() {
-		if !request.PusNotification || len(messageTitle) < 1 {
-			return
-		}
-
+	if request.PusNotification && len(messageTitle) > 0 {
 		createdAt := new(time.Time)
 		*createdAt = time.Now()
-		webpushConfig.SendPushNotificationToUserBulk(
+		go webpushConfig.SendPushNotificationToUserBulk(
 			users,
 			&webpushConfig.WebPushPayload{
 				Title:     messageTitle,
@@ -70,68 +67,55 @@ func SendMessage(
 			UserService.Repository,
 			NotificationService.Repository,
 		)
-	}()
-	// Send telegram
-	go func() {
-		if !request.Telegram {
-			return
-		}
+	}
 
-		if school == nil || school.Config == nil || len(school.Config.TelegramBotToken) < 1 ||
-			len(messageBody) < 1 {
-			return
-		}
-		telegramHelper.SendMessage(
+	// Send telegram
+	if request.Telegram && school != nil && school.Config != nil &&
+		len(school.Config.TelegramBotToken) > 0 && len(messageBody) > 0 {
+		go telegramHelper.SendMessage(
 			school.Config.TelegramBotToken,
 			messageBody,
 			users,
 		)
-	}()
-	// Send whatsapp
-	go func() {
-		if !request.Whatsapp {
-			return
-		}
+	}
 
-		if school == nil || school.Config == nil || len(school.Config.WhatsappToken) < 1 ||
-			len(school.Config.WhatsappPhoneID) < 1 || len(messageBody) < 1 {
-			return
-		}
-		whatsappHelper.SendMessage(
+	// Send whatsapp
+	if request.Whatsapp && school.Config != nil && len(school.Config.WhatsappToken) > 0 &&
+		len(school.Config.WhatsappPhoneID) > 0 && len(messageBody) > 0 {
+		go whatsappHelper.SendMessage(
 			school.Config.WhatsappToken,
 			school.Config.WhatsappPhoneID,
 			messageBody,
 			users,
 		)
-	}()
-	// Send mail
-	go func() {
-		if !request.PusNotification {
-			return
-		}
+	}
 
-		mailData := &smtpHelper.EmailData{
-			HomePageLink: school.WebsiteUrl(),
-			Logo:         school.LogoUrl(),
-			Title:        messageTitle,
-			Message:      messageBody,
-		}
-		mailBody, errTemplate := mailData.LoadTemplate()
-		if errTemplate != nil {
-			helpers.Logger.Error("Failed to load email template!", zap.Error(errTemplate))
-		}
-		if len(mailBody) < 1 {
-			helpers.Logger.Warn("Empty message body!")
-		}
-		mailUsers := make([]string, 0, len(users))
-		for _, user := range users {
-			if utils.IsEmailValid(user.Email) {
-				mailUsers = append(mailUsers, user.Email)
+	// Send mail
+	if request.PusNotification {
+		go func() {
+			mailData := &smtpHelper.EmailData{
+				HomePageLink: school.WebsiteUrl(),
+				Logo:         school.LogoUrl(),
+				Title:        messageTitle,
+				Message:      messageBody,
 			}
-		}
-		errMail := smtpHelper.SendEmailBCC(mailUsers, messageTitle, mailBody)
-		if errMail != nil {
-			helpers.Logger.Error("Failed to send mail!", zap.Error(errMail))
-		}
-	}()
+			mailBody, errTemplate := mailData.LoadTemplate()
+			if errTemplate != nil {
+				helpers.Logger.Error("Failed to load email template!", zap.Error(errTemplate))
+			}
+			if len(mailBody) < 1 {
+				helpers.Logger.Warn("Empty message body!")
+			}
+			mailUsers := make([]string, 0, len(users))
+			for _, user := range users {
+				if utils.IsEmailValid(user.Email) {
+					mailUsers = append(mailUsers, user.Email)
+				}
+			}
+			errMail := smtpHelper.SendEmailBCC(mailUsers, messageTitle, mailBody)
+			if errMail != nil {
+				helpers.Logger.Error("Failed to send mail!", zap.Error(errMail))
+			}
+		}()
+	}
 }
