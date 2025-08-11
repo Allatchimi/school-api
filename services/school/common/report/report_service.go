@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"api/common/constants"
-	"api/common/helpers"
 	"api/common/types"
 	serviceHelperFeature "api/services/helper/feature"
 	serviceHelperMessage "api/services/helper/message"
@@ -21,8 +20,6 @@ import (
 	"api/services/school/highschool/sequence"
 	"api/services/school/university/semester"
 	"api/services/school/university/unit"
-
-	"go.uber.org/zap"
 )
 
 type Service struct {
@@ -449,7 +446,6 @@ func (service *Service) UpdateTableStatus(
 		studentEnrollReq.LevelDomainID = result.LevelDomainID
 		userStudents, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
 		if errUsers != nil {
-			helpers.Logger.Error("Error getting users for student enroll", zap.Error(errUsers))
 			return
 		}
 		var title, message string

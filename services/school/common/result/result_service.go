@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"api/common/constants"
-	"api/common/helpers"
 	"api/common/types"
 	serviceHelperFeature "api/services/helper/feature"
 	serviceHelperMessage "api/services/helper/message"
@@ -16,8 +15,6 @@ import (
 	"api/services/school/common/result/model"
 	"api/services/school/common/student"
 	dataStudent "api/services/school/common/student/data"
-
-	"go.uber.org/zap"
 )
 
 type Service struct {
@@ -177,7 +174,6 @@ func (service *Service) CreateTable(
 		studentEnrollReq.UnitID = result.Exam.UnitID
 		userStudents, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
 		if errUsers != nil {
-			helpers.Logger.Error("Error getting users for student enroll", zap.Error(errUsers))
 			return
 		}
 		// Parents
@@ -188,7 +184,6 @@ func (service *Service) CreateTable(
 		parentEnrollReq.UnitID = result.Exam.UnitID
 		userParents, errUsers := serviceHelperUser.GetAllUserForParentStudent(parentEnrollReq)
 		if errUsers != nil {
-			helpers.Logger.Error("Error getting users for parent student", zap.Error(errUsers))
 			return
 		}
 		var title, message string
@@ -397,7 +392,6 @@ func (service *Service) UpdateTable(
 		studentEnrollReq.UnitID = result.Exam.UnitID
 		userStudents, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
 		if errUsers != nil {
-			helpers.Logger.Error("Error getting users for student enroll", zap.Error(errUsers))
 			return
 		}
 		// Parents
@@ -408,7 +402,6 @@ func (service *Service) UpdateTable(
 		parentEnrollReq.UnitID = result.Exam.UnitID
 		userParents, errUsers := serviceHelperUser.GetAllUserForParentStudent(parentEnrollReq)
 		if errUsers != nil {
-			helpers.Logger.Error("Error getting users for parent student", zap.Error(errUsers))
 			return
 		}
 		var title, message string

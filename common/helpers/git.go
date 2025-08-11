@@ -155,17 +155,8 @@ func GitPushSchoolDeployment(schoolID string, baseDir string, filesDir string) (
 }
 
 // GitPushDeletedSchoolDeployment pushes the deleted school files to the repository.
-func GitPushDeletedSchoolDeployment(schoolID string, baseDir string, folderToAdd *string) (err error) {
+func GitPushDeletedSchoolDeployment(schoolID string, baseDir string, folderToAdd string) (err error) {
 	repoDir := filepath.Join(baseDir, mRepoDir)
-
-	// Copy the generated deployment files into the cloned repo
-	if folderToAdd != nil && len(*folderToAdd) > 0 {
-		if err = utils.CopyDir(*folderToAdd, repoDir); err != nil {
-			errMsg := "Failed to copy deployment files!"
-			err = fmt.Errorf("%s: %s %s %s %w", errMsg, *folderToAdd, repoDir, err.Error(), err)
-			return
-		}
-	}
 
 	// Clone the repo into a directory
 	if err = config.GitDistributedLock(func() error {
@@ -188,6 +179,15 @@ func GitPushDeletedSchoolDeployment(schoolID string, baseDir string, folderToAdd
 		errMsg := "Failed to create .gitkeep file!"
 		err = fmt.Errorf("%s: %s %w", errMsg, filepath.Join(deletedSchoolDir, ".gitkeep"), err)
 		return
+	}
+
+	// Copy the generated deployment files into the cloned repo
+	if len(folderToAdd) > 0 {
+		if err = utils.CopyDir(folderToAdd, deletedSchoolDir); err != nil {
+			errMsg := "Failed to copy deployment files!"
+			err = fmt.Errorf("%s: %s %s %s %w", errMsg, folderToAdd, repoDir, err.Error(), err)
+			return
+		}
 	}
 
 	// Remove existing school from deploys folder

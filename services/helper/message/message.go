@@ -54,6 +54,7 @@ func SendMessage(
 		if !request.PusNotification || len(messageTitle) < 1 {
 			return
 		}
+
 		createdAt := new(time.Time)
 		*createdAt = time.Now()
 		webpushConfig.SendPushNotificationToUserBulk(
@@ -75,6 +76,7 @@ func SendMessage(
 		if !request.Telegram {
 			return
 		}
+
 		if school == nil || school.Config == nil || len(school.Config.TelegramBotToken) < 1 ||
 			len(messageBody) < 1 {
 			return
@@ -90,6 +92,7 @@ func SendMessage(
 		if !request.Whatsapp {
 			return
 		}
+
 		if school == nil || school.Config == nil || len(school.Config.WhatsappToken) < 1 ||
 			len(school.Config.WhatsappPhoneID) < 1 || len(messageBody) < 1 {
 			return
@@ -106,6 +109,7 @@ func SendMessage(
 		if !request.PusNotification {
 			return
 		}
+
 		mailData := &smtpHelper.EmailData{
 			HomePageLink: school.WebsiteUrl(),
 			Logo:         school.LogoUrl(),

@@ -40,7 +40,11 @@ func DeploySchool(school *model.School) (err error) {
 	defer os.RemoveAll(tempDir)
 
 	// Generate website URL
-	websiteURL := fmt.Sprintf("https://%s", school.Config.WebsiteDomainName)
+	protocol := "https"
+	if config.Env.AppEnv != "prod" {
+		protocol = "http"
+	}
+	websiteURL := fmt.Sprintf("%s://%s", protocol, school.Config.WebsiteDomainName)
 	// Generate API key using HMAC SHA256
 	apiKey, err := securityUtil.GenerateHMAC_SHA256_Base64URL(
 		fmt.Sprintf("%d", school.ID),
@@ -269,7 +273,7 @@ func DeleteSchoolDeployment(schoolID int64) (err error) {
 	}
 
 	// Push deployment to delete school
-	err = helpers.GitPushDeletedSchoolDeployment(fmt.Sprintf("%d", schoolID), tempDir, &deploymentStatusDir)
+	err = helpers.GitPushDeletedSchoolDeployment(fmt.Sprintf("%d", schoolID), tempDir, deploymentStatusDir)
 	if err != nil {
 		helpers.Logger.Error("Failed to push deleted school deployment!", zap.String("Error", err.Error()))
 		return

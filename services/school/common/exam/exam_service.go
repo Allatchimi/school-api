@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"api/common/constants"
-	"api/common/helpers"
 	"api/common/types"
 	serviceHelperFeature "api/services/helper/feature"
 	serviceHelperMessage "api/services/helper/message"
@@ -15,8 +14,6 @@ import (
 	dataParent "api/services/school/common/parent/data"
 	dataStudent "api/services/school/common/student/data"
 	dataTeacher "api/services/school/common/teacher/data"
-
-	"go.uber.org/zap"
 )
 
 type Service struct {
@@ -129,7 +126,6 @@ func (service *Service) Create(
 		teacherEnrollReq.UnitID = result.UnitID
 		userTeachers, errUsers := serviceHelperUser.GetAllUserForTeacherClassSubjectUnit(teacherEnrollReq)
 		if errUsers != nil {
-			helpers.Logger.Error("Error getting users for teacher class subject unit", zap.Error(errUsers))
 			return
 		}
 		// Students
@@ -140,7 +136,6 @@ func (service *Service) Create(
 		studentEnrollReq.UnitID = result.UnitID
 		userStudents, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
 		if errUsers != nil {
-			helpers.Logger.Error("Error getting users for student enroll", zap.Error(errUsers))
 			return
 		}
 		// Parents
@@ -151,7 +146,6 @@ func (service *Service) Create(
 		parentEnrollReq.UnitID = result.UnitID
 		userParents, errUsers := serviceHelperUser.GetAllUserForParentStudent(parentEnrollReq)
 		if errUsers != nil {
-			helpers.Logger.Error("Error getting users for parent student", zap.Error(errUsers))
 			return
 		}
 		var title, message string
@@ -362,6 +356,7 @@ func (service *Service) Update(
 		if foundItem.Status == result.Status {
 			return
 		}
+
 		// Teachers
 		teacherEnrollReq := &dataTeacher.GetAllTeacherClassSubjectUnitRequest{}
 		teacherEnrollReq.SchoolID = result.SchoolID
@@ -370,7 +365,6 @@ func (service *Service) Update(
 		teacherEnrollReq.UnitID = result.UnitID
 		userTeachers, errUsers := serviceHelperUser.GetAllUserForTeacherClassSubjectUnit(teacherEnrollReq)
 		if errUsers != nil {
-			helpers.Logger.Error("Error getting users for teacher class subject unit", zap.Error(errUsers))
 			return
 		}
 		// Students
@@ -381,7 +375,6 @@ func (service *Service) Update(
 		studentEnrollReq.UnitID = result.UnitID
 		userStudents, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
 		if errUsers != nil {
-			helpers.Logger.Error("Error getting users for student enroll", zap.Error(errUsers))
 			return
 		}
 		// Parents
@@ -392,7 +385,6 @@ func (service *Service) Update(
 		parentEnrollReq.UnitID = result.UnitID
 		userParents, errUsers := serviceHelperUser.GetAllUserForParentStudent(parentEnrollReq)
 		if errUsers != nil {
-			helpers.Logger.Error("Error getting users for parent student", zap.Error(errUsers))
 			return
 		}
 		var title, message string
@@ -444,7 +436,6 @@ func (service *Service) Update(
 			"",
 			allUsers,
 		)
-
 	}()
 	return
 }

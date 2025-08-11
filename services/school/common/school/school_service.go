@@ -304,46 +304,44 @@ func (service *Service) UpdateDeploymentStatus(
 	}
 
 	// Send message
-	go func() {
-		users, errUsers := serviceHelperSchool.GetAllUserByFeature(constants.FeatureAdmin)
-		if errUsers != nil || len(users) < 1 {
-			return
+	users, errUsers := serviceHelperSchool.GetAllUserByFeature(constants.FeatureAdmin)
+	if errUsers != nil || len(users) < 1 {
+		return
+	}
+	var title, message string
+	websiteUrl := ""
+	if updatedItem.Config != nil && len(updatedItem.Config.WebsiteDomainName) > 0 {
+		protocol := "https"
+		if config.Env.AppEnv != "prod" {
+			protocol = "http"
 		}
-		var title, message string
-		websiteUrl := ""
-		if updatedItem.Config != nil && len(updatedItem.Config.WebsiteDomainName) > 0 {
-			protocol := "https"
-			if config.Env.AppEnv != "prod" {
-				protocol = "http"
-			}
-			websiteUrl = fmt.Sprintf("%s://%s", protocol, updatedItem.Config.WebsiteDomainName)
-		}
-		switch updatedItem.Status {
-		case constants.SCHOOL_DEPLOYMENT_STATUS_DONE, constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES:
-			title = "Successfully deployed school " + updatedItem.Name
-			message = fmt.Sprintf(`
+		websiteUrl = fmt.Sprintf("%s://%s", protocol, updatedItem.Config.WebsiteDomainName)
+	}
+	switch updatedItem.Status {
+	case constants.SCHOOL_DEPLOYMENT_STATUS_DONE, constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES:
+		title = "Successfully deployed school " + updatedItem.Name
+		message = fmt.Sprintf(`
 			The school %s has been successfully deployed and is now ready for use. You can access it at %s.
 			`, updatedItem.Name, websiteUrl)
-		case constants.SCHOOL_DEPLOYMENT_STATUS_FAILED:
-			title = "Failed to deploy school " + updatedItem.Name
-			message = fmt.Sprintf(`
+	case constants.SCHOOL_DEPLOYMENT_STATUS_FAILED:
+		title = "Failed to deploy school " + updatedItem.Name
+		message = fmt.Sprintf(`
 			The deployment of school '%s' has failed due to technical issues. 
 			Please check the system logs and try again, or contact support for assistance
 			`, updatedItem.Name)
-		}
-		serviceHelperMessage.SendMessage(
-			&serviceHelperMessage.MessageRequest{
-				Audience:        constants.NOTIFICATION_AUDIENCE_SCHOOL,
-				PusNotification: true,
-				Mail:            true,
-			},
-			title,
-			message,
-			nil,
-			"",
-			users,
-		)
-	}()
+	}
+	serviceHelperMessage.SendMessage(
+		&serviceHelperMessage.MessageRequest{
+			Audience:        constants.NOTIFICATION_AUDIENCE_SCHOOL,
+			PusNotification: true,
+			Mail:            true,
+		},
+		title,
+		message,
+		nil,
+		"",
+		users,
+	)
 	return
 }
 
