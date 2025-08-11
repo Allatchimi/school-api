@@ -308,8 +308,11 @@ func (service *Service) UpdateDeploymentStatus(
 	if errUsers != nil || len(users) < 1 {
 		return
 	}
-	var title, message string
 	websiteUrl := ""
+	title := "Initialized deployment of school " + updatedItem.Name
+	message := fmt.Sprintf(`
+	The deployment of school '%s' has been initiated. It will be deployed as soon as possible(approx. 15 minutes)
+	`, updatedItem.Name)
 	if updatedItem.Config != nil && len(updatedItem.Config.WebsiteDomainName) > 0 {
 		protocol := "https"
 		if config.Env.AppEnv != "prod" {
@@ -328,11 +331,6 @@ func (service *Service) UpdateDeploymentStatus(
 		message = fmt.Sprintf(`
 			The deployment of school '%s' has failed due to technical issues. 
 			Please check the system logs and try again, or contact support for assistance
-			`, updatedItem.Name)
-	case constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED:
-		title = "Initialized deployment of school " + updatedItem.Name
-		message = fmt.Sprintf(`
-			The deployment of school '%s' has been initiated. It will be deployed as soon as possible(approx. 15 minutes)
 			`, updatedItem.Name)
 	case constants.SCHOOL_DEPLOYMENT_STATUS_PENDING:
 		title = "Pending deployment of school " + updatedItem.Name
