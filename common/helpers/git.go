@@ -60,11 +60,17 @@ func gitPush(repoDir string, commitMessage string, branch string) (err error) {
 // gitClone clones the repository into a directory.
 func gitClone(repoDir string, branch string, withSubmodules bool) (err error) {
 	Logger.Info("Cloning repository...")
+
+	parentDir := filepath.Dir(repoDir)
+	if err = os.MkdirAll(parentDir, 0755); err != nil {
+		return fmt.Errorf("Failed to create parent directory: %w", err)
+	}
+
 	var cloneCmd *exec.Cmd
 	if withSubmodules {
-		cloneCmd = newGitCommand("", "clone", "--recurse-submodules", config.Env.GitRepoSshUrl, repoDir)
+		cloneCmd = newGitCommand(parentDir, "clone", "--recurse-submodules", config.Env.GitRepoSshUrl, repoDir)
 	} else {
-		cloneCmd = newGitCommand("", "clone", config.Env.GitRepoSshUrl, repoDir)
+		cloneCmd = newGitCommand(parentDir, "clone", config.Env.GitRepoSshUrl, repoDir)
 	}
 	output, errClone := cloneCmd.CombinedOutput()
 	if errClone != nil {
