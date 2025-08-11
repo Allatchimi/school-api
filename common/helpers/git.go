@@ -34,7 +34,7 @@ func gitPush(repoDir string, commitMessage string, branch string) (err error) {
 	if output, errConfig := configNameCmd.CombinedOutput(); errConfig != nil {
 		return fmt.Errorf("Failed to set git user.name: %v, output: %s", errConfig, string(output))
 	}
-	configEmailCmd := newGitCommand(repoDir, "config", "user.email", config.Env.SmtpDomainName)
+	configEmailCmd := newGitCommand(repoDir, "config", "user.email", "github-actions[bot]@users.noreply.github.com")
 	if output, errConfig := configEmailCmd.CombinedOutput(); errConfig != nil {
 		return fmt.Errorf("Failed to set git user.email: %v, output: %s", errConfig, string(output))
 	}
