@@ -29,6 +29,16 @@ func newGitCommand(dir string, args ...string) *exec.Cmd {
 
 // gitPush pushes to the repository.
 func gitPush(repoDir string, commitMessage string, branch string) (err error) {
+	Logger.Info("Configuring Git user...")
+	configNameCmd := newGitCommand(repoDir, "config", "user.name", "Bot")
+	if output, errConfig := configNameCmd.CombinedOutput(); errConfig != nil {
+		return fmt.Errorf("Failed to set git user.name: %v, output: %s", errConfig, string(output))
+	}
+	configEmailCmd := newGitCommand(repoDir, "config", "user.email", config.Env.SmtpDomainName)
+	if output, errConfig := configEmailCmd.CombinedOutput(); errConfig != nil {
+		return fmt.Errorf("Failed to set git user.email: %v, output: %s", errConfig, string(output))
+	}
+
 	Logger.Info("Pushing changes to GitHub...")
 	commands := [][]string{
 		{"add", "."},
