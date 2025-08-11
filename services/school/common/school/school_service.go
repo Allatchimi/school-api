@@ -335,6 +335,8 @@ func (service *Service) UpdateDeploymentStatus(
 			Audience:        constants.NOTIFICATION_AUDIENCE_SCHOOL,
 			PusNotification: true,
 			Mail:            true,
+			Telegram:        true,
+			Whatsapp:        true,
 		},
 		title,
 		message,

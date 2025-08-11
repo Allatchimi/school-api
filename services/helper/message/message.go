@@ -48,7 +48,15 @@ func SendMessage(
 		return
 	}
 
-	helpers.Logger.Info("Preparing to send message to users: ", zap.Int("count", len(users)))
+	helpers.Logger.Info(
+		"Preparing to send message to users!",
+		zap.Int("count", len(users)),
+		zap.String("audience", request.Audience),
+		zap.Bool("pushNotification", request.PusNotification),
+		zap.Bool("telegram", request.Telegram),
+		zap.Bool("whatsapp", request.Whatsapp),
+		zap.Bool("mail", request.Mail),
+	)
 
 	// Send push notification
 	if request.PusNotification && len(messageTitle) > 0 {
