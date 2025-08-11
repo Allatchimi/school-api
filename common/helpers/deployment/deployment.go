@@ -248,7 +248,7 @@ func DeleteSchoolDeployment(schoolID int64) (err error) {
 		SchoolApiKey: apiKey,
 	}
 	deploymentStatusApiUrlData := DeploymentStatusApiUrlData{
-		ApiUrl: config.Env.ApiBaseURL,
+		ApiUrl: fmt.Sprintf("%s/schools/deployment/status", config.Env.ApiBaseURL),
 	}
 	// Generate deployment status files
 	if err = htmlHelper.RenderTemplate(filepath.Join(deploymentStatusDir, "schoolapikey.txt"), deploymentStatusSchoolApiKeyTemplateContent, deploymentStatusSchoolApiData); err != nil {

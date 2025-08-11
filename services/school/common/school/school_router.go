@@ -112,7 +112,7 @@ func RegisterEndpoints(
 			OperationID: "update-school-deployment-status",
 			Summary:     "Update school deployment status",
 			Description: "Update existing school deployment status with matching id and return the new school object.",
-			Method:      http.MethodPut,
+			Method:      http.MethodPost,
 			Path:        fmt.Sprintf("%s/deployment/status", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
 			Security: []map[string][]string{
