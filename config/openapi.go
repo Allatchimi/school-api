@@ -10,11 +10,10 @@ import (
 )
 
 type OpenAPITemplate struct {
-	Docs      []byte
-	Redocly   []byte
-	Scalar    []byte
-	Stoplight []byte
-	Swagger   []byte
+	Docs    []byte
+	Redocly []byte
+	Scalar  []byte
+	Swagger []byte
 }
 
 type OpenAPIDocsData struct {
@@ -60,12 +59,6 @@ func LoadOpenAPITemplates() (err error) {
 
 	// Scalar
 	OpenAPITemplates.Scalar, err = utils.ReadFile(constants.AssetOpenAPIPath + "/scalar.html")
-	if err != nil {
-		return
-	}
-
-	// Stoplight
-	OpenAPITemplates.Stoplight, err = utils.ReadFile(constants.AssetOpenAPIPath + "/stoplight.html")
 	if err != nil {
 		return
 	}

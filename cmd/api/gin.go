@@ -106,9 +106,6 @@ func StartGin() {
 	ginGroup.GET("/docs/redocly", func(ctx *gin.Context) {
 		ctx.Data(200, "text/html", config.OpenAPITemplates.Redocly)
 	})
-	ginGroup.GET("/docs/stoplight", func(ctx *gin.Context) {
-		ctx.Data(200, "text/html", config.OpenAPITemplates.Stoplight)
-	})
 	registerEndpoints(&humaApi)
 
 	// Start to listen
