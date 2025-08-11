@@ -2,14 +2,11 @@ package smtpHelper
 
 import (
 	"api/common/constants"
-	"api/common/helpers"
 	"bytes"
 	"fmt"
 	"html/template"
 	"os"
 	"path/filepath"
-
-	"go.uber.org/zap"
 )
 
 type EmailData struct {
@@ -31,12 +28,13 @@ func loadTemplate(templateFileName string, data any) (body []byte, err error) {
 		err = fmt.Errorf("%s", errMsg)
 		return
 	}
-	helpers.Logger.Info("Loading templates...")
+
+	// Get the absolute path of the executable
 	exePath, _ := os.Executable()
 	exeDir := filepath.Dir(exePath)
 	AssetMailPath := filepath.Join(exeDir, constants.AssetMailPath)
-	helpers.Logger.Info("Directory:", zap.String("Base DIR", exeDir))
 
+	// Parse files
 	tmpl, err := template.ParseFiles(
 		filepath.Join(AssetMailPath, "layout/base.html"),
 		filepath.Join(AssetMailPath, templateFileName),
