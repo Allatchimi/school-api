@@ -8,5 +8,6 @@ const (
 	AssetOpenAPIPath = AssetPrivatePath + "/templates/openapi"
 	AssetMailPath    = AssetPrivatePath + "/templates/mail"
 
-	AssetPublicAppPath = AssetPublicPath + "/app"
+	AssetPublicAppPath     = AssetPublicPath + "/app"
+	AssetPublicOpenApiPath = AssetPublicPath + "/openapi"
 )
