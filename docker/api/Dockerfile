@@ -35,10 +35,6 @@ RUN apt-get update && apt-get install -y \
     ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-# Update certificates
-COPY ./assets/private/keys/cert/hostup.crt /usr/local/share/ca-certificates/hostup.crt
-RUN update-ca-certificates
-
 # Copy the binary and assets to the container
 COPY --from=builder /app/.build/main ./main
 COPY --from=builder /app/assets ./assets
