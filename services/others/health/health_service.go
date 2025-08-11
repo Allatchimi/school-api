@@ -28,6 +28,15 @@ func (service *Service) HealthDepencencies(ctxData *types.ContextData) (result b
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("postgres")
 		result = false
+
+		// Retry to connect
+		errConnect := config.ConnectDatabase()
+		if errConnect != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage("reconnect postgres")
+			result = false
+			return
+		}
 		return
 	}
 
@@ -37,6 +46,15 @@ func (service *Service) HealthDepencencies(ctxData *types.ContextData) (result b
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("redis")
 		result = false
+
+		// Retry to connect
+		errConnect := config.ConnectRedis()
+		if errConnect != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage("reconnect redis")
+			result = false
+			return
+		}
 		return
 	}
 
