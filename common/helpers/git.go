@@ -227,12 +227,25 @@ func GitSetupSSHKey() error {
 		return fmt.Errorf("%s: %s %s %w", errMsg, sshDir, err.Error(), err)
 	}
 
-	// Write the private key to ~/.ssh/id_ed25519 with restrictive permissions
+	keyPathTmp := filepath.Join(sshDir, "id_ed25519.tmp")
 	keyPath := filepath.Join(sshDir, "id_ed25519")
-	if err := os.WriteFile(keyPath, []byte(privateKey), 0600); err != nil {
+
+	// Write the private key to ~/.ssh/id_ed25519 with restrictive permissions
+	if err := os.WriteFile(keyPathTmp, []byte(privateKey), 0600); err != nil {
 		errMsg := "Failed to write private SSH key!"
-		return fmt.Errorf("%s: %s %s %w", errMsg, keyPath, err.Error(), err)
+		return fmt.Errorf("%s: %s %s %w", errMsg, keyPathTmp, err.Error(), err)
 	}
+	// Cleanup the private key
+	cmdCleanup := exec.Command("awk", "NF", keyPathTmp)
+	output, err := cmdCleanup.Output()
+	if err != nil {
+		return fmt.Errorf("Failed to cleanup GitHub SSH key: %w", err)
+	}
+	err = os.WriteFile(keyPath, output, 0600)
+	if err != nil {
+		return fmt.Errorf("Failed to write cleaned key: %w", err)
+	}
+	os.Remove(keyPathTmp)
 
 	// Preload GitHub's SSH host key to known_hosts to avoid interactive prompts
 	if err := GitPreloadGitHubSSHKey(); err != nil {
