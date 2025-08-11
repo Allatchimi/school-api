@@ -15,6 +15,12 @@ func InjectServices(
 }
 
 func GetAllUserByFeature(feature string) (users []model.User, err error) {
-	users, err = UserService.Repository.GetAll(nil, nil, &dataUser.GetAllRequest{Feature: feature})
+	users, err = UserService.Repository.GetAll(
+		nil, nil,
+		&dataUser.GetAllRequest{
+			Feature:                feature,
+			RemoveAdminRestriction: true,
+		},
+	)
 	return
 }

@@ -481,8 +481,10 @@ func (repository *Repository) GetAll(
 	} else {
 		request = &data.GetAllRequest{}
 	}
-	where = helpers.AppendWhereClause(where, "roles.name <> ?")
-	args = append(args, config.Env.FixtureRoleAdmin)
+	if !request.RemoveAdminRestriction {
+		where = helpers.AppendWhereClause(where, "roles.name <> ?")
+		args = append(args, config.Env.FixtureRoleAdmin)
+	}
 
 	// Handle search filter securely
 	if filter != nil && len(filter.Search) > 0 {
