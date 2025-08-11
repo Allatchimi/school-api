@@ -26,7 +26,7 @@ ENV LANG=C.UTF-8
 WORKDIR /app
 
 # Install packages. openssh-client is needed for deployment
-RUN apk add --no-cache bash openssh-client git
+RUN apk add --no-cache bash openssh-client git nano
 
 # Copy the binary and assets to the container
 COPY --from=builder /app/.build/main ./main
