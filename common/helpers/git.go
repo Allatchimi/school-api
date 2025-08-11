@@ -258,7 +258,7 @@ func GitSetupSSHKey() error {
 // GitPreloadGitHubSSHKey adds GitHub's SSH host key to known_hosts to prevent prompt on first connection.
 func GitPreloadGitHubSSHKey() error {
 	// Evaluate and add GitHub's SSH key
-	cmdEval := exec.Command("eval", "\"$(ssh-agent -s)\"")
+	cmdEval := exec.Command("sh", "-c", "eval", "\"$(ssh-agent -s)\"")
 	_, errEval := cmdEval.Output()
 	if errEval != nil {
 		errMsg := "Failed to evaluate GitHub SSH key!"
