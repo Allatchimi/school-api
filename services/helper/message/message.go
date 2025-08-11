@@ -90,9 +90,18 @@ func SendMessage(
 	}
 
 	// Send whatsapp
-	if request.Whatsapp && school.Config != nil && len(school.Config.WhatsappToken) > 0 &&
-		len(school.Config.WhatsappPhoneID) > 0 && len(messageBody) > 0 {
-		helpers.Logger.Info("Sending whatsapp message!")
+	if request.Whatsapp &&
+		school != nil &&
+		school.Config != nil &&
+		len(school.Config.WhatsappToken) > 0 &&
+		len(school.Config.WhatsappPhoneID) > 0 &&
+		len(messageBody) > 0 &&
+		users != nil && len(users) > 0 {
+
+		helpers.Logger.Info("Sending whatsapp message!",
+			zap.String("phoneID", school.Config.WhatsappPhoneID),
+			zap.Int("userCount", len(users)),
+		)
 		go whatsappHelper.SendMessage(
 			school.Config.WhatsappToken,
 			school.Config.WhatsappPhoneID,
