@@ -142,6 +142,7 @@ func SendPushNotificationToUserBulk(
 				fmt.Sprintf("%d", user.ID),
 				&wsConfig.WSNotificationResponse{
 					ID:        fmt.Sprintf("%d", notification.ID),
+					Audience:  fmt.Sprintf("%d", user.ID),
 					Title:     notification.Title,
 					Message:   notification.Message,
 					Seen:      notification.Seen,

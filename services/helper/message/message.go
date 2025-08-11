@@ -17,6 +17,7 @@ import (
 )
 
 type MessageRequest struct {
+	Audience        string
 	PusNotification bool
 	Telegram        bool
 	Whatsapp        bool
@@ -46,55 +47,65 @@ func SendMessage(
 		return
 	}
 
-	helpers.Logger.Info("Preparing to send message to users: ", zap.Int("count", len(users)), zap.Any("data", users))
+	helpers.Logger.Info("Preparing to send message to users: ", zap.Int("count", len(users)))
 
 	// Send push notification
 	go func() {
-		if len(messageTitle) > 0 {
-			createdAt := new(time.Time)
-			*createdAt = time.Now()
-			webpushConfig.SendPushNotificationToUserBulk(
-				users,
-				&webpushConfig.WebPushPayload{
-					Title:     messageTitle,
-					Body:      messageBody,
-					Icon:      school.LogoUrl(),
-					Url:       school.WebsiteUrl() + urlPath,
-					CreatedAt: createdAt,
-				},
-				nil,
-				UserService.Repository,
-				NotificationService.Repository,
-			)
+		if !request.PusNotification || len(messageTitle) < 1 {
+			return
 		}
+		createdAt := new(time.Time)
+		*createdAt = time.Now()
+		webpushConfig.SendPushNotificationToUserBulk(
+			users,
+			&webpushConfig.WebPushPayload{
+				Title:     messageTitle,
+				Body:      messageBody,
+				Icon:      school.LogoUrl(),
+				Url:       school.WebsiteUrl() + urlPath,
+				CreatedAt: createdAt,
+			},
+			nil,
+			UserService.Repository,
+			NotificationService.Repository,
+		)
 	}()
 	// Send telegram
 	go func() {
-		if school != nil && school.Config != nil && len(school.Config.TelegramBotToken) > 0 {
-			if len(messageBody) > 1 {
-				telegramHelper.SendMessage(
-					school.Config.TelegramBotToken,
-					messageBody,
-					users,
-				)
-			}
+		if !request.Telegram {
+			return
 		}
+		if school == nil || school.Config == nil || len(school.Config.TelegramBotToken) < 1 ||
+			len(messageBody) < 1 {
+			return
+		}
+		telegramHelper.SendMessage(
+			school.Config.TelegramBotToken,
+			messageBody,
+			users,
+		)
 	}()
 	// Send whatsapp
 	go func() {
-		if school != nil && school.Config != nil && len(school.Config.WhatsappToken) > 0 && len(school.Config.WhatsappPhoneID) > 0 {
-			if len(messageBody) > 1 {
-				whatsappHelper.SendMessage(
-					school.Config.WhatsappToken,
-					school.Config.WhatsappPhoneID,
-					messageBody,
-					users,
-				)
-			}
+		if !request.Whatsapp {
+			return
 		}
+		if school == nil || school.Config == nil || len(school.Config.WhatsappToken) < 1 ||
+			len(school.Config.WhatsappPhoneID) < 1 || len(messageBody) < 1 {
+			return
+		}
+		whatsappHelper.SendMessage(
+			school.Config.WhatsappToken,
+			school.Config.WhatsappPhoneID,
+			messageBody,
+			users,
+		)
 	}()
 	// Send mail
 	go func() {
+		if !request.PusNotification {
+			return
+		}
 		mailData := &smtpHelper.EmailData{
 			HomePageLink: school.WebsiteUrl(),
 			Logo:         school.LogoUrl(),

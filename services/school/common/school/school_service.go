@@ -8,6 +8,7 @@ import (
 	deploymentHelper "api/common/helpers/deployment"
 	"api/common/types"
 	"api/common/utils"
+	"api/config"
 	serviceHelperMessage "api/services/helper/message"
 	serviceHelperSchool "api/services/helper/school"
 	"api/services/school/common/school/data"
@@ -111,13 +112,13 @@ func (service *Service) Create(
 	go func() {
 		err := deploymentHelper.DeploySchool(result)
 		if err != nil {
-			service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
+			service.UpdateDeploymentStatus(ctxData, result.ID, &data.SchoolDeploymentStatusRequest{
 				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_FAILED,
 				Feedback: fmt.Sprintf("Failed to deploy school! Error: %s", err.Error()),
 			})
 			return
 		}
-		service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
+		service.UpdateDeploymentStatus(ctxData, result.ID, &data.SchoolDeploymentStatusRequest{
 			Status:   constants.SCHOOL_DEPLOYMENT_STATUS_PENDING,
 			Feedback: "School deployment pushed to GitHub! Now waiting for deployment to complete.",
 		})
@@ -243,13 +244,13 @@ func (service *Service) Update(
 		if !(foundItem.IsSameDeploymentAsRequest(request) && foundItem.Config.IsSameDeploymentAsRequest(request.Config)) {
 			err := deploymentHelper.DeploySchool(result)
 			if err != nil {
-				service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
+				service.UpdateDeploymentStatus(ctxData, result.ID, &data.SchoolDeploymentStatusRequest{
 					Status:   constants.SCHOOL_DEPLOYMENT_STATUS_FAILED,
 					Feedback: fmt.Sprintf("Failed to deploy school! Error: %s", err.Error()),
 				})
 				return
 			}
-			service.Repository.UpdateDeploymentStatusByID(result.ID, &data.SchoolDeploymentStatusRequest{
+			service.UpdateDeploymentStatus(ctxData, result.ID, &data.SchoolDeploymentStatusRequest{
 				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_PENDING,
 				Feedback: "School deployment pushed to GitHub! Now waiting for deployment to complete.",
 			})
@@ -278,7 +279,6 @@ func (service *Service) UpdateDeploymentStatus(
 
 	// Delete school if deployment request is delete
 	if foundItem.DeploymentRequest == constants.SCHOOL_DEPLOYMENT_REQUEST_DELETE &&
-		foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_PENDING &&
 		(request.Status == constants.SCHOOL_DEPLOYMENT_STATUS_DONE ||
 			request.Status == constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES) {
 		_, err = service.Repository.DeleteByID(foundItem.ID)
@@ -312,15 +312,19 @@ func (service *Service) UpdateDeploymentStatus(
 		var title, message string
 		websiteUrl := ""
 		if updatedItem.Config != nil && len(updatedItem.Config.WebsiteDomainName) > 0 {
-			websiteUrl = fmt.Sprintf("https://%s", updatedItem.Config.WebsiteDomainName)
+			protocol := "https"
+			if config.Env.AppEnv != "prod" {
+				protocol = "http"
+			}
+			websiteUrl = fmt.Sprintf("%s://%s", protocol, updatedItem.Config.WebsiteDomainName)
 		}
 		switch updatedItem.Status {
-		case constants.SCHOOL_DEPLOYMENT_STATUS_FAILED:
+		case constants.SCHOOL_DEPLOYMENT_STATUS_DONE, constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES:
 			title = "Successfully deployed school " + updatedItem.Name
 			message = fmt.Sprintf(`
 			The school %s has been successfully deployed and is now ready for use. You can access it at %s.
 			`, updatedItem.Name, websiteUrl)
-		case constants.SCHOOL_DEPLOYMENT_STATUS_DONE, constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES:
+		case constants.SCHOOL_DEPLOYMENT_STATUS_FAILED:
 			title = "Failed to deploy school " + updatedItem.Name
 			message = fmt.Sprintf(`
 			The deployment of school '%s' has failed due to technical issues. 
@@ -329,6 +333,7 @@ func (service *Service) UpdateDeploymentStatus(
 		}
 		serviceHelperMessage.SendMessage(
 			&serviceHelperMessage.MessageRequest{
+				Audience:        constants.NOTIFICATION_AUDIENCE_SCHOOL,
 				PusNotification: true,
 				Mail:            true,
 			},
@@ -424,7 +429,7 @@ func (service *Service) Delete(
 	}
 
 	// Update deployment status
-	foundItem.DeploymentStatus = constants.SCHOOL_DEPLOYMENT_STATUS_PENDING
+	foundItem.DeploymentStatus = constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED
 	foundItem.DeploymentRequest = constants.SCHOOL_DEPLOYMENT_REQUEST_DELETE
 	foundItem.DeploymentFeedback = ""
 	service.Repository.UpdateByID(id, foundItem)
@@ -433,13 +438,13 @@ func (service *Service) Delete(
 	go func() {
 		err := deploymentHelper.DeleteSchoolDeployment(id)
 		if err != nil {
-			service.Repository.UpdateDeploymentStatusByID(id, &data.SchoolDeploymentStatusRequest{
+			service.UpdateDeploymentStatus(ctxData, id, &data.SchoolDeploymentStatusRequest{
 				Status:   constants.SCHOOL_DEPLOYMENT_STATUS_FAILED,
 				Feedback: fmt.Sprintf("Failed to delete school! %s", err.Error()),
 			})
 			return
 		}
-		service.Repository.UpdateDeploymentStatusByID(id, &data.SchoolDeploymentStatusRequest{
+		service.UpdateDeploymentStatus(ctxData, id, &data.SchoolDeploymentStatusRequest{
 			Status:   constants.SCHOOL_DEPLOYMENT_STATUS_PENDING,
 			Feedback: "Deleted school deployment pushed to GitHub! Now waiting for deletion to complete.",
 		})

@@ -99,7 +99,8 @@ export const COLOR_SCHEMES = [
 `
 
 	// Deployment status templates
-	deploymentStatusTemplateContent = `{{ .SchoolApiKey }}`
+	deploymentStatusSchoolApiKeyTemplateContent = `{{ .SchoolApiKey }}`
+	deploymentStatusApiUrlTemplateContent       = `{{ .ApiUrl }}`
 
 	// Kubernetes templates
 	kubernetesWebsiteDomainNameTemplateContent = `{{ .WebsiteDomainName }}`
@@ -145,6 +146,10 @@ type SmtpSelectorData struct {
 	SmtpSelector string
 }
 
-type DeploymentStatusData struct {
+type DeploymentStatusSchoolApiKeyData struct {
 	SchoolApiKey string
+}
+
+type DeploymentStatusApiUrlData struct {
+	ApiUrl string
 }

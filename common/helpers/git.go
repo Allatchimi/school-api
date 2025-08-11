@@ -14,9 +14,9 @@ import (
 )
 
 const (
-	repoDir            = ".repository"
-	deployedSchoolsDir = "deployed"
-	deletedSchoolsDir  = "deleted"
+	mRepoDir            = ".repository"
+	mDeployedSchoolsDir = "deployed"
+	mDeletedSchoolsDir  = "deleted"
 )
 
 // gitPush pushes to the repository.
@@ -97,7 +97,7 @@ func gitPull(repoDir string, branch string) (err error) {
 
 // GitPushSchoolDeployment pushes the generated files to the repository.
 func GitPushSchoolDeployment(schoolID string, baseDir string, filesDir string) (err error) {
-	repoDir := filepath.Join(baseDir, repoDir)
+	repoDir := filepath.Join(baseDir, mRepoDir)
 	os.RemoveAll(repoDir)
 
 	// Clone the repo into a directory
@@ -117,7 +117,7 @@ func GitPushSchoolDeployment(schoolID string, baseDir string, filesDir string) (
 
 	// Define source and destination directories for the school deployment files
 	srcDir := filepath.Join(filesDir)
-	dstDir := filepath.Join(repoDir, deployedSchoolsDir)
+	dstDir := filepath.Join(repoDir, mDeployedSchoolsDir)
 
 	// Ensure the parent directory exists
 	if err = os.MkdirAll(dstDir, os.ModePerm); err != nil {
@@ -129,7 +129,7 @@ func GitPushSchoolDeployment(schoolID string, baseDir string, filesDir string) (
 	// Remove existing school files to have a clean directory
 	os.RemoveAll(filepath.Join(dstDir, schoolID))
 	// Remove school from deleted folder
-	os.RemoveAll(filepath.Join(repoDir, deletedSchoolsDir, schoolID))
+	os.RemoveAll(filepath.Join(repoDir, mDeletedSchoolsDir, schoolID))
 
 	// Copy the generated deployment files into the cloned repo
 	if err = utils.CopyDir(srcDir, dstDir); err != nil {
@@ -155,8 +155,17 @@ func GitPushSchoolDeployment(schoolID string, baseDir string, filesDir string) (
 }
 
 // GitPushDeletedSchoolDeployment pushes the deleted school files to the repository.
-func GitPushDeletedSchoolDeployment(schoolID string, baseDir string) (err error) {
-	repoDir := filepath.Join(baseDir, repoDir)
+func GitPushDeletedSchoolDeployment(schoolID string, baseDir string, folderToAdd *string) (err error) {
+	repoDir := filepath.Join(baseDir, mRepoDir)
+
+	// Copy the generated deployment files into the cloned repo
+	if folderToAdd != nil && len(*folderToAdd) > 0 {
+		if err = utils.CopyDir(*folderToAdd, repoDir); err != nil {
+			errMsg := "Failed to copy deployment files!"
+			err = fmt.Errorf("%s: %s %s %s %w", errMsg, *folderToAdd, repoDir, err.Error(), err)
+			return
+		}
+	}
 
 	// Clone the repo into a directory
 	if err = config.GitDistributedLock(func() error {
@@ -173,7 +182,7 @@ func GitPushDeletedSchoolDeployment(schoolID string, baseDir string) (err error)
 	}
 
 	// Add school to deleted folder by creating a directory and adding a .gitkeep file
-	deletedSchoolDir := filepath.Join(repoDir, deletedSchoolsDir, schoolID)
+	deletedSchoolDir := filepath.Join(repoDir, mDeletedSchoolsDir, schoolID)
 	os.MkdirAll(deletedSchoolDir, os.ModePerm)
 	if err = os.WriteFile(filepath.Join(deletedSchoolDir, ".gitkeep"), nil, os.ModePerm); err != nil {
 		errMsg := "Failed to create .gitkeep file!"
@@ -182,7 +191,7 @@ func GitPushDeletedSchoolDeployment(schoolID string, baseDir string) (err error)
 	}
 
 	// Remove existing school from deploys folder
-	deployedSchoolDir := filepath.Join(repoDir, deployedSchoolsDir, schoolID)
+	deployedSchoolDir := filepath.Join(repoDir, mDeployedSchoolsDir, schoolID)
 	os.RemoveAll(deployedSchoolDir)
 
 	// Change working directory to the cloned repo for git operations

@@ -9,5 +9,5 @@ const (
 
 const (
 	REQUEST_AUDIENCE_ADMIN   = "admin"
-	REQUEST_AUDIENCE_TEACHER = "TEACHER"
+	REQUEST_AUDIENCE_TEACHER = "teacher"
 )

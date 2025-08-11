@@ -25,8 +25,8 @@ ENV LANG=C.UTF-8
 
 WORKDIR /app
 
-# Install packages
-RUN apk add bash
+# Install packages. openssh-client is needed for deployment
+RUN apk add --no-cache bash openssh-client
 
 # Copy the binary and assets to the container
 COPY --from=builder /app/.build/main ./main

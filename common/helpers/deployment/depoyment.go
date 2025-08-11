@@ -79,8 +79,11 @@ func DeploySchool(school *model.School) (err error) {
 		PrimaryBgHover: school.Config.ColorPrimaryBgHover,
 	}
 	// Generate deployment status data
-	deploymentStatusData := DeploymentStatusData{
+	deploymentStatusSchoolApiData := DeploymentStatusSchoolApiKeyData{
 		SchoolApiKey: apiKey,
+	}
+	deploymentStatusApiUrlData := DeploymentStatusApiUrlData{
+		ApiUrl: fmt.Sprintf("%s%s", config.Env.ApiBaseURL, config.Env.ApiGroup),
 	}
 	// Generate deployment data
 	kubernetesDeploymentData := KubernetesWebsiteDomainNameData{
@@ -100,6 +103,7 @@ func DeploySchool(school *model.School) (err error) {
 	// Define output directory structure
 	outputDir := filepath.Join(tempDir, fmt.Sprintf("%d", school.ID))
 	deploymentDir := filepath.Join(outputDir, "deployment")
+	deploymentStatusDir := filepath.Join(deploymentDir, "status")
 	deploymentKubernetesDir := filepath.Join(deploymentDir, "kubernetes")
 	deploymentSmtpDir := filepath.Join(deploymentDir, "smtp")
 	websiteDir := filepath.Join(outputDir, "website")
@@ -107,7 +111,7 @@ func DeploySchool(school *model.School) (err error) {
 	faviconDir := filepath.Join(websiteDir, "src", "app")
 	logosDir := filepath.Join(websiteDir, "public", "assets", "images", "logos")
 	// Create required directories
-	for _, dir := range []string{outputDir, deploymentDir, deploymentKubernetesDir, deploymentSmtpDir, websiteDir, colorDir, faviconDir, logosDir} {
+	for _, dir := range []string{outputDir, deploymentDir, deploymentStatusDir, deploymentKubernetesDir, deploymentSmtpDir, websiteDir, colorDir, faviconDir, logosDir} {
 		if err = os.MkdirAll(dir, os.ModePerm); err != nil {
 			errMsg := "Failed to create directory!"
 			err = fmt.Errorf("%s: %s %w", errMsg, dir, err)
@@ -126,9 +130,14 @@ func DeploySchool(school *model.School) (err error) {
 		return
 	}
 	// Generate deployment status files
-	if err = htmlHelper.RenderTemplate(filepath.Join(deploymentDir, "status.txt"), deploymentStatusTemplateContent, deploymentStatusData); err != nil {
+	if err = htmlHelper.RenderTemplate(filepath.Join(deploymentStatusDir, "schoolapikey.txt"), deploymentStatusSchoolApiKeyTemplateContent, deploymentStatusSchoolApiData); err != nil {
 		errMsg := "Failed to render template!"
-		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentDir, "status.txt"), deploymentStatusTemplateContent, err)
+		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentStatusDir, "schoolapikey.txt"), deploymentStatusSchoolApiKeyTemplateContent, err)
+		return
+	}
+	if err = htmlHelper.RenderTemplate(filepath.Join(deploymentStatusDir, "apiurl.txt"), deploymentStatusApiUrlTemplateContent, deploymentStatusApiUrlData); err != nil {
+		errMsg := "Failed to render template!"
+		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentStatusDir, "apiurl.txt"), deploymentStatusApiUrlTemplateContent, err)
 		return
 	}
 	// Generate kubernetes deployment files
@@ -194,6 +203,23 @@ func DeleteSchoolDeployment(schoolID int64) (err error) {
 		return
 	}
 
+	// Generate API key using HMAC SHA256
+	apiKey, err := securityUtil.GenerateHMAC_SHA256_Base64URL(
+		fmt.Sprintf("%d", schoolID),
+		config.Env.SchoolApiSecret,
+	)
+	if err != nil {
+		errMsg := "Failed to generate API key!"
+		err = fmt.Errorf("%s! Error: %s", errMsg, err.Error())
+		return
+	}
+	if len(apiKey) < 1 {
+		errMsg := "API key is empty!"
+		err = fmt.Errorf("%s", errMsg)
+		return
+	}
+	helpers.Logger.Info("API key generated successfully.", zap.String("API Key", apiKey))
+
 	// Create temp directory
 	tempDir, err := os.MkdirTemp("", baseDir)
 	if err != nil {
@@ -202,6 +228,35 @@ func DeleteSchoolDeployment(schoolID int64) (err error) {
 		return
 	}
 	defer os.RemoveAll(tempDir)
+
+	// Define output directory structure
+	deploymentStatusDir := filepath.Join(tempDir, "status")
+	// Create required directories
+	for _, dir := range []string{deploymentStatusDir} {
+		if err = os.MkdirAll(dir, os.ModePerm); err != nil {
+			errMsg := "Failed to create directory!"
+			err = fmt.Errorf("%s: %s %w", errMsg, dir, err)
+			return
+		}
+	}
+	// Generate deployment status data
+	deploymentStatusSchoolApiData := DeploymentStatusSchoolApiKeyData{
+		SchoolApiKey: apiKey,
+	}
+	deploymentStatusApiUrlData := DeploymentStatusApiUrlData{
+		ApiUrl: config.Env.ApiBaseURL,
+	}
+	// Generate deployment status files
+	if err = htmlHelper.RenderTemplate(filepath.Join(deploymentStatusDir, "schoolapikey.txt"), deploymentStatusSchoolApiKeyTemplateContent, deploymentStatusSchoolApiData); err != nil {
+		errMsg := "Failed to render template!"
+		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentStatusDir, "schoolapikey.txt"), deploymentStatusSchoolApiKeyTemplateContent, err)
+		return
+	}
+	if err = htmlHelper.RenderTemplate(filepath.Join(deploymentStatusDir, "apiurl.txt"), deploymentStatusApiUrlTemplateContent, deploymentStatusApiUrlData); err != nil {
+		errMsg := "Failed to render template!"
+		err = fmt.Errorf("%s: %s %s %w", errMsg, filepath.Join(deploymentStatusDir, "apiurl.txt"), deploymentStatusApiUrlTemplateContent, err)
+		return
+	}
 
 	// Setup SSH key
 	if runtime.GOOS != "windows" {
@@ -214,7 +269,7 @@ func DeleteSchoolDeployment(schoolID int64) (err error) {
 	}
 
 	// Push deployment to delete school
-	err = helpers.GitPushDeletedSchoolDeployment(fmt.Sprintf("%d", schoolID), tempDir)
+	err = helpers.GitPushDeletedSchoolDeployment(fmt.Sprintf("%d", schoolID), tempDir, &deploymentStatusDir)
 	if err != nil {
 		helpers.Logger.Error("Failed to push deleted school deployment!", zap.String("Error", err.Error()))
 		return

@@ -23,6 +23,7 @@ type Client struct {
 
 type WSNotificationResponse struct {
 	ID        string `json:"id"`
+	Audience  string `json:"audience"`
 	Title     string `json:"title"`
 	Message   string `json:"message"`
 	Href      string `json:"href"`
