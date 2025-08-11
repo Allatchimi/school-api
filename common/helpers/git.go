@@ -244,7 +244,13 @@ func GitSetupSSHKey() error {
 
 // GitPreloadGitHubSSHKey adds GitHub's SSH host key to known_hosts to prevent prompt on first connection.
 func GitPreloadGitHubSSHKey() error {
-	// Add GitHub's SSH key to ssh-agent
+	// Evaluate and add GitHub's SSH key
+	cmdEval := exec.Command("eval", "\"$(ssh-agent -s)\"")
+	_, errEval := cmdEval.Output()
+	if errEval != nil {
+		errMsg := "Failed to evaluate GitHub SSH key!"
+		return fmt.Errorf("%s: %s %s %w", errMsg, "github.com", errEval.Error(), errEval)
+	}
 	cmdAgent := exec.Command("ssh-add", "/root/.ssh/id_ed25519")
 	_, errAgent := cmdAgent.Output()
 	if errAgent != nil {
