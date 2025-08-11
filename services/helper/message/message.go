@@ -62,6 +62,7 @@ func SendMessage(
 	if request.PusNotification && len(messageTitle) > 0 {
 		createdAt := new(time.Time)
 		*createdAt = time.Now()
+		helpers.Logger.Info("Sending push notification message!")
 		go webpushConfig.SendPushNotificationToUserBulk(
 			users,
 			&webpushConfig.WebPushPayload{
@@ -80,6 +81,7 @@ func SendMessage(
 	// Send telegram
 	if request.Telegram && school != nil && school.Config != nil &&
 		len(school.Config.TelegramBotToken) > 0 && len(messageBody) > 0 {
+		helpers.Logger.Info("Sending telegram message!")
 		go telegramHelper.SendMessage(
 			school.Config.TelegramBotToken,
 			messageBody,
@@ -90,6 +92,7 @@ func SendMessage(
 	// Send whatsapp
 	if request.Whatsapp && school.Config != nil && len(school.Config.WhatsappToken) > 0 &&
 		len(school.Config.WhatsappPhoneID) > 0 && len(messageBody) > 0 {
+		helpers.Logger.Info("Sending whatsapp message!")
 		go whatsappHelper.SendMessage(
 			school.Config.WhatsappToken,
 			school.Config.WhatsappPhoneID,
@@ -101,6 +104,7 @@ func SendMessage(
 	// Send mail
 	if request.Mail {
 		go func() {
+			helpers.Logger.Info("Sending mail!")
 			mailData := &smtpHelper.EmailData{
 				HomePageLink: school.WebsiteUrl(),
 				Logo:         school.LogoUrl(),
