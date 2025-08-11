@@ -99,7 +99,7 @@ func SendMessage(
 	}
 
 	// Send mail
-	if request.PusNotification {
+	if request.Mail {
 		go func() {
 			mailData := &smtpHelper.EmailData{
 				HomePageLink: school.WebsiteUrl(),
