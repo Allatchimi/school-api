@@ -244,12 +244,20 @@ func GitSetupSSHKey() error {
 
 // GitPreloadGitHubSSHKey adds GitHub's SSH host key to known_hosts to prevent prompt on first connection.
 func GitPreloadGitHubSSHKey() error {
+	// Add GitHub's SSH key to ssh-agent
+	cmdAgent := exec.Command("ssh-add", "/root/.ssh/id_ed25519")
+	_, errAgent := cmdAgent.Output()
+	if errAgent != nil {
+		errMsg := "Failed to add GitHub SSH key to ssh-agent!"
+		return fmt.Errorf("%s: %s %s %w", errMsg, "github.com", errAgent.Error(), errAgent)
+	}
+
 	// Use ssh-keyscan to fetch GitHub's SSH public key fingerprint
-	cmd := exec.Command("ssh-keyscan", "github.com")
-	output, err := cmd.Output()
-	if err != nil {
+	cmdScan := exec.Command("ssh-keyscan", "github.com")
+	outputScan, errScan := cmdScan.Output()
+	if errScan != nil {
 		errMsg := "Failed to scan GitHub SSH key!"
-		return fmt.Errorf("%s: %s %s %w", errMsg, "github.com", err.Error(), err)
+		return fmt.Errorf("%s: %s %s %w", errMsg, "github.com", errScan.Error(), errScan)
 	}
 
 	// Append GitHub's SSH key to known_hosts file (creating it if necessary)
@@ -261,7 +269,7 @@ func GitPreloadGitHubSSHKey() error {
 	}
 	defer file.Close()
 
-	if _, err := file.Write(output); err != nil {
+	if _, err := file.Write(outputScan); err != nil {
 		errMsg := "Failed to write to known_hosts!"
 		return fmt.Errorf("%s: %s %s %w", errMsg, knownHostsPath, err.Error(), err)
 	}
