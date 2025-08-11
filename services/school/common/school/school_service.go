@@ -329,6 +329,16 @@ func (service *Service) UpdateDeploymentStatus(
 			The deployment of school '%s' has failed due to technical issues. 
 			Please check the system logs and try again, or contact support for assistance
 			`, updatedItem.Name)
+	case constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED:
+		title = "Initialized deployment of school " + updatedItem.Name
+		message = fmt.Sprintf(`
+			The deployment of school '%s' has been initiated. It will be deployed as soon as possible(approx. 15 minutes)
+			`, updatedItem.Name)
+	case constants.SCHOOL_DEPLOYMENT_STATUS_PENDING:
+		title = "Pending deployment of school " + updatedItem.Name
+		message = fmt.Sprintf(`
+			The deployment of school '%s' is pending. Approximately 10 minutes to deploy
+			`, updatedItem.Name)
 	}
 	go serviceHelperMessage.SendMessage(
 		&serviceHelperMessage.MessageRequest{
