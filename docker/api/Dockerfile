@@ -20,13 +20,20 @@ RUN GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o ./.build/main ./cm
 
 # ----------------------- Stage serve -----------------------
 
-FROM alpine:latest AS api
+FROM ubuntu:24.04 AS api
 ENV LANG=C.UTF-8
 
 WORKDIR /app
 
 # Install packages. openssh-client is needed for deployment
-RUN apk add --no-cache bash openssh-client git nano gawk
+RUN apt-get update && apt-get install -y \
+    bash \
+    openssh-client \
+    git \
+    nano \
+    gawk \
+    ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy the binary and assets to the container
 COPY --from=builder /app/.build/main ./main

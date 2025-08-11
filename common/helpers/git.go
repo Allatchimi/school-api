@@ -19,20 +19,28 @@ const (
 	mDeletedSchoolsDir  = "deleted"
 )
 
+func newGitCommand(dir string, args ...string) *exec.Cmd {
+	cmd := exec.Command("git", args...)
+	cmd.Dir = dir
+	cmd.Env = append(os.Environ(),
+		`GIT_SSH_COMMAND=ssh -i /root/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes`)
+	return cmd
+}
+
 // gitPush pushes to the repository.
 func gitPush(repoDir string, commitMessage string, branch string) (err error) {
 	Logger.Info("Pushing changes to GitHub...")
 	commands := [][]string{
-		{"git", "add", "."},
-		{"git", "commit", "-m", commitMessage},
-		{"git", "push", "origin", branch},
+		{"add", "."},
+		{"commit", "-m", commitMessage},
+		{"push", "origin", branch},
 	}
 	for _, args := range commands {
-		commitCmd := exec.Command(args[0], args[1:]...)
-		commitCmd.Dir = repoDir
-		if errCommit := commitCmd.Run(); errCommit != nil {
+		commitCmd := newGitCommand(repoDir, args...)
+		output, errCommit := commitCmd.CombinedOutput()
+		if errCommit != nil {
 			errMsg := "Failed to push changes to GitHub!"
-			err = fmt.Errorf("%s: %s %w", errMsg, errCommit.Error(), errCommit)
+			err = fmt.Errorf("%s: %s\nGit output:\n%s", errMsg, errCommit.Error(), string(output))
 			return
 		}
 	}
@@ -42,54 +50,49 @@ func gitPush(repoDir string, commitMessage string, branch string) (err error) {
 // gitClone clones the repository into a directory.
 func gitClone(repoDir string, branch string, withSubmodules bool) (err error) {
 	Logger.Info("Cloning repository...")
+	var cloneCmd *exec.Cmd
 	if withSubmodules {
-		if err = exec.Command(
-			"git", "clone", "--recurse-submodules", config.Env.GitRepoSshUrl, repoDir,
-		).Run(); err != nil {
-			errMsg := "Failed to clone repo!"
-			err = fmt.Errorf("%s: %s %s %w", errMsg, repoDir, err.Error(), err)
-			return
-		}
+		cloneCmd = newGitCommand("", "clone", "--recurse-submodules", config.Env.GitRepoSshUrl, repoDir)
 	} else {
-		if err = exec.Command(
-			"git", "clone", config.Env.GitRepoSshUrl, repoDir,
-		).Run(); err != nil {
-			errMsg := "Failed to clone repo!"
-			err = fmt.Errorf("%s: %s %s %w", errMsg, repoDir, err.Error(), err)
-			return
-		}
+		cloneCmd = newGitCommand("", "clone", config.Env.GitRepoSshUrl, repoDir)
+	}
+	output, errClone := cloneCmd.CombinedOutput()
+	if errClone != nil {
+		errMsg := "Failed to clone repo!"
+		err = fmt.Errorf("%s: %s %s\nGit output:\n%s", errMsg, repoDir, errClone.Error(), string(output))
+		return
 	}
 
-	// Switch to the specified branch
-	if len(branch) < 1 {
-		branch = "main" // Default branch if not specified
+	if branch == "" {
+		branch = "main"
 	}
+
 	Logger.Info("Checking out repository...")
-	checkoutCmd := exec.Command("git", "checkout", branch)
-	checkoutCmd.Dir = repoDir
-	if outCheckout, errCheckout := checkoutCmd.CombinedOutput(); errCheckout != nil {
+	checkoutCmd := newGitCommand(repoDir, "checkout", branch)
+	outCheckout, errCheckout := checkoutCmd.CombinedOutput()
+	if errCheckout != nil {
 		Logger.Warn("Failed to switch to git branch! Creating branch and switching to branch instead...", zap.String("gitOutput", string(outCheckout)))
-		createBranchCmd := exec.Command("git", "checkout", "-b", branch)
-		createBranchCmd.Dir = repoDir
-		if outCreate, errCreate := createBranchCmd.CombinedOutput(); errCreate != nil {
+		createBranchCmd := newGitCommand(repoDir, "checkout", "-b", branch)
+		outCreate, errCreate := createBranchCmd.CombinedOutput()
+		if errCreate != nil {
 			errMsg := "Failed to create and switch to git branch!"
 			Logger.Error(errMsg, zap.String("git output", string(outCreate)))
-			err = fmt.Errorf("%s: %s\nGit output: %s", errMsg, branch, string(outCreate))
+			err = fmt.Errorf("%s: %s\nGit output:\n%s", errMsg, branch, string(outCreate))
 			return
 		}
 	}
 	return
 }
 
-// gitClone clones the repository into a directory.
+// gitPull pulls latest changes from remote.
 func gitPull(repoDir string, branch string) (err error) {
 	Logger.Info("Pulling repository...")
-	pullCmd := exec.Command("git", "pull", "origin", branch)
-	pullCmd.Dir = repoDir
-	if outPull, errPull := pullCmd.CombinedOutput(); errPull != nil {
+	pullCmd := newGitCommand(repoDir, "pull", "origin", branch)
+	outPull, errPull := pullCmd.CombinedOutput()
+	if errPull != nil {
 		errMsg := "Failed to pull git changes!"
 		Logger.Error(errMsg, zap.String("git output", string(outPull)))
-		err = fmt.Errorf("%s: %s\nGit output: %s", errMsg, branch, string(outPull))
+		err = fmt.Errorf("%s: %s\nGit output:\n%s", errMsg, branch, string(outPull))
 		return
 	}
 	return
@@ -257,20 +260,6 @@ func GitSetupSSHKey() error {
 
 // GitPreloadGitHubSSHKey adds GitHub's SSH host key to known_hosts to prevent prompt on first connection.
 func GitPreloadGitHubSSHKey() error {
-	// Evaluate and add GitHub's SSH key
-	cmdEval := exec.Command("sh", "-c", "eval", "\"$(ssh-agent -s)\"")
-	_, errEval := cmdEval.Output()
-	if errEval != nil {
-		errMsg := "Failed to evaluate GitHub SSH key!"
-		return fmt.Errorf("%s: %s %s %w", errMsg, "github.com", errEval.Error(), errEval)
-	}
-	cmdAgent := exec.Command("ssh-add", "/root/.ssh/id_ed25519")
-	_, errAgent := cmdAgent.Output()
-	if errAgent != nil {
-		errMsg := "Failed to add GitHub SSH key to ssh-agent!"
-		return fmt.Errorf("%s: %s %s %w", errMsg, "github.com", errAgent.Error(), errAgent)
-	}
-
 	// Use ssh-keyscan to fetch GitHub's SSH public key fingerprint
 	cmdScan := exec.Command("ssh-keyscan", "github.com")
 	outputScan, errScan := cmdScan.Output()
