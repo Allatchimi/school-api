@@ -41,8 +41,6 @@ func RegisterEndpoints(
 							constants.FeatureAdmin,
 							constants.FeatureDirector,
 						), // Feature
-						tableName,                // Table name
-						constants.PermissionRead, // Operation
 					},
 				},
 			},

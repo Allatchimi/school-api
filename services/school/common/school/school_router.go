@@ -128,7 +128,6 @@ func RegisterEndpoints(
 		func(
 			ctx context.Context,
 			input *struct {
-				data.SchoolID
 				Body data.SchoolDeploymentStatusRequest
 			},
 		) (*struct{ Body types.DefaultResponse }, error) {

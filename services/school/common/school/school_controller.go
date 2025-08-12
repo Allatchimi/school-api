@@ -34,13 +34,13 @@ func (controller *Controller) Create(
 func (controller *Controller) UpdateDeploymentStatus(
 	ctx *context.Context,
 	input *struct {
-		data.SchoolID
 		Body data.SchoolDeploymentStatusRequest
 	},
 ) (errCode int, err error) {
+	ctxData := httpHelper.GetContextData(ctx)
 	errCode, err = controller.Service.UpdateDeploymentStatus(
-		httpHelper.GetContextData(ctx),
-		input.ID,
+		ctxData,
+		ctxData.Jwt.SchoolID,
 		&input.Body,
 	)
 	return
