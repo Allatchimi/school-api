@@ -144,15 +144,6 @@ func (service *Service) Update(
 		return
 	}
 
-	// Check if the deployment status is pending
-	if (foundItem.DeploymentRequest == constants.SCHOOL_DEPLOYMENT_REQUEST_CREATE || foundItem.DeploymentRequest == constants.SCHOOL_DEPLOYMENT_REQUEST_UPDATE) &&
-		(foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED ||
-			foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_PENDING) {
-		errCode = http.StatusLocked
-		err = constants.Http423LockedErrorMessage()
-		return
-	}
-
 	// Format request
 	item := &model.School{
 		Name:               request.Name,
@@ -182,6 +173,20 @@ func (service *Service) Update(
 		errCode = http.StatusFound
 		err = constants.Http302ErrorMessage(MODEL_NAME)
 		return
+	}
+
+	// Check if it is the same deployment
+	if foundItem.IsSameDeploymentAsRequest(request) && foundItem.Config.IsSameDeploymentAsRequest(request.Config) {
+		item.DeploymentStatus = constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES
+	} else {
+		// Check if the deployment status is pending
+		if (foundItem.DeploymentRequest == constants.SCHOOL_DEPLOYMENT_REQUEST_CREATE || foundItem.DeploymentRequest == constants.SCHOOL_DEPLOYMENT_REQUEST_UPDATE) &&
+			(foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_INITIATED ||
+				foundItem.DeploymentStatus == constants.SCHOOL_DEPLOYMENT_STATUS_PENDING) {
+			errCode = http.StatusLocked
+			err = constants.Http423LockedErrorMessage()
+			return
+		}
 	}
 
 	// Check unique config
@@ -214,9 +219,6 @@ func (service *Service) Update(
 	}
 
 	// Update school
-	if foundItem.IsSameDeploymentAsRequest(request) && foundItem.Config.IsSameDeploymentAsRequest(request.Config) {
-		item.DeploymentStatus = constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES
-	}
 	result, err = service.Repository.UpdateByID(id, item)
 	if err != nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
