@@ -6,9 +6,9 @@ import (
 
 	"api/common/constants"
 	deploymentHelper "api/common/helpers/deployment"
+	httpHelper "api/common/helpers/http"
 	"api/common/types"
 	"api/common/utils"
-	"api/config"
 	serviceHelperMessage "api/services/helper/message"
 	serviceHelperSchool "api/services/helper/school"
 	"api/services/school/common/school/data"
@@ -316,11 +316,7 @@ func (service *Service) UpdateDeploymentStatus(
 	The deployment of school '%s' has been initiated. It will be deployed as soon as possible(approx. 15 minutes)
 	`, updatedItem.Name)
 	if updatedItem.Config != nil && len(updatedItem.Config.WebsiteDomainName) > 0 {
-		protocol := "https"
-		if config.Env.AppEnv != "prod" {
-			protocol = "http"
-		}
-		websiteUrl = fmt.Sprintf("%s://%s", protocol, updatedItem.Config.WebsiteDomainName)
+		websiteUrl = fmt.Sprintf("%s://%s", httpHelper.DefaultProtocol(), updatedItem.Config.WebsiteDomainName)
 	}
 	switch updatedItem.Status {
 	case constants.SCHOOL_DEPLOYMENT_STATUS_DONE, constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES:

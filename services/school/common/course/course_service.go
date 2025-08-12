@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"api/common/constants"
+	httpHelper "api/common/helpers/http"
 	"api/common/types"
 	serviceHelperFeature "api/services/helper/feature"
 	serviceHelperMessage "api/services/helper/message"
@@ -129,6 +130,12 @@ func (service *Service) Create(
 				message = result.Title
 			}
 		}
+		websiteURL := fmt.Sprintf(
+			"%s://%s/dashboard/common/courses/%d",
+			httpHelper.DefaultProtocol(),
+			result.School.Config.WebsiteDomainName,
+			result.ID,
+		)
 		go serviceHelperMessage.SendMessage(
 			&serviceHelperMessage.MessageRequest{
 				PusNotification: true,
@@ -139,7 +146,7 @@ func (service *Service) Create(
 			title,
 			message,
 			result.School,
-			fmt.Sprintf("/dashboard/common/courses/%d", result.ID),
+			websiteURL,
 			users,
 		)
 	}()

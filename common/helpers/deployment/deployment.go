@@ -40,11 +40,7 @@ func DeploySchool(school *model.School) (err error) {
 	defer os.RemoveAll(tempDir)
 
 	// Generate website URL
-	protocol := "https"
-	if config.Env.AppEnv != "prod" {
-		protocol = "http"
-	}
-	websiteURL := fmt.Sprintf("%s://%s", protocol, school.Config.WebsiteDomainName)
+	websiteURL := fmt.Sprintf("%s://%s", httpHelper.DefaultProtocol(), school.Config.WebsiteDomainName)
 	// Generate API key using HMAC SHA256
 	apiKey, err := securityUtil.GenerateHMAC_SHA256_Base64URL(
 		fmt.Sprintf("%d", school.ID),
