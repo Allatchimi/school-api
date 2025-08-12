@@ -83,7 +83,7 @@ func DeploySchool(school *model.School) (err error) {
 		SchoolApiKey: apiKey,
 	}
 	deploymentStatusApiUrlData := DeploymentStatusApiUrlData{
-		ApiUrl: fmt.Sprintf("%s%s", config.Env.ApiBaseURL, config.Env.ApiGroup),
+		ApiUrl: fmt.Sprintf("%s%s/schools/deployment/status", config.Env.ApiBaseURL, config.Env.ApiGroup),
 	}
 	// Generate deployment data
 	kubernetesDeploymentData := KubernetesWebsiteDomainNameData{
