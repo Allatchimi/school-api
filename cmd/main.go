@@ -5,6 +5,7 @@ import (
 	"api/cmd/di"
 	"api/cmd/fixture"
 	"api/cmd/migrate"
+	"api/cmd/test"
 	"api/common/helpers"
 	securityUtil "api/common/utils/security"
 	"api/config"
@@ -42,6 +43,7 @@ func main() {
 	helpers.Logger.Info("Fixtures loaded!")
 
 	di.InjectDependencies()
+	test.TestAll()
 	api.StartGin()
 }
 

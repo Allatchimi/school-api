@@ -22,6 +22,36 @@ type EmailDataCheckCode struct {
 	DurationMinutes int
 }
 
+var assetPath string
+
+func checkAssetMailPath() {
+	if len(assetPath) > 0 {
+		return
+	}
+	// Get the absolute path of the executable
+	exePath, _ := os.Executable()
+	exeDir := filepath.Dir(exePath)
+	AssetMailPath := filepath.Join(exeDir, constants.AssetMailPath)
+
+	// Parse files
+	_, err := template.ParseFiles(
+		filepath.Join(AssetMailPath, "layout/base.html"),
+	)
+	if err != nil {
+		_, err2 := template.ParseFiles(
+			filepath.Join(constants.AssetMailPath, "layout/base.html"),
+		)
+		if err2 != nil {
+			return
+		}
+		assetPath = constants.AssetMailPath
+		return
+	}
+
+	// Update the path
+	assetPath = AssetMailPath
+}
+
 func loadTemplate(templateFileName string, data any) (body []byte, err error) {
 	if data == nil {
 		errMsg := "No provided data!"
@@ -29,15 +59,18 @@ func loadTemplate(templateFileName string, data any) (body []byte, err error) {
 		return
 	}
 
-	// Get the absolute path of the executable
-	exePath, _ := os.Executable()
-	exeDir := filepath.Dir(exePath)
-	AssetMailPath := filepath.Join(exeDir, constants.AssetMailPath)
+	// Check the correct path
+	checkAssetMailPath()
+	if len(assetPath) < 1 {
+		errMsg := "Invalid asset path!"
+		err = fmt.Errorf("%s", errMsg)
+		return
+	}
 
 	// Parse files
 	tmpl, err := template.ParseFiles(
-		filepath.Join(AssetMailPath, "layout/base.html"),
-		filepath.Join(AssetMailPath, templateFileName),
+		filepath.Join(assetPath, "layout/base.html"),
+		filepath.Join(assetPath, templateFileName),
 	)
 	if err != nil {
 		errMsg := "Error loading templates!"
@@ -45,6 +78,7 @@ func loadTemplate(templateFileName string, data any) (body []byte, err error) {
 		return
 	}
 
+	// Load template
 	var buf bytes.Buffer
 	if err = tmpl.ExecuteTemplate(&buf, "layout", data); err != nil {
 		errMsg := "Error executing template!"

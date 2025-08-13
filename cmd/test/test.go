@@ -18,10 +18,11 @@ import (
 )
 
 func TestAll() {
-
+	TestSpecificSendMail("prosper.abouar@gmail.com")
+	TestSpecificSendMail("prosper.abouar@yahoo.fr")
 }
 
-func TestSpecificSendMail() {
+func TestSpecificSendMail(to string) {
 	// Sent mail
 	data := &smtpHelper.EmailDataCheckCode{
 		EmailData: smtpHelper.EmailData{
@@ -41,7 +42,7 @@ func TestSpecificSendMail() {
 	err = smtpHelper.SendEmailTo(
 		"support@digitcore.cm",
 		"Digitcore support",
-		"prosper.abouar@gmail.com",
+		to,
 		constants.MailVerifyEmailCheckCode.Subject,
 		body,
 	)
