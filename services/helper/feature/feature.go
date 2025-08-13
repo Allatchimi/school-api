@@ -59,7 +59,7 @@ func GetUserDataByFeatureName(ctxData *types.ContextData) (teacherID int64, stud
 		if foundStudent == nil || foundStudent.ID < 1 || foundStudent.SchoolID != ctxData.Jwt.SchoolID {
 			return
 		}
-		teacherID = foundStudent.ID
+		studentID = foundStudent.ID
 		ok = true
 		return
 	}
@@ -74,7 +74,7 @@ func GetUserDataByFeatureName(ctxData *types.ContextData) (teacherID int64, stud
 		if foundParent == nil || foundParent.ID < 1 || foundParent.SchoolID != ctxData.Jwt.SchoolID {
 			return
 		}
-		teacherID = foundParent.ID
+		parentID = foundParent.ID
 		ok = true
 		return
 	}
