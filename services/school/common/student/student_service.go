@@ -1,12 +1,14 @@
 package student
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
 
 	"api/common/constants"
 	"api/common/helpers"
+	googleMailHelper "api/common/helpers/message/mail/google"
 
 	"api/common/types"
 	"api/common/utils"
@@ -19,6 +21,8 @@ import (
 	"api/services/user/user"
 	dataUser "api/services/user/user/data"
 	modelUser "api/services/user/user/model"
+
+	"go.uber.org/zap"
 )
 
 type Service struct {
@@ -184,6 +188,30 @@ func (service *Service) Create(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+
+	// Create google workspace user
+	go func() {
+		if result.School == nil || result.School.Config == nil ||
+			result.User == nil || result.User.Info == nil || result.User.Config == nil {
+			return
+		}
+		if !request.AutoGenerateEmail {
+			return
+		}
+		userGoogle, errGoogle := googleMailHelper.CreateGoogleWorkspaceUser(
+			context.Background(),
+			result.School.Config.GoogleWorkspaceCredentials,
+			result.School.Config.GoogleWorkspaceUserEmailDomain,
+			result.User,
+			password,
+		)
+		if errGoogle != nil || userGoogle == nil {
+			helpers.Logger.Warn(
+				"Failed to create Google Workspace user!",
+				zap.Error(errGoogle))
+		}
+		helpers.Logger.Info("Google Workspace user created!", zap.String("Email", userGoogle.PrimaryEmail))
+	}()
 	return
 }
 
@@ -291,41 +319,43 @@ func (service *Service) CreateStudentPreEnroll(
 	}
 
 	// Send message
-	var msgTitle, msgBody, msgClassLevelDomain string
-	switch result.School.Type {
-	case constants.SCHOOL_TYPE_HIGHSCHOOL:
-		if result.Class != nil {
-			msgClassLevelDomain = fmt.Sprintf("class %s", result.Class.Name)
+	go func() {
+		var msgTitle, msgBody, msgClassLevelDomain string
+		switch result.School.Type {
+		case constants.SCHOOL_TYPE_HIGHSCHOOL:
+			if result.Class != nil {
+				msgClassLevelDomain = fmt.Sprintf("class %s", result.Class.Name)
+			}
+		case constants.SCHOOL_TYPE_UNIVERSITY:
+			if result.LevelDomain != nil && result.LevelDomain.Level != nil && result.LevelDomain.Domain != nil {
+				msgClassLevelDomain = fmt.Sprintf("level domain %s %s", result.LevelDomain.Level.Name, result.LevelDomain.Domain.Name)
+			}
 		}
-	case constants.SCHOOL_TYPE_UNIVERSITY:
-		if result.LevelDomain != nil && result.LevelDomain.Level != nil && result.LevelDomain.Domain != nil {
-			msgClassLevelDomain = fmt.Sprintf("level domain %s %s", result.LevelDomain.Level.Name, result.LevelDomain.Domain.Name)
-		}
-	}
-	switch result.Status {
-	case constants.STUDENT_PRE_ENROLL_STATUS_INITIATED:
-		msgTitle = fmt.Sprintf("Enrollment request received for %s", msgClassLevelDomain)
-		msgBody = fmt.Sprintf(`Dear %s %s,
+		switch result.Status {
+		case constants.STUDENT_PRE_ENROLL_STATUS_INITIATED:
+			msgTitle = fmt.Sprintf("Enrollment request received for %s", msgClassLevelDomain)
+			msgBody = fmt.Sprintf(`Dear %s %s,
 		Thank you for your enrollment request to %s for %s.
 		We have successfully received your application and our admissions team is currently reviewing it. 
 		You will receive a notification with our decision as soon as the review process is complete.
 		If you have any questions in the meantime, please don't hesitate to contact our support team.
 		Best regards,
 		The Admissions Team`,
-			result.FirstName, result.LastName, result.School.Info.FullName, msgClassLevelDomain)
+				result.FirstName, result.LastName, result.School.Info.FullName, msgClassLevelDomain)
 
-	}
-	go serviceHelperMessage.SendMessage(
-		&serviceHelperMessage.MessageRequest{
-			PusNotification: true,
-			Mail:            true,
-		},
-		msgTitle,
-		msgBody,
-		result.School,
-		"",
-		[]modelUser.User{*result.User},
-	)
+		}
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				PusNotification: true,
+				Mail:            true,
+			},
+			msgTitle,
+			msgBody,
+			result.School,
+			"",
+			[]modelUser.User{*result.User},
+		)
+	}()
 	return
 }
 
@@ -731,42 +761,44 @@ func (service *Service) UpdateStudentPreEnrollStatus(
 	}
 
 	// Send message
-	var msgTitle, msgBody, msgClassLevelDomain string
-	switch result.School.Type {
-	case constants.SCHOOL_TYPE_HIGHSCHOOL:
-		if result.Class != nil {
-			msgClassLevelDomain = fmt.Sprintf("class %s", result.Class.Name)
+	go func() {
+		var msgTitle, msgBody, msgClassLevelDomain string
+		switch result.School.Type {
+		case constants.SCHOOL_TYPE_HIGHSCHOOL:
+			if result.Class != nil {
+				msgClassLevelDomain = fmt.Sprintf("class %s", result.Class.Name)
+			}
+		case constants.SCHOOL_TYPE_UNIVERSITY:
+			if result.LevelDomain != nil && result.LevelDomain.Level != nil && result.LevelDomain.Domain != nil {
+				msgClassLevelDomain = fmt.Sprintf("level domain %s %s", result.LevelDomain.Level.Name, result.LevelDomain.Domain.Name)
+			}
 		}
-	case constants.SCHOOL_TYPE_UNIVERSITY:
-		if result.LevelDomain != nil && result.LevelDomain.Level != nil && result.LevelDomain.Domain != nil {
-			msgClassLevelDomain = fmt.Sprintf("level domain %s %s", result.LevelDomain.Level.Name, result.LevelDomain.Domain.Name)
-		}
-	}
-	switch result.Status {
-	case constants.STUDENT_PRE_ENROLL_STATUS_ENROLLED:
-		msgTitle = fmt.Sprintf("Enrollment accepted for %s!", msgClassLevelDomain)
-		msgBody = fmt.Sprintf(`Hi %s %s, welcome to %s! 
+		switch result.Status {
+		case constants.STUDENT_PRE_ENROLL_STATUS_ENROLLED:
+			msgTitle = fmt.Sprintf("Enrollment accepted for %s!", msgClassLevelDomain)
+			msgBody = fmt.Sprintf(`Hi %s %s, welcome to %s! 
 			Please visit our website and log in with your credentials. 
 			Your new email is %s, and your default password is a combination of your first name, first last name, and birth year/enrolled year. 
 			For example: For a user with first name "John Durand", last name "Carmack Benie" and birthday "2010/06/13", the default password would be JohnCarmack2010. 
 			If this doesn't work, please contact our support team through the website. Thank you.`, createdStudent.User.Info.FirstName, createdStudent.User.Info.LastName, result.School.Info.FullName, createdStudent.User.Email)
 
-	case constants.STUDENT_PRE_ENROLL_STATUS_REJECTED:
-		msgTitle = fmt.Sprintf("Enrollment rejected for %s!", msgClassLevelDomain)
-		msgBody = fmt.Sprintf("Your enrollment for %s has been rejected. Please check your account dashboard for more details.", msgClassLevelDomain)
-	}
+		case constants.STUDENT_PRE_ENROLL_STATUS_REJECTED:
+			msgTitle = fmt.Sprintf("Enrollment rejected for %s!", msgClassLevelDomain)
+			msgBody = fmt.Sprintf("Your enrollment for %s has been rejected. Please check your account dashboard for more details.", msgClassLevelDomain)
+		}
 
-	go serviceHelperMessage.SendMessage(
-		&serviceHelperMessage.MessageRequest{
-			PusNotification: true,
-			Mail:            true,
-		},
-		msgTitle,
-		msgBody,
-		result.School,
-		"",
-		[]modelUser.User{*foundItem.User},
-	)
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				PusNotification: true,
+				Mail:            true,
+			},
+			msgTitle,
+			msgBody,
+			result.School,
+			"",
+			[]modelUser.User{*foundItem.User},
+		)
+	}()
 	return
 }
 

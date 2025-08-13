@@ -1,12 +1,14 @@
 package director
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
 
 	"api/common/constants"
 	"api/common/helpers"
+	googleMailHelper "api/common/helpers/message/mail/google"
 	"api/common/types"
 	"api/common/utils"
 	"api/config"
@@ -18,6 +20,8 @@ import (
 	"api/services/user/user"
 	dataUser "api/services/user/user/data"
 	modelUser "api/services/user/user/model"
+
+	"go.uber.org/zap"
 )
 
 type Service struct {
@@ -181,45 +185,71 @@ func (service *Service) Create(
 		return
 	}
 
+	// Create google workspace user
+	go func() {
+		if result.School == nil || result.School.Config == nil ||
+			result.User == nil || result.User.Info == nil || result.User.Config == nil {
+			return
+		}
+		if !request.AutoGenerateEmail {
+			return
+		}
+		userGoogle, errGoogle := googleMailHelper.CreateGoogleWorkspaceUser(
+			context.Background(),
+			result.School.Config.GoogleWorkspaceCredentials,
+			result.School.Config.GoogleWorkspaceUserEmailDomain,
+			result.User,
+			password,
+		)
+		if errGoogle != nil || userGoogle == nil {
+			helpers.Logger.Warn(
+				"Failed to create Google Workspace user!",
+				zap.Error(errGoogle))
+		}
+		helpers.Logger.Info("Google Workspace user created!", zap.String("Email", userGoogle.PrimaryEmail))
+	}()
+
 	// Send message
-	var msgTitle, msgBody string
-	msgTitle = fmt.Sprintf("Welcome to %s - Director Assignment", result.School.Name)
-	msgBody = fmt.Sprintf(`Dear %s %s,
-	<br><br>
-	Congratulations on your appointment as Director of %s!
-	We are delighted to welcome you to our educational community. 
-	Your leadership and expertise will be invaluable as we continue to provide excellent education to our students.
+	go func() {
+		var msgTitle, msgBody string
+		msgTitle = fmt.Sprintf("Welcome to %s - Director Assignment", result.School.Name)
+		msgBody = fmt.Sprintf(`Dear %s %s,
+<br><br>
+Congratulations on your appointment as Director of %s!
+We are delighted to welcome you to our educational community. 
+Your leadership and expertise will be invaluable as we continue to provide excellent education to our students.
 
-	<br><br>
-	Your account has been set up with the following credentials:
-	<br>
-	• Email: %s
-	<br>
-	• Temporary Password: %s
+<br><br>
+Your account has been set up with the following credentials:
+<br>
+• Email: %s
+<br>
+• Temporary Password: %s
 
-	<br><br>
-	For security reasons, please log in to the administrative portal at your earliest convenience and update your password. 
-	You will have full administrative access to manage school operations, staff, students, and resources.
-	If you need any assistance getting started or have questions about the platform, please don't hesitate to contact our support team.
+<br><br>
+For security reasons, please log in to the administrative portal at your earliest convenience and update your password. 
+You will have full administrative access to manage school operations, staff, students, and resources.
+If you need any assistance getting started or have questions about the platform, please don't hesitate to contact our support team.
 
-	<br><br>
-	We look forward to working with you and wish you great success in your new role.
-	
-	<br><br>
-	Best regards,
-	The Administration Team`,
-		result.User.Info.FirstName, result.User.Info.LastName, result.School.Name, result.User.Email, password)
+<br><br>
+We look forward to working with you and wish you great success in your new role.
 
-	go serviceHelperMessage.SendMessage(
-		&serviceHelperMessage.MessageRequest{
-			Mail: true,
-		},
-		msgTitle,
-		msgBody,
-		result.School,
-		"",
-		[]modelUser.User{*result.User},
-	)
+<br><br>
+Best regards,
+The Administration Team`,
+			result.User.Info.FirstName, result.User.Info.LastName, result.School.Name, result.User.Email, password)
+
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				Mail: true,
+			},
+			msgTitle,
+			msgBody,
+			result.School,
+			"",
+			[]modelUser.User{*result.User},
+		)
+	}()
 	return
 }
 

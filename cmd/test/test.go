@@ -18,26 +18,10 @@ import (
 )
 
 func TestAll() {
-	// Create Google user
-	ctx := context.Background()
-	admin := &modelUser.User{
-		Email: "admin@emfi.cm",
-	}
-	user := &modelUser.User{
-		Email: "prosper.abouar@gmail.com",
-		Info: &modelUser.UserInfo{
-			FirstName: "Prosper",
-			LastName:  "Abouar",
-			Gender:    "male",
-		},
-	}
-	errGoogle := googleMailHelper.CreateGoogleWorkspaceUser(&ctx, "", admin, user, "Cpasbien123!")
-	if errGoogle != nil {
-		helpers.Logger.Warn(
-			"Failed to create Google user!",
-			zap.Error(errGoogle))
-	}
 
+}
+
+func TestSpecificSendMail() {
 	// Sent mail
 	data := &smtpHelper.EmailDataCheckCode{
 		EmailData: smtpHelper.EmailData{
@@ -66,7 +50,75 @@ func TestAll() {
 		return
 	}
 	helpers.Logger.Info("Email sent successfully")
+}
 
+func TestSpecificCreateGoogleUser() {
+	// Create Google user
+	ctx := context.Background()
+	user := &modelUser.User{
+		Email: "prosper1.abouar1@digitschool.com",
+		School: &modelSchool.School{
+			Config: &modelSchool.SchoolConfig{
+				GoogleWorkspaceCredentials:     "googleWorkspaceCredentials",
+				GoogleWorkspaceUserEmailDomain: "googleWorkspaceUserEmailDomain",
+			},
+		},
+		Info: &modelUser.UserInfo{
+			FirstName: "Prosper",
+			LastName:  "Abouar",
+			Gender:    "male",
+		},
+	}
+	createUser, errGoogle := googleMailHelper.CreateGoogleWorkspaceUser(
+		ctx,
+		"creds.json",
+		"admin@digitschool.cm",
+		user,
+		"Cpasbien123!",
+	)
+	if errGoogle != nil || createUser == nil {
+		helpers.Logger.Warn(
+			"Failed to create Google user!",
+			zap.Error(errGoogle))
+	}
+}
+
+func TestSpecificSendTelegramMessage() {
+	// Send Telegram message
+	go func() {
+		telegramHelper.SendMessage(
+			"7676549051:AAF4u-ElGxwzarPY2EAul6YSdCwwKjxLItk",
+			"Welcome Prosper! Nice to see you.",
+			[]modelUser.User{
+				{
+					Config: &modelUser.UserConfig{
+						TelegramChatID: 123456789,
+					},
+				},
+			},
+		)
+	}()
+}
+
+func TestSpecificSendWhatsappMessage() {
+	// Send WhatsApp message
+	go func() {
+		whatsappHelper.SendMessage(
+			"ElGxwzarPY2EAul6YSdCwwKjxLItk",
+			"7676549051",
+			"Welcome Prosper! Nice to see you.",
+			[]modelUser.User{
+				{
+					Config: &modelUser.UserConfig{
+						WhatsappPhoneNumber: 237696666666,
+					},
+				},
+			},
+		)
+	}()
+}
+
+func TestSpecificDeploySchool() {
 	// Deploy school
 	school := &modelSchool.School{
 		Type:      "university",
@@ -101,51 +153,4 @@ func TestAll() {
 			},
 		)
 	}()
-
-	// Send WhatsApp message
-	go func() {
-		whatsappHelper.SendMessage(
-			"ElGxwzarPY2EAul6YSdCwwKjxLItk",
-			"7676549051",
-			"Welcome Prosper! Nice to see you.",
-			[]modelUser.User{
-				{
-					Config: &modelUser.UserConfig{
-						WhatsappPhoneNumber: 237696666666,
-					},
-				},
-			},
-		)
-	}()
-}
-
-func TestSpecific() {
-	// Sent mail
-	data := &smtpHelper.EmailDataCheckCode{
-		EmailData: smtpHelper.EmailData{
-			HomePageLink: fmt.Sprintf("https://%s", "digitcore.cm"),
-			Logo:         "https://static-cdn.jtvnw.net/growth-assets/email_twitch_logo_uv",
-			Title:        constants.MailVerifyEmailCheckCode.Title,
-			Message:      constants.MailVerifyEmailCheckCode.Message,
-		},
-		Code:            fmt.Sprintf("%d", 234589),
-		DurationMinutes: 10,
-	}
-	body, err := data.LoadTemplate()
-	if err != nil {
-		helpers.Logger.Error("Failed to load email template", zap.Error(err))
-		return
-	}
-	err = smtpHelper.SendEmailTo(
-		"support@digitcore.cm",
-		"Digitcore support",
-		"prosper.abouar@gmail.com",
-		constants.MailVerifyEmailCheckCode.Subject,
-		body,
-	)
-	if err != nil {
-		helpers.Logger.Error("Failed to send email", zap.Error(err))
-		return
-	}
-	helpers.Logger.Info("Email sent successfully")
 }

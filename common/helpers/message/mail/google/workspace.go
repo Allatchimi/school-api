@@ -1,6 +1,7 @@
 package googleMailHelper
 
 import (
+	"api/common/utils"
 	"api/services/user/user/model"
 	"context"
 	"fmt"
@@ -12,56 +13,74 @@ import (
 
 // CreateGoogleWorkspaceUser creates a new user account in Google Workspace
 func CreateGoogleWorkspaceUser(
-	ctx *context.Context,
-	credentials string,
-	admin *model.User,
+	ctx context.Context,
+	credentialsJSON string,
+	adminEmail string,
 	user *model.User,
 	password string,
-) error {
-	// Required OAuth scopes to manage users in Google Workspace
-	scopes := []string{"https://www.googleapis.com/auth/admin.directory.user"}
-
-	// Load credentials
-	creds, err := google.JWTConfigFromJSON(
-		[]byte(credentials),
-		scopes...,
-	)
-	if err != nil {
-		errMsg := "Failed to load credentials!"
-		return fmt.Errorf("%s: %s %w", errMsg, err.Error(), err)
+) (*googleAdmin.User, error) {
+	// Validate inputs early
+	if user == nil || user.Info == nil || !utils.IsEmailValid(user.Email) ||
+		len(password) == 0 || len(credentialsJSON) == 0 {
+		return nil, fmt.Errorf("invalid inputs")
 	}
 
-	// Use domain-wide delegation to act on behalf of the admin
-	creds.Subject = admin.Email
+	// Required scopes to manage users; add more if needed (e.g., user.security)
+	scopes := []string{
+		"https://www.googleapis.com/auth/admin.directory.user",
+	}
 
+	// Load service account credentials
+	creds, err := google.JWTConfigFromJSON([]byte(credentialsJSON), scopes...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load credentials: %w", err)
+	}
+
+	// Domain-Wide Delegation - act on behalf of a super admin in the Workspace domain
+	// IMPORTANT: Replace with a real super admin email
+	if !utils.IsEmailValid(adminEmail) {
+		return nil, fmt.Errorf("missing GOOGLE_WORKSPACE_ADMIN_EMAIL (super admin email for domain-wide delegation)")
+	}
+	creds.Subject = adminEmail
+
+	// Build the user payload; keep optional fields only if valid
+	var gender *googleAdmin.UserGender
+	if user.Info.Gender == "male" || user.Info.Gender == "female" {
+		gender = &googleAdmin.UserGender{
+			Type: user.Info.Gender,
+		}
+	}
 	newUser := &googleAdmin.User{
 		PrimaryEmail: user.Email,
-		Password:     password,
+		Password:     password, // Plaintext allowed; Google stores it securely. Ensure it matches domain password policy.
 		Name: &googleAdmin.UserName{
 			GivenName:  user.Info.FirstName,
 			FamilyName: user.Info.LastName,
+			// FullName is optional; Admin API can compute display names; keep consistent with your needs
+			FullName: fmt.Sprintf("%s %s", user.Info.FirstName, user.Info.LastName),
 		},
-		Gender: &googleAdmin.UserGender{
-			Type: user.Info.Gender, // "male", "female"
-		},
+		// Gender is optional; ensure the value matches allowed enum; if unsure, omit
+		Gender: gender,
+		// Languages must be ISO 639-1 codes; optional
 		Languages: []*googleAdmin.UserLanguage{
 			{LanguageCode: "fr"},
 			{LanguageCode: "en"},
-		}, // Language codes must follow ISO 639-1 (e.g. "fr", "en")
+		},
+		// Optional orgUnitPath, change password at next login, etc.
+		// OrgUnitPath: "/",
+		// ChangePasswordAtNextLogin: true,
 	}
 
-	// Initialize the Admin SDK Directory service
-	srv, err := googleAdmin.NewService(*ctx, option.WithTokenSource(creds.TokenSource(*ctx)))
+	// Initialize Admin SDK Directory service using the token source from service account
+	srv, err := googleAdmin.NewService(ctx, option.WithTokenSource(creds.TokenSource(ctx)))
 	if err != nil {
-		errMsg := "Failed to create admin service!"
-		return fmt.Errorf("%s: %s %w", errMsg, err.Error(), err)
+		return nil, fmt.Errorf("failed to create admin service: %w", err)
 	}
 
-	// Create the user in Google Workspace
-	_, err = srv.Users.Insert(newUser).Do()
+	// Create the user
+	result, err := srv.Users.Insert(newUser).Do()
 	if err != nil {
-		errMsg := "Failed to create Google account!"
-		return fmt.Errorf("%s: %s %w", errMsg, err.Error(), err)
+		return nil, fmt.Errorf("failed to create Google account: %w", err)
 	}
-	return nil
+	return result, nil
 }
