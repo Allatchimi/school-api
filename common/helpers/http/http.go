@@ -1,6 +1,7 @@
 package httpHelper
 
 import (
+	"api/common/helpers"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -17,7 +18,7 @@ type HttpHeader struct {
 
 var httpClient *http.Client
 
-func newHttpClient() *http.Client {
+func defaultHttpClient() *http.Client {
 	if httpClient == nil {
 		httpClient = &http.Client{
 			Timeout: 30 * time.Second,
@@ -42,6 +43,14 @@ func HttpGet(url string, response any) error {
 	if err != nil {
 		return err
 	}
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf(
+			"HTTP Error %d. Failed to GET %s. Response: %s",
+			resp.StatusCode,
+			url,
+			helpers.PrintAny(response),
+		)
+	}
 	return nil
 }
 
@@ -58,7 +67,7 @@ func HttpPost(url string, headers []HttpHeader, body any, response any) error {
 		req.Header.Set(header.Label, header.Value)
 	}
 
-	client := newHttpClient()
+	client := defaultHttpClient()
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -74,6 +83,15 @@ func HttpPost(url string, headers []HttpHeader, body any, response any) error {
 	if err != nil {
 		return err
 	}
+
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf(
+			"HTTP Error %d. Failed to POST %s. Response: %s",
+			resp.StatusCode,
+			url,
+			helpers.PrintAny(response),
+		)
+	}
 	return nil
 }
 
@@ -85,8 +103,13 @@ func HttpDownloadFile(url, destination string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to download %s: status %d", url, resp.StatusCode)
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf(
+			"HTTP Error %d. Failed to GET %s. Response: %s",
+			resp.StatusCode,
+			url,
+			resp.Status,
+		)
 	}
 
 	out, err := os.Create(destination)

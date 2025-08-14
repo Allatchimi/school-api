@@ -18,11 +18,9 @@ import (
 )
 
 func TestAll() {
-	go func() {
-		TestSpecificSendMail("prosper.abouar@gmail.com")
-		TestSpecificSendMail("prosper.abouar@yahoo.fr")
-		TestSpecificSendWhatsappMessage()
-	}()
+	go TestSpecificSendMail("prosper.abouar@gmail.com")
+	go TestSpecificSendMail("prosper.abouar@yahoo.fr")
+	go TestSpecificSendWhatsappMessage()
 }
 
 func TestSpecificSendMail(to string) {
@@ -114,6 +112,7 @@ func TestSpecificSendWhatsappMessage() {
 			[]string{"Problem with score of INF101 ", "rejected", "DIGIT-School"},
 			[]modelUser.User{
 				{
+					Email: "prosper.abouar@gmail.com",
 					Info: &modelUser.UserInfo{
 						FirstName: "Prosper",
 						LastName:  "Abouar",
@@ -148,19 +147,4 @@ func TestSpecificDeploySchool() {
 	configDeploy.DeploySchool(school)
 	// configDeploy.DeleteSchoolDeployment(1)
 	// configDeploy.DeleteSchoolDeployment(2)
-
-	// Send Telegram message
-	go func() {
-		telegramHelper.SendMessage(
-			"7676549051:AAF4u-ElGxwzarPY2EAul6YSdCwwKjxLItk",
-			"Welcome Prosper! Nice to see you.",
-			[]modelUser.User{
-				{
-					Config: &modelUser.UserConfig{
-						TelegramChatID: 123456789,
-					},
-				},
-			},
-		)
-	}()
 }

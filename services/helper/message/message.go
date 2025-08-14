@@ -87,8 +87,12 @@ func SendMessage(
 
 	// Send telegram
 	go func() {
-		if !(request.Telegram && school != nil && school.Config != nil &&
+		if !request.Telegram {
+			return
+		}
+		if !(school != nil && school.Config != nil &&
 			len(school.Config.TelegramBotToken) > 0) {
+			helpers.Logger.Warn("Missing some information to send Telegram message! Skipped.")
 			return
 		}
 		helpers.Logger.Info("Sending telegram message!")
@@ -101,12 +105,15 @@ func SendMessage(
 
 	// Send whatsapp
 	go func() {
-		if !(request.Whatsapp &&
-			school != nil &&
+		if !request.Whatsapp {
+			return
+		}
+		if !(school != nil &&
 			school.Config != nil &&
 			len(school.Config.WhatsappToken) > 0 &&
 			len(school.Config.WhatsappPhoneID) > 0 &&
 			users != nil && len(users) > 0) {
+			helpers.Logger.Warn("Missing some information to send Whatsapp message! Skipped.")
 			return
 		}
 		helpers.Logger.Info("Sending whatsapp template message!",

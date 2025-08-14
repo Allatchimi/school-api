@@ -77,7 +77,7 @@ func (service *Service) UpdateProfileConfigMessage(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if userFound == nil {
+	if userFound == nil || userFound.ID < 0 {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
