@@ -101,6 +101,10 @@ func (repository *Repository) UpdateStatusByID(
 		Preload(clause.Associations).
 		Preload("School.Info").
 		Preload("School.Config").
+		Preload("Student.User").
+		Preload("Student.User.Role").
+		Preload("Student.User.Info").
+		Preload("Student.User.Config").
 		Where("id = ?", id).
 		First(result).Error
 	return

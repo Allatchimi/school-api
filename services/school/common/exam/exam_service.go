@@ -124,46 +124,43 @@ func (service *Service) Create(
 		teacherEnrollReq.YearID = result.YearID
 		teacherEnrollReq.ClassSubjectID = result.ClassSubjectID
 		teacherEnrollReq.UnitID = result.UnitID
-		userTeachers, errUsers := serviceHelperUser.GetAllUserForTeacherClassSubjectUnit(teacherEnrollReq)
-		if errUsers != nil {
-			return
-		}
+		userTeachers, errTeachers := serviceHelperUser.GetAllUserForTeacherClassSubjectUnit(teacherEnrollReq)
 		// Students
 		studentEnrollReq := &dataStudent.GetAllStudentEnrollRequest{}
 		studentEnrollReq.SchoolID = result.SchoolID
 		studentEnrollReq.YearID = result.YearID
 		studentEnrollReq.ClassSubjectID = result.ClassSubjectID
 		studentEnrollReq.UnitID = result.UnitID
-		userStudents, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
-		if errUsers != nil {
-			return
-		}
+		userStudents, errStudentUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
 		// Parents
 		parentEnrollReq := &dataParent.GetAllParentStudentRequest{}
 		parentEnrollReq.SchoolID = result.SchoolID
 		parentEnrollReq.YearID = result.YearID
 		parentEnrollReq.ClassSubjectID = result.ClassSubjectID
 		parentEnrollReq.UnitID = result.UnitID
-		userParents, errUsers := serviceHelperUser.GetAllUserForParentStudent(parentEnrollReq)
-		if errUsers != nil {
+		userParents, errParentUsers := serviceHelperUser.GetAllUserForParentStudent(parentEnrollReq)
+		if errTeachers != nil && errStudentUsers != nil && errParentUsers != nil {
 			return
 		}
-		var title, message string
+		var title, message, classSubjectUnit, classLevelDomain string
 		switch result.Status {
 		case constants.EXAM_STATUS_DRAFT:
 			title = "New added exam to draft"
 		case constants.EXAM_STATUS_ONLINE:
 			title = "Published exam is now online"
-		case constants.EXAM_STATUS_RESULTS:
-			title = "Exam results are available"
 		}
 		switch result.School.Type {
 		case constants.SCHOOL_TYPE_HIGHSCHOOL:
 			if result.ClassSubject != nil && result.ClassSubject.Subject != nil && result.ClassSubject.Class != nil && result.Type != nil && result.Sequence != nil && result.Year != nil {
+				classSubjectUnit = result.ClassSubject.Subject.Name
+				classLevelDomain = result.ClassSubject.Class.Name
 				message = fmt.Sprintf("Exam for subject %s %s: %s %s %s", result.ClassSubject.Subject.Name, result.ClassSubject.Class.Name, result.Type.Name, result.Sequence.Name, result.Year.Name)
 			}
 		case constants.SCHOOL_TYPE_UNIVERSITY:
-			if result.Unit != nil && result.Type != nil && result.Unit.Semester != nil && result.Year != nil {
+			if result.Unit != nil && result.Type != nil && result.Unit.Semester != nil && result.Year != nil &&
+				result.Unit.LevelDomain != nil && result.Unit.LevelDomain.Domain != nil && result.Unit.LevelDomain.Level != nil {
+				classSubjectUnit = result.Unit.Name
+				classLevelDomain = fmt.Sprintf("%s %s", result.Unit.LevelDomain.Level.Name, result.Unit.LevelDomain.Domain.Name)
 				message = fmt.Sprintf("Exam for unit %s: %s %s %s", result.Unit.Name, result.Type.Name, result.Unit.Semester.Name, result.Year.Name)
 			}
 		}
@@ -171,8 +168,6 @@ func (service *Service) Create(
 			serviceHelperMessage.SendMessage(
 				&serviceHelperMessage.MessageRequest{
 					PusNotification: true,
-					Telegram:        true,
-					Whatsapp:        true,
 					Mail:            true,
 				},
 				title,
@@ -183,21 +178,58 @@ func (service *Service) Create(
 			)
 			return
 		}
-		allUsers := append(userTeachers, append(userStudents, userParents...)...)
 		serviceHelperMessage.SendMessage(
 			&serviceHelperMessage.MessageRequest{
 				PusNotification: true,
-				Telegram:        true,
-				Whatsapp:        true,
 				Mail:            true,
 			},
 			title,
 			message,
 			result.School,
 			"",
-			allUsers,
+			userTeachers,
 		)
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				PusNotification: true,
+				Telegram:        true,
+				Whatsapp:        true,
+				Mail:            true,
 
+				WhatsappTemplate: constants.WHATSAPP_TEMPLATE_EXAM_PUBLISHED,
+				WhatsappBodyParams: []string{
+					fmt.Sprintf("%s %s", result.Type.Name, classSubjectUnit),
+					result.StartDate.Format("02 Jan 2006 15:04:05 UTC"),
+					result.School.Name,
+				},
+			},
+			title,
+			message,
+			result.School,
+			"",
+			userStudents,
+		)
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				PusNotification: true,
+				Telegram:        true,
+				Whatsapp:        true,
+				Mail:            true,
+
+				WhatsappTemplate: constants.WHATSAPP_TEMPLATE_EXAM_PUBLISHED_PARENT,
+				WhatsappBodyParams: []string{
+					fmt.Sprintf("%s %s", result.Type.Name, classSubjectUnit),
+					classLevelDomain,
+					result.StartDate.Format("02 Jan 2006 15:04:05 UTC"),
+					result.School.Name,
+				},
+			},
+			title,
+			message,
+			result.School,
+			"",
+			userParents,
+		)
 	}()
 	return
 }
@@ -363,46 +395,43 @@ func (service *Service) Update(
 		teacherEnrollReq.YearID = result.YearID
 		teacherEnrollReq.ClassSubjectID = result.ClassSubjectID
 		teacherEnrollReq.UnitID = result.UnitID
-		userTeachers, errUsers := serviceHelperUser.GetAllUserForTeacherClassSubjectUnit(teacherEnrollReq)
-		if errUsers != nil {
-			return
-		}
+		userTeachers, errTeachers := serviceHelperUser.GetAllUserForTeacherClassSubjectUnit(teacherEnrollReq)
 		// Students
 		studentEnrollReq := &dataStudent.GetAllStudentEnrollRequest{}
 		studentEnrollReq.SchoolID = result.SchoolID
 		studentEnrollReq.YearID = result.YearID
 		studentEnrollReq.ClassSubjectID = result.ClassSubjectID
 		studentEnrollReq.UnitID = result.UnitID
-		userStudents, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
-		if errUsers != nil {
-			return
-		}
+		userStudents, errStudentUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
 		// Parents
 		parentEnrollReq := &dataParent.GetAllParentStudentRequest{}
 		parentEnrollReq.SchoolID = result.SchoolID
 		parentEnrollReq.YearID = result.YearID
 		parentEnrollReq.ClassSubjectID = result.ClassSubjectID
 		parentEnrollReq.UnitID = result.UnitID
-		userParents, errUsers := serviceHelperUser.GetAllUserForParentStudent(parentEnrollReq)
-		if errUsers != nil {
+		userParents, errParentUsers := serviceHelperUser.GetAllUserForParentStudent(parentEnrollReq)
+		if errTeachers != nil && errStudentUsers != nil && errParentUsers != nil {
 			return
 		}
-		var title, message string
+		var title, message, classSubjectUnit, classLevelDomain string
 		switch result.Status {
 		case constants.EXAM_STATUS_DRAFT:
 			title = "New added exam to draft"
 		case constants.EXAM_STATUS_ONLINE:
 			title = "Published exam is now online"
-		case constants.EXAM_STATUS_RESULTS:
-			title = "Exam results are available"
 		}
 		switch result.School.Type {
 		case constants.SCHOOL_TYPE_HIGHSCHOOL:
 			if result.ClassSubject != nil && result.ClassSubject.Subject != nil && result.ClassSubject.Class != nil && result.Type != nil && result.Sequence != nil && result.Year != nil {
+				classSubjectUnit = result.ClassSubject.Subject.Name
+				classLevelDomain = result.ClassSubject.Class.Name
 				message = fmt.Sprintf("Exam for subject %s %s: %s %s %s", result.ClassSubject.Subject.Name, result.ClassSubject.Class.Name, result.Type.Name, result.Sequence.Name, result.Year.Name)
 			}
 		case constants.SCHOOL_TYPE_UNIVERSITY:
-			if result.Unit != nil && result.Type != nil && result.Unit.Semester != nil && result.Year != nil {
+			if result.Unit != nil && result.Type != nil && result.Unit.Semester != nil && result.Year != nil &&
+				result.Unit.LevelDomain != nil && result.Unit.LevelDomain.Domain != nil && result.Unit.LevelDomain.Level != nil {
+				classSubjectUnit = result.Unit.Name
+				classLevelDomain = fmt.Sprintf("%s %s", result.Unit.LevelDomain.Level.Name, result.Unit.LevelDomain.Domain.Name)
 				message = fmt.Sprintf("Exam for unit %s: %s %s %s", result.Unit.Name, result.Type.Name, result.Unit.Semester.Name, result.Year.Name)
 			}
 		}
@@ -410,8 +439,6 @@ func (service *Service) Update(
 			serviceHelperMessage.SendMessage(
 				&serviceHelperMessage.MessageRequest{
 					PusNotification: true,
-					Telegram:        true,
-					Whatsapp:        true,
 					Mail:            true,
 				},
 				title,
@@ -422,19 +449,57 @@ func (service *Service) Update(
 			)
 			return
 		}
-		allUsers := append(userTeachers, append(userStudents, userParents...)...)
 		serviceHelperMessage.SendMessage(
 			&serviceHelperMessage.MessageRequest{
 				PusNotification: true,
-				Telegram:        true,
-				Whatsapp:        true,
 				Mail:            true,
 			},
 			title,
 			message,
 			result.School,
 			"",
-			allUsers,
+			userTeachers,
+		)
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				PusNotification: true,
+				Telegram:        true,
+				Whatsapp:        true,
+				Mail:            true,
+
+				WhatsappTemplate: constants.WHATSAPP_TEMPLATE_EXAM_PUBLISHED,
+				WhatsappBodyParams: []string{
+					fmt.Sprintf("%s %s", result.Type.Name, classSubjectUnit),
+					result.StartDate.Format("02 Jan 2006 15:04:05 UTC"),
+					result.School.Name,
+				},
+			},
+			title,
+			message,
+			result.School,
+			"",
+			userStudents,
+		)
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				PusNotification: true,
+				Telegram:        true,
+				Whatsapp:        true,
+				Mail:            true,
+
+				WhatsappTemplate: constants.WHATSAPP_TEMPLATE_EXAM_PUBLISHED_PARENT,
+				WhatsappBodyParams: []string{
+					fmt.Sprintf("%s %s", result.Type.Name, classSubjectUnit),
+					classLevelDomain,
+					result.StartDate.Format("Monday, 02/01/2025 15:04 MST"),
+					result.School.Name,
+				},
+			},
+			title,
+			message,
+			result.School,
+			"",
+			userParents,
 		)
 	}()
 	return
@@ -687,7 +752,7 @@ func (service *Service) GetAll(
 			return
 		}
 		if ctxData.User.Feature != constants.FeatureAdmin && ctxData.User.Feature != constants.FeatureDirector && ctxData.User.Feature != constants.FeatureTeacher {
-			newRequest.StatusList = []string{constants.EXAM_STATUS_ONLINE, constants.EXAM_STATUS_RESULTS}
+			newRequest.StatusList = []string{constants.EXAM_STATUS_ONLINE}
 		}
 	}
 

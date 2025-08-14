@@ -66,32 +66,32 @@ func (service *Service) Create(
 		}
 
 		// Get all user
-		if result == nil {
-			continue
-		}
-		users, _ := serviceHelperMessage.UserService.Repository.GetAll(
-			nil,
-			nil,
-			&dataUser.GetAllRequest{
-				SchoolID: newRequest.SchoolID,
-				RoleID:   roleID,
-			},
-		)
+		go func() {
+			if result == nil {
+				return
+			}
+			users, _ := serviceHelperMessage.UserService.Repository.GetAll(
+				nil,
+				nil,
+				&dataUser.GetAllRequest{
+					SchoolID: newRequest.SchoolID,
+					RoleID:   roleID,
+				},
+			)
 
-		// Send message
-		go serviceHelperMessage.SendMessage(
-			&serviceHelperMessage.MessageRequest{
-				PusNotification: true,
-				Telegram:        true,
-				Whatsapp:        true,
-				Mail:            true,
-			},
-			request.Subject,
-			request.Message,
-			result.School,
-			"",
-			users,
-		)
+			// Send message
+			serviceHelperMessage.SendMessage(
+				&serviceHelperMessage.MessageRequest{
+					PusNotification: true,
+					Mail:            true,
+				},
+				request.Subject,
+				request.Message,
+				result.School,
+				"",
+				users,
+			)
+		}()
 	}
 	return
 }

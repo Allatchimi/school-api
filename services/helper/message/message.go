@@ -17,11 +17,15 @@ import (
 )
 
 type MessageRequest struct {
-	Audience        string
+	Audience string
+
 	PusNotification bool
 	Telegram        bool
 	Whatsapp        bool
 	Mail            bool
+
+	WhatsappTemplate   string
+	WhatsappBodyParams []string
 }
 
 var UserService *user.Service
@@ -105,14 +109,17 @@ func SendMessage(
 			users != nil && len(users) > 0) {
 			return
 		}
-		helpers.Logger.Info("Sending whatsapp message!",
+		helpers.Logger.Info("Sending whatsapp template message!",
+			zap.String("token", school.Config.WhatsappToken),
 			zap.String("phoneID", school.Config.WhatsappPhoneID),
+			zap.String("template", request.WhatsappTemplate),
 			zap.Int("userCount", len(users)),
 		)
 		whatsappHelper.SendMessage(
 			school.Config.WhatsappToken,
 			school.Config.WhatsappPhoneID,
-			messageBody,
+			request.WhatsappTemplate,
+			request.WhatsappBodyParams,
 			users,
 		)
 	}()

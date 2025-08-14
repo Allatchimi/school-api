@@ -10,6 +10,7 @@ import (
 	"api/common/utils"
 	securityUtil "api/common/utils/security"
 	"api/config"
+	serviceHelperMessage "api/services/helper/message"
 	"api/services/user/profile/data"
 	"api/services/user/user"
 	"api/services/user/user/model"
@@ -94,6 +95,55 @@ func (service *Service) UpdateProfileConfigMessage(
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}
+
+	// Send whatsapp welcome message
+	go func() {
+		if userFound.School == nil ||
+			userFound.Config.WhatsappPhoneNumber == result.WhatsappPhoneNumber ||
+			result.WhatsappPhoneNumber < 1 {
+			return
+		}
+		newUser := *userFound
+		newUser.Config = result
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				Whatsapp: true,
+
+				WhatsappTemplate: constants.WHATSAPP_TEMPLATE_WELCOME,
+				WhatsappBodyParams: []string{
+					newUser.School.Name,
+				},
+			},
+			"",
+			"",
+			newUser.School,
+			"",
+			[]model.User{newUser},
+		)
+	}()
+	// Send telegram welcome message
+	go func() {
+		if userFound.School == nil ||
+			userFound.Config.TelegramChatID == result.TelegramChatID ||
+			result.TelegramChatID < 1 {
+			return
+		}
+		newUser := *userFound
+		newUser.Config = result
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				Telegram: true,
+			},
+			"Welcome",
+			fmt.Sprintf(
+				"Phone number have been updated successfully. You can now receive events from %s portal.",
+				newUser.School.Name,
+			),
+			newUser.School,
+			"",
+			[]model.User{newUser},
+		)
+	}()
 	return
 }
 

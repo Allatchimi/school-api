@@ -306,50 +306,50 @@ func (service *Service) UpdateDeploymentStatus(
 	}
 
 	// Send message
-	users, errUsers := serviceHelperSchool.GetAllUserByFeature(constants.FeatureAdmin)
-	if errUsers != nil || len(users) < 1 {
-		return
-	}
-	websiteUrl := ""
-	title := "Initialized deployment of school " + updatedItem.Name
-	message := fmt.Sprintf(`
+	go func() {
+		users, errUsers := serviceHelperSchool.GetAllUserByFeature(constants.FeatureAdmin)
+		if errUsers != nil || len(users) < 1 {
+			return
+		}
+		websiteUrl := ""
+		title := "Initialized deployment of school " + updatedItem.Name
+		message := fmt.Sprintf(`
 	The deployment of school '%s' has been initiated. It will be deployed as soon as possible(approx. 15 minutes)
 	`, updatedItem.Name)
-	if updatedItem.Config != nil && len(updatedItem.Config.WebsiteDomainName) > 0 {
-		websiteUrl = fmt.Sprintf("%s://%s", httpHelper.DefaultProtocol(), updatedItem.Config.WebsiteDomainName)
-	}
-	switch updatedItem.Status {
-	case constants.SCHOOL_DEPLOYMENT_STATUS_DONE, constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES:
-		title = "Successfully deployed school " + updatedItem.Name
-		message = fmt.Sprintf(`
+		if updatedItem.Config != nil && len(updatedItem.Config.WebsiteDomainName) > 0 {
+			websiteUrl = fmt.Sprintf("%s://%s", httpHelper.DefaultProtocol(), updatedItem.Config.WebsiteDomainName)
+		}
+		switch updatedItem.Status {
+		case constants.SCHOOL_DEPLOYMENT_STATUS_DONE, constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES:
+			title = "Successfully deployed school " + updatedItem.Name
+			message = fmt.Sprintf(`
 			The school %s has been successfully deployed and is now ready for use. You can access it at %s.
 			`, updatedItem.Name, websiteUrl)
-	case constants.SCHOOL_DEPLOYMENT_STATUS_FAILED:
-		title = "Failed to deploy school " + updatedItem.Name
-		message = fmt.Sprintf(`
+		case constants.SCHOOL_DEPLOYMENT_STATUS_FAILED:
+			title = "Failed to deploy school " + updatedItem.Name
+			message = fmt.Sprintf(`
 			The deployment of school '%s' has failed due to technical issues. 
 			Please check the system logs and try again, or contact support for assistance
 			`, updatedItem.Name)
-	case constants.SCHOOL_DEPLOYMENT_STATUS_PENDING:
-		title = "Pending deployment of school " + updatedItem.Name
-		message = fmt.Sprintf(`
+		case constants.SCHOOL_DEPLOYMENT_STATUS_PENDING:
+			title = "Pending deployment of school " + updatedItem.Name
+			message = fmt.Sprintf(`
 			The deployment of school '%s' is pending. Approximately 10 minutes to deploy
 			`, updatedItem.Name)
-	}
-	go serviceHelperMessage.SendMessage(
-		&serviceHelperMessage.MessageRequest{
-			Audience:        constants.NOTIFICATION_AUDIENCE_SCHOOL,
-			PusNotification: true,
-			Mail:            true,
-			Telegram:        true,
-			Whatsapp:        true,
-		},
-		title,
-		message,
-		nil,
-		"",
-		users,
-	)
+		}
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				Audience:        constants.NOTIFICATION_AUDIENCE_SCHOOL,
+				PusNotification: true,
+				Mail:            true,
+			},
+			title,
+			message,
+			nil,
+			"",
+			users,
+		)
+	}()
 	return
 }
 

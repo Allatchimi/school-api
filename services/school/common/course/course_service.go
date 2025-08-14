@@ -119,13 +119,13 @@ func (service *Service) Create(
 		switch result.School.Type {
 		case constants.SCHOOL_TYPE_HIGHSCHOOL:
 			if result.ClassSubject != nil && result.ClassSubject.Subject != nil {
-				message = fmt.Sprintf("%s %s: %s", result.ClassSubject.Subject.Name, result.ClassSubject.Class.Name, result.Title)
+				message = fmt.Sprintf("New course for %s %s: %s", result.ClassSubject.Subject.Name, result.ClassSubject.Class.Name, result.Title)
 			} else {
 				message = result.Title
 			}
 		case constants.SCHOOL_TYPE_UNIVERSITY:
 			if result.Unit != nil {
-				message = fmt.Sprintf("%s: %s", result.Unit.Name, result.Title)
+				message = fmt.Sprintf("New course for %s: %s", result.Unit.Name, result.Title)
 			} else {
 				message = result.Title
 			}
@@ -136,12 +136,17 @@ func (service *Service) Create(
 			result.School.Config.WebsiteDomainName,
 			result.ID,
 		)
-		go serviceHelperMessage.SendMessage(
+		serviceHelperMessage.SendMessage(
 			&serviceHelperMessage.MessageRequest{
 				PusNotification: true,
 				Telegram:        true,
-				Whatsapp:        true,
+				Whatsapp:        false,
 				Mail:            true,
+
+				WhatsappTemplate: constants.WHATSAPP_TEMPLATE_COURSE_PUBLISHED,
+				WhatsappBodyParams: []string{
+					result.Title,
+				},
 			},
 			title,
 			message,

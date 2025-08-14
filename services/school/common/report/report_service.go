@@ -10,6 +10,7 @@ import (
 	serviceHelperMessage "api/services/helper/message"
 	serviceHelperUser "api/services/helper/user"
 	"api/services/school/common/exam"
+	dataParent "api/services/school/common/parent/data"
 	"api/services/school/common/report/data"
 	"api/services/school/common/report/model"
 	"api/services/school/common/result"
@@ -430,7 +431,7 @@ func (service *Service) UpdateTableStatus(
 		return
 	}
 
-	// Send message to student
+	// Send message to student and parent
 	go func() {
 		if result == nil || result.Status == foundItem.Status {
 			return
@@ -444,8 +445,15 @@ func (service *Service) UpdateTableStatus(
 		studentEnrollReq.YearID = result.YearID
 		studentEnrollReq.ClassID = result.ClassID
 		studentEnrollReq.LevelDomainID = result.LevelDomainID
-		userStudents, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
-		if errUsers != nil {
+		userStudents, errStudentUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
+		// Parents
+		parentEnrollReq := &dataParent.GetAllParentStudentRequest{}
+		parentEnrollReq.SchoolID = result.SchoolID
+		parentEnrollReq.YearID = result.YearID
+		parentEnrollReq.ClassID = result.ClassID
+		parentEnrollReq.LevelDomainID = result.LevelDomainID
+		userParents, errUsers := serviceHelperUser.GetAllUserForParentStudent(parentEnrollReq)
+		if errStudentUsers != nil && errUsers != nil {
 			return
 		}
 		var title, message string
@@ -459,13 +467,16 @@ func (service *Service) UpdateTableStatus(
 		} else {
 			periodFullName = result.PeriodName
 		}
+		var classLevelDomain string
 		switch result.School.Type {
 		case constants.SCHOOL_TYPE_HIGHSCHOOL:
 			if result.Class != nil && result.Year != nil {
+				classLevelDomain = result.Class.Name
 				message = fmt.Sprintf("The report for class %s: %s %s has been %s", result.Class.Name, periodFullName, result.Year.Name, result.Status)
 			}
 		case constants.SCHOOL_TYPE_UNIVERSITY:
 			if result.LevelDomain != nil && result.LevelDomain.Level != nil && result.LevelDomain.Domain != nil && result.Year != nil {
+				classLevelDomain = fmt.Sprintf("%s %s", result.LevelDomain.Level.Name, result.LevelDomain.Domain.Name)
 				message = fmt.Sprintf("The report for level domain %s %s: %s %s has been %s", result.LevelDomain.Level.Name, result.LevelDomain.Domain.Name, periodFullName, result.Year.Name, result.Status)
 			}
 		}
@@ -475,12 +486,37 @@ func (service *Service) UpdateTableStatus(
 				Telegram:        true,
 				Whatsapp:        true,
 				Mail:            true,
+
+				WhatsappTemplate: constants.WHATSAPP_TEMPLATE_REPORT_PUBLISHED,
+				WhatsappBodyParams: []string{
+					periodFullName,
+					result.School.Name,
+				},
 			},
 			title,
 			message,
 			result.School,
 			"",
 			userStudents,
+		)
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				PusNotification: true,
+				Telegram:        true,
+				Whatsapp:        true,
+				Mail:            true,
+
+				WhatsappTemplate: constants.WHATSAPP_TEMPLATE_REPORT_PUBLISHED_PARENT,
+				WhatsappBodyParams: []string{
+					fmt.Sprintf("%s %s", periodFullName, classLevelDomain),
+					result.School.Name,
+				},
+			},
+			title,
+			message,
+			result.School,
+			"",
+			userParents,
 		)
 	}()
 	return

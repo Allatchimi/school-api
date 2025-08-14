@@ -21,7 +21,7 @@ type ExamRequest struct {
 	UnitID         int64 `json:"unitID" required:"false" doc:"Unit id"`
 	TypeID         int64 `json:"typeID" required:"true" doc:"Type id"`
 
-	Status          string     `json:"status" required:"true" enum:"draft,online,results" doc:"Status"`
+	Status          string     `json:"status" required:"true" enum:"draft,online" doc:"Status"`
 	Notation        float64    `json:"notation" required:"true" minimum:"1" doc:"Notation"`
 	Percentage      int        `json:"percentage" required:"true" minimum:"1" doc:"Percentage"`
 	Description     string     `json:"description" required:"false" doc:"Description"`

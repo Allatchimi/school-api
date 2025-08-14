@@ -34,6 +34,18 @@ func (repository *Repository) Create(item *model.Exam) (result *model.Exam, err 
 		Preload(clause.Associations).
 		Preload("School.Info").
 		Preload("School.Config").
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
+		Preload("Unit.Semester").
 		First(result, item.ID).Error
 	return
 }
@@ -99,6 +111,18 @@ func (repository *Repository) UpdateByID(id int64, item *model.Exam) (result *mo
 		Preload(clause.Associations).
 		Preload("School.Info").
 		Preload("School.Config").
+		Preload("ClassSubject.Class").
+		Preload("ClassSubject.Class.School").
+		Preload("ClassSubject.Class.Specialty").
+		Preload("ClassSubject.Class.Specialty.Section").
+		Preload("ClassSubject.Subject").
+		Preload("Unit.LevelDomain").
+		Preload("Unit.LevelDomain.School").
+		Preload("Unit.LevelDomain.Level").
+		Preload("Unit.LevelDomain.Domain").
+		Preload("Unit.LevelDomain.Domain.Department").
+		Preload("Unit.LevelDomain.Domain.Department.Faculty").
+		Preload("Unit.Semester").
 		Where("id = ?", id).
 		First(result).Error
 	return

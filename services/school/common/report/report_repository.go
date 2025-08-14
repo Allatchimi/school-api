@@ -260,6 +260,15 @@ func (repository *Repository) UpdateReportTableStatusByID(id int64, status strin
 		Preload(clause.Associations).
 		Preload("School.Info").
 		Preload("School.Config").
+		Preload("Class.School").
+		Preload("Class.Specialty").
+		Preload("Class.Specialty.Section").
+		Preload("ClassSubject.Subject").
+		Preload("LevelDomain.School").
+		Preload("LevelDomain.Level").
+		Preload("LevelDomain.Domain").
+		Preload("LevelDomain.Domain.Department").
+		Preload("LevelDomain.Domain.Department.Faculty").
 		Where("id = ?", id).
 		First(result).Error
 	return

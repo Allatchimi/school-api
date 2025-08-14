@@ -99,11 +99,12 @@ func startRetryWorker(redisClient *goredislib.Client, botToken string) {
 			continue
 		}
 
-		_, err = postHttpMessage(job)
-		if err != nil {
+		respData, errPost := postHttpMessage(job)
+		if errPost != nil {
+			helpers.Logger.Error("WhatsApp failed to post message", zap.Error(errPost))
 			job.Attempts++
 			if job.Attempts >= job.MaxAttempt {
-				helpers.Logger.Error("Telegram retry failed - max attempts exceeded", zap.Int64("Chat ID", job.ChatID))
+				helpers.Logger.Error("Telegram failed - max attempts exceeded", zap.Int64("Chat ID", job.ChatID))
 				// Optionally: push to dead-letter queue
 				continue
 			}
@@ -111,11 +112,16 @@ func startRetryWorker(redisClient *goredislib.Client, botToken string) {
 			newData, _ := job.serialize()
 			_ = redisClient.RPush(ctx, retryQueue, newData).Err()
 		} else {
-			helpers.Logger.Info("Telegram retry succeeded", zap.Int64("Chat ID", job.ChatID))
+			helpers.Logger.Info(
+				fmt.Sprintf("Telegram send succeeded after attempt %d", job.Attempts),
+				zap.Int64("Chat ID", job.ChatID),
+				zap.Any("Response data", respData),
+			)
+
 		}
 
-		// Always respect Telegram rate limit
-		time.Sleep(2 * time.Second)
+		// Always respect rate limit: ~1 msg/sec
+		time.Sleep(2 * time.Second) // Sleep every 2sec
 	}
 }
 

@@ -18,8 +18,11 @@ import (
 )
 
 func TestAll() {
-	TestSpecificSendMail("prosper.abouar@gmail.com")
-	TestSpecificSendMail("prosper.abouar@yahoo.fr")
+	go func() {
+		TestSpecificSendMail("prosper.abouar@gmail.com")
+		TestSpecificSendMail("prosper.abouar@yahoo.fr")
+		TestSpecificSendWhatsappMessage()
+	}()
 }
 
 func TestSpecificSendMail(to string) {
@@ -105,13 +108,19 @@ func TestSpecificSendWhatsappMessage() {
 	// Send WhatsApp message
 	go func() {
 		whatsappHelper.SendMessage(
-			"ElGxwzarPY2EAul6YSdCwwKjxLItk",
-			"7676549051",
-			"Welcome Prosper! Nice to see you.",
+			"EAAVClhRHZAuYBPCQXj5IPhtHFqRmERdeZBLm72L9gyUyDeUki5aYajYiVHaycxoxpTZAHFlusjHZB87UvYOObTdCbjYYhq7io6cmZA7ZBahl9kpdCdq9AYcicVFqJtKLQC3ldVpQRTshxNOLXCyJ86JCjbhgZBdXa8SUArWAZBkFH1ggBqjh96j5oe5my2H0CMBSUJwoNTNSExHspsIuShHmFGwZChf07mB5ZAMbzzrhGbtZAr4WygZD",
+			"774627652396866",
+			"request_status",
+			[]string{"Problem with score of INF101 ", "rejected", "DIGIT-School"},
 			[]modelUser.User{
 				{
+					Info: &modelUser.UserInfo{
+						FirstName: "Prosper",
+						LastName:  "Abouar",
+						Language:  "en",
+					},
 					Config: &modelUser.UserConfig{
-						WhatsappPhoneNumber: 237696666666,
+						WhatsappPhoneNumber: 237693264668,
 					},
 				},
 			},

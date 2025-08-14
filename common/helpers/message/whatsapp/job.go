@@ -16,9 +16,14 @@ type WhatsAppJob struct {
 	PhoneID             string
 	AccessToken         string
 	ReceiverPhoneNumber string
-	Message             string
-	Attempts            int
-	MaxAttempt          int
+
+	Template   string
+	Language   string
+	BodyParams []string
+	TTLSeconds int
+
+	Attempts   int
+	MaxAttempt int
 }
 
 func (job *WhatsAppJob) serialize() ([]byte, error) {
@@ -95,11 +100,12 @@ func startRetryWorker(redisClient *goredislib.Client, accessToken, phoneID strin
 			continue
 		}
 
-		_, err = postHttpMessage(job)
-		if err != nil {
+		respData, errPost := postTemplateMessage(job)
+		if errPost != nil {
+			helpers.Logger.Error("WhatsApp failed to post message", zap.Error(errPost))
 			job.Attempts++
 			if job.Attempts >= job.MaxAttempt {
-				helpers.Logger.Error("WhatsApp retry failed - max attempts exceeded", zap.String("Phone Number", job.ReceiverPhoneNumber))
+				helpers.Logger.Error("WhatsApp failed - max attempts exceeded", zap.String("Phone Number", job.ReceiverPhoneNumber))
 				// Optionally: push to dead-letter queue
 				continue
 			}
@@ -107,9 +113,15 @@ func startRetryWorker(redisClient *goredislib.Client, accessToken, phoneID strin
 			newData, _ := job.serialize()
 			_ = redisClient.RPush(ctx, queueName, newData).Err()
 		} else {
-			helpers.Logger.Info("WhatsApp retry succeeded", zap.String("Phone Number", job.ReceiverPhoneNumber))
+			helpers.Logger.Info(
+				fmt.Sprintf("WhatsApp send succeeded after attempt %d", job.Attempts),
+				zap.String("Phone Number", job.ReceiverPhoneNumber),
+				zap.Any("Response data", respData),
+			)
 		}
-		time.Sleep(2 * time.Second) // Respect rate limit (~1 msg/sec)
+
+		// Always respect rate limit: ~1 msg/sec
+		time.Sleep(2 * time.Second) // Sleep every 2sec
 	}
 }
 

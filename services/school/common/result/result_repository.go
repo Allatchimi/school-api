@@ -49,6 +49,21 @@ func (repository *Repository) CreateResultTable(item *model.ResultTable) (result
 		Preload(clause.Associations).
 		Preload("School.Info").
 		Preload("School.Config").
+		Preload("Exam.Type").
+		Preload("Exam.ClassSubject").
+		Preload("Exam.ClassSubject.Class").
+		Preload("Exam.ClassSubject.Class.School").
+		Preload("Exam.ClassSubject.Class.Specialty").
+		Preload("Exam.ClassSubject.Class.Specialty.Section").
+		Preload("Exam.ClassSubject.Subject").
+		Preload("Exam.Sequence").
+		Preload("Exam.Unit").
+		Preload("Exam.Unit.LevelDomain").
+		Preload("Exam.Unit.LevelDomain.Level").
+		Preload("Exam.Unit.LevelDomain.Domain").
+		Preload("Exam.Unit.LevelDomain.Domain.Department").
+		Preload("Exam.Unit.LevelDomain.Domain.Department.Faculty").
+		Preload("Exam.Unit.Semester").
 		First(result, item.ID).Error
 	return
 }
@@ -89,6 +104,23 @@ func (repository *Repository) UpdateResultTableByID(id int64, item *model.Result
 	}
 	err = repository.Db.
 		Model(&model.ResultTable{}).
+		Preload("School.Info").
+		Preload("School.Config").
+		Preload("Exam.Type").
+		Preload("Exam.ClassSubject").
+		Preload("Exam.ClassSubject.Class").
+		Preload("Exam.ClassSubject.Class.School").
+		Preload("Exam.ClassSubject.Class.Specialty").
+		Preload("Exam.ClassSubject.Class.Specialty.Section").
+		Preload("Exam.ClassSubject.Subject").
+		Preload("Exam.Sequence").
+		Preload("Exam.Unit").
+		Preload("Exam.Unit.LevelDomain").
+		Preload("Exam.Unit.LevelDomain.Level").
+		Preload("Exam.Unit.LevelDomain.Domain").
+		Preload("Exam.Unit.LevelDomain.Domain.Department").
+		Preload("Exam.Unit.LevelDomain.Domain.Department.Faculty").
+		Preload("Exam.Unit.Semester").
 		Where("id = ?", id).
 		Updates(fields).Error
 	if err != nil {

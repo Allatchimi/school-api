@@ -172,48 +172,79 @@ func (service *Service) CreateTable(
 		studentEnrollReq.YearID = result.Exam.YearID
 		studentEnrollReq.ClassSubjectID = result.Exam.ClassSubjectID
 		studentEnrollReq.UnitID = result.Exam.UnitID
-		userStudents, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
-		if errUsers != nil {
-			return
-		}
+		userStudents, errStudentUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
 		// Parents
 		parentEnrollReq := &dataParent.GetAllParentStudentRequest{}
 		parentEnrollReq.SchoolID = result.SchoolID
 		parentEnrollReq.YearID = result.Exam.YearID
 		parentEnrollReq.ClassSubjectID = result.Exam.ClassSubjectID
 		parentEnrollReq.UnitID = result.Exam.UnitID
-		userParents, errUsers := serviceHelperUser.GetAllUserForParentStudent(parentEnrollReq)
-		if errUsers != nil {
+		userParents, errParentUsers := serviceHelperUser.GetAllUserForParentStudent(parentEnrollReq)
+		if errStudentUsers != nil && errParentUsers != nil {
 			return
 		}
 		var title, message string
+		var classSubjectUnit string
+		var classLevelDomain string
 		switch result.Status {
 		case constants.RESULT_STATUS_PUBLISHED:
 			title = "Available results for exam"
 		}
 		switch result.School.Type {
 		case constants.SCHOOL_TYPE_HIGHSCHOOL:
-			if result.Exam.ClassSubject != nil && result.Exam.ClassSubject.Subject != nil && result.Exam.ClassSubject.Class != nil && result.Exam.Type != nil && result.Exam.Sequence != nil && result.Exam.Year != nil {
-				message = fmt.Sprintf("Results exam for subject %s %s: %s %s %s", result.Exam.ClassSubject.Subject.Name, result.Exam.ClassSubject.Class.Name, result.Exam.Type.Name, result.Exam.Sequence.Name, result.Exam.Year.Name)
+			if result.Exam.ClassSubject != nil && result.Exam.ClassSubject.Subject != nil &&
+				result.Exam.ClassSubject.Class != nil && result.Exam.Type != nil &&
+				result.Exam.Sequence != nil && result.Exam.Year != nil {
+				classSubjectUnit = result.Exam.ClassSubject.Subject.Name
+				classLevelDomain = result.Exam.ClassSubject.Class.Name
+				message = fmt.Sprintf("Results for subject %s %s: %s %s %s", result.Exam.ClassSubject.Subject.Name, result.Exam.ClassSubject.Class.Name, result.Exam.Type.Name, result.Exam.Sequence.Name, result.Exam.Year.Name)
 			}
 		case constants.SCHOOL_TYPE_UNIVERSITY:
-			if result.Exam.Unit != nil && result.Exam.Type != nil && result.Exam.Unit.Semester != nil && result.Exam.Year != nil {
-				message = fmt.Sprintf("Results exam for unit %s: %s %s %s", result.Exam.Unit.Name, result.Exam.Type.Name, result.Exam.Unit.Semester.Name, result.Exam.Year.Name)
+			if result.Exam.Unit != nil && result.Exam.Type != nil && result.Exam.Unit.Semester != nil &&
+				result.Exam.Unit.LevelDomain != nil && result.Exam.Unit.LevelDomain.Level != nil &&
+				result.Exam.Unit.LevelDomain.Domain != nil && result.Exam.Year != nil {
+				classSubjectUnit = result.Exam.Unit.Name
+				classLevelDomain = fmt.Sprintf("%s %s", result.Exam.Unit.LevelDomain.Level.Name, result.Exam.Unit.LevelDomain.Domain.Name)
+				message = fmt.Sprintf("Results for unit %s: %s %s %s", result.Exam.Unit.Name, result.Exam.Type.Name, result.Exam.Unit.Semester.Name, result.Exam.Year.Name)
 			}
 		}
-		allUsers := append(userStudents, userParents...)
 		serviceHelperMessage.SendMessage(
 			&serviceHelperMessage.MessageRequest{
 				PusNotification: true,
 				Telegram:        true,
 				Whatsapp:        true,
 				Mail:            true,
+
+				WhatsappTemplate: constants.WHATSAPP_TEMPLATE_RESULT_PUBLISHED,
+				WhatsappBodyParams: []string{
+					classSubjectUnit,
+					result.School.Name,
+				},
 			},
 			title,
 			message,
 			result.School,
 			"",
-			allUsers,
+			userStudents,
+		)
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				PusNotification: true,
+				Telegram:        true,
+				Whatsapp:        true,
+				Mail:            true,
+
+				WhatsappTemplate: constants.WHATSAPP_TEMPLATE_RESULT_PUBLISHED_PARENT,
+				WhatsappBodyParams: []string{
+					fmt.Sprintf("%s (%s)", classSubjectUnit, classLevelDomain),
+					result.School.Name,
+				},
+			},
+			title,
+			message,
+			result.School,
+			"",
+			userParents,
 		)
 	}()
 	return
@@ -381,7 +412,7 @@ func (service *Service) UpdateTable(
 
 	// Send message to students and parents
 	go func() {
-		if result.Exam == nil || result.Exam.ID < 1 || result.Status != constants.RESULT_STATUS_PUBLISHED || result.Status == foundItem.Status {
+		if result.Exam == nil || result.Exam.ID < 1 || result.Status != constants.RESULT_STATUS_PUBLISHED {
 			return
 		}
 		// Students
@@ -390,48 +421,79 @@ func (service *Service) UpdateTable(
 		studentEnrollReq.YearID = result.Exam.YearID
 		studentEnrollReq.ClassSubjectID = result.Exam.ClassSubjectID
 		studentEnrollReq.UnitID = result.Exam.UnitID
-		userStudents, errUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
-		if errUsers != nil {
-			return
-		}
+		userStudents, errStudentUsers := serviceHelperUser.GetAllUserForStudentEnroll(studentEnrollReq)
 		// Parents
 		parentEnrollReq := &dataParent.GetAllParentStudentRequest{}
 		parentEnrollReq.SchoolID = result.SchoolID
 		parentEnrollReq.YearID = result.Exam.YearID
 		parentEnrollReq.ClassSubjectID = result.Exam.ClassSubjectID
 		parentEnrollReq.UnitID = result.Exam.UnitID
-		userParents, errUsers := serviceHelperUser.GetAllUserForParentStudent(parentEnrollReq)
-		if errUsers != nil {
+		userParents, errParentUsers := serviceHelperUser.GetAllUserForParentStudent(parentEnrollReq)
+		if errStudentUsers != nil && errParentUsers != nil {
 			return
 		}
 		var title, message string
+		var classSubjectUnit string
+		var classLevelDomain string
 		switch result.Status {
 		case constants.RESULT_STATUS_PUBLISHED:
 			title = "Available results for exam"
 		}
 		switch result.School.Type {
 		case constants.SCHOOL_TYPE_HIGHSCHOOL:
-			if result.Exam.ClassSubject != nil && result.Exam.ClassSubject.Subject != nil && result.Exam.ClassSubject.Class != nil && result.Exam.Type != nil && result.Exam.Sequence != nil && result.Exam.Year != nil {
-				message = fmt.Sprintf("Results exam for subject %s %s: %s %s %s", result.Exam.ClassSubject.Subject.Name, result.Exam.ClassSubject.Class.Name, result.Exam.Type.Name, result.Exam.Sequence.Name, result.Exam.Year.Name)
+			if result.Exam.ClassSubject != nil && result.Exam.ClassSubject.Subject != nil &&
+				result.Exam.ClassSubject.Class != nil && result.Exam.Type != nil &&
+				result.Exam.Sequence != nil && result.Exam.Year != nil {
+				classSubjectUnit = result.Exam.ClassSubject.Subject.Name
+				classLevelDomain = result.Exam.ClassSubject.Class.Name
+				message = fmt.Sprintf("Results for subject %s %s: %s %s %s", result.Exam.ClassSubject.Subject.Name, result.Exam.ClassSubject.Class.Name, result.Exam.Type.Name, result.Exam.Sequence.Name, result.Exam.Year.Name)
 			}
 		case constants.SCHOOL_TYPE_UNIVERSITY:
-			if result.Exam.Unit != nil && result.Exam.Type != nil && result.Exam.Unit.Semester != nil && result.Exam.Year != nil {
-				message = fmt.Sprintf("Results exam for unit %s: %s %s %s", result.Exam.Unit.Name, result.Exam.Type.Name, result.Exam.Unit.Semester.Name, result.Exam.Year.Name)
+			if result.Exam.Unit != nil && result.Exam.Type != nil && result.Exam.Unit.Semester != nil &&
+				result.Exam.Unit.LevelDomain != nil && result.Exam.Unit.LevelDomain.Level != nil &&
+				result.Exam.Unit.LevelDomain.Domain != nil && result.Exam.Year != nil {
+				classSubjectUnit = result.Exam.Unit.Name
+				classLevelDomain = fmt.Sprintf("%s %s", result.Exam.Unit.LevelDomain.Level.Name, result.Exam.Unit.LevelDomain.Domain.Name)
+				message = fmt.Sprintf("Results for unit %s: %s %s %s", result.Exam.Unit.Name, result.Exam.Type.Name, result.Exam.Unit.Semester.Name, result.Exam.Year.Name)
 			}
 		}
-		allUsers := append(userStudents, userParents...)
 		serviceHelperMessage.SendMessage(
 			&serviceHelperMessage.MessageRequest{
 				PusNotification: true,
 				Telegram:        true,
 				Whatsapp:        true,
 				Mail:            true,
+
+				WhatsappTemplate: constants.WHATSAPP_TEMPLATE_RESULT_PUBLISHED,
+				WhatsappBodyParams: []string{
+					classSubjectUnit,
+					result.School.Name,
+				},
 			},
 			title,
 			message,
 			result.School,
 			"",
-			allUsers,
+			userStudents,
+		)
+		serviceHelperMessage.SendMessage(
+			&serviceHelperMessage.MessageRequest{
+				PusNotification: true,
+				Telegram:        true,
+				Whatsapp:        true,
+				Mail:            true,
+
+				WhatsappTemplate: constants.WHATSAPP_TEMPLATE_RESULT_PUBLISHED_PARENT,
+				WhatsappBodyParams: []string{
+					fmt.Sprintf("%s (%s)", classSubjectUnit, classLevelDomain),
+					result.School.Name,
+				},
+			},
+			title,
+			message,
+			result.School,
+			"",
+			userParents,
 		)
 	}()
 	return
@@ -623,7 +685,7 @@ func (service *Service) GetAll(
 			return
 		}
 		if ctxData.User.Feature != constants.FeatureAdmin && ctxData.User.Feature != constants.FeatureDirector && ctxData.User.Feature != constants.FeatureTeacher {
-			newRequest.TableStatusList = []string{constants.EXAM_STATUS_ONLINE, constants.EXAM_STATUS_RESULTS}
+			newRequest.TableStatusList = []string{constants.EXAM_STATUS_ONLINE}
 		}
 	}
 
@@ -669,7 +731,7 @@ func (service *Service) GetAllTable(
 			return
 		}
 		if ctxData.User.Feature != constants.FeatureAdmin && ctxData.User.Feature != constants.FeatureDirector && ctxData.User.Feature != constants.FeatureTeacher {
-			newRequest.ExamStatusList = []string{constants.EXAM_STATUS_ONLINE, constants.EXAM_STATUS_RESULTS}
+			newRequest.ExamStatusList = []string{constants.EXAM_STATUS_ONLINE}
 		}
 	}
 
