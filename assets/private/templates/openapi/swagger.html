@@ -116,7 +116,7 @@
       // Show indeterminate state when length is not computable
       function setIndeterminate() {
         const txt = document.getElementById("progress-text");
-        if (txt) txt.textContent = "Chargement…";
+        if (txt) txt.textContent = "Loading...";
       }
 
       // Hide loader overlay with fade animation
@@ -173,7 +173,7 @@
         } catch (err) {
           console.error("Failed to load OpenAPI spec:", err);
           const txt = document.getElementById("progress-text");
-          if (txt) txt.textContent = "Échec du chargement";
+          if (txt) txt.textContent = "Failed to load";
         }
       }
 
