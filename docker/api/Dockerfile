@@ -1,5 +1,5 @@
-# ----------------------- Stage building -----------------------
-FROM golang:alpine AS builder
+# ----------------------- Stage builder -----------------------
+FROM golang:1.25.0-alpine AS builder
 ENV LANG=C.UTF-8
 
 WORKDIR /app
@@ -18,7 +18,7 @@ COPY . .
 RUN GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o ./.build/main ./cmd/main.go
 
 
-# ----------------------- Stage serve -----------------------
+# ----------------------- Stage runner -----------------------
 
 FROM ubuntu:24.04 AS api
 ENV LANG=C.UTF-8
