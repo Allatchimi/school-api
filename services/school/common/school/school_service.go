@@ -294,8 +294,19 @@ func (service *Service) UpdateDeploymentStatus(
 		return
 	}
 
+	// Format request
+	item := &data.SchoolDeploymentStatusRequest{
+		Status:   request.Status,
+		Feedback: request.Status,
+	}
+	if len(request.Extra) < 1 {
+		item.Extra = foundItem.DeploymentExtra
+	} else {
+		item.Extra = request.Extra
+	}
+
 	// Update status
-	updatedItem, err := service.Repository.UpdateDeploymentStatusByID(id, request)
+	updatedItem, err := service.Repository.UpdateDeploymentStatusByID(id, item)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)

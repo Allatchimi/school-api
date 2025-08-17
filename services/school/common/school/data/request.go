@@ -67,8 +67,9 @@ type SchoolConfigRequest struct {
 }
 
 type SchoolDeploymentStatusRequest struct {
-	Status   string `json:"status" required:"true" enum:"done,failed" doc:"Deployment status"`
-	Feedback string `json:"feedback" required:"false" doc:"Deployment feedback"`
+	Status   string `json:"status" required:"true" enum:"done,failed" doc:"Status"`
+	Feedback string `json:"feedback" required:"false" doc:"Feedback"`
+	Extra    string `json:"extra" required:"false" doc:"Extra"`
 }
 
 type GetAllRequest struct {

@@ -12,6 +12,7 @@ type SchoolResponse struct {
 	DeploymentRequest  string `json:"deploymentRequest" required:"false" doc:"Deployment request"`
 	DeploymentStatus   string `json:"deploymentStatus" required:"false" doc:"Deployment status"`
 	DeploymentFeedback string `json:"deploymentFeedback" required:"false" doc:"Deployment feedback"`
+	DeploymentExtra    string `json:"deploymentExtra" required:"false" doc:"Deployment exta"`
 	DeploymentCount    int64  `json:"deploymentVersion" required:"false" doc:"Deployment version"`
 }
 

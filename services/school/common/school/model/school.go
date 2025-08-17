@@ -22,6 +22,7 @@ type School struct {
 	DeploymentRequest  string `gorm:"default:null"`
 	DeploymentStatus   string `gorm:"default:null"`
 	DeploymentFeedback string `gorm:"default:null;type:text"`
+	DeploymentExtra    string `gorm:"default:null;type:text"`
 	DeploymentCount    int64  `gorm:"default:null"`
 	Favicon            string `gorm:"default:null"`
 	Logo               string `gorm:"default:null"`
@@ -48,6 +49,7 @@ func (item *School) ToResponse() *data.SchoolResponse {
 	resp.DeploymentRequest = item.DeploymentRequest
 	resp.DeploymentStatus = item.DeploymentStatus
 	resp.DeploymentFeedback = item.DeploymentFeedback
+	resp.DeploymentExtra = item.DeploymentExtra
 	resp.DeploymentCount = item.DeploymentCount
 	resp.Favicon = item.Favicon
 	resp.Logo = item.Logo

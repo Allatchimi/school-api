@@ -18,9 +18,6 @@ import (
 )
 
 func TestAll() {
-	go TestSpecificSendMail("prosper.abouar@gmail.com")
-	go TestSpecificSendMail("prosper.abouar@yahoo.fr")
-	go TestSpecificSendWhatsappMessage()
 }
 
 func TestSpecificSendMail(to string) {

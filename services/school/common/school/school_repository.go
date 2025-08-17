@@ -101,6 +101,7 @@ func (repository *Repository) UpdateDeploymentStatusByID(id int64, request *data
 	fields := map[string]any{
 		"deployment_status":   request.Status,
 		"deployment_feedback": request.Feedback,
+		"deployment_extra":    request.Extra,
 	}
 	err = repository.Db.
 		Model(&model.School{}).
