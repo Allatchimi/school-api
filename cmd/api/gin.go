@@ -50,7 +50,7 @@ func StartGin() {
 			Type:         "http",
 			Scheme:       "bearer",
 			BearerFormat: "JWT",
-			Description:  "Bearer token used to access some resources",
+			Description:  "Bearer token used to authenticate",
 		},
 		constants.SecuritySchemeSchoolToken: {
 			Type:        "apiKey",

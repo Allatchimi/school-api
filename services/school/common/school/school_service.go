@@ -319,7 +319,7 @@ func (service *Service) UpdateDeploymentStatus(
 		if updatedItem.Config != nil && len(updatedItem.Config.WebsiteDomainName) > 0 {
 			websiteUrl = fmt.Sprintf("%s://%s", httpHelper.DefaultProtocol(), updatedItem.Config.WebsiteDomainName)
 		}
-		switch updatedItem.Status {
+		switch updatedItem.DeploymentStatus {
 		case constants.SCHOOL_DEPLOYMENT_STATUS_DONE, constants.SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES:
 			title = "Successfully deployed school " + updatedItem.Name
 			message = fmt.Sprintf(`

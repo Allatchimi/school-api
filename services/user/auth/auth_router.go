@@ -204,7 +204,7 @@ func RegisterEndpoints(
 		huma.Operation{
 			OperationID: "forgot-password-code",
 			Summary:     "Forgot step 2",
-			Description: "Forgot password step 2 validate your request with your received(email) code and token from step 1.",
+			Description: "Forgot password step 2 validate your request with the received code and token from step 1.",
 			Method:      http.MethodPost,
 			Path:        fmt.Sprintf("%s/forgot/checkcode", endpointConfig.Group),
 			Tags:        endpointConfig.Tag,
