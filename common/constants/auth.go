@@ -1,9 +1,9 @@
 package constants
 
 // API security name
-const SecuritySchemeBearerToken = "Bearer token"
-const SecuritySchemeSchoolToken = "School token"
-const SecuritySchemeSchoolID = "School ID"
+const SecuritySchemeBearerToken = "BearerToken"
+const SecuritySchemeSchoolID = "SchoolID"
+const SecuritySchemeSchoolToken = "SchoolToken"
 
 // Authentication - login methods
 const AuthLoginMethodDefault = "default"

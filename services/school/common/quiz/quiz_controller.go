@@ -146,7 +146,6 @@ func (controller *Controller) GetAllQuizAnswer(
 	input *struct {
 		types.Filter
 		types.PaginationRequest
-		data.QuizID
 		data.GetAllQuizAnswerRequest
 	},
 ) (result *data.QuizAnswerResponseList, errCode int, err error) {
@@ -171,7 +170,6 @@ func (controller *Controller) GetAllQuizResult(
 	input *struct {
 		types.Filter
 		types.PaginationRequest
-		data.QuizID
 		data.GetAllQuizResultRequest
 	},
 ) (result *data.QuizResultResponseList, errCode int, err error) {
@@ -179,7 +177,7 @@ func (controller *Controller) GetAllQuizResult(
 	quizAnswerList, errCode, err := controller.Service.GetAllQuizAnswer(
 		httpHelper.GetContextData(ctx), newFilter, newPagination,
 		&data.GetAllQuizAnswerRequest{
-			QuizID: input.QuizID,
+			QuizID: input.GetAllQuizResultRequest.QuizID,
 		},
 	)
 	if err != nil {
