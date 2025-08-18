@@ -38,6 +38,20 @@ func (service *Service) PostWebhook(
 		return
 	}
 	text, _ := msg["text"].(string)
+
+	// Handle command
+	switch text {
+	case "/id":
+		errCode, err = handleCommandID(service, msg, SchoolID)
+	case "/start":
+		errCode, err = handleCommandStart(service, msg, SchoolID)
+	}
+
+	return
+}
+
+func handleCommandID(service *Service, msg map[string]any, SchoolID int64) (errCode int, err error) {
+	// Get data
 	chat, ok := msg["chat"].(map[string]any)
 	if !ok {
 		return
@@ -49,11 +63,6 @@ func (service *Service) PostWebhook(
 	chatID := int64(chatIDFloat)
 	firstName, _ := chat["first_name"].(string)
 	username, _ := chat["username"].(string)
-
-	// Check command
-	if text != "/id" || chatID < 1 {
-		return
-	}
 
 	// Get school
 	schoolFound, err := service.SchoolService.Repository.GetByID(SchoolID)
@@ -74,6 +83,57 @@ func (service *Service) PostWebhook(
 		username := username
 		message := fmt.Sprintf(
 			"Hello %s (@%s) 👋\nYour Telegram Chat ID is: %d\n\nPlease enter this ID in your school profile.",
+			firstName, username, chatID,
+		)
+
+		err = sendTelegramMessage(schoolFound.Config.TelegramBotToken, chatID, message)
+		if err != nil {
+			helpers.Logger.Error("Error sending telegram message: %v", zap.Error(err))
+			return
+		}
+	}()
+	return
+}
+
+func handleCommandStart(service *Service, msg map[string]any, SchoolID int64) (errCode int, err error) {
+	// Get data
+	chat, ok := msg["chat"].(map[string]any)
+	if !ok {
+		return
+	}
+	chatIDFloat, ok := chat["id"].(float64)
+	if !ok {
+		return
+	}
+	chatID := int64(chatIDFloat)
+	firstName, _ := chat["first_name"].(string)
+	username, _ := chat["username"].(string)
+
+	// Get school
+	schoolFound, err := service.SchoolService.Repository.GetByID(SchoolID)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	if schoolFound == nil || schoolFound.ID < 1 {
+		errCode = http.StatusNotFound
+		err = constants.Http404ErrorMessage(MODEL_NAME)
+		return
+	}
+
+	// Send message
+	go func() {
+		firstName := firstName
+		username := username
+		message := fmt.Sprintf(
+			`👋 Welcome %s (@%s)!\n
+
+			I'm here to assist you with notifications and updates.  
+			If you haven't set your Chat ID yet, please use the "/id" command so we can link your account to this chat.  
+
+			Once your Chat ID is defined, you'll start receiving updates directly here.
+			`,
 			firstName, username, chatID,
 		)
 
