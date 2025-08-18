@@ -95,9 +95,6 @@ func (item *School) WebsiteUrl() (url string) {
 		return
 	}
 	protocol := "https"
-	if config.Env.AppEnv != "prod" {
-		protocol = "http"
-	}
 	url = fmt.Sprintf("%s://%s", protocol, item.Config.WebsiteDomainName)
 	return
 }

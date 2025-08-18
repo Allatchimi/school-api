@@ -126,7 +126,7 @@ func (service *Service) Login(
 	err = fmt.Errorf("%s", "Account found but not activated! Please activate your account to start using your services.")
 
 	// Send code to email
-	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+	if userFound == nil || userFound.ID < 1 {
 		return
 	}
 	if utils.IsEmailValid(request.Email) {
@@ -134,8 +134,8 @@ func (service *Service) Login(
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailDataCheckCode{
 				EmailData: smtpHelper.EmailData{
-					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
-					Logo:         userFound.School.Logo,
+					HomePageLink: userFound.School.WebsiteUrl(),
+					Logo:         userFound.School.LogoUrl(),
 					Title:        constants.MailVerifyEmailCheckCode.Title,
 					Message:      constants.MailVerifyEmailCheckCode.Message,
 				},
@@ -424,7 +424,7 @@ func (service *Service) Register(
 	}
 
 	// Send code to email
-	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+	if userFound == nil || userFound.ID < 1 {
 		return
 	}
 	if utils.IsEmailValid(request.Email) {
@@ -432,8 +432,8 @@ func (service *Service) Register(
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailDataCheckCode{
 				EmailData: smtpHelper.EmailData{
-					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
-					Logo:         userFound.School.Logo,
+					HomePageLink: userFound.School.WebsiteUrl(),
+					Logo:         userFound.School.LogoUrl(),
 					Title:        constants.MailVerifyEmailCheckCode.Title,
 					Message:      constants.MailVerifyEmailCheckCode.Message,
 				},
@@ -542,15 +542,15 @@ func (service *Service) ActivateAccount(
 	_, _ = config.DeleteRedisString(securityUtil.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
 
 	// Send welcome message
-	if userFound.School == nil || userFound.School.Config == nil {
+	if userFound == nil || userFound.ID < 1 {
 		return
 	}
 	if utils.IsEmailValid(updatedUser.Email) {
 		go func() {
 			fromEmail, fromUsername := updatedUser.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailData{
-				HomePageLink: fmt.Sprintf("https://%s", updatedUser.School.Config.WebsiteDomainName),
-				Logo:         updatedUser.School.Logo,
+				HomePageLink: userFound.School.WebsiteUrl(),
+				Logo:         userFound.School.LogoUrl(),
 				Title:        constants.MailWelcomeVerifiedEmail.Title,
 				Message:      constants.MailWelcomeVerifiedEmail.Message,
 			}
@@ -634,7 +634,7 @@ func (service *Service) ForgotPasswordInit(
 	token = newToken
 
 	// Send code to email
-	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
+	if userFound == nil || userFound.ID < 1 {
 		return
 	}
 	if utils.IsEmailValid(request.Email) {
@@ -642,8 +642,8 @@ func (service *Service) ForgotPasswordInit(
 			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
 			data := &smtpHelper.EmailDataCheckCode{
 				EmailData: smtpHelper.EmailData{
-					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
-					Logo:         userFound.School.Logo,
+					HomePageLink: userFound.School.WebsiteUrl(),
+					Logo:         userFound.School.LogoUrl(),
 					Title:        constants.MailForgotPasswordCheckCode.Title,
 					Message:      constants.MailForgotPasswordCheckCode.Message,
 				},
