@@ -22,6 +22,10 @@ func (controller *Controller) PostWebhook(
 		Body data.TelegramWebhookRequest
 	},
 ) (errCode int, err error) {
-	errCode, err = controller.Service.PostWebhook(httpHelper.GetContextData(ctx), input.SchoolID, &input.Body)
+	errCode, err = controller.Service.PostWebhook(
+		httpHelper.GetContextData(ctx),
+		input.TelegramBotSchoolID.SchoolID,
+		&input.Body,
+	)
 	return
 }

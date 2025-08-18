@@ -5,14 +5,18 @@ import (
 	"net/http"
 
 	"api/common/constants"
+	"api/common/helpers"
 	deploymentHelper "api/common/helpers/deployment"
 	httpHelper "api/common/helpers/http"
+	telegramHelper "api/common/helpers/message/telegram"
 	"api/common/types"
 	"api/common/utils"
 	serviceHelperMessage "api/services/helper/message"
 	serviceHelperSchool "api/services/helper/school"
 	"api/services/school/common/school/data"
 	"api/services/school/common/school/model"
+
+	"go.uber.org/zap"
 )
 
 type Service struct {
@@ -107,6 +111,19 @@ func (service *Service) Create(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+
+	// Post Telegram wehook
+	go func() {
+		if result.Config == nil || len(result.Config.TelegramBotToken) < 1 {
+			return
+		}
+		data, errTelegram := telegramHelper.SetTelegramWebhook(result.ID, result.Config.TelegramBotToken)
+		if errTelegram != nil {
+			helpers.Logger.Error("Failed to post webhook", zap.Error(errTelegram))
+			return
+		}
+		helpers.Logger.Info("Posted webhook", zap.Any("data", data))
+	}()
 
 	// Deploy school
 	go func() {
@@ -240,6 +257,19 @@ func (service *Service) Update(
 	}
 	result.Info = newInfo
 	result.Config = newConfig
+
+	// Post Telegram wehook
+	go func() {
+		if result.Config == nil || len(result.Config.TelegramBotToken) < 1 {
+			return
+		}
+		data, errTelegram := telegramHelper.SetTelegramWebhook(result.ID, result.Config.TelegramBotToken)
+		if errTelegram != nil {
+			helpers.Logger.Error("Failed to post webhook", zap.Error(errTelegram))
+			return
+		}
+		helpers.Logger.Info("Posted webhook", zap.Any("data", data))
+	}()
 
 	// Deploy school
 	go func() {

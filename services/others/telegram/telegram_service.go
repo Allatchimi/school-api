@@ -29,7 +29,7 @@ func (service *Service) PostWebhook(
 	request *data.TelegramWebhookRequest,
 ) (errCode int, err error) {
 	// Safety check
-	if request.Update.Message.Text != "/id" || request.Update.Message.Chat.ID == 0 {
+	if request.Message.Text != "/id" || request.Message.Chat.ID == 0 {
 		return
 	}
 
@@ -40,16 +40,16 @@ func (service *Service) PostWebhook(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if schoolFound == nil {
+	if schoolFound == nil || schoolFound.ID < 1 {
 		errCode = http.StatusNotFound
 		err = constants.Http404ErrorMessage(MODEL_NAME)
 		return
 	}
 
 	// Send message
-	chatID := request.Update.Message.Chat.ID
-	firstName := request.Update.Message.From.FirstName
-	username := request.Update.Message.From.Username
+	chatID := request.Message.Chat.ID
+	firstName := request.Message.From.FirstName
+	username := request.Message.From.Username
 	message := fmt.Sprintf(
 		"Hello %s (@%s) 👋\nYour Telegram Chat ID is: %d\n\nPlease enter this ID in your school profile.",
 		firstName, username, chatID,

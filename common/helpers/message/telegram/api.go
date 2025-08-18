@@ -15,7 +15,9 @@ func postHttpMessage(job *TelegramJob) (data any, err error) {
 	headers := []httpHelper.HttpHeader{
 		{Label: "Content-Type", Value: "application/json"},
 	}
-	err = httpHelper.HttpPost(url, headers, payload, data)
+	var resp any
+	err = httpHelper.HttpPost(url, headers, payload, &resp)
+	data = resp
 	return
 }
 
@@ -28,6 +30,8 @@ func postHttpWebhook(schoolID int64, botToken string) (data any, err error) {
 	headers := []httpHelper.HttpHeader{
 		{Label: "Content-Type", Value: "application/json"},
 	}
-	err = httpHelper.HttpPost(url, headers, payload, data)
+	var resp any
+	err = httpHelper.HttpPost(url, headers, payload, &resp)
+	data = resp
 	return
 }

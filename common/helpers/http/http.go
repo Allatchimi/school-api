@@ -39,6 +39,9 @@ func HttpGet(url string, response any) error {
 	if err != nil {
 		return err
 	}
+	if data == nil {
+		return fmt.Errorf("Empty response")
+	}
 	err = json.Unmarshal(data, response)
 	if err != nil {
 		return err
@@ -79,12 +82,16 @@ func HttpPost(url string, headers []HttpHeader, body any, response any) error {
 	if err != nil {
 		return err
 	}
+	if data == nil {
+		return fmt.Errorf("Empty response")
+	}
 	err = json.Unmarshal(data, response)
 	if err != nil {
 		return err
 	}
 
 	if resp.StatusCode >= 400 {
+		fmt.Print(response)
 		return fmt.Errorf(
 			"HTTP Error %d. Failed to POST %s. Response: %s",
 			resp.StatusCode,
