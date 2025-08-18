@@ -82,7 +82,11 @@ func handleCommandID(service *Service, msg map[string]any, SchoolID int64) (errC
 		firstName := firstName
 		username := username
 		message := fmt.Sprintf(
-			"Hello %s (@%s) 👋\nYour Telegram Chat ID is: %d\n\nPlease enter this ID in your school profile.",
+			`Hello %s @%s
+Your Telegram Chat ID is: %d
+
+Please enter this ID in your school profile.
+`,
 			firstName, username, chatID,
 		)
 
@@ -127,14 +131,14 @@ func handleCommandStart(service *Service, msg map[string]any, SchoolID int64) (e
 		firstName := firstName
 		username := username
 		message := fmt.Sprintf(
-			`👋 Welcome %s (@%s)!\n
+			`👋 Welcome %s @%s
 
-			I'm here to assist you with notifications and updates.  
-			If you haven't set your Chat ID yet, please use the "/id" command so we can link your account to this chat.  
+I'm here to assist you with notifications and updates.  
+If you haven't set your Chat ID yet, please use the /id command so we can link your account to this chat.  
 
-			Once your Chat ID is defined, you'll start receiving updates directly here.
+Once your Chat ID is defined, you'll start receiving updates directly here.
 			`,
-			firstName, username, chatID,
+			firstName, username,
 		)
 
 		err = sendTelegramMessage(schoolFound.Config.TelegramBotToken, chatID, message)
