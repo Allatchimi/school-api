@@ -2,12 +2,15 @@ package telegram
 
 import (
 	"api/common/constants"
+	"api/common/helpers"
 	httpHelper "api/common/helpers/http"
 	"api/common/types"
 	"api/services/others/telegram/data"
 	"api/services/school/common/school"
 	"fmt"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 type Service struct {
@@ -47,20 +50,21 @@ func (service *Service) PostWebhook(
 	}
 
 	// Send message
-	chatID := request.Message.Chat.ID
-	firstName := request.Message.From.FirstName
-	username := request.Message.From.Username
-	message := fmt.Sprintf(
-		"Hello %s (@%s) 👋\nYour Telegram Chat ID is: %d\n\nPlease enter this ID in your school profile.",
-		firstName, username, chatID,
-	)
+	go func() {
+		chatID := request.Message.Chat.ID
+		firstName := request.Message.From.FirstName
+		username := request.Message.From.Username
+		message := fmt.Sprintf(
+			"Hello %s (@%s) 👋\nYour Telegram Chat ID is: %d\n\nPlease enter this ID in your school profile.",
+			firstName, username, chatID,
+		)
 
-	err = sendTelegramMessage(schoolFound.Config.TelegramBotToken, chatID, message)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
+		err = sendTelegramMessage(schoolFound.Config.TelegramBotToken, chatID, message)
+		if err != nil {
+			helpers.Logger.Error("Error sending telegram message: %v", zap.Error(err))
+			return
+		}
+	}()
 	return
 }
 
