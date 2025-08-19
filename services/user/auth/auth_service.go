@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"api/common/constants"
+	"api/common/helpers"
 	authHelper "api/common/helpers/auth"
 	smtpHelper "api/common/helpers/message/mail/smtp"
 	"api/common/types"
@@ -18,6 +19,8 @@ import (
 	modelRole "api/services/user/role/model"
 	"api/services/user/user"
 	"api/services/user/user/model"
+
+	"go.uber.org/zap"
 )
 
 type Service struct {
@@ -126,38 +129,42 @@ func (service *Service) Login(
 	err = fmt.Errorf("%s", "Account found but not activated! Please activate your account to start using your services.")
 
 	// Send code to email
-	if userFound == nil || userFound.ID < 1 {
-		return
-	}
-	if utils.IsEmailValid(request.Email) {
-		go func() {
-			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
-			data := &smtpHelper.EmailDataCheckCode{
-				EmailData: smtpHelper.EmailData{
-					HomePageLink: userFound.School.WebsiteUrl(),
-					Logo:         userFound.School.LogoUrl(),
-					Title:        constants.MailVerifyEmailCheckCode.Title,
-					Message:      constants.MailVerifyEmailCheckCode.Message,
-				},
-				Code:            fmt.Sprintf("%d", randomCode),
-				DurationMinutes: 10,
-			}
-			body, err := data.LoadTemplate()
-			if err != nil {
-				return
-			}
-			err = smtpHelper.SendEmailTo(
-				fromEmail,
-				fromUsername,
-				userFound.Email,
-				constants.MailVerifyEmailCheckCode.Subject,
-				body,
-			)
-			if err != nil {
-				return
-			}
-		}()
-	}
+	go func() {
+		if userFound == nil || userFound.ID < 1 {
+			return
+		}
+		if !utils.IsEmailValid(request.Email) {
+			return
+		}
+		fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
+		data := &smtpHelper.EmailDataCheckCode{
+			EmailData: smtpHelper.EmailData{
+				HomePageLink: userFound.School.WebsiteUrl(),
+				Logo:         userFound.School.LogoUrl(),
+				Title:        constants.MailVerifyEmailCheckCode.Title,
+				Message:      constants.MailVerifyEmailCheckCode.Message,
+			},
+			Code:            fmt.Sprintf("%d", randomCode),
+			DurationMinutes: 10,
+		}
+		mailBody, errTemplate := data.LoadTemplate()
+		if errTemplate != nil {
+			helpers.Logger.Error("Failed to load email template!", zap.Error(errTemplate))
+		}
+		if len(mailBody) < 1 {
+			helpers.Logger.Warn("Empty message body!")
+		}
+		errMail := smtpHelper.SendEmailTo(
+			fromEmail,
+			fromUsername,
+			userFound.Email,
+			constants.MailVerifyEmailCheckCode.Subject,
+			mailBody,
+		)
+		if errMail != nil {
+			helpers.Logger.Error("Failed to send mail!", zap.Error(errMail))
+		}
+	}()
 	return
 }
 
@@ -424,38 +431,42 @@ func (service *Service) Register(
 	}
 
 	// Send code to email
-	if userFound == nil || userFound.ID < 1 {
-		return
-	}
-	if utils.IsEmailValid(request.Email) {
-		go func() {
-			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
-			data := &smtpHelper.EmailDataCheckCode{
-				EmailData: smtpHelper.EmailData{
-					HomePageLink: userFound.School.WebsiteUrl(),
-					Logo:         userFound.School.LogoUrl(),
-					Title:        constants.MailVerifyEmailCheckCode.Title,
-					Message:      constants.MailVerifyEmailCheckCode.Message,
-				},
-				Code:            fmt.Sprintf("%d", randomCode),
-				DurationMinutes: 10,
-			}
-			body, err := data.LoadTemplate()
-			if err != nil {
-				return
-			}
-			err = smtpHelper.SendEmailTo(
-				fromEmail,
-				fromUsername,
-				userFound.Email,
-				constants.MailVerifyEmailCheckCode.Subject,
-				body,
-			)
-			if err != nil {
-				return
-			}
-		}()
-	}
+	go func() {
+		if userFound == nil || userFound.ID < 1 {
+			return
+		}
+		if !utils.IsEmailValid(request.Email) {
+			return
+		}
+		fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
+		data := &smtpHelper.EmailDataCheckCode{
+			EmailData: smtpHelper.EmailData{
+				HomePageLink: userFound.School.WebsiteUrl(),
+				Logo:         userFound.School.LogoUrl(),
+				Title:        constants.MailVerifyEmailCheckCode.Title,
+				Message:      constants.MailVerifyEmailCheckCode.Message,
+			},
+			Code:            fmt.Sprintf("%d", randomCode),
+			DurationMinutes: 10,
+		}
+		mailBody, errTemplate := data.LoadTemplate()
+		if errTemplate != nil {
+			helpers.Logger.Error("Failed to load email template!", zap.Error(errTemplate))
+		}
+		if len(mailBody) < 1 {
+			helpers.Logger.Warn("Empty message body!")
+		}
+		errMail := smtpHelper.SendEmailTo(
+			fromEmail,
+			fromUsername,
+			userFound.Email,
+			constants.MailVerifyEmailCheckCode.Subject,
+			mailBody,
+		)
+		if errMail != nil {
+			helpers.Logger.Error("Failed to send mail!", zap.Error(errMail))
+		}
+	}()
 	return
 }
 
@@ -542,34 +553,38 @@ func (service *Service) ActivateAccount(
 	_, _ = config.DeleteRedisString(securityUtil.GetJWTCachedKey(jwtToken.UserID, jwtToken.Issuer))
 
 	// Send welcome message
-	if userFound == nil || userFound.ID < 1 {
-		return
-	}
-	if utils.IsEmailValid(updatedUser.Email) {
-		go func() {
-			fromEmail, fromUsername := updatedUser.School.SMTPNoReplySender()
-			data := &smtpHelper.EmailData{
-				HomePageLink: userFound.School.WebsiteUrl(),
-				Logo:         userFound.School.LogoUrl(),
-				Title:        constants.MailWelcomeVerifiedEmail.Title,
-				Message:      constants.MailWelcomeVerifiedEmail.Message,
-			}
-			body, err := data.LoadTemplate()
-			if err != nil {
-				return
-			}
-			err = smtpHelper.SendEmailTo(
-				fromEmail,
-				fromUsername,
-				updatedUser.Email,
-				constants.MailWelcomeVerifiedEmail.Subject,
-				body,
-			)
-			if err != nil {
-				return
-			}
-		}()
-	}
+	go func() {
+		if userFound == nil || userFound.ID < 1 {
+			return
+		}
+		if !utils.IsEmailValid(updatedUser.Email) {
+			return
+		}
+		fromEmail, fromUsername := updatedUser.School.SMTPNoReplySender()
+		data := &smtpHelper.EmailData{
+			HomePageLink: userFound.School.WebsiteUrl(),
+			Logo:         userFound.School.LogoUrl(),
+			Title:        constants.MailWelcomeVerifiedEmail.Title,
+			Message:      constants.MailWelcomeVerifiedEmail.Message,
+		}
+		mailBody, errTemplate := data.LoadTemplate()
+		if errTemplate != nil {
+			helpers.Logger.Error("Failed to load email template!", zap.Error(errTemplate))
+		}
+		if len(mailBody) < 1 {
+			helpers.Logger.Warn("Empty message body!")
+		}
+		errMail := smtpHelper.SendEmailTo(
+			fromEmail,
+			fromUsername,
+			updatedUser.Email,
+			constants.MailWelcomeVerifiedEmail.Subject,
+			mailBody,
+		)
+		if errMail != nil {
+			helpers.Logger.Error("Failed to send mail!", zap.Error(errMail))
+		}
+	}()
 	return
 }
 
@@ -634,38 +649,42 @@ func (service *Service) ForgotPasswordInit(
 	token = newToken
 
 	// Send code to email
-	if userFound == nil || userFound.ID < 1 {
-		return
-	}
-	if utils.IsEmailValid(request.Email) {
-		go func() {
-			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
-			data := &smtpHelper.EmailDataCheckCode{
-				EmailData: smtpHelper.EmailData{
-					HomePageLink: userFound.School.WebsiteUrl(),
-					Logo:         userFound.School.LogoUrl(),
-					Title:        constants.MailForgotPasswordCheckCode.Title,
-					Message:      constants.MailForgotPasswordCheckCode.Message,
-				},
-				Code:            fmt.Sprintf("%d", randomCode),
-				DurationMinutes: 10,
-			}
-			body, err := data.LoadTemplate()
-			if err != nil {
-				return
-			}
-			err = smtpHelper.SendEmailTo(
-				fromEmail,
-				fromUsername,
-				userFound.Email,
-				constants.MailForgotPasswordCheckCode.Subject,
-				body,
-			)
-			if err != nil {
-				return
-			}
-		}()
-	}
+	go func() {
+		if userFound == nil || userFound.ID < 1 {
+			return
+		}
+		if !utils.IsEmailValid(request.Email) {
+			return
+		}
+		fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
+		data := &smtpHelper.EmailDataCheckCode{
+			EmailData: smtpHelper.EmailData{
+				HomePageLink: userFound.School.WebsiteUrl(),
+				Logo:         userFound.School.LogoUrl(),
+				Title:        constants.MailForgotPasswordCheckCode.Title,
+				Message:      constants.MailForgotPasswordCheckCode.Message,
+			},
+			Code:            fmt.Sprintf("%d", randomCode),
+			DurationMinutes: 10,
+		}
+		mailBody, errTemplate := data.LoadTemplate()
+		if errTemplate != nil {
+			helpers.Logger.Error("Failed to load email template!", zap.Error(errTemplate))
+		}
+		if len(mailBody) < 1 {
+			helpers.Logger.Warn("Empty message body!")
+		}
+		errMail := smtpHelper.SendEmailTo(
+			fromEmail,
+			fromUsername,
+			userFound.Email,
+			constants.MailForgotPasswordCheckCode.Subject,
+			mailBody,
+		)
+		if errMail != nil {
+			helpers.Logger.Error("Failed to send mail!", zap.Error(errMail))
+		}
+	}()
 	return
 }
 

@@ -35,6 +35,8 @@ func (repository *Repository) Create(item *model.User) (result *model.User, err 
 	result = &model.User{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		First(result, item.ID).Error
 	return
 }
@@ -107,6 +109,8 @@ func (repository *Repository) UpdateByID(id int64, item *model.User) (result *mo
 	result = &model.User{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where("id = ?", id).
 		First(result).Error
 	return
@@ -129,6 +133,8 @@ func (repository *Repository) UpdateEmailByID(id int64, email string) (result *m
 	result = &model.User{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where("id = ?", id).
 		First(result).Error
 	return
@@ -151,6 +157,8 @@ func (repository *Repository) UpdatePhoneNumberByID(id int64, phoneNumber uint64
 	result = &model.User{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where("id = ?", id).
 		First(result).Error
 	return
@@ -173,6 +181,8 @@ func (repository *Repository) UpdatePasswordByID(id int64, password string) (res
 	result = &model.User{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where("id = ?", id).
 		First(result).Error
 	return
@@ -198,6 +208,8 @@ func (repository *Repository) UpdateActivationByID(id int64, item *model.User) (
 	result = &model.User{}
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where("id = ?", id).
 		First(result).Error
 	return
@@ -372,6 +384,8 @@ func (repository *Repository) GetByID(id int64) (*model.User, error) {
 	result := &model.User{}
 	return result, repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where("id = ?", id).
 		Limit(1).Find(result).Error
 }
@@ -381,6 +395,8 @@ func (repository *Repository) GetByIDNoAdmin(id int64) (*model.User, error) {
 	return result, repository.Db.
 		Joins("JOIN roles ON roles.id = users.role_id").
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where("roles.name <> ?", config.Env.FixtureRoleAdmin).
 		Where("users.id = ?", id).
 		Limit(1).Find(result).Error
@@ -391,6 +407,8 @@ func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.
 	return result, repository.Db.
 		Joins("JOIN roles ON roles.id = users.role_id").
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where("roles.name <> ?", config.Env.FixtureRoleAdmin).
 		Where("users.id = ?", id).
 		Where("users.school_id = ?", schoolID).
@@ -409,6 +427,8 @@ func (repository *Repository) GetByEmailSchoolID(email string, schoolID int64) (
 	}
 	return result, repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where(
 			"login_method = ?", constants.AuthLoginMethodDefault,
 		).Where(
@@ -423,6 +443,8 @@ func (repository *Repository) GetByPhoneNumberSchoolID(phoneNumber uint64, schoo
 	if schoolID < 1 {
 		return result, repository.Db.
 			Preload(clause.Associations).
+			Preload("School.Info").
+			Preload("School.Config").
 			Where("login_method = ?", constants.AuthLoginMethodDefault).
 			Where("phone_number = ?", phoneNumber).
 			Where(repository.Db.Where("school_id < ?", 1).Or("school_id IS NULL")).
@@ -430,6 +452,8 @@ func (repository *Repository) GetByPhoneNumberSchoolID(phoneNumber uint64, schoo
 	}
 	return result, repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where("login_method = ?", constants.AuthLoginMethodDefault).
 		Where("phone_number = ?", phoneNumber).
 		Where("school_id = ?", schoolID).
@@ -440,6 +464,8 @@ func (repository *Repository) GetByProviderSchoolID(provider string, providerUse
 	result := &model.User{}
 	return result, repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Where(
 			"login_method = ?", constants.AuthLoginMethodProvider,
 		).Where(
@@ -511,6 +537,8 @@ func (repository *Repository) GetAll(
 	// Perform query with preloads and custom pagination scope
 	err = repository.Db.
 		Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
 		Scopes(
 			helpers.PaginationScopeV2(
 				repository.Db,

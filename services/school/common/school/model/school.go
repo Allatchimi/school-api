@@ -109,7 +109,7 @@ func (item *School) LogoUrl() (url string) {
 }
 
 func (item *School) SMTPNoReplySender() (senderEmail string, senderName string) {
-	if item == nil {
+	if item == nil || item.Config == nil {
 		senderEmail = config.Env.SmtpUserNoReply + "@" + config.Env.SmtpDomainName
 		senderName = config.Env.AppName
 		return
@@ -120,7 +120,7 @@ func (item *School) SMTPNoReplySender() (senderEmail string, senderName string) 
 }
 
 func (item *School) SMTPSupportSender() (senderEmail string, senderName string) {
-	if item == nil {
+	if item == nil || item.Config == nil {
 		senderEmail = config.Env.SmtpUserSupport + "@" + config.Env.SmtpDomainName
 		senderName = "Support " + config.Env.AppName
 		return
