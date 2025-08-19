@@ -796,7 +796,13 @@ func (service *Service) ForgotPasswordNewPassword(
 	}
 
 	// Update user password
-	userUpdated, err := service.UserService.Repository.UpdatePasswordByID(jwtToken.UserID, request.NewPassword)
+	hasedPassword, err := securityUtil.EncodeArgon2id(request.NewPassword)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	userUpdated, err := service.UserService.Repository.UpdatePasswordByID(jwtToken.UserID, hasedPassword)
 	if err != nil || userUpdated == nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
 		if errPgState == nil {

@@ -42,11 +42,6 @@ func (item *User) BeforeCreate(db *gorm.DB) (err error) {
 	return
 }
 
-func (item *User) BeforeUpdate(db *gorm.DB) (err error) {
-	item.Password, err = securityUtil.EncodeArgon2id(item.Password)
-	return
-}
-
 func (u *User) BeforeDelete(db *gorm.DB) (err error) {
 	if u == nil {
 		return

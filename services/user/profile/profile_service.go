@@ -427,7 +427,13 @@ func (service *Service) UpdateProfilePasswordNewPassword(
 	}
 
 	// Update user password
-	userUpdated, err := service.UserService.Repository.UpdatePasswordByID(jwtTokenDecoded.UserID, password)
+	hasedPassword, err := securityUtil.EncodeArgon2id(password)
+	if err != nil {
+		errCode = http.StatusInternalServerError
+		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+		return
+	}
+	userUpdated, err := service.UserService.Repository.UpdatePasswordByID(jwtTokenDecoded.UserID, hasedPassword)
 	if err != nil || userUpdated == nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())
 		if errPgState == nil {
