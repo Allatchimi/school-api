@@ -133,9 +133,6 @@ func (service *Service) Login(
 		if userFound == nil || userFound.ID < 1 {
 			return
 		}
-		if !utils.IsEmailValid(request.Email) {
-			return
-		}
 		fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
 		data := &smtpHelper.EmailDataCheckCode{
 			EmailData: smtpHelper.EmailData{
@@ -432,17 +429,14 @@ func (service *Service) Register(
 
 	// Send code to email
 	go func() {
-		if userFound == nil || userFound.ID < 1 {
+		if createdUser == nil || createdUser.ID < 1 {
 			return
 		}
-		if !utils.IsEmailValid(request.Email) {
-			return
-		}
-		fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
+		fromEmail, fromUsername := createdUser.School.SMTPNoReplySender()
 		data := &smtpHelper.EmailDataCheckCode{
 			EmailData: smtpHelper.EmailData{
-				HomePageLink: userFound.School.WebsiteUrl(),
-				Logo:         userFound.School.LogoUrl(),
+				HomePageLink: createdUser.School.WebsiteUrl(),
+				Logo:         createdUser.School.LogoUrl(),
 				Title:        constants.MailVerifyEmailCheckCode.Title,
 				Message:      constants.MailVerifyEmailCheckCode.Message,
 			},
@@ -459,7 +453,7 @@ func (service *Service) Register(
 		errMail := smtpHelper.SendEmailTo(
 			fromEmail,
 			fromUsername,
-			userFound.Email,
+			createdUser.Email,
 			constants.MailVerifyEmailCheckCode.Subject,
 			mailBody,
 		)
@@ -554,16 +548,13 @@ func (service *Service) ActivateAccount(
 
 	// Send welcome message
 	go func() {
-		if userFound == nil || userFound.ID < 1 {
-			return
-		}
-		if !utils.IsEmailValid(updatedUser.Email) {
+		if updatedUser == nil || updatedUser.ID < 1 {
 			return
 		}
 		fromEmail, fromUsername := updatedUser.School.SMTPNoReplySender()
 		data := &smtpHelper.EmailData{
-			HomePageLink: userFound.School.WebsiteUrl(),
-			Logo:         userFound.School.LogoUrl(),
+			HomePageLink: updatedUser.School.WebsiteUrl(),
+			Logo:         updatedUser.School.LogoUrl(),
 			Title:        constants.MailWelcomeVerifiedEmail.Title,
 			Message:      constants.MailWelcomeVerifiedEmail.Message,
 		}
@@ -651,9 +642,6 @@ func (service *Service) ForgotPasswordInit(
 	// Send code to email
 	go func() {
 		if userFound == nil || userFound.ID < 1 {
-			return
-		}
-		if !utils.IsEmailValid(request.Email) {
 			return
 		}
 		fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
