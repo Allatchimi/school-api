@@ -205,6 +205,7 @@ func (service *Service) Create(
 			helpers.Logger.Warn(
 				"Failed to create Google Workspace user!",
 				zap.Error(errGoogle))
+			return
 		}
 		helpers.Logger.Info("Google Workspace user created!", zap.String("Email", userGoogle.PrimaryEmail))
 	}()
