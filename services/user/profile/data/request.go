@@ -18,7 +18,7 @@ type UpdateProfileInfoRequest struct {
 // Update password
 type UpdateProfilePasswordCheckCodeRequest struct {
 	Token string `json:"token" required:"true" doc:"Received token on previous step"`
-	Code  int    `json:"code" required:"true" doc:"Received Code by email"`
+	Code  string `json:"code" required:"true" doc:"Received Code by email"`
 }
 type UpdateProfilePasswordNewPasswordRequest struct {
 	Token           string `json:"token" required:"true" doc:"Received token on previous step"`
@@ -29,7 +29,7 @@ type UpdateProfilePasswordNewPasswordRequest struct {
 // Update phone number
 type UpdateProfilePhoneNumberCheckCodeRequest struct {
 	Token string `json:"token" required:"true" doc:"Received token on previous step"`
-	Code  int    `json:"code" required:"true" doc:"Received Code by email"`
+	Code  string `json:"code" required:"true" doc:"Received Code by email"`
 }
 type UpdateProfilePhoneNumberNewPhoneNumberRequest struct {
 	Token       string `json:"token" required:"true" doc:"Received token on previous step"`
@@ -45,7 +45,7 @@ type UpdateProfileMessageRequest struct {
 // Update MFA for email
 type UpdateProfileMfaEmailCheckCodeRequest struct {
 	Token string `json:"token" required:"true" doc:"Received token on previous step"`
-	Code  int    `json:"code" required:"true" doc:"Received Code by email"`
+	Code  string `json:"code" required:"true" doc:"Received Code by email"`
 }
 
 // Update notification setting

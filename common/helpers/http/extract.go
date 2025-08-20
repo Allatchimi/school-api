@@ -26,7 +26,7 @@ func GetContextData(ctx *context.Context) (result *types.ContextData) {
 	if value, ok := (*ctx).Value(constants.AppKey).(string); ok {
 		jwt.App = value
 	}
-	if value, ok := (*ctx).Value(constants.CodeKey).(int); ok {
+	if value, ok := (*ctx).Value(constants.CodeKey).(string); ok {
 		jwt.Code = value
 	}
 	if value, ok := (*ctx).Value(constants.IssuerKey).(string); ok {

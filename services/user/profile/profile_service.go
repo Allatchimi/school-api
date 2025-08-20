@@ -203,12 +203,7 @@ func (service *Service) UpdateProfilePasswordInit(
 	}
 
 	// Generate new random code
-	randomCode, err := utils.GenerateRandomCode(6)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
+	randomCode := utils.GenerateRandomCode(6)
 	expires := securityUtil.NewExpiresDateDefault()
 	newJwtToken, newToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
@@ -270,7 +265,7 @@ func (service *Service) UpdateProfilePasswordInit(
 func (service *Service) UpdateProfilePasswordCheckCode(
 	ctxData *types.ContextData,
 	inputToken string,
-	inputCode int,
+	inputCode string,
 ) (token string, errCode int, err error) {
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
@@ -286,7 +281,7 @@ func (service *Service) UpdateProfilePasswordCheckCode(
 	}
 
 	// Check input
-	if len(inputToken) <= 0 && inputCode < 10000 {
+	if len(inputToken) <= 0 && len(inputCode) < 1 {
 		errCode = http.StatusBadRequest
 		err = fmt.Errorf("%s", "Invalid token and code! Please enter valid information.")
 		return
@@ -296,7 +291,7 @@ func (service *Service) UpdateProfilePasswordCheckCode(
 		err = fmt.Errorf("%s", "Invalid token! Please enter valid information.")
 		return
 	}
-	if inputCode < 10000 {
+	if len(inputCode) < 1 {
 		errCode = http.StatusBadRequest
 		err = fmt.Errorf("%s", "Invalid code! Please enter valid information.")
 		return
@@ -323,7 +318,7 @@ func (service *Service) UpdateProfilePasswordCheckCode(
 	}
 
 	// Check if the code is valid
-	if jwtToken.Code < 1 || jwtToken.Code != inputCode {
+	if jwtToken.Code != inputCode {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", "Invalid code! Please enter valid information.")
 		return
@@ -500,12 +495,7 @@ func (service *Service) UpdateProfilePhoneNumberInit(
 	}
 
 	// Generate new random code
-	randomCode, err := utils.GenerateRandomCode(6)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
+	randomCode := utils.GenerateRandomCode(6)
 	expires := securityUtil.NewExpiresDateDefault()
 	newJwtToken, newToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
@@ -567,7 +557,7 @@ func (service *Service) UpdateProfilePhoneNumberInit(
 func (service *Service) UpdateProfilePhoneNumberCheckCode(
 	ctxData *types.ContextData,
 	inputToken string,
-	inputCode int,
+	inputCode string,
 ) (token string, errCode int, err error) {
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
@@ -583,7 +573,7 @@ func (service *Service) UpdateProfilePhoneNumberCheckCode(
 	}
 
 	// Check input
-	if len(inputToken) <= 0 && inputCode < 10000 {
+	if len(inputToken) <= 0 && len(inputCode) < 1 {
 		errCode = http.StatusBadRequest
 		err = fmt.Errorf("%s", "Invalid token and code! Please enter valid information.")
 		return
@@ -593,7 +583,7 @@ func (service *Service) UpdateProfilePhoneNumberCheckCode(
 		err = fmt.Errorf("%s", "Invalid token! Please enter valid information.")
 		return
 	}
-	if inputCode < 10000 {
+	if len(inputCode) < 1 {
 		errCode = http.StatusBadRequest
 		err = fmt.Errorf("%s", "Invalid code! Please enter valid information.")
 		return
@@ -620,7 +610,7 @@ func (service *Service) UpdateProfilePhoneNumberCheckCode(
 	}
 
 	// Check if the code is valid
-	if jwtToken.Code < 1 || jwtToken.Code != inputCode {
+	if jwtToken.Code != inputCode {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", "Invalid code! Please enter valid information.")
 		return
@@ -751,12 +741,7 @@ func (service *Service) UpdateProfileMfaEmailInit(
 	}
 
 	// Generate new random code
-	randomCode, err := utils.GenerateRandomCode(6)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
+	randomCode := utils.GenerateRandomCode(6)
 	expires := securityUtil.NewExpiresDateDefault()
 	newJwtToken, newToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
@@ -818,7 +803,7 @@ func (service *Service) UpdateProfileMfaEmailInit(
 func (service *Service) UpdateProfileMfaEmailCheckCode(
 	ctxData *types.ContextData,
 	inputToken string,
-	inputCode int,
+	inputCode string,
 ) (errCode int, err error) {
 	// Find user
 	userFound, err := service.UserService.Repository.GetByID(ctxData.Jwt.UserID)
@@ -834,7 +819,7 @@ func (service *Service) UpdateProfileMfaEmailCheckCode(
 	}
 
 	// Check input
-	if len(inputToken) <= 0 && inputCode < 10000 {
+	if len(inputToken) <= 0 && len(inputCode) < 1 {
 		errCode = http.StatusBadRequest
 		err = fmt.Errorf("%s", "Invalid token and code! Please enter valid information.")
 		return
@@ -844,7 +829,7 @@ func (service *Service) UpdateProfileMfaEmailCheckCode(
 		err = fmt.Errorf("%s", "Invalid token! Please enter valid information.")
 		return
 	}
-	if inputCode < 10000 {
+	if len(inputCode) < 1 {
 		errCode = http.StatusBadRequest
 		err = fmt.Errorf("%s", "Invalid code! Please enter valid information.")
 		return
@@ -871,7 +856,7 @@ func (service *Service) UpdateProfileMfaEmailCheckCode(
 	}
 
 	// Check if the code is valid
-	if jwtToken.Code < 1 || jwtToken.Code != inputCode {
+	if jwtToken.Code != inputCode {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", "Invalid code! Please enter valid information.")
 		return

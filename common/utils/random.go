@@ -3,7 +3,6 @@ package utils
 import (
 	"errors"
 	"math/rand"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -22,12 +21,12 @@ const (
 
 // GenerateRandomCode Generates a random numeric code of specified length.
 // Returns the generated code and an error if any.
-func GenerateRandomCode(length int) (int, error) {
+func GenerateRandomCode(length int) string {
 	safeLength := length
 	if safeLength <= 0 {
 		safeLength = 1
 	}
-	return strconv.Atoi(GenerateRandomValue(letterNumeric, safeLength))
+	return GenerateRandomValue(letterNumeric, safeLength)
 }
 
 // GenerateRandomPassword Returns a random password of the specified length.

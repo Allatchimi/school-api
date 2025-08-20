@@ -11,7 +11,7 @@ type JwtToken struct {
 	Platform string `json:"platform"`
 	Device   string `json:"device"`
 	App      string `json:"app"`
-	Code     int    `json:"code"`
+	Code     string `json:"code"`
 }
 
 // GoogleUserProfileResponse Represents claims for a Google user.

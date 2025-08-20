@@ -52,10 +52,12 @@ func (service *Service) Login(
 		err = fmt.Errorf("%s", errMsg)
 		return
 	}
+	helpers.Logger.Info("Password", zap.String("password", request.Password), zap.String("hash", userFound.Password))
 	isPasswordMatches, err := securityUtil.CompareArgon2id(request.Password, userFound.Password)
 	if err != nil || !isPasswordMatches {
 		errCode = http.StatusNotFound
 		err = fmt.Errorf("%s", errMsg)
+		helpers.Logger.Info("Error", zap.Error(err))
 		return
 	}
 	// Check if the status is enabled
@@ -95,13 +97,7 @@ func (service *Service) Login(
 
 	// For non activated user account, generate new random code and token with
 	// issuer JWT_ISSUER_AUTH_ACTIVATE and send code to email
-	randomCode := 0
-	randomCode, err = utils.GenerateRandomCode(6)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
+	randomCode := utils.GenerateRandomCode(6)
 
 	// Generate new token
 	var activateAccountJwtToken *types.JwtToken
@@ -128,6 +124,7 @@ func (service *Service) Login(
 	errCode = http.StatusForbidden
 	err = fmt.Errorf("%s", "Account found but not activated! Please activate your account to start using your services.")
 
+	helpers.Logger.Info("Activate account!", zap.String("code", randomCode))
 	// Send code to email
 	go func() {
 		if userFound == nil || userFound.ID < 1 {
@@ -397,13 +394,7 @@ func (service *Service) Register(
 
 	// Since the new user account is not activated, we generate code with
 	// issuer JWT_ISSUER_AUTH_ACTIVATE and send code to email
-	randomCode := 0
-	randomCode, err = utils.GenerateRandomCode(6)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
+	randomCode := utils.GenerateRandomCode(6)
 
 	// Generate new token
 	var activateAccountJwtToken *types.JwtToken
@@ -427,6 +418,7 @@ func (service *Service) Register(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 	}
 
+	helpers.Logger.Info("Activate account!", zap.String("code", randomCode))
 	// Send code to email
 	go func() {
 		if createdUser == nil || createdUser.ID < 1 {
@@ -488,7 +480,7 @@ func (service *Service) ActivateAccount(
 	}
 
 	// Check if code is valid
-	if jwtToken.Code < 1 || jwtToken.Code != request.Code {
+	if jwtToken.Code != request.Code {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", "Invalid code! Please enter valid information.")
 		return
@@ -610,12 +602,7 @@ func (service *Service) ForgotPasswordInit(
 	}
 
 	// Generate new random code
-	randomCode, err := utils.GenerateRandomCode(6)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
-	}
+	randomCode := utils.GenerateRandomCode(6)
 	expires := securityUtil.NewExpiresDateDefault()
 	newJwtToken, newToken, err := securityUtil.EncodeJWTToken(
 		&types.JwtToken{
@@ -639,6 +626,7 @@ func (service *Service) ForgotPasswordInit(
 	}
 	token = newToken
 
+	helpers.Logger.Info("Forgot password!", zap.String("code", randomCode))
 	// Send code to email
 	go func() {
 		if userFound == nil || userFound.ID < 1 {
@@ -680,7 +668,7 @@ func (service *Service) ForgotPasswordCode(
 	request *data.ForgotPasswordCodeRequest,
 ) (token string, errCode int, err error) {
 	// Check request
-	if len(request.Token) < 1 && request.Code < 1 {
+	if len(request.Token) < 1 && len(request.Code) < 1 {
 		errCode = http.StatusBadRequest
 		err = fmt.Errorf("%s", "Invalid token and code! Please enter valid information.")
 		return
@@ -690,7 +678,7 @@ func (service *Service) ForgotPasswordCode(
 		err = fmt.Errorf("%s", "Invalid token! Please enter valid information.")
 		return
 	}
-	if request.Code < 10000 {
+	if len(request.Code) < 1 {
 		errCode = http.StatusBadRequest
 		err = fmt.Errorf("%s", "Invalid code! Please enter valid information.")
 		return
@@ -717,7 +705,7 @@ func (service *Service) ForgotPasswordCode(
 	}
 
 	// Check if the code is valid
-	if jwtToken.Code < 1 || jwtToken.Code != request.Code {
+	if jwtToken.Code != request.Code {
 		errCode = http.StatusUnprocessableEntity
 		err = fmt.Errorf("%s", "Invalid code! Please enter valid information.")
 		return
@@ -802,6 +790,7 @@ func (service *Service) ForgotPasswordNewPassword(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
+	helpers.Logger.Info("Password", zap.String("password", request.NewPassword), zap.String("hash", hasedPassword))
 	userUpdated, err := service.UserService.Repository.UpdatePasswordByID(jwtToken.UserID, hasedPassword)
 	if err != nil || userUpdated == nil {
 		pgState, errPgState := utils.ExtractSQLState(err.Error())

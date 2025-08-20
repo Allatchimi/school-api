@@ -25,6 +25,9 @@ func EncodeArgon2id(password string) (string, error) {
 
 // CompareArgon2id Verifies if the Argon2id password matches the string.
 func CompareArgon2id(password string, hashedPassword string) (bool, error) {
-	initialHashedPassword, _ := DecodeBase64(hashedPassword)
+	initialHashedPassword, err := DecodeBase64(hashedPassword)
+	if err != nil {
+		return false, err
+	}
 	return argon2id.ComparePasswordAndHash(password, initialHashedPassword)
 }

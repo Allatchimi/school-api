@@ -34,7 +34,7 @@ type RegisterRequest struct {
 // Activate account
 type ActivateAccountRequest struct {
 	Token string `json:"token" required:"true" doc:"Received token"`
-	Code  int    `json:"code" required:"true" doc:"Received Code by email"`
+	Code  string `json:"code" required:"true" doc:"Received Code by email"`
 }
 
 // Forgot password
@@ -46,7 +46,7 @@ type ForgotPasswordInitRequest struct {
 }
 type ForgotPasswordCodeRequest struct {
 	Token string `json:"token" required:"true" doc:"Received token on previous step"`
-	Code  int    `json:"code" required:"true" doc:"Received Code by email"`
+	Code  string `json:"code" required:"true" doc:"Received Code by email"`
 }
 type ForgotPasswordNewPasswordRequest struct {
 	Token       string `json:"token" required:"true" doc:"Received token on previous step"`

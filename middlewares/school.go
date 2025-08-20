@@ -67,7 +67,6 @@ func SchoolMiddleware(api huma.API) func(huma.Context, func(huma.Context)) {
 					constants.Http401InvalidTokenErrorMessage(),
 				)
 				return
-
 			}
 
 			schoolID, err := strconv.ParseInt(schoolIDStr, 10, 64)
