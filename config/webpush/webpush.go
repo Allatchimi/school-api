@@ -153,7 +153,7 @@ func SendPushNotificationToUserBulk(
 		}
 
 		// Send push notification
-		if user.Config.AllowNotifications {
+		if user.Config != nil && user.Config.AllowNotifications {
 			errs = append(errs, SendPushNotificationToUser(&user, payload, ttl, userRepository))
 		}
 	}

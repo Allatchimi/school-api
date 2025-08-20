@@ -108,3 +108,24 @@ func (controller *Controller) GetAll(
 	result.Pagination = newPagination
 	return
 }
+
+func (controller *Controller) GetAllPreEnroll(
+	ctx *context.Context,
+	input *struct {
+		types.Filter
+		types.PaginationRequest
+		data.GetAllRequest
+	},
+) (result *data.YearResponseList, errCode int, err error) {
+	newPagination, newFilter := helpers.GetPaginationFiltersFromQuery(&input.Filter, &input.PaginationRequest)
+	yearList, errCode, err := controller.Service.GetAllPreEnroll(httpHelper.GetContextData(ctx), newFilter, newPagination, &input.GetAllRequest)
+	if err != nil {
+		return
+	}
+	result = &data.YearResponseList{
+		Data: model.ToResponseList(yearList),
+	}
+	result.Filter = newFilter
+	result.Pagination = newPagination
+	return
+}

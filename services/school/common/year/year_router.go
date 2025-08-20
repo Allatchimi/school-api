@@ -287,4 +287,46 @@ func RegisterEndpoints(
 			}{Body: *result}, nil
 		},
 	)
+
+	// Get all year preenroll
+	huma.Register(
+		*humaApi,
+		huma.Operation{
+			OperationID: "get-year-preenroll-list",
+			Summary:     "Get all year preenroll",
+			Description: "Get all year preenroll with support for search, filter and pagination",
+			Method:      http.MethodGet,
+			Path:        fmt.Sprintf("%s/preenroll", endpointConfig.Group),
+			Tags:        endpointConfig.Tag,
+			Security: []map[string][]string{
+				{
+					constants.SecuritySchemeSchoolToken: {},
+					constants.SecuritySchemeSchoolID:    {},
+					constants.SecuritySchemeBearerToken: {},
+				},
+			},
+			MaxBodyBytes:  constants.DefaultBodySize,
+			DefaultStatus: http.StatusOK,
+			Errors:        []int{http.StatusInternalServerError, http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden},
+		},
+		func(
+			ctx context.Context,
+			input *struct {
+				types.Filter
+				types.PaginationRequest
+				data.GetAllRequest
+			},
+		) (*struct {
+			Body data.YearResponseList
+		}, error) {
+			result, errCode, err := controller.GetAllPreEnroll(&ctx, input)
+			if err != nil {
+				return nil, huma.NewError(errCode, err.Error(), err)
+			}
+
+			return &struct {
+				Body data.YearResponseList
+			}{Body: *result}, nil
+		},
+	)
 }
