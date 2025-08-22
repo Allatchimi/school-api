@@ -22,13 +22,13 @@ func RegisterEndpoints(
 	}
 	const tableName = constants.RESOURCE_TABLE_INITIALIZE
 
-	// Get initial school by id
+	// Get initial
 	huma.Register(
 		*humaApi,
 		huma.Operation{
 			OperationID: "get-initialize",
 			Summary:     "Get initial",
-			Description: "Return one initial configuration",
+			Description: "Return initial configuration",
 			Method:      http.MethodGet,
 			Path:        endpointConfig.Group,
 			Tags:        endpointConfig.Tag,

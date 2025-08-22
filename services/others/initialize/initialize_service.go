@@ -53,7 +53,7 @@ func (service *Service) GetInitial(
 	}
 
 	// Get school
-	school, err := service.SchoolService.Repository.GetByID(ctxData.Jwt.SchoolID)
+	school, err := service.SchoolService.Repository.GetByID(newRequest.SchoolID)
 	if err != nil {
 		errCode = http.StatusInternalServerError
 		err = constants.Http500ErrorMessage("")
@@ -69,9 +69,8 @@ func (service *Service) GetInitial(
 			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 			return
 		}
+		helpers.Logger.Info("Initial years", zap.Int("count", len(tempYears)))
 	}
-	helpers.Logger.Info("Initial school", zap.Any("school", school))
-	helpers.Logger.Info("Initial years", zap.Int("count", len(tempYears)))
 
 	// Update response
 	years := modelYear.ToResponseList(tempYears)

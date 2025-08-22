@@ -43,6 +43,15 @@ func AuthMiddleware(api huma.API) func(huma.Context, func(huma.Context)) {
 			}
 		}
 		if !isAuthorizationBearerRequired {
+			// Try to get token from header
+			tempToken := ExtractBearerTokenHeader(&humaCtx)
+			tempJwtToken, _, _ := securityUtil.ValidateAuthToken(tempToken)
+			if tempJwtToken != nil {
+				tempCtx := SetAuthContext(&humaCtx, tempToken, tempJwtToken)
+				next(*tempCtx)
+				return
+			}
+
 			next(humaCtx)
 			return
 		}

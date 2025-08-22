@@ -471,17 +471,21 @@ func (repository *Repository) GetAll(
 				LEFT JOIN highschool_subjects ON highschool_class_subjects.subject_id = highschool_subjects.id
 
 				LEFT JOIN teacher_class_subject_units ON exams.school_id = teacher_class_subject_units.school_id
+				AND teacher_class_subject_units.year_id = exams.year_id
 				AND (
 				(teacher_class_subject_units.class_subject_id IS NOT NULL AND exams.class_subject_id = teacher_class_subject_units.class_subject_id)
 				OR
 				(teacher_class_subject_units.unit_id IS NOT NULL AND exams.unit_id = teacher_class_subject_units.unit_id)
 				)
+
 				LEFT JOIN student_enrolls ON exams.school_id = student_enrolls.school_id
+				AND student_enrolls.year_id = exams.year_id
 				AND (
 				(student_enrolls.class_id IS NOT NULL AND highschool_class_subjects.class_id = student_enrolls.class_id)
 				OR
 				(student_enrolls.level_domain_id IS NOT NULL AND university_units.level_domain_id = student_enrolls.level_domain_id)
 				)
+				
 				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,

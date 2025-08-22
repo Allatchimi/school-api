@@ -259,18 +259,29 @@ func (repository *Repository) GetByID(id int64) (*model.Student, error) {
 	result := &model.Student{}
 	return result, repository.Db.Preload(clause.Associations).
 		Preload("School.Info").
+		Preload("School.Config").
+		Preload("User.Info").
+		Preload("User.Config").
 		Where("id = ?", id).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByUserID(userID int64) (*model.Student, error) {
 	result := &model.Student{}
 	return result, repository.Db.Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
+		Preload("User.Info").
+		Preload("User.Config").
 		Where("user_id = ?", userID).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) GetByUserIDSchoolID(userID int64, schoolID int64) (*model.Student, error) {
 	result := &model.Student{}
 	return result, repository.Db.Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
+		Preload("User.Info").
+		Preload("User.Config").
 		Where("user_id = ?", userID).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
@@ -306,6 +317,10 @@ func (repository *Repository) GetStudentPreEnrollByID(id int64) (*model.StudentP
 func (repository *Repository) GetByIDSchoolID(id int64, schoolID int64) (*model.Student, error) {
 	result := &model.Student{}
 	return result, repository.Db.Preload(clause.Associations).
+		Preload("School.Info").
+		Preload("School.Config").
+		Preload("User.Info").
+		Preload("User.Config").
 		Where("id = ?", id).
 		Where("school_id = ?", schoolID).
 		Limit(1).Find(result).Error
@@ -411,17 +426,19 @@ func (repository *Repository) AreSameUniqueObjectsByUID(item1 *model.Student, it
 func (repository *Repository) GetStudentEnrollUniqueObject(item *model.StudentEnroll) (*model.StudentEnroll, error) {
 	result := &model.StudentEnroll{}
 	return result, repository.Db.Preload(clause.Associations).Where(&model.StudentEnroll{
-		StudentID:     item.StudentID,
+		SchoolID:      item.SchoolID,
 		YearID:        item.YearID,
 		LevelDomainID: item.LevelDomainID,
 		ClassID:       item.ClassID,
+		StudentID:     item.StudentID,
 	}).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) AreStudentEnrollSameUniqueObjects(item1 *model.StudentEnroll, item2 *model.StudentEnroll) bool {
 	if item1 != nil && item2 != nil &&
-		(item1.StudentID == item2.StudentID &&
-			item1.YearID == item2.YearID && item1.LevelDomainID == item2.LevelDomainID && item1.ClassID == item2.ClassID) {
+		(item1.SchoolID == item2.SchoolID && item1.YearID == item2.YearID &&
+			item1.LevelDomainID == item2.LevelDomainID && item1.ClassID == item2.ClassID &&
+			item1.StudentID == item2.StudentID) {
 		return true
 	}
 	return false
@@ -429,10 +446,22 @@ func (repository *Repository) AreStudentEnrollSameUniqueObjects(item1 *model.Stu
 
 func (repository *Repository) GetStudentPreEnrollUniqueObject(item *model.StudentPreEnroll) (*model.StudentPreEnroll, error) {
 	result := &model.StudentPreEnroll{}
-	return result, nil
+	return result, repository.Db.Preload(clause.Associations).Where(&model.StudentPreEnroll{
+		SchoolID:      item.SchoolID,
+		YearID:        item.YearID,
+		LevelDomainID: item.LevelDomainID,
+		ClassID:       item.ClassID,
+		UserID:        item.UserID,
+	}).Limit(1).Find(result).Error
 }
 
 func (repository *Repository) AreStudentPreEnrollSameUniqueObjects(item1 *model.StudentPreEnroll, item2 *model.StudentPreEnroll) bool {
+	if item1 != nil && item2 != nil &&
+		(item1.SchoolID == item2.SchoolID && item1.YearID == item2.YearID &&
+			item1.LevelDomainID == item2.LevelDomainID && item1.ClassID == item2.ClassID &&
+			item1.UserID == item2.UserID) {
+		return true
+	}
 	return false
 }
 
@@ -614,11 +643,13 @@ func (repository *Repository) GetAllStudentEnroll(
 				LEFT JOIN university_units ON student_enrolls.level_domain_id = university_units.level_domain_id
 				
 				LEFT JOIN teacher_class_subject_units ON student_enrolls.school_id = teacher_class_subject_units.school_id
+				AND teacher_class_subject_units.year_id = student_enrolls.year_id
 				AND (
 				(teacher_class_subject_units.class_subject_id IS NOT NULL AND highschool_class_subjects.id = teacher_class_subject_units.class_subject_id)
 				OR
 				(teacher_class_subject_units.unit_id IS NOT NULL AND university_units.id = teacher_class_subject_units.unit_id)
 				)
+				
 				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,

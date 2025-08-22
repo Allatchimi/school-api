@@ -112,9 +112,9 @@ func (repository *Repository) GetAll(
 			where = helpers.AppendWhereClause(where, "payments.school_id = ?")
 			args = append(args, request.SchoolID)
 		}
-		if request.StudentEnrollID > 0 {
-			where = helpers.AppendWhereClause(where, "payments.student_enroll_id = ?")
-			args = append(args, request.StudentEnrollID)
+		if request.YearID > 0 {
+			where = helpers.AppendWhereClause(where, "student_enrolls.year_id = ?")
+			args = append(args, request.YearID)
 		}
 		if request.ClassID > 0 {
 			where = helpers.AppendWhereClause(where, "student_enrolls.class_id = ?")
@@ -123,6 +123,10 @@ func (repository *Repository) GetAll(
 		if request.LevelDomainID > 0 {
 			where = helpers.AppendWhereClause(where, "student_enrolls.level_domain_id = ?")
 			args = append(args, request.LevelDomainID)
+		}
+		if request.StudentEnrollID > 0 {
+			where = helpers.AppendWhereClause(where, "payments.student_enroll_id = ?")
+			args = append(args, request.StudentEnrollID)
 		}
 		if request.TeacherID > 0 {
 			where = helpers.AppendWhereClause(where, "teacher_class_subject_units.teacher_id = ?")
@@ -151,6 +155,7 @@ func (repository *Repository) GetAll(
 			payments.status ILIKE ? OR
 			schools.name ILIKE ? OR
 			schools.type ILIKE ? OR
+			years.name ILIKE ? OR
 			students.uid ILIKE ? OR
 			highschool_classes.name ? OR
 			highschool_classes.description ? OR
@@ -161,7 +166,7 @@ func (repository *Repository) GetAll(
 		)`
 
 		where = helpers.AppendWhereClause(where, searchClause)
-		args = append(args, search, search, like, like, like, like, like, like, like, like, like, like, like)
+		args = append(args, search, search, like, like, like, like, like, like, like, like, like, like, like, like)
 	}
 
 	// Perform query with preloads and custom pagination scope
@@ -183,6 +188,7 @@ func (repository *Repository) GetAll(
 				FROM payments
 				LEFT JOIN schools ON payments.school_id = schools.id
 				LEFT JOIN student_enrolls ON payments.student_enroll_id = student_enrolls.id
+				LEFT JOIN years ON student_enrolls.year_id = years.id
 				LEFT JOIN students ON student_enrolls.student_id = students.id
 				LEFT JOIN highschool_classes ON student_enrolls.class_id = highschool_classes.id
 				LEFT JOIN university_level_domains ON student_enrolls.level_domain_id = university_level_domains.id
@@ -192,11 +198,13 @@ func (repository *Repository) GetAll(
 				LEFT JOIN university_units ON university_level_domains.id = university_units.level_domain_id
 				
 				LEFT JOIN teacher_class_subject_units ON payments.school_id = teacher_class_subject_units.school_id
+				AND teacher_class_subject_units.year_id = student_enrolls.year_id
 				AND (
 				(teacher_class_subject_units.class_subject_id IS NOT NULL AND highschool_class_subjects.id = teacher_class_subject_units.class_subject_id)
 				OR
 				(teacher_class_subject_units.unit_id IS NOT NULL AND university_units.id = teacher_class_subject_units.unit_id)
 				)
+				
 				LEFT JOIN parent_students ON student_enrolls.student_id = parent_students.student_id`,
 				where,
 				pagination,

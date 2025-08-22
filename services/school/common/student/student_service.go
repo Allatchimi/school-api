@@ -312,15 +312,12 @@ func (service *Service) CreateStudentPreEnroll(
 		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 		return
 	}
-	if result == nil || result.ID < 1 {
-		return
-	}
-	if result.School == nil || result.School.Info == nil {
-		return
-	}
 
 	// Send message
 	go func() {
+		if result == nil || result.ID < 1 || result.School == nil || result.School.Info == nil {
+			return
+		}
 		var msgTitle, msgBody, msgClassLevelDomain string
 		switch result.School.Type {
 		case constants.SCHOOL_TYPE_HIGHSCHOOL:
@@ -599,7 +596,7 @@ func (service *Service) UpdateStudentPreEnroll(
 		return
 	}
 
-	// Check if the status is ok
+	// Check the status
 	if foundItem.Status != constants.STUDENT_PRE_ENROLL_STATUS_INITIATED {
 		errCode = http.StatusLocked
 		err = constants.Http423LockedErrorMessage()
@@ -672,11 +669,16 @@ func (service *Service) UpdateStudentPreEnrollStatus(
 		return
 	}
 
-	// Check status
-	if foundItem.Status == constants.STUDENT_PRE_ENROLL_STATUS_ENROLLED ||
-		foundItem.Status == constants.STUDENT_PRE_ENROLL_STATUS_REJECTED {
-		errCode = http.StatusConflict
-		err = constants.Http409ConflictErrorMessage()
+	// Check the status
+	if foundItem.Status == constants.STUDENT_PRE_ENROLL_STATUS_REJECTED ||
+		foundItem.Status == constants.STUDENT_PRE_ENROLL_STATUS_ENROLLED {
+		errCode = http.StatusLocked
+		err = constants.Http423LockedErrorMessage()
+		return
+	}
+	if request.Status == foundItem.Status {
+		errCode = http.StatusBadRequest
+		err = constants.Http400BadRequestErrorMessage()
 		return
 	}
 
@@ -687,23 +689,26 @@ func (service *Service) UpdateStudentPreEnrollStatus(
 	}
 
 	// Update
-	result, err = service.Repository.UpdateStudentPreEnrollStatusByID(id, item)
-	if err != nil {
-		errCode = http.StatusInternalServerError
-		err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-		return
+	if item.Status != constants.STUDENT_PRE_ENROLL_STATUS_ENROLLED {
+		result, err = service.Repository.UpdateStudentPreEnrollStatusByID(id, item)
+		if err != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
 	}
 
 	// Check the new status
-	if !(result.Status == constants.STUDENT_PRE_ENROLL_STATUS_ENROLLED ||
-		result.Status == constants.STUDENT_PRE_ENROLL_STATUS_REJECTED) {
+	if !(request.Status == constants.STUDENT_PRE_ENROLL_STATUS_ENROLLED ||
+		request.Status == constants.STUDENT_PRE_ENROLL_STATUS_REJECTED) {
 		return
 	}
 
 	// Create new student if the status is enrolled
 	var createdStudent *model.Student
 	var createdStudentEnroll *model.StudentEnroll
-	if result.Status == constants.STUDENT_PRE_ENROLL_STATUS_ENROLLED {
+	if request.Status == constants.STUDENT_PRE_ENROLL_STATUS_ENROLLED {
+		// Create the student
 		createdStudent, errCode, err = service.Create(ctxData, &data.StudentRequest{
 			SchoolID:          foundItem.SchoolID,
 			AutoGenerateEmail: true,
@@ -716,53 +721,79 @@ func (service *Service) UpdateStudentPreEnrollStatus(
 				BirthLocation: foundItem.BirthLocation,
 			},
 		})
-		if !(err != nil || createdStudent == nil || createdStudent.ID < 1) {
-			createdStudentEnroll, errCode, err = service.CreateStudentEnroll(ctxData, &data.StudentEnrollRequest{
-				SchoolID:      foundItem.SchoolID,
-				YearID:        foundItem.YearID,
-				ClassID:       foundItem.ClassID,
-				LevelDomainID: foundItem.LevelDomainID,
-				StudentID:     createdStudent.ID,
-
-				Origin:         constants.STUDENT_ENROLL_ORIGIN_PRE_ENROLL,
-				OriginFeedback: "Enrolled form pre enrollment request.",
-			})
-		}
-		if err != nil || createdStudent == nil || createdStudent.ID < 1 || createdStudentEnroll == nil || createdStudentEnroll.ID < 1 {
-			var errMsg string
+		if err != nil || createdStudent == nil || createdStudent.ID < 1 {
 			if errCode == http.StatusFound {
-				errMsg = "A similar student enroll already exists!"
-			} else {
-				errMsg = "Automatically rejected by the system! Please try again later."
+				var errMsg string
+				if errCode == http.StatusFound {
+					errMsg = "A similar student enroll already exists!"
+				} else {
+					errMsg = "Automatically rejected by the system! Please try again later."
+				}
+				var tempErr error
+				result, tempErr = service.Repository.UpdateStudentPreEnrollStatusByID(id, &model.StudentPreEnroll{
+					Status:         constants.STUDENT_PRE_ENROLL_STATUS_REJECTED,
+					StatusFeedback: errMsg,
+				})
+				if tempErr != nil {
+					errCode = http.StatusInternalServerError
+					err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+					return
+				}
+				return
 			}
-			var tempErr error
-			result, tempErr = service.Repository.UpdateStudentPreEnrollStatusByID(id, &model.StudentPreEnroll{
-				Status:         constants.STUDENT_PRE_ENROLL_STATUS_REJECTED,
-				StatusFeedback: errMsg,
-			})
-			if tempErr != nil {
-				errCode = http.StatusInternalServerError
-				err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			}
-			if err == nil {
-				errCode = http.StatusInternalServerError
-				err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
-			}
-		} else {
-			createdStudent, err = service.Repository.GetByID(createdStudent.ID)
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
 		}
-	}
+		// Create the enrollment
+		createdStudentEnroll, errCode, err = service.CreateStudentEnroll(ctxData, &data.StudentEnrollRequest{
+			SchoolID:      foundItem.SchoolID,
+			YearID:        foundItem.YearID,
+			ClassID:       foundItem.ClassID,
+			LevelDomainID: foundItem.LevelDomainID,
+			StudentID:     createdStudent.ID,
 
-	if err != nil {
-		return
-	}
-	if createdStudent == nil || createdStudent.User == nil || createdStudent.User.Info == nil ||
-		result.School == nil || result.School.Info == nil {
-		return
+			Origin:         constants.STUDENT_ENROLL_ORIGIN_PRE_ENROLL,
+			OriginFeedback: "Enrolled form pre enrollment request.",
+		})
+		if err != nil || createdStudentEnroll == nil || createdStudentEnroll.ID < 1 {
+			if errCode == http.StatusFound {
+				var errMsg string
+				if errCode == http.StatusFound {
+					errMsg = "A similar student enroll already exists!"
+				} else {
+					errMsg = "Automatically rejected by the system! Please try again later."
+				}
+				var tempErr error
+				result, tempErr = service.Repository.UpdateStudentPreEnrollStatusByID(id, &model.StudentPreEnroll{
+					Status:         constants.STUDENT_PRE_ENROLL_STATUS_REJECTED,
+					StatusFeedback: errMsg,
+				})
+				if tempErr != nil {
+					errCode = http.StatusInternalServerError
+					err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+					return
+				}
+				return
+			}
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
+		// Update the status
+		result, err = service.Repository.UpdateStudentPreEnrollStatusByID(id, item)
+		if err != nil {
+			errCode = http.StatusInternalServerError
+			err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
+			return
+		}
 	}
 
 	// Send message
 	go func() {
+		if result == nil || result.School == nil || result.School.Info == nil {
+			return
+		}
 		var msgTitle, msgBody, msgClassLevelDomain string
 		switch result.School.Type {
 		case constants.SCHOOL_TYPE_HIGHSCHOOL:
@@ -776,13 +807,15 @@ func (service *Service) UpdateStudentPreEnrollStatus(
 		}
 		switch result.Status {
 		case constants.STUDENT_PRE_ENROLL_STATUS_ENROLLED:
+			if createdStudent == nil || createdStudent.User == nil || createdStudent.User.Info == nil {
+				break
+			}
 			msgTitle = fmt.Sprintf("Enrollment accepted for %s!", msgClassLevelDomain)
 			msgBody = fmt.Sprintf(`Hi %s %s, welcome to %s! 
 			Please visit our website and log in with your credentials. 
 			Your new email is %s, and your default password is a combination of your first name, first last name, and birth year/enrolled year. 
 			For example: For a user with first name "John Durand", last name "Carmack Benie" and birthday "2010/06/13", the default password would be JohnCarmack2010. 
 			If this doesn't work, please contact our support team through the website. Thank you.`, createdStudent.User.Info.FirstName, createdStudent.User.Info.LastName, result.School.Info.FullName, createdStudent.User.Email)
-
 		case constants.STUDENT_PRE_ENROLL_STATUS_REJECTED:
 			msgTitle = fmt.Sprintf("Enrollment rejected for %s!", msgClassLevelDomain)
 			msgBody = fmt.Sprintf("Your enrollment for %s has been rejected. Please check your account dashboard for more details.", msgClassLevelDomain)
