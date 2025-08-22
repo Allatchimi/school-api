@@ -138,7 +138,7 @@ func (service *Service) Login(
 				Title:        constants.MailVerifyEmailCheckCode.Title,
 				Message:      constants.MailVerifyEmailCheckCode.Message,
 			},
-			Code:            fmt.Sprintf("%d", randomCode),
+			Code:            fmt.Sprintf("%s", randomCode),
 			DurationMinutes: 10,
 		}
 		msgBody, errTemplate := data.LoadTemplate()
@@ -432,7 +432,7 @@ func (service *Service) Register(
 				Title:        constants.MailVerifyEmailCheckCode.Title,
 				Message:      constants.MailVerifyEmailCheckCode.Message,
 			},
-			Code:            fmt.Sprintf("%d", randomCode),
+			Code:            fmt.Sprintf("%s", randomCode),
 			DurationMinutes: 10,
 		}
 		msgBody, errTemplate := data.LoadTemplate()
@@ -640,7 +640,7 @@ func (service *Service) ForgotPasswordInit(
 				Title:        constants.MailForgotPasswordCheckCode.Title,
 				Message:      constants.MailForgotPasswordCheckCode.Message,
 			},
-			Code:            fmt.Sprintf("%d", randomCode),
+			Code:            fmt.Sprintf("%s", randomCode),
 			DurationMinutes: 10,
 		}
 		msgBody, errTemplate := data.LoadTemplate()

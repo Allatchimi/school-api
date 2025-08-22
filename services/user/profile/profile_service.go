@@ -248,7 +248,7 @@ func (service *Service) UpdateProfilePasswordInit(
 				Title:        constants.MailUpdatePasswordCheckCode.Title,
 				Message:      constants.MailUpdatePasswordCheckCode.Message,
 			},
-			Code:            fmt.Sprintf("%d", randomCode),
+			Code:            fmt.Sprintf("%s", randomCode),
 			DurationMinutes: 10,
 		}
 		msgBody, errTemplate := data.LoadTemplate()
@@ -542,7 +542,7 @@ func (service *Service) UpdateProfilePhoneNumberInit(
 				Title:        constants.MailUpdatePhoneNumberCheckCode.Title,
 				Message:      constants.MailUpdatePhoneNumberCheckCode.Message,
 			},
-			Code:            fmt.Sprintf("%d", randomCode),
+			Code:            fmt.Sprintf("%s", randomCode),
 			DurationMinutes: 10,
 		}
 		msgBody, errTemplate := data.LoadTemplate()
@@ -789,7 +789,7 @@ func (service *Service) UpdateProfileMfaEmailInit(
 				Title:        constants.MailUpdateMfaEmailCheckCode.Title,
 				Message:      constants.MailUpdateMfaEmailCheckCode.Message,
 			},
-			Code:            fmt.Sprintf("%d", randomCode),
+			Code:            fmt.Sprintf("%s", randomCode),
 			DurationMinutes: 10,
 		}
 		msgBody, errTemplate := data.LoadTemplate()
