@@ -141,11 +141,11 @@ func (service *Service) Login(
 			Code:            fmt.Sprintf("%d", randomCode),
 			DurationMinutes: 10,
 		}
-		mailBody, errTemplate := data.LoadTemplate()
+		msgBody, errTemplate := data.LoadTemplate()
 		if errTemplate != nil {
 			helpers.Logger.Error("Failed to load email template!", zap.Error(errTemplate))
 		}
-		if len(mailBody) < 1 {
+		if len(msgBody) < 1 {
 			helpers.Logger.Warn("Empty message body!")
 		}
 		errMail := smtpHelper.SendEmailTo(
@@ -153,7 +153,7 @@ func (service *Service) Login(
 			fromUsername,
 			userFound.Email,
 			constants.MailVerifyEmailCheckCode.Subject,
-			mailBody,
+			msgBody,
 		)
 		if errMail != nil {
 			helpers.Logger.Error("Failed to send mail!", zap.Error(errMail))
@@ -435,11 +435,11 @@ func (service *Service) Register(
 			Code:            fmt.Sprintf("%d", randomCode),
 			DurationMinutes: 10,
 		}
-		mailBody, errTemplate := data.LoadTemplate()
+		msgBody, errTemplate := data.LoadTemplate()
 		if errTemplate != nil {
 			helpers.Logger.Error("Failed to load email template!", zap.Error(errTemplate))
 		}
-		if len(mailBody) < 1 {
+		if len(msgBody) < 1 {
 			helpers.Logger.Warn("Empty message body!")
 		}
 		errMail := smtpHelper.SendEmailTo(
@@ -447,7 +447,7 @@ func (service *Service) Register(
 			fromUsername,
 			createdUser.Email,
 			constants.MailVerifyEmailCheckCode.Subject,
-			mailBody,
+			msgBody,
 		)
 		if errMail != nil {
 			helpers.Logger.Error("Failed to send mail!", zap.Error(errMail))
@@ -550,11 +550,11 @@ func (service *Service) ActivateAccount(
 			Title:        constants.MailWelcomeVerifiedEmail.Title,
 			Message:      constants.MailWelcomeVerifiedEmail.Message,
 		}
-		mailBody, errTemplate := data.LoadTemplate()
+		msgBody, errTemplate := data.LoadTemplate()
 		if errTemplate != nil {
 			helpers.Logger.Error("Failed to load email template!", zap.Error(errTemplate))
 		}
-		if len(mailBody) < 1 {
+		if len(msgBody) < 1 {
 			helpers.Logger.Warn("Empty message body!")
 		}
 		errMail := smtpHelper.SendEmailTo(
@@ -562,7 +562,7 @@ func (service *Service) ActivateAccount(
 			fromUsername,
 			updatedUser.Email,
 			constants.MailWelcomeVerifiedEmail.Subject,
-			mailBody,
+			msgBody,
 		)
 		if errMail != nil {
 			helpers.Logger.Error("Failed to send mail!", zap.Error(errMail))
@@ -643,11 +643,11 @@ func (service *Service) ForgotPasswordInit(
 			Code:            fmt.Sprintf("%d", randomCode),
 			DurationMinutes: 10,
 		}
-		mailBody, errTemplate := data.LoadTemplate()
+		msgBody, errTemplate := data.LoadTemplate()
 		if errTemplate != nil {
 			helpers.Logger.Error("Failed to load email template!", zap.Error(errTemplate))
 		}
-		if len(mailBody) < 1 {
+		if len(msgBody) < 1 {
 			helpers.Logger.Warn("Empty message body!")
 		}
 		errMail := smtpHelper.SendEmailTo(
@@ -655,7 +655,7 @@ func (service *Service) ForgotPasswordInit(
 			fromUsername,
 			userFound.Email,
 			constants.MailForgotPasswordCheckCode.Subject,
-			mailBody,
+			msgBody,
 		)
 		if errMail != nil {
 			helpers.Logger.Error("Failed to send mail!", zap.Error(errMail))

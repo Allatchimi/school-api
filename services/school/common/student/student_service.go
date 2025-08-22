@@ -739,6 +739,33 @@ func (service *Service) UpdateStudentPreEnrollStatus(
 					err = constants.Http500ErrorMessage(DEFAULT_ERROR_MESSAGE)
 					return
 				}
+				// Send the message
+				go func() {
+					var msgTitle, msgBody, msgClassLevelDomain string
+					switch result.School.Type {
+					case constants.SCHOOL_TYPE_HIGHSCHOOL:
+						if result.Class != nil {
+							msgClassLevelDomain = fmt.Sprintf("class %s", result.Class.Name)
+						}
+					case constants.SCHOOL_TYPE_UNIVERSITY:
+						if result.LevelDomain != nil && result.LevelDomain.Level != nil && result.LevelDomain.Domain != nil {
+							msgClassLevelDomain = fmt.Sprintf("level domain %s %s", result.LevelDomain.Level.Name, result.LevelDomain.Domain.Name)
+						}
+					}
+					msgTitle = fmt.Sprintf("Enrollment rejected for %s!", msgClassLevelDomain)
+					msgBody = fmt.Sprintf("Your enrollment for %s has been rejected. Please check your account dashboard for more details.", msgClassLevelDomain)
+					serviceHelperMessage.SendMessage(
+						&serviceHelperMessage.MessageRequest{
+							PusNotification: true,
+							Mail:            true,
+						},
+						msgTitle,
+						msgBody,
+						result.School,
+						"",
+						[]modelUser.User{*foundItem.User},
+					)
+				}()
 				return
 			}
 			errCode = http.StatusInternalServerError

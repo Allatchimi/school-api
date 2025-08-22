@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"api/common/helpers"
 	httpHelper "api/common/helpers/http"
 	"api/services/school/common/director"
 	"api/services/school/common/parent"
@@ -14,7 +13,6 @@ import (
 	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
-	"go.uber.org/zap"
 
 	"api/common/constants"
 )
@@ -145,7 +143,6 @@ func PermissionMiddleware(
 
 		// Set user context data
 		var userFeatureID int64
-		var isUserFeatureIDSet = false
 		switch foundUser.Role.Feature {
 		case constants.FeatureDirector:
 			foundFeatUser, errFoundFeat := directorRepo.GetByUserID(foundUser.ID)
@@ -155,7 +152,6 @@ func PermissionMiddleware(
 				return
 			}
 			if foundFeatUser != nil && foundFeatUser.ID > 0 {
-				isUserFeatureIDSet = true
 				userFeatureID = foundFeatUser.ID
 			}
 		case constants.FeatureTeacher:
@@ -166,7 +162,6 @@ func PermissionMiddleware(
 				return
 			}
 			if foundFeatUser != nil && foundFeatUser.ID > 0 {
-				isUserFeatureIDSet = true
 				userFeatureID = foundFeatUser.ID
 			}
 		case constants.FeatureStudent:
@@ -177,7 +172,6 @@ func PermissionMiddleware(
 				return
 			}
 			if foundFeatUser != nil && foundFeatUser.ID > 0 {
-				isUserFeatureIDSet = true
 				userFeatureID = foundFeatUser.ID
 			}
 		case constants.FeatureParent:
@@ -188,11 +182,10 @@ func PermissionMiddleware(
 				return
 			}
 			if foundFeatUser != nil && foundFeatUser.ID > 0 {
-				isUserFeatureIDSet = true
 				userFeatureID = foundFeatUser.ID
 			}
 		}
-		helpers.Logger.Info("User context", zap.String("role", foundUser.Role.Name), zap.String("feature", foundUser.Role.Feature), zap.Bool("isUserFeatureIDSet", isUserFeatureIDSet), zap.Int64("userFeatureID", userFeatureID))
+
 		userCtx := SetUserContext(&humaCtx, foundUser.RoleID, foundUser.Role.Feature, userFeatureID)
 
 		// Next

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"api/common/constants"
+	"api/common/helpers"
 	smtpHelper "api/common/helpers/message/mail/smtp"
 	"api/common/types"
 	"api/common/utils"
@@ -14,6 +15,8 @@ import (
 	"api/services/user/profile/data"
 	"api/services/user/user"
 	"api/services/user/user/model"
+
+	"go.uber.org/zap"
 )
 
 type Service struct {
@@ -98,7 +101,10 @@ func (service *Service) UpdateProfileConfigMessage(
 
 	// Send whatsapp welcome message
 	go func() {
-		if userFound.School == nil ||
+		if userFound == nil || userFound.ID < 1 {
+			return
+		}
+		if userFound.Config == nil ||
 			userFound.Config.WhatsappPhoneNumber == result.WhatsappPhoneNumber ||
 			result.WhatsappPhoneNumber < 1 {
 			return
@@ -123,7 +129,10 @@ func (service *Service) UpdateProfileConfigMessage(
 	}()
 	// Send telegram welcome message
 	go func() {
-		if userFound.School == nil ||
+		if userFound == nil || userFound.ID < 1 {
+			return
+		}
+		if userFound.Config == nil ||
 			userFound.Config.TelegramChatID == result.TelegramChatID ||
 			result.TelegramChatID < 1 {
 			return
@@ -227,38 +236,39 @@ func (service *Service) UpdateProfilePasswordInit(
 	token = newToken
 
 	// Send code to email
-	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
-		return
-	}
-	if utils.IsEmailValid(userFound.Email) {
-		go func() {
-			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
-			data := &smtpHelper.EmailDataCheckCode{
-				EmailData: smtpHelper.EmailData{
-					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
-					Logo:         userFound.School.Logo,
-					Title:        constants.MailUpdatePasswordCheckCode.Title,
-					Message:      constants.MailUpdatePasswordCheckCode.Message,
-				},
-				Code:            fmt.Sprintf("%d", randomCode),
-				DurationMinutes: 10,
-			}
-			body, err := data.LoadTemplate()
-			if err != nil {
-				return
-			}
-			err = smtpHelper.SendEmailTo(
-				fromEmail,
-				fromUsername,
-				userFound.Email,
-				constants.MailUpdatePasswordCheckCode.Subject,
-				body,
-			)
-			if err != nil {
-				return
-			}
-		}()
-	}
+	go func() {
+		if userFound == nil || userFound.ID < 1 {
+			return
+		}
+		fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
+		data := &smtpHelper.EmailDataCheckCode{
+			EmailData: smtpHelper.EmailData{
+				HomePageLink: userFound.School.WebsiteUrl(),
+				Logo:         userFound.School.LogoUrl(),
+				Title:        constants.MailUpdatePasswordCheckCode.Title,
+				Message:      constants.MailUpdatePasswordCheckCode.Message,
+			},
+			Code:            fmt.Sprintf("%d", randomCode),
+			DurationMinutes: 10,
+		}
+		msgBody, errTemplate := data.LoadTemplate()
+		if errTemplate != nil {
+			helpers.Logger.Error("Failed to load email template!", zap.Error(errTemplate))
+		}
+		if len(msgBody) < 1 {
+			helpers.Logger.Warn("Empty message body!")
+		}
+		err = smtpHelper.SendEmailTo(
+			fromEmail,
+			fromUsername,
+			userFound.Email,
+			constants.MailUpdatePasswordCheckCode.Subject,
+			msgBody,
+		)
+		if err != nil {
+			return
+		}
+	}()
 	return
 }
 
@@ -447,34 +457,35 @@ func (service *Service) UpdateProfilePasswordNewPassword(
 	_, _ = config.DeleteRedisString(securityUtil.GetJWTCachedKey(jwtTokenDecoded.UserID, jwtTokenDecoded.Issuer))
 
 	// Send alert message to email
-	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
-		return
-	}
-	if utils.IsEmailValid(userFound.Email) {
-		go func() {
-			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
-			data := &smtpHelper.EmailData{
-				HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
-				Logo:         userFound.School.Logo,
-				Title:        constants.MailUpdatePasswordSuccess.Title,
-				Message:      constants.MailUpdatePasswordSuccess.Message,
-			}
-			body, err := data.LoadTemplate()
-			if err != nil {
-				return
-			}
-			err = smtpHelper.SendEmailTo(
-				fromEmail,
-				fromUsername,
-				userFound.Email,
-				constants.MailUpdatePasswordCheckCode.Subject,
-				body,
-			)
-			if err != nil {
-				return
-			}
-		}()
-	}
+	go func() {
+		if userFound == nil || userFound.ID < 1 {
+			return
+		}
+		fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
+		data := &smtpHelper.EmailData{
+			HomePageLink: userFound.School.WebsiteUrl(),
+			Logo:         userFound.School.LogoUrl(),
+			Title:        constants.MailUpdatePasswordSuccess.Title,
+			Message:      constants.MailUpdatePasswordSuccess.Message,
+		}
+		msgBody, errTemplate := data.LoadTemplate()
+		if errTemplate != nil {
+			helpers.Logger.Error("Failed to load email template!", zap.Error(errTemplate))
+		}
+		if len(msgBody) < 1 {
+			helpers.Logger.Warn("Empty message body!")
+		}
+		err = smtpHelper.SendEmailTo(
+			fromEmail,
+			fromUsername,
+			userFound.Email,
+			constants.MailUpdatePasswordCheckCode.Subject,
+			msgBody,
+		)
+		if err != nil {
+			return
+		}
+	}()
 	return
 }
 
@@ -519,38 +530,39 @@ func (service *Service) UpdateProfilePhoneNumberInit(
 	token = newToken
 
 	// Send code to email or phone number
-	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
-		return
-	}
-	if utils.IsEmailValid(userFound.Email) {
-		go func() {
-			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
-			data := &smtpHelper.EmailDataCheckCode{
-				EmailData: smtpHelper.EmailData{
-					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
-					Logo:         userFound.School.Logo,
-					Title:        constants.MailUpdatePhoneNumberCheckCode.Title,
-					Message:      constants.MailUpdatePhoneNumberCheckCode.Message,
-				},
-				Code:            fmt.Sprintf("%d", randomCode),
-				DurationMinutes: 10,
-			}
-			body, err := data.LoadTemplate()
-			if err != nil {
-				return
-			}
-			err = smtpHelper.SendEmailTo(
-				fromEmail,
-				fromUsername,
-				userFound.Email,
-				constants.MailUpdatePhoneNumberCheckCode.Subject,
-				body,
-			)
-			if err != nil {
-				return
-			}
-		}()
-	}
+	go func() {
+		if userFound == nil || userFound.ID < 1 {
+			return
+		}
+		fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
+		data := &smtpHelper.EmailDataCheckCode{
+			EmailData: smtpHelper.EmailData{
+				HomePageLink: userFound.School.WebsiteUrl(),
+				Logo:         userFound.School.LogoUrl(),
+				Title:        constants.MailUpdatePhoneNumberCheckCode.Title,
+				Message:      constants.MailUpdatePhoneNumberCheckCode.Message,
+			},
+			Code:            fmt.Sprintf("%d", randomCode),
+			DurationMinutes: 10,
+		}
+		msgBody, errTemplate := data.LoadTemplate()
+		if errTemplate != nil {
+			helpers.Logger.Error("Failed to load email template!", zap.Error(errTemplate))
+		}
+		if len(msgBody) < 1 {
+			helpers.Logger.Warn("Empty message body!")
+		}
+		err = smtpHelper.SendEmailTo(
+			fromEmail,
+			fromUsername,
+			userFound.Email,
+			constants.MailUpdatePhoneNumberCheckCode.Subject,
+			msgBody,
+		)
+		if err != nil {
+			return
+		}
+	}()
 	return
 }
 
@@ -765,38 +777,39 @@ func (service *Service) UpdateProfileMfaEmailInit(
 	token = newToken
 
 	// Send code to email
-	if userFound == nil || userFound.School == nil || userFound.School.Config == nil {
-		return
-	}
-	if utils.IsEmailValid(userFound.Email) {
-		go func() {
-			fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
-			data := &smtpHelper.EmailDataCheckCode{
-				EmailData: smtpHelper.EmailData{
-					HomePageLink: fmt.Sprintf("https://%s", userFound.School.Config.WebsiteDomainName),
-					Logo:         userFound.School.Logo,
-					Title:        constants.MailUpdateMfaEmailCheckCode.Title,
-					Message:      constants.MailUpdateMfaEmailCheckCode.Message,
-				},
-				Code:            fmt.Sprintf("%d", randomCode),
-				DurationMinutes: 10,
-			}
-			body, err := data.LoadTemplate()
-			if err != nil {
-				return
-			}
-			err = smtpHelper.SendEmailTo(
-				fromEmail,
-				fromUsername,
-				userFound.Email,
-				constants.MailUpdateMfaEmailCheckCode.Subject,
-				body,
-			)
-			if err != nil {
-				return
-			}
-		}()
-	}
+	go func() {
+		if userFound == nil || userFound.ID < 1 {
+			return
+		}
+		fromEmail, fromUsername := userFound.School.SMTPNoReplySender()
+		data := &smtpHelper.EmailDataCheckCode{
+			EmailData: smtpHelper.EmailData{
+				HomePageLink: userFound.School.WebsiteUrl(),
+				Logo:         userFound.School.LogoUrl(),
+				Title:        constants.MailUpdateMfaEmailCheckCode.Title,
+				Message:      constants.MailUpdateMfaEmailCheckCode.Message,
+			},
+			Code:            fmt.Sprintf("%d", randomCode),
+			DurationMinutes: 10,
+		}
+		msgBody, errTemplate := data.LoadTemplate()
+		if errTemplate != nil {
+			helpers.Logger.Error("Failed to load email template!", zap.Error(errTemplate))
+		}
+		if len(msgBody) < 1 {
+			helpers.Logger.Warn("Empty message body!")
+		}
+		err = smtpHelper.SendEmailTo(
+			fromEmail,
+			fromUsername,
+			userFound.Email,
+			constants.MailUpdateMfaEmailCheckCode.Subject,
+			msgBody,
+		)
+		if err != nil {
+			return
+		}
+	}()
 	return
 }
 

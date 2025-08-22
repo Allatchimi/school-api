@@ -7,7 +7,6 @@ import (
 	"api/common/constants"
 	"api/common/types"
 
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -68,7 +67,6 @@ func PaginationScopeV2(
 	// Return scoped function to apply raw SQL with parameters
 	return func(tx *gorm.DB) *gorm.DB {
 		rawQuery := fmt.Sprintf("%s %s %s", selection, where, paginationFilter)
-		Logger.Info("rawQuery", zap.String("rawQuery", rawQuery), zap.Any("args", args))
 		return tx.Raw(rawQuery, args...)
 	}
 }

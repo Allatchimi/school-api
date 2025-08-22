@@ -43,13 +43,18 @@ func AuthMiddleware(api huma.API) func(huma.Context, func(huma.Context)) {
 			}
 		}
 		if !isAuthorizationBearerRequired {
-			// Try to get token from header
-			tempToken := ExtractBearerTokenHeader(&humaCtx)
-			tempJwtToken, _, _ := securityUtil.ValidateAuthToken(tempToken)
-			if tempJwtToken != nil {
-				tempCtx := SetAuthContext(&humaCtx, tempToken, tempJwtToken)
-				next(*tempCtx)
-				return
+			// Get school context and compare school id form server with jwt token
+			token := ExtractBearerTokenHeader(&humaCtx)
+			jwtToken, _, _ := securityUtil.ValidateAuthToken(token)
+			if jwtToken != nil {
+				// Get school context and compare school id form server with jwt token
+				ctx := humaCtx.Context()
+				schoolID := httpHelper.GetSchoolContext(&ctx)
+				if jwtToken.SchoolID == schoolID {
+					authCtx := SetAuthContext(&humaCtx, token, jwtToken)
+					next(*authCtx)
+					return
+				}
 			}
 
 			next(humaCtx)
