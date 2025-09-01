@@ -8,7 +8,7 @@ const (
 const (
 	SCHOOL_DEPLOYMENT_STATUS_INITIATED       = "initiated"
 	SCHOOL_DEPLOYMENT_STATUS_PENDING         = "pending"
-	SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES = "done no changes"
+	SCHOOL_DEPLOYMENT_STATUS_DONE_NO_CHANGES = "done_no_changes"
 	SCHOOL_DEPLOYMENT_STATUS_DONE            = "done"
 	SCHOOL_DEPLOYMENT_STATUS_FAILED          = "failed"
 )

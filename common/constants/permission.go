@@ -8,13 +8,13 @@ const (
 )
 
 const (
-	FeatureAdmin    = "dashboard-admin"
-	FeatureDirector = "dashboard-director"
-	FeatureTeacher  = "dashboard-teacher"
-	FeatureStudent  = "dashboard-student"
-	FeatureParent   = "dashboard-parent"
+	FeatureAdmin    = "dashboard_admin"
+	FeatureDirector = "dashboard_director"
+	FeatureTeacher  = "dashboard_teacher"
+	FeatureStudent  = "dashboard_student"
+	FeatureParent   = "dashboard_parent"
 
-	FeatureDefault = "dashboard-default"
+	FeatureDefault = "dashboard_default"
 )
 
 const (
@@ -54,20 +54,20 @@ const (
 	RESOURCE_TABLE_PAYMENT  = "payments"
 
 	// Highschool
-	RESOURCE_TABLE_HIGHSCHOOL_SECTION   = "highschool sections"
-	RESOURCE_TABLE_HIGHSCHOOL_SPECIALTY = "highschool specialties"
-	RESOURCE_TABLE_HIGHSCHOOL_CLASS     = "highschool classes"
-	RESOURCE_TABLE_HIGHSCHOOL_QUARTER   = "highschool quarters"
-	RESOURCE_TABLE_HIGHSCHOOL_SEQUENCE  = "highschool sequences"
-	RESOURCE_TABLE_HIGHSCHOOL_SUBJECT   = "highschool subjects"
+	RESOURCE_TABLE_HIGHSCHOOL_SECTION   = "highschool_sections"
+	RESOURCE_TABLE_HIGHSCHOOL_SPECIALTY = "highschool_specialties"
+	RESOURCE_TABLE_HIGHSCHOOL_CLASS     = "highschool_classes"
+	RESOURCE_TABLE_HIGHSCHOOL_QUARTER   = "highschool_quarters"
+	RESOURCE_TABLE_HIGHSCHOOL_SEQUENCE  = "highschool_sequences"
+	RESOURCE_TABLE_HIGHSCHOOL_SUBJECT   = "highschool_subjects"
 
 	// University
-	RESOURCE_TABLE_UNIVERSITY_FACULTY    = "university faculties"
-	RESOURCE_TABLE_UNIVERSITY_DEPARTMENT = "university departments"
-	RESOURCE_TABLE_UNIVERSITY_DOMAIN     = "university domains"
-	RESOURCE_TABLE_UNIVERSITY_LEVEL      = "university levels"
-	RESOURCE_TABLE_UNIVERSITY_SEMESTER   = "university semesters"
-	RESOURCE_TABLE_UNIVERSITY_UNIT       = "university units"
+	RESOURCE_TABLE_UNIVERSITY_FACULTY    = "university_faculties"
+	RESOURCE_TABLE_UNIVERSITY_DEPARTMENT = "university_departments"
+	RESOURCE_TABLE_UNIVERSITY_DOMAIN     = "university_domains"
+	RESOURCE_TABLE_UNIVERSITY_LEVEL      = "university_levels"
+	RESOURCE_TABLE_UNIVERSITY_SEMESTER   = "university_semesters"
+	RESOURCE_TABLE_UNIVERSITY_UNIT       = "university_units"
 )
 
 var RESOURCE_TABLE_LIST = []string{
