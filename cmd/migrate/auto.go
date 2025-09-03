@@ -40,7 +40,7 @@ import (
 )
 
 // Apply applies all models with default migration rule.
-func Apply() error {
+func ApplyAuto() error {
 	// Migrate models without foreign key
 	err := config.DB.AutoMigrate(
 		// ----------- Quiz models -----------

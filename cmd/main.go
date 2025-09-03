@@ -29,17 +29,24 @@ func main() {
 		panic(errInit)
 	}
 
-	// Migrate
-	err := migrate.Apply()
+	// Auto migrate
+	err := migrate.ApplyAuto()
 	if err != nil {
 		panic(err)
 	}
+	helpers.Logger.Info("Auto migrate done!")
 	// Load fixtures
 	err = fixture.Load()
 	if err != nil {
 		panic(err)
 	}
 	helpers.Logger.Info("Fixtures loaded!")
+	// Manually migrate
+	err = migrate.ApplyManually()
+	if err != nil {
+		panic(err)
+	}
+	helpers.Logger.Info("Manually migration done!")
 
 	di.InjectDependencies()
 	api.StartGin()
