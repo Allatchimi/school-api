@@ -16,7 +16,6 @@ NEXT_AUTH_URL="{{ .NextAuthUrl }}"
 NEXT_AUTH_SECRET="{{ .NextAuthSecret }}"
 
 SCHOOL_ID={{ .SchoolID }}
-SCHOOL_TYPE="{{ .SchoolType }}"
 SCHOOL_API_KEY="{{ .SchoolApiKey }}"
 `
 
