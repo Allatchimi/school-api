@@ -107,7 +107,7 @@ func DeploySchool(school *model.School) (err error) {
 	deploymentKubernetesDir := filepath.Join(deploymentDir, "kubernetes")
 	deploymentSmtpDir := filepath.Join(deploymentDir, "smtp")
 	websiteDir := filepath.Join(outputDir, "website")
-	colorDir := filepath.Join(websiteDir, "src", "lib", "constants", "common")
+	colorDir := filepath.Join(websiteDir, "src", "lib", "constants", "others")
 	faviconDir := filepath.Join(websiteDir, "src", "app")
 	logosDir := filepath.Join(websiteDir, "public", "assets", "images", "logos")
 	// Create required directories
