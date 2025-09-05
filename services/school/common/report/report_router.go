@@ -20,7 +20,7 @@ func RegisterEndpoints(
 		Group: "/schools/reports",
 		Tag:   []string{"Reports"},
 	}
-	const tableName = "reports"
+	const tableName = constants.RESOURCE_TABLE_REPORT
 
 	// Create report entry
 	huma.Register(

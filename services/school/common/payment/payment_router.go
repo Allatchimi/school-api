@@ -20,7 +20,7 @@ func RegisterEndpoints(
 		Group: "/schools/payments",
 		Tag:   []string{"Payments"},
 	}
-	const tableName = "payments"
+	const tableName = constants.RESOURCE_TABLE_PAYMENT
 
 	// Create payment
 	huma.Register(

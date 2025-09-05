@@ -20,7 +20,7 @@ func RegisterEndpoints(
 		Group: "/users",
 		Tag:   []string{"Users"},
 	}
-	const tableName = "users"
+	const tableName = constants.RESOURCE_TABLE_USER
 
 	// Create user
 	huma.Register(

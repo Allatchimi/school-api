@@ -20,7 +20,7 @@ func RegisterEndpoints(
 		Group: "/schools/highschool/sequences",
 		Tag:   []string{"Highschool - Sequences"},
 	}
-	const tableName = "sequences"
+	const tableName = constants.RESOURCE_TABLE_HIGHSCHOOL_SEQUENCE
 
 	// Create sequence
 	huma.Register(

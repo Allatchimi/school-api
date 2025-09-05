@@ -20,7 +20,7 @@ func RegisterEndpoints(
 		Group: "/schools/university/domains",
 		Tag:   []string{"University - Domains"},
 	}
-	const tableName = "domains"
+	const tableName = constants.RESOURCE_TABLE_UNIVERSITY_DOMAIN
 
 	// Create domain
 	huma.Register(

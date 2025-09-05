@@ -20,7 +20,7 @@ func RegisterEndpoints(
 		Group: "/permissions",
 		Tag:   []string{"Permissions"},
 	}
-	const tableName = "permissions"
+	const tableName = constants.RESOURCE_TABLE_PERMISSION
 
 	// Update permission
 	huma.Register(

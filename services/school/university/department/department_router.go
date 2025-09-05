@@ -20,7 +20,7 @@ func RegisterEndpoints(
 		Group: "/schools/university/departments",
 		Tag:   []string{"University - Departments"},
 	}
-	const tableName = "departments"
+	const tableName = constants.RESOURCE_TABLE_UNIVERSITY_DEPARTMENT
 
 	// Create department
 	huma.Register(

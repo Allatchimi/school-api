@@ -20,7 +20,7 @@ func RegisterEndpoints(
 		Group: "/schools/quizzes",
 		Tag:   []string{"Quizzes"},
 	}
-	const tableName = "quizzes"
+	const tableName = constants.RESOURCE_TABLE_QUIZ
 
 	// Create quiz
 	huma.Register(

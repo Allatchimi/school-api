@@ -23,7 +23,7 @@ func RegisterEndpoints(
 		Group: "/schools/meetings",
 		Tag:   []string{"Meetings"},
 	}
-	const tableName = "meetings"
+	const tableName = constants.RESOURCE_TABLE_MEETING
 
 	// Create meeting room
 	huma.Register(
