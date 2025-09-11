@@ -58,6 +58,7 @@ func (service *Service) Create(
 		SequenceID:     newRequest.SequenceID,
 		UnitID:         newRequest.UnitID,
 
+		Status:   constants.REQUEST_STATUS_INITIATED,
 		Audience: newRequest.Audience,
 		Title:    newRequest.Title,
 		Message:  newRequest.Message,
