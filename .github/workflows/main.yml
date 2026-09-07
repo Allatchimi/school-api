@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CONTAINER_PROVIDER: ghcr.io
-      CONTAINER_ORG: emenec-finance
+      CONTAINER_ORG: allatchimi
       CONTAINER_REPO: school-api
       CONTAINER_IMAGE: school-api
       CONTAINER_IMAGE_TAG: ${{ github.run_number }} # $GITHUB_RUN_NUMBER

@@ -11,11 +11,11 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
-    command: redis-server --appendonly yes --requirepass ${SERVER_REDIS_PASSWORD}
+    command: redis-server --appendonly yes --requirepass "$${REDIS_PASSWORD}"
     networks:
       - internal-network
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping"]
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping"]
       interval: 10s
       timeout: 5s
       retries: 3
