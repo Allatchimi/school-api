@@ -2,6 +2,8 @@ package config
 
 import (
 	"api/common/constants"
+	"reflect"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -115,25 +117,39 @@ var Env = &Environment{}
 // LoadEnv Loads environment variables.
 func LoadEnv() error {
 	viper.AddConfigPath(".")
+	viper.AddConfigPath("/app")
 	viper.SetConfigName("app")
 	viper.SetConfigType("env")
 
 	viper.AutomaticEnv()
-
-	err := viper.ReadInConfig()
-	if err == nil {
-		err = viper.Unmarshal(Env)
-		if err == nil {
-			// Initialize the JWT issuer passphrase after the environment file is loaded
-			constants.InitializeJwtIssuerConst(
-				Env.JwtIssuerSessionPassphrase,
-				Env.JwtIssuerSessionApiKeyPassphrase,
-				Env.JwtIssuerAuthPassphrase,
-				Env.JwtIssuerProfileUpdatePasswordPassphrase,
-				Env.JwtIssuerProfileUpdateEmailPassphrase,
-				Env.JwtIssuerProfileUpdatePhoneNumberPassphrase,
-			)
+	envType := reflect.TypeOf(Environment{})
+	for i := 0; i < envType.NumField(); i++ {
+		key := strings.Split(envType.Field(i).Tag.Get("mapstructure"), ",")[0]
+		if key == "" || key == "-" {
+			continue
+		}
+		if err := viper.BindEnv(key); err != nil {
+			return err
 		}
 	}
-	return err
+
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			return err
+		}
+	}
+	if err := viper.Unmarshal(Env); err != nil {
+		return err
+	}
+
+	// Initialize the JWT issuer passphrase after the environment is loaded.
+	constants.InitializeJwtIssuerConst(
+		Env.JwtIssuerSessionPassphrase,
+		Env.JwtIssuerSessionApiKeyPassphrase,
+		Env.JwtIssuerAuthPassphrase,
+		Env.JwtIssuerProfileUpdatePasswordPassphrase,
+		Env.JwtIssuerProfileUpdateEmailPassphrase,
+		Env.JwtIssuerProfileUpdatePhoneNumberPassphrase,
+	)
+	return nil
 }

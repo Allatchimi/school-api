@@ -58,7 +58,6 @@ RUN apk add --no-cache \
 COPY --from=builder /app/main /app/main
 COPY --from=builder /app/assets /app/assets
 
-COPY --from=builder /app/app.env ./app.env
 RUN chmod +x /app/main
 
 EXPOSE 3100
