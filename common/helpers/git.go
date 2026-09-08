@@ -276,12 +276,12 @@ func GitSetupSSHKey() error {
 
 // GitPreloadGitHubSSHKey adds GitHub's SSH host key to known_hosts to prevent prompt on first connection.
 func GitPreloadGitHubSSHKey() error {
-	// Use ssh-keyscan to fetch GitHub's SSH public key fingerprint
-	cmdScan := exec.Command("ssh-keyscan", "github.com")
+	// Restrict the scan to GitHub host key algorithms supported by the image.
+	cmdScan := exec.Command("ssh-keyscan", "-T", "10", "-t", "rsa,ecdsa,ed25519", "github.com")
 	outputScan, errScan := cmdScan.Output()
 	if errScan != nil {
 		errMsg := "Failed to scan GitHub SSH key!"
-		return fmt.Errorf("%s: %s %s %w", errMsg, "github.com", errScan.Error(), errScan)
+		return fmt.Errorf("%s: %s %w", errMsg, "github.com", errScan)
 	}
 
 	// Append GitHub's SSH key to known_hosts file (creating it if necessary)
