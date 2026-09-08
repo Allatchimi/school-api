@@ -4,6 +4,11 @@ on:
   push:
     branches: [main] # Branch name
   workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   docker-build-image:
     runs-on: ubuntu-latest
@@ -37,7 +42,7 @@ jobs:
           severity: "MEDIUM,HIGH,CRITICAL"
 
       - name: Login to GitHub Docker Registry
-        run: echo ${{ secrets.GHCR_PASSWORD }} | docker login ${{ env.CONTAINER_PROVIDER}} -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.CONTAINER_PROVIDER }} -u "${{ github.actor }}" --password-stdin
 
       - name: Push image to GitHub Docker Registry
         run: |
